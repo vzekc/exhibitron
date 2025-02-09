@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Code Scanner</title>
+</head>
+<body>
+<video id="video" autoplay playsinline></video>
+<canvas id="canvas" hidden></canvas>
+<p id="result">Scanning...</p>
+
+<script src="jsQR.min.js"></script>
+<script>
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  const context = canvas.getContext('2d');
+  const result = document.getElementById('result');
+
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+    .then(stream => {
+      video.srcObject = stream;
+      return new Promise((resolve) => video.onloadedmetadata = resolve);
+    })
+    .then(() => {
+      video.play();
+      requestAnimationFrame(scanQRCode);
+    })
+    .catch(err => {
+      console.error("Error accessing camera:", err);
+      result.textContent = "Camera access denied.";
+    });
+
+  function scanQRCode() {
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" });
+
+      if (code) {
+        result.textContent = "QR Code detected: " + code.data;
+      } else {
+        requestAnimationFrame(scanQRCode);
+      }
+    } else {
+      requestAnimationFrame(scanQRCode);
+    }
+  }
+</script>
+</body>
+</html>
