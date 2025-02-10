@@ -3,7 +3,7 @@ import esbuild from 'esbuild'
 const isWatchMode = process.argv.includes('--watch')
 
 const buildOptions: esbuild.BuildOptions = {
-  entryPoints: ['src/backend/app.ts'],
+  entryPoints: ['src/server.ts'],
   outfile: 'dist/backend.js',
   bundle: true,
   platform: 'node',
