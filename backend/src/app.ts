@@ -17,8 +17,10 @@ import {
 import { Strategy as LocalStrategy } from 'passport-local'
 import sanitizeHtml from 'sanitize-html'
 import path from 'path'
+import { validate as validateUuid } from 'uuid'
 
-import db from './db'
+import db, { withClient } from './db'
+import { PoolClient } from 'pg'
 
 const resolvePath = (...components: string[]) =>
   path.join(__dirname, '../..', ...components)
@@ -149,9 +151,29 @@ passport.use(
   })
 )
 
+type User = {
+  username: string,
+  id: string,
+  is_administrator: boolean,
+}
+
 // Serialize user into session
-passport.serializeUser((user, done) => {
-  done(null, user)
+passport.serializeUser(async (user, done) => {
+  const { username } = user as User
+  const dbUser = await withClient(async (client) => {
+    let result = await client.query(`SELECT name, id, is_administrator
+                                     FROM "user"
+                                     WHERE name = $1`, [username])
+    if (!result.rows.length) {
+      console.log(`creating new user ${username}`)
+      result = await client.query(`INSERT INTO "user"(name, is_administrator)
+                                   VALUES ($1, FALSE)
+                                   RETURNING name, id, is_administrator`, [username])
+    }
+    console.log('user', result.rows[0])
+    return result.rows[0]
+  })
+  done(null, dbUser)
 })
 
 // Deserialize user from session
@@ -171,6 +193,16 @@ const isAuthenticated = async (ctx: Koa.Context, next: () => Promise<void>) => {
     }
   }
 }
+
+const isAdmin = async (ctx: Koa.Context, next: () => Promise<void>) =>
+  isAuthenticated(ctx, async () => {
+    if (ctx.state.user.is_administrator) {
+      await next()
+    } else {
+      ctx.status = 403
+      ctx.body = 'Forbidden'
+    }
+  })
 
 app.use(db.middleware)
 
@@ -253,28 +285,6 @@ router.get('/:page/:arg?', (ctx: Koa.Context, next: () => Promise<void>) => {
 
 router.redirect('/', '/status')
 
-const sanitzeHtmlOptions = {
-  allowedTags: ['h1', 'h2', 'h3', 'h4', 'p', 'strong', 'em', 'pre', 'img', 'a'],
-  allowedSchemes: ['http', 'https', 'data'],
-}
-
-router.put(
-  '/api/host/:mac_address',
-  isAuthenticated,
-  async (ctx: Koa.Context) => {
-    // Validate the description field
-    const { description } = ctx.request.body
-    if (description) {
-      ctx.request.body.description = sanitizeHtml(
-        description,
-        sanitzeHtmlOptions
-      )
-    }
-
-    ctx.status = 204
-  }
-)
-
 router.get('/auth', passport.authenticate('oidc'))
 
 router.get(
@@ -332,10 +342,113 @@ router.post('/auth/set-password', async (ctx: Koa.Context) => {
 })
 
 // Logout route
-router.post('/logout', async (ctx: Koa.Context) => {
+router.all('/logout', async (ctx: Koa.Context) => {
   await ctx.logout()
   ctx.redirect('/')
 })
+
+const sanitzeHtmlOptions = {
+  allowedTags: ['h1', 'h2', 'h3', 'h4', 'p', 'strong', 'em', 'pre', 'img', 'a'],
+  allowedSchemes: ['http', 'https', 'data'],
+}
+
+router.post('/api/exhibition', isAdmin, async (ctx: Koa.Context) => {
+  const client = ctx.state.db as PoolClient
+  const { title, description, owner } = ctx.request.body
+  const result = await client.query(
+    `
+        INSERT INTO exhibition(title, description, owner)
+        VALUES ($1, $2, $3)
+        RETURNING id`,
+    [title, sanitizeHtml(description, sanitzeHtmlOptions), owner]
+  )
+  ctx.body = result.rows[0]
+  ctx.status = 200
+})
+
+const makeExhibitionsQuery =
+  (where?: string) => `SELECT u.name                                                AS "username",
+                                           e.title,
+                                           e.description,
+                                           COALESCE(ARRAY_AGG(t.number ORDER BY t.number), '{}') AS table_numbers
+                                    FROM exhibition AS e
+                                             JOIN "user" u ON e.owner = u.id
+                                             LEFT JOIN tables t ON t.exhibition = e.id
+                                    ${where ?? ''}
+                                    GROUP BY u.name, e.title, e.description`
+
+router.get('/api/exhibition', async (ctx: Koa.Context) => {
+  const client = ctx.state.db as PoolClient
+  const result = await client.query(makeExhibitionsQuery())
+  ctx.body = { exhibitions: result.rows }
+  ctx.status = 200
+})
+
+router.get('/api/exhibition/:id', async (ctx: Koa.Context) => {
+  const client = ctx.state.db as PoolClient
+  const { id } = ctx.params
+  if (!validateUuid(id)) {
+    ctx.body = { message: "invalid UUID", id}
+    ctx.status = 400
+    return
+  }
+  const result = await client.query(makeExhibitionsQuery(`WHERE e.id = '${id}'`))
+  if (result.rows.length) {
+    ctx.body = result.rows[0]
+    ctx.status = 200
+  } else {
+    ctx.body = { message: "exhibition not found", id }
+    ctx.status = 404
+  }
+})
+
+router.get('/api/table/:number', async (ctx: Koa.Context) => {
+  const client = ctx.state.db as PoolClient
+  const { number } = ctx.params
+  if (!number?.match(/^\d+$/)) {
+    ctx.body = { message: "invalid table number", number}
+    ctx.status = 400
+    return
+  }
+  const result = await client.query('SELECT exhibition FROM tables WHERE number = $1', [number]);
+  if (result.rows[0]?.exhibition) {
+    ctx.redirect(`/api/exhibition/${result.rows[0]?.exhibition}`)
+  } else if (result.rows.length) {
+    ctx.body = { message: "table not assigned", number }
+    ctx.status = 400
+  } else {
+    ctx.body = { message: "table not found", number }
+    ctx.status = 404
+  }
+})
+
+router.put(
+  '/api/exhibition/:id',
+  isAuthenticated,
+  async (ctx: Koa.Context) => {
+    const client = ctx.state.db
+    const { id } = ctx.params
+    // Validate the description field
+    const { title, description } = ctx.request.body
+    const result = await client.query(
+      `
+          UPDATE exhibition
+          SET title       = COALESCE($2, title),
+              description = COALESCE($3, description)
+          WHERE id = $1
+            AND ((owner = $4) OR $5)
+          RETURNING id`,
+      [
+        id,
+        title,
+        sanitizeHtml(description, sanitzeHtmlOptions),
+        ctx.state.user.id,
+        ctx.state.user.is_admin,
+      ]
+    )
+    ctx.status = result.rows[0]?.id ? 204 : 400
+  }
+)
 
 app.use(router.routes())
 app.use(router.allowedMethods())

@@ -7,7 +7,7 @@ const pool = new pg.Pool({
   user: process.env.PGUSER,
   password: process.env.PGPASSWORD,
   host: process.env.PGHOST,
-  database: process.env.PGDATABASE || 'retrostar',
+  database: process.env.PGDATABASE || 'cc-katalog',
   port: parseInt(process.env.PGPORT || '5432'),
 })
 
@@ -16,7 +16,9 @@ export const connect = async () => pool.connect()
 export const closePool = async () => pool.end()
 
 // Middleware function to allocate PostgreSQL database connection and manage transactions
-export const withClient = async <T>(handler: (client: pg.PoolClient) => Promise<T>) => {
+export const withClient = async <T>(
+  handler: (client: pg.PoolClient) => Promise<T>
+) => {
   const client = await connect()
   let result = null
   try {
