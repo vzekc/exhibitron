@@ -27,7 +27,7 @@ const QrTableScanner: React.FC = () => {
     return () => {
       console.log('useEffect callback called, isActive:', isActive)
     }
-  }, [])
+  }, [isActive])
 
   return (
     <div className="card">

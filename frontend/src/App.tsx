@@ -3,6 +3,7 @@ import './App.css'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import Navbar from './Navbar.tsx'
 import Exhibitions from './Exhibitions.tsx'
+import Exhibition from './Exhibition.tsx'
 
 const App = () => {
   return (
@@ -14,7 +15,7 @@ const App = () => {
           <Route path="/table" element={<QrTableScanner />} />
           <Route path="/table/:id" element={<div>table</div>} />
           <Route path="/exhibition" element={<Exhibitions/>} />
-          <Route path="/exhibition/:id" element={<div>individual exhibition</div>} />
+          <Route path="/exhibition/:id" element={<Exhibition/>} />
         </Routes>
       </div>
     </Router>

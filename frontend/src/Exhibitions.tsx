@@ -28,7 +28,7 @@ const renderTableNumbers = (numbers: number[]): string => {
 }
 
 const Exhibitions = () => {
-  const [exhibitions, setExhibitions] = useState([] as Exhibition[])
+  const [exhibitions, setExhibitions] = useState<Exhibition[]>([])
 
   useEffect(() => {
     getExhibitions().then(e => setExhibitions(e))
@@ -45,7 +45,7 @@ const Exhibitions = () => {
     <tbody>
     {
       exhibitions.map(({ id, username, title, table_numbers }) =>
-        <tr>
+        <tr key={id}>
           <td><Link to={`/exhibition/${id}`}>{title}</Link></td>
           <td>{username}</td>
           <td>{renderTableNumbers(table_numbers)}</td>
