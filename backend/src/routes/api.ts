@@ -29,21 +29,31 @@ router.post('/exhibition', isAdmin, async (ctx: Koa.Context) => {
   ctx.status = 200
 })
 
+export type Exhibition = {
+  id: string;
+  username: string;
+  title: string;
+  description: string;
+  table_numbers: number[];
+}
+
 const makeExhibitionsQuery =
-  (where?: string) => `SELECT u.name                                                AS "username",
-                                           e.title,
-                                           e.description,
-                                           COALESCE(ARRAY_AGG(t.number ORDER BY t.number), '{}') AS table_numbers
-                                    FROM exhibition AS e
-                                             JOIN "user" u ON e.owner = u.id
-                                             LEFT JOIN tables t ON t.exhibition = e.id
-                                    ${where ?? ''}
-                                    GROUP BY u.name, e.title, e.description`
+  (where?: string) => `SELECT e.id,
+                              u.name         AS "username",
+                              e.title,
+                              e.description,
+                              COALESCE(ARRAY_AGG(t.number ORDER BY t.number) FILTER (WHERE t.number IS NOT NULL),
+                                       '{}') AS table_numbers
+                       FROM exhibition AS e
+                                JOIN "user" u ON e.owner = u.id
+                                LEFT JOIN tables t ON t.exhibition = e.id
+                           ${where ?? ''}
+                       GROUP BY e.id, u.name, e.title, e.description`
 
 router.get('/exhibition', async (ctx: Koa.Context) => {
   const client = ctx.state.db as PoolClient
   const result = await client.query(makeExhibitionsQuery())
-  ctx.body = { exhibitions: result.rows }
+  ctx.body = { exhibitions: result.rows as Exhibition[] }
   ctx.status = 200
 })
 
@@ -57,7 +67,7 @@ router.get('/exhibition/:id', async (ctx: Koa.Context) => {
   }
   const result = await client.query(makeExhibitionsQuery(`WHERE e.id = '${id}'`))
   if (result.rows.length) {
-    ctx.body = result.rows[0]
+    ctx.body = result.rows[0] as Exhibition
     ctx.status = 200
   } else {
     ctx.body = { message: "exhibition not found", id }
