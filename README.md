@@ -1,1 +1,1 @@
-# Dynamische Katalog-Application für die CC-Konferenz
+# Dynamische Katalog-Applikation für die CC-Konferenz
