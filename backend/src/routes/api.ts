@@ -83,14 +83,18 @@ router.get('/exhibition/:id', async (ctx: Context) => {
   }
 })
 
-router.get('/table/:number', async (ctx: Context) => {
-  const client = ctx.state.db
-  const { number } = ctx.params
+const getTable = async (ctx: Context, number: string) => {
   if (!number?.match(/^\d+$/)) {
     ctx.body = { message: 'invalid table number', number }
     ctx.status = 400
     return
   }
+
+}
+
+router.get('/table/:number', async (ctx: Context) => {
+  const client = ctx.state.db
+  const table = await getTable(ctx.params.number)
   const result = await client.query(
     'SELECT exhibition FROM tables WHERE number = $1',
     [number]
@@ -106,12 +110,13 @@ router.get('/table/:number', async (ctx: Context) => {
   }
 })
 
-router.post('/table/:number/claim', async (ctx: Context) => {
+router.post('/table/:number/claim', async (ctx: AuthenticatedContext) => {
   const client = ctx.state.db
-  const table = await
+  const { table } = ctx.params
+
 })
 
-router.put('/exhibition/:id', isAuthenticated, async (ctx: Context) => {
+router.put('/exhibition/:id', isAuthenticated, async (ctx: AuthenticatedContext) => {
   const client = ctx.state.db
   const { id } = ctx.params
   // Validate the description field
