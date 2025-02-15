@@ -18,7 +18,7 @@ export class ArticleRepository extends EntityRepository<Article> {
     const usedTags = this.em.createQueryBuilder(Article, 'aa')
       // we need to mark raw query fragment with `sql` helper
       // otherwise it would be escaped
-      .select(sql`group_concat(distinct t.name)`)
+      .select(sql`string_agg(distinct t.name, ',')`)
       .join('aa.tags', 't')
       .where({ 'aa.id': sql.ref('a.id') })
       .groupBy('aa.author')
@@ -27,7 +27,7 @@ export class ArticleRepository extends EntityRepository<Article> {
     // build final query
     return this.createQueryBuilder('a')
       .select(['slug', 'title', 'description', 'author'])
-      .addSelect(sql.ref('u.full_name').as('authorName'))
+      .addSelect(sql.ref('u.full_name').as('"authorName"'))
       .join('author', 'u')
       .addSelect([totalComments, usedTags]);
   }

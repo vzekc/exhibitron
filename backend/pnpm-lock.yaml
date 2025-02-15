@@ -4,13 +4,18 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@mikro-orm/core@6.4.6':
+    hash: ybtqcpmuvna2v6zusd3miryjga
+    path: patches/@mikro-orm__core@6.4.6.patch
+
 dependencies:
   '@fastify/jwt':
     specifier: ^8.0.1
     version: 8.0.1
   '@mikro-orm/core':
     specifier: ^6.4.6
-    version: 6.4.6
+    version: 6.4.6(patch_hash=ybtqcpmuvna2v6zusd3miryjga)
   '@mikro-orm/migrations':
     specifier: ^6.4.6
     version: 6.4.6(@mikro-orm/core@6.4.6)(@types/node@22.13.4)(pg@8.13.2)
@@ -341,7 +346,7 @@ packages:
     hasBin: true
     dependencies:
       '@jercle/yargonaut': 1.1.5
-      '@mikro-orm/core': 6.4.6
+      '@mikro-orm/core': 6.4.6(patch_hash=ybtqcpmuvna2v6zusd3miryjga)
       '@mikro-orm/knex': 6.4.6(@mikro-orm/core@6.4.6)(pg@8.13.2)
       fs-extra: 11.3.0
       tsconfig-paths: 4.2.0
@@ -359,7 +364,7 @@ packages:
       - tedious
     dev: true
 
-  /@mikro-orm/core@6.4.6:
+  /@mikro-orm/core@6.4.6(patch_hash=ybtqcpmuvna2v6zusd3miryjga):
     resolution: {integrity: sha512-xVm/ALG/3vTMgh6SrvojJ6jjMa0s2hNzWN0triDB16BaNdLwWE4aAaAe+3CuoMFqJAArSOUISTEjExbzELB1ZA==}
     engines: {node: '>= 18.12.0'}
     dependencies:
@@ -370,6 +375,7 @@ packages:
       globby: 11.1.0
       mikro-orm: 6.4.6
       reflect-metadata: 0.2.2
+    patched: true
 
   /@mikro-orm/knex@6.4.6(@mikro-orm/core@6.4.6)(pg@8.13.2):
     resolution: {integrity: sha512-o6t67tFH/GuPZCCEtKbTTL8HDXNgB2ITjButCTZLwteL0qI9yE/f7K6K+dEUKW+hAL3KRvc2BQeumvCVWFeISg==}
@@ -387,7 +393,7 @@ packages:
       mariadb:
         optional: true
     dependencies:
-      '@mikro-orm/core': 6.4.6
+      '@mikro-orm/core': 6.4.6(patch_hash=ybtqcpmuvna2v6zusd3miryjga)
       fs-extra: 11.3.0
       knex: 3.1.0(pg@8.13.2)
       sqlstring: 2.3.3
@@ -406,7 +412,7 @@ packages:
     peerDependencies:
       '@mikro-orm/core': ^6.0.0
     dependencies:
-      '@mikro-orm/core': 6.4.6
+      '@mikro-orm/core': 6.4.6(patch_hash=ybtqcpmuvna2v6zusd3miryjga)
       '@mikro-orm/knex': 6.4.6(@mikro-orm/core@6.4.6)(pg@8.13.2)
       fs-extra: 11.3.0
       umzug: 3.8.2(@types/node@22.13.4)
@@ -430,7 +436,7 @@ packages:
     peerDependencies:
       '@mikro-orm/core': ^6.0.0
     dependencies:
-      '@mikro-orm/core': 6.4.6
+      '@mikro-orm/core': 6.4.6(patch_hash=ybtqcpmuvna2v6zusd3miryjga)
       '@mikro-orm/knex': 6.4.6(@mikro-orm/core@6.4.6)(pg@8.13.2)
       pg: 8.13.2
       postgres-array: 3.0.2
@@ -454,7 +460,7 @@ packages:
     peerDependencies:
       '@mikro-orm/core': ^6.0.0
     dependencies:
-      '@mikro-orm/core': 6.4.6
+      '@mikro-orm/core': 6.4.6(patch_hash=ybtqcpmuvna2v6zusd3miryjga)
       globby: 11.1.0
       ts-morph: 25.0.1
     dev: true
@@ -465,7 +471,7 @@ packages:
     peerDependencies:
       '@mikro-orm/core': ^6.0.0
     dependencies:
-      '@mikro-orm/core': 6.4.6
+      '@mikro-orm/core': 6.4.6(patch_hash=ybtqcpmuvna2v6zusd3miryjga)
       fs-extra: 11.3.0
       globby: 11.1.0
     dev: true

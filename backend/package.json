@@ -6,8 +6,8 @@
     "@fastify/jwt": "^8.0.1",
     "@mikro-orm/core": "^6.4.6",
     "@mikro-orm/migrations": "^6.4.6",
-    "@mikro-orm/sql-highlighter": "^1.0.1",
     "@mikro-orm/postgresql": "^6.4.6",
+    "@mikro-orm/sql-highlighter": "^1.0.1",
     "argon2": "^0.41.1",
     "fastify": "^4.28.1",
     "zod": "^3.23.8"
@@ -27,5 +27,10 @@
     "start": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/server.ts",
     "start:prod": "NODE_ENV=production node dist/server.js",
     "test": "vitest run"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "@mikro-orm/core@6.4.6": "patches/@mikro-orm__core@6.4.6.patch"
+    }
   }
 }

@@ -48,6 +48,7 @@ export async function bootstrap(port = 3001, migrate = true) {
     }
 
     app.log.error(error);
+    console.log(error);
     reply.status(500).send({ error: error.message });
   });
 

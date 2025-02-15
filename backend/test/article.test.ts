@@ -24,6 +24,7 @@ test('list all articles', async () => {
   // assert it was successful response
   expect(res.statusCode).toBe(200);
 
+  console.log('got articles', res.json())
   // with expected shape
   expect(res.json()).toMatchObject({
     items: [

@@ -23,7 +23,7 @@ export class ArticleListing {
   tags!: string[];
 
   @Property()
-  author!: number;
+  authorId!: number;
 
   @Property()
   authorName!: string;

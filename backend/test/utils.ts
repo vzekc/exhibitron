@@ -16,8 +16,7 @@ export async function initTestApp(port: number) {
     // preferTs: true,
   });
 
-  // create the schema so we can use the database
-  await orm.schema.createSchema();
+  await orm.schema.refreshDatabase(); // Drops & re-creates schema
   await orm.seeder.seed(TestSeeder);
 
   const { app } = await bootstrap(port, false);
