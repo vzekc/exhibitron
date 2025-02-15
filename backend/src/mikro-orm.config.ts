@@ -1,37 +1,30 @@
-import type { Options } from '@mikro-orm/postgresql';
-import { GeneratedCacheAdapter, PostgreSqlDriver } from '@mikro-orm/postgresql';
+import { defineConfig, GeneratedCacheAdapter, Options } from '@mikro-orm/postgresql';
 import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
-import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
-import { SeedManager } from '@mikro-orm/seeder';
-import { Migrator } from '@mikro-orm/migrations';
-
 import { existsSync, readFileSync } from 'node:fs';
 
-const enableMetadataCache = () =>
-  process.env.NODE_ENV === 'production' && existsSync('./temp/metadata.json');
+const options = {} as Options;
 
-const config: Options = {
-  // for simplicity, we use the SQLite database, as it's available pretty much everywhere
-  driver: PostgreSqlDriver,
-  dbName: 'cc-katalog',
-  // folder-based discovery setup, using common filename suffix
-  entities: ['dist/**/*.entity.js'],
-  entitiesTs: ['src/**/*.entity.ts'],
-  // we will use the ts-morph reflection, an alternative to the default reflect-metadata provider
-  // check the documentation for their differences: https://mikro-orm.io/docs/metadata-providers
-  metadataProvider: TsMorphMetadataProvider,
-  // enable debug mode to log SQL queries and discovery information
-  debug: true,
-  extensions: [SeedManager, Migrator],
-  highlighter: new SqlHighlighter(),
-  metadataCache: enableMetadataCache() ? {
+if (process.env.NODE_ENV === 'production' && existsSync('./temp/metadata.json')) {
+  options.metadataCache = {
     enabled: true,
     adapter: GeneratedCacheAdapter,
     // temp/metadata.json can be generated via `npx mikro-orm-esm cache:generate --combine`
     options: {
       data: JSON.parse(readFileSync('./temp/metadata.json', { encoding: 'utf8' })),
     },
-  } : undefined,
-};
+  };
+} else {
+  options.metadataProvider = (await import('@mikro-orm/reflection')).TsMorphMetadataProvider;
+}
 
-export default config;
+export default defineConfig({
+  dbName: 'cc-katalog',
+  entities: ['dist/**/*.entity.js'],
+  entitiesTs: ['src/**/*.entity.ts'],
+  // enable debug mode to log SQL queries and discovery information
+  debug: true,
+  // for vitest to get around `TypeError: Unknown file extension ".ts"` (ERR_UNKNOWN_FILE_EXTENSION)
+  dynamicImportProvider: id => import(id),
+  highlighter: new SqlHighlighter(),
+  ...options,
+});
