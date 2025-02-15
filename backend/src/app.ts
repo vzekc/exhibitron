@@ -1,12 +1,12 @@
-import { NotFoundError, RequestContext } from "@mikro-orm/core";
-import { fastify } from "fastify";
-import fastifyJWT from "@fastify/jwt";
-import { initORM } from "./db.js";
-import { registerArticleRoutes } from "./modules/article/routes.js";
-import { registerUserRoutes } from "./modules/user/routes.js";
-import { AuthError } from "./modules/common/utils.js";
+import { NotFoundError, RequestContext } from '@mikro-orm/core';
+import { fastify } from 'fastify';
+import fastifyJWT from '@fastify/jwt';
+import { initORM } from './db.js';
+import { registerArticleRoutes } from './modules/article/routes.js';
+import { registerUserRoutes } from './modules/user/routes.js';
+import { AuthError } from './modules/common/utils.js';
 
-export async function bootstrap(port = 3001, migrate = true) {
+export async function bootstrap(port: number | undefined, migrate: boolean | undefined) {
   const db = await initORM();
 
   if (migrate) {
@@ -18,16 +18,16 @@ export async function bootstrap(port = 3001, migrate = true) {
 
   // register JWT plugin
   app.register(fastifyJWT, {
-    secret: process.env.JWT_SECRET ?? "12345678", // fallback for testing
+    secret: process.env.JWT_SECRET ?? '12345678', // fallback for testing
   });
 
   // register request context hook
-  app.addHook("onRequest", (request, reply, done) => {
+  app.addHook('onRequest', (request, reply, done) => {
     RequestContext.create(db.em, done);
   });
 
   // register auth hook after the ORM one to use the context
-  app.addHook("onRequest", async (request) => {
+  app.addHook('onRequest', async (request) => {
     try {
       const ret = await request.jwtVerify<{ id: number }>();
       request.user = await db.user.findOneOrFail(ret.id);
@@ -53,13 +53,13 @@ export async function bootstrap(port = 3001, migrate = true) {
   });
 
   // shut down the connection when closing the app
-  app.addHook("onClose", async () => {
+  app.addHook('onClose', async () => {
     await db.orm.close();
   });
 
   // register routes here
-  app.register(registerArticleRoutes, { prefix: "article" });
-  app.register(registerUserRoutes, { prefix: "user" });
+  app.register(registerArticleRoutes, { prefix: 'article' });
+  app.register(registerUserRoutes, { prefix: 'user' });
 
   const url = await app.listen({ port });
 

@@ -1,17 +1,18 @@
 import { afterAll, beforeAll, expect, test } from 'vitest';
 import { FastifyInstance } from 'fastify';
-import { initTestApp } from './utils.js';
+import { initTestApp, deleteDatabase } from './utils.js';
 
 let app: FastifyInstance;
+let dbName: string;
 
 beforeAll(async () => {
-  // we use different ports to allow parallel testing
-  app = await initTestApp(30001);
+  ({ app, dbName } = await initTestApp());
 });
 
 afterAll(async () => {
   // we close only the fastify app - it will close the database connection via onClose hook automatically
-  await app?.close();
+  await app.close();
+  await deleteDatabase(dbName);
 });
 
 test('list all articles', async () => {
@@ -24,7 +25,6 @@ test('list all articles', async () => {
   // assert it was successful response
   expect(res.statusCode).toBe(200);
 
-  console.log('got articles', res.json())
   // with expected shape
   expect(res.json()).toMatchObject({
     items: [
