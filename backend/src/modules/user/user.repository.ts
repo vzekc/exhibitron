@@ -1,4 +1,4 @@
-import { EntityRepository } from '@mikro-orm/sqlite';
+import { EntityRepository } from '@mikro-orm/postgresql';
 import { User } from './user.entity.js';
 import { AuthError } from '../common/utils.js';
 

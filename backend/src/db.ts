@@ -1,4 +1,4 @@
-import { defineConfig, EntityManager, EntityRepository, MikroORM, Options } from '@mikro-orm/sqlite';
+import { defineConfig, EntityManager, EntityRepository, MikroORM, Options } from '@mikro-orm/postgresql';
 import { Article } from './modules/article/article.entity.js';
 import { User } from './modules/user/user.entity.js';
 import { Tag } from './modules/article/tag.entity.js';
@@ -23,7 +23,7 @@ export async function initORM(options?: Options): Promise<Services> {
     return cache;
   }
 
-  const orm = await MikroORM.init({ ...defineConfig(config), ...options });
+  const orm = await MikroORM.init({ ...config, ...options });
 
   // save to cache before returning
   return cache = {

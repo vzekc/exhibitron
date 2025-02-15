@@ -9,9 +9,8 @@ export async function initTestApp(port: number) {
     // first, include the main config
     ...config,
     // no need for debug information, it would only pollute the logs
-    debug: false,
-    // we will use in-memory database, this way we can easily parallelize our tests
-    dbName: ':memory:',
+    debug: true,
+    dbName: 'cc-katalog-test',
     // this will ensure the ORM discovers TS entities, with ts-node, ts-jest and vitest
     // it will be inferred automatically, but we are using vitest here
     // preferTs: true,

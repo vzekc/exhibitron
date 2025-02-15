@@ -11,7 +11,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   // we close only the fastify app - it will close the database connection via onClose hook automatically
-  await app.close();
+  await app?.close();
 });
 
 test('list all articles', async () => {

@@ -1,4 +1,4 @@
-import { FindOptions, sql, EntityRepository } from '@mikro-orm/sqlite';
+import { FindOptions, sql, EntityRepository } from '@mikro-orm/postgresql';
 import { Article } from './article.entity.js';
 import { Comment } from './comment.entity.js';
 import { ArticleListing } from './article-listing.entity.js';

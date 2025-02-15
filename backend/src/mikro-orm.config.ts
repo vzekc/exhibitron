@@ -1,5 +1,5 @@
-import type { Options } from '@mikro-orm/sqlite';
-import { GeneratedCacheAdapter, SqliteDriver } from '@mikro-orm/sqlite';
+import type { Options } from '@mikro-orm/postgresql';
+import { GeneratedCacheAdapter, PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import { SeedManager } from '@mikro-orm/seeder';
@@ -12,8 +12,8 @@ const enableMetadataCache = () =>
 
 const config: Options = {
   // for simplicity, we use the SQLite database, as it's available pretty much everywhere
-  driver: SqliteDriver,
-  dbName: 'sqlite.db',
+  driver: PostgreSqlDriver,
+  dbName: 'cc-katalog',
   // folder-based discovery setup, using common filename suffix
   entities: ['dist/**/*.entity.js'],
   entitiesTs: ['src/**/*.entity.ts'],
@@ -22,7 +22,6 @@ const config: Options = {
   metadataProvider: TsMorphMetadataProvider,
   // enable debug mode to log SQL queries and discovery information
   debug: true,
-  dynamicImportProvider: id => import(id),
   extensions: [SeedManager, Migrator],
   highlighter: new SqlHighlighter(),
   metadataCache: enableMetadataCache() ? {
