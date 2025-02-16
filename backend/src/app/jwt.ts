@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import { FastifyInstance } from 'fastify'
 import fastifyJWT from '@fastify/jwt'
 import { initORM } from '../db.js'
@@ -16,7 +17,7 @@ export const register = async (app: FastifyInstance) => {
       const ret = await request.jwtVerify<{ id: number }>()
       request.user = await db.user.findOneOrFail(ret.id)
     } catch (e) {
-      app.log.error(e)
+      app.log.debug('could not verify JWT token, user not set', e)
       // ignore token errors, we validate the request.user exists only where needed
     }
   })

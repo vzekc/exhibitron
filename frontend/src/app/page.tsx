@@ -3,7 +3,7 @@ import axios from "axios";
 
 async function getUsers() {
   try {
-    const response = await axios.get("http://localhost:3001/users");
+    const response = await axios.get("/users");
     return response.data;
   } catch (error) {
     console.error("Error fetching users", error);
