@@ -11,7 +11,6 @@ import {
   Property,
 } from '@mikro-orm/core'
 import { BaseEntity } from '../common/base.entity.js'
-import { Article } from '../article/article.entity.js'
 import { hash, verify } from 'argon2'
 import { UserRepository } from './user.repository.js'
 import { Exhibition } from '../exhibition/exhibition.entity.js'
@@ -53,9 +52,6 @@ export class User extends BaseEntity<'isAdministrator' | 'bio'> {
 
   @Embedded(() => Social, { object: true })
   social?: Social
-
-  @OneToMany({ mappedBy: 'author' })
-  articles = new Collection<Article>(this)
 
   @OneToMany({ mappedBy: 'exhibitor' })
   exhibitions = new Collection<Exhibition>(this)

@@ -6,7 +6,6 @@ import * as oidc from './app/oidc.js'
 import * as orm from './app/orm.js'
 import * as jwt from './app/jwt.js'
 import * as session from './app/session.js'
-import { registerArticleRoutes } from './modules/article/routes.js'
 import { registerUserRoutes } from './modules/user/routes.js'
 import { AuthError, PermissionDeniedError } from './modules/common/utils.js'
 import { registerExhibitionRoutes } from './modules/exhibition/routes.js'
@@ -67,7 +66,6 @@ export async function bootstrap({
   registerErrorHandler(app)
 
   // register routes here
-  app.register(registerArticleRoutes, { prefix: 'article' })
   app.register(registerUserRoutes, { prefix: 'user' })
   app.register(registerExhibitionRoutes, { prefix: 'exhibition' })
 
