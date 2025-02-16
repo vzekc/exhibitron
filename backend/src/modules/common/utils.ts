@@ -1,4 +1,3 @@
-import { Article } from '../article/article.entity.js'
 
 export class AuthError extends Error {}
 export class PermissionDeniedError extends Error {}
@@ -12,10 +11,4 @@ export function getUserFromToken(req: FastifyRequest) {
   }
 
   return req.user
-}
-
-export function verifyArticlePermissions(user: User, article: Article): void {
-  if (article.author.id !== user.id) {
-    throw new Error('You are not the author of this article!')
-  }
 }
