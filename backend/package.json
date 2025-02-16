@@ -41,7 +41,7 @@
     "start:prod": "NODE_ENV=production node dist/server.js",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint src test"
+    "lint": "eslint src"
   },
   "pnpm": {
     "patchedDependencies": {

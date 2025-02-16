@@ -1,5 +1,7 @@
 {
-  "namespaces": ["public"],
+  "namespaces": [
+    "public"
+  ],
   "name": "public",
   "tables": [
     {
@@ -29,7 +31,7 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "length": 6,
           "mappedType": "datetime"
         },
@@ -49,7 +51,9 @@
       "indexes": [
         {
           "keyName": "tag_pkey",
-          "columnNames": ["id"],
+          "columnNames": [
+            "id"
+          ],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -87,7 +91,7 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "length": 6,
           "mappedType": "datetime"
         },
@@ -131,6 +135,16 @@
           "default": "''",
           "mappedType": "text"
         },
+        "is_administrator": {
+          "name": "is_administrator",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        },
         "social": {
           "name": "social",
           "type": "jsonb",
@@ -146,7 +160,9 @@
       "indexes": [
         {
           "keyName": "user_pkey",
-          "columnNames": ["id"],
+          "columnNames": [
+            "id"
+          ],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -184,7 +200,222 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "number": {
+          "name": "number",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
           "nullable": false,
+          "mappedType": "integer"
+        },
+        "exhibitor_id": {
+          "name": "exhibitor_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        }
+      },
+      "name": "table",
+      "schema": "public",
+      "indexes": [
+        {
+          "columnNames": [
+            "number"
+          ],
+          "composite": false,
+          "keyName": "table_number_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "table_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "table_exhibitor_id_foreign": {
+          "constraintName": "table_exhibitor_id_foreign",
+          "columnNames": [
+            "exhibitor_id"
+          ],
+          "localTableName": "public.table",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.user",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "text": {
+          "name": "text",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
+        "table_id": {
+          "name": "table_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
+        "exhibitor_id": {
+          "name": "exhibitor_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        }
+      },
+      "name": "exhibition",
+      "schema": "public",
+      "indexes": [
+        {
+          "columnNames": [
+            "table_id"
+          ],
+          "composite": false,
+          "keyName": "exhibition_table_id_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "exhibition_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "exhibition_table_id_foreign": {
+          "constraintName": "exhibition_table_id_foreign",
+          "columnNames": [
+            "table_id"
+          ],
+          "localTableName": "public.exhibition",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.table",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        },
+        "exhibition_exhibitor_id_foreign": {
+          "constraintName": "exhibition_exhibitor_id_foreign",
+          "columnNames": [
+            "exhibitor_id"
+          ],
+          "localTableName": "public.exhibition",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.user",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
           "length": 6,
           "mappedType": "datetime"
         },
@@ -241,7 +472,9 @@
       "schema": "public",
       "indexes": [
         {
-          "columnNames": ["slug"],
+          "columnNames": [
+            "slug"
+          ],
           "composite": false,
           "keyName": "article_slug_unique",
           "constraint": true,
@@ -249,7 +482,9 @@
           "unique": true
         },
         {
-          "columnNames": ["title"],
+          "columnNames": [
+            "title"
+          ],
           "composite": false,
           "keyName": "article_title_index",
           "constraint": false,
@@ -258,7 +493,9 @@
         },
         {
           "keyName": "article_pkey",
-          "columnNames": ["id"],
+          "columnNames": [
+            "id"
+          ],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -269,9 +506,13 @@
       "foreignKeys": {
         "article_author_id_foreign": {
           "constraintName": "article_author_id_foreign",
-          "columnNames": ["author_id"],
+          "columnNames": [
+            "author_id"
+          ],
           "localTableName": "public.article",
-          "referencedColumnNames": ["id"],
+          "referencedColumnNames": [
+            "id"
+          ],
           "referencedTableName": "public.user",
           "updateRule": "cascade"
         }
@@ -305,7 +546,7 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "length": 6,
           "mappedType": "datetime"
         },
@@ -343,7 +584,9 @@
       "indexes": [
         {
           "keyName": "comment_pkey",
-          "columnNames": ["id"],
+          "columnNames": [
+            "id"
+          ],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -354,17 +597,25 @@
       "foreignKeys": {
         "comment_article_id_foreign": {
           "constraintName": "comment_article_id_foreign",
-          "columnNames": ["article_id"],
+          "columnNames": [
+            "article_id"
+          ],
           "localTableName": "public.comment",
-          "referencedColumnNames": ["id"],
+          "referencedColumnNames": [
+            "id"
+          ],
           "referencedTableName": "public.article",
           "updateRule": "cascade"
         },
         "comment_author_id_foreign": {
           "constraintName": "comment_author_id_foreign",
-          "columnNames": ["author_id"],
+          "columnNames": [
+            "author_id"
+          ],
           "localTableName": "public.comment",
-          "referencedColumnNames": ["id"],
+          "referencedColumnNames": [
+            "id"
+          ],
           "referencedTableName": "public.user",
           "updateRule": "cascade"
         }
@@ -397,7 +648,10 @@
       "indexes": [
         {
           "keyName": "article_tags_pkey",
-          "columnNames": ["article_id", "tag_id"],
+          "columnNames": [
+            "article_id",
+            "tag_id"
+          ],
           "composite": true,
           "constraint": true,
           "primary": true,
@@ -408,18 +662,26 @@
       "foreignKeys": {
         "article_tags_article_id_foreign": {
           "constraintName": "article_tags_article_id_foreign",
-          "columnNames": ["article_id"],
+          "columnNames": [
+            "article_id"
+          ],
           "localTableName": "public.article_tags",
-          "referencedColumnNames": ["id"],
+          "referencedColumnNames": [
+            "id"
+          ],
           "referencedTableName": "public.article",
           "deleteRule": "cascade",
           "updateRule": "cascade"
         },
         "article_tags_tag_id_foreign": {
           "constraintName": "article_tags_tag_id_foreign",
-          "columnNames": ["tag_id"],
+          "columnNames": [
+            "tag_id"
+          ],
           "localTableName": "public.article_tags",
-          "referencedColumnNames": ["id"],
+          "referencedColumnNames": [
+            "id"
+          ],
           "referencedTableName": "public.tag",
           "deleteRule": "cascade",
           "updateRule": "cascade"

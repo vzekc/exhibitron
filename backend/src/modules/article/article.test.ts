@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, expect, test } from 'vitest'
 import { FastifyInstance } from 'fastify'
-import { initTestApp, deleteDatabase } from './utils.js'
+import { initTestApp, deleteDatabase } from '../../test/utils.js'
 
 let app: FastifyInstance
 let dbName: string

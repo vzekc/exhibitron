@@ -10,7 +10,10 @@ import { Tag } from './modules/article/tag.entity.js'
 import { Comment } from './modules/article/comment.entity.js'
 import { UserRepository } from './modules/user/user.repository.js'
 import { ArticleRepository } from './modules/article/article.repository.js'
+import { ExhibitionRepository } from './modules/exhibition/exhibition.repository.js'
 import config from './mikro-orm.config.js'
+import { Exhibition } from './modules/exhibition/exhibition.entity.js'
+import { Table } from './modules/exhibition/table.entity.js'
 
 export interface Services {
   orm: MikroORM
@@ -19,6 +22,8 @@ export interface Services {
   user: UserRepository
   tag: EntityRepository<Tag>
   comment: EntityRepository<Comment>
+  exhibition: ExhibitionRepository
+  table: EntityRepository<Table>
 }
 
 let cache: Services
@@ -41,5 +46,7 @@ export async function initORM(options?: Options): Promise<Services> {
     user: orm.em.getRepository(User),
     tag: orm.em.getRepository(Tag),
     comment: orm.em.getRepository(Comment),
+    exhibition: orm.em.getRepository(Exhibition),
+    table: orm.em.getRepository(Table),
   })
 }

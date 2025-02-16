@@ -14,6 +14,7 @@ import { BaseEntity } from '../common/base.entity.js'
 import { Article } from '../article/article.entity.js'
 import { hash, verify } from 'argon2'
 import { UserRepository } from './user.repository.js'
+import { Exhibition } from '../exhibition/exhibition.entity.js'
 
 @Embeddable()
 export class Social {
@@ -28,7 +29,7 @@ export class Social {
 }
 
 @Entity({ repository: () => UserRepository })
-export class User extends BaseEntity<'bio'> {
+export class User extends BaseEntity<'isAdministrator' | 'bio'> {
   // for automatic inference via `em.getRepository(User)`
   [EntityRepositoryType]?: UserRepository
 
@@ -47,11 +48,17 @@ export class User extends BaseEntity<'bio'> {
   @Property({ type: 'text' })
   bio: string = ''
 
+  @Property()
+  isAdministrator: boolean = false
+
   @Embedded(() => Social, { object: true })
   social?: Social
 
   @OneToMany({ mappedBy: 'author' })
   articles = new Collection<Article>(this)
+
+  @OneToMany({ mappedBy: 'exhibitor' })
+  exhibitions = new Collection<Exhibition>(this)
 
   constructor(fullName: string, email: string, password: string) {
     super()

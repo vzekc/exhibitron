@@ -9,6 +9,6 @@ export abstract class BaseEntity<Optional = never> {
   @Property()
   createdAt = new Date()
 
-  @Property({ onUpdate: () => new Date() })
+  @Property({ nullable: true, onUpdate: () => new Date() })
   updatedAt = new Date()
 }

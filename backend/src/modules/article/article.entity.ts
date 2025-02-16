@@ -1,6 +1,7 @@
 import {
   Collection,
   Entity,
+  EntityRepositoryType,
   ManyToMany,
   ManyToOne,
   OneToMany,
@@ -22,6 +23,8 @@ function convertToSlug(text: string) {
 
 @Entity({ repository: () => ArticleRepository })
 export class Article extends BaseEntity<'slug' | 'description'> {
+  [EntityRepositoryType]?: ArticleRepository
+
   @Property({ unique: true })
   slug!: string
 

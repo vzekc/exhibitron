@@ -1,14 +1,14 @@
 import { Entity, EntityManager, Property } from '@mikro-orm/core'
-import { Article } from './article.entity.js'
+import { Exhibition } from './exhibition.entity.js'
 
 @Entity({
   expression: (em: EntityManager) => {
-    return em.getRepository(Article).listArticlesQuery()
+    return em.getRepository(Exhibition).listExhibitionsQuery()
   },
 })
-export class ArticleListing {
+export class ExhibitionListing {
   @Property()
-  slug!: string
+  id!: string
 
   @Property()
   title!: string
@@ -17,14 +17,11 @@ export class ArticleListing {
   description!: string
 
   @Property()
-  tags!: string[]
+  exhibitorId!: number
 
   @Property()
-  authorId!: number
+  exhibitorName!: string
 
   @Property()
-  authorName!: string
-
-  @Property()
-  totalComments!: number
+  table?: number
 }

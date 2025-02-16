@@ -23,4 +23,4 @@ export const register = async (app: FastifyInstance) => {
   await app.register(fastifySwaggerUi, {
     routePrefix: '/documentation',
   })
-};
+}

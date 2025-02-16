@@ -8,7 +8,7 @@ export const register = async (app: FastifyInstance) => {
 
   // register JWT plugin
   app.register(fastifyJWT, {
-    secret: process.env.JWT_SECRET ?? '12345678' // fallback for testing
+    secret: process.env.JWT_SECRET ?? '12345678', // fallback for testing
   })
 
   // register auth hook after the ORM one to use the context
