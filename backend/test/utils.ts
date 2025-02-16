@@ -41,7 +41,7 @@ export const runCommand = (command: string): void => {
   try {
     execSync(command, { stdio: 'inherit' })
   } catch (error) {
-    throw new Error(`Command failed: ${command}`)
+    throw new Error(`Command failed: ${command}: ${error}`)
   }
 }
 
