@@ -4,6 +4,7 @@ import { initORM } from '../db.js'
 import config from '../mikro-orm.config.js'
 import { TestSeeder } from '../seeders/TestSeeder.js'
 import { execSync } from 'child_process'
+import { FastifyInstance } from 'fastify'
 
 const generateRandomString = (length: number): string => {
   const characters = 'abcdefghijklmnopqrstuvwxyz0123456789'
@@ -57,6 +58,24 @@ export const deleteDatabase = (dbName: string) => {
   } else {
     runCommand(`dropdb ${dbName}`)
   }
+}
+
+export const login = async (
+  app: FastifyInstance,
+  username: string,
+  password: string = 'secret',
+) => {
+  const res = await app.inject({
+    method: 'post',
+    url: '/user/sign-in',
+    payload: {
+      username,
+      password,
+    },
+  })
+
+  expect(res).toHaveStatus(200)
+  return res.json()
 }
 
 expect.extend({

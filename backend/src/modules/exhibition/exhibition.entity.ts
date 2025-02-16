@@ -7,7 +7,7 @@ import {
 } from '@mikro-orm/core'
 import { User } from '../user/user.entity.js'
 import { BaseEntity } from '../common/base.entity.js'
-import { Table } from './table.entity.js'
+import { Table } from '../table/table.entity.js'
 import { ExhibitionRepository } from './exhibition.repository.js'
 
 @Entity({ repository: () => ExhibitionRepository })

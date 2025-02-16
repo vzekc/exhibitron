@@ -1,7 +1,5 @@
 {
-  "namespaces": [
-    "public"
-  ],
+  "namespaces": ["public"],
   "name": "public",
   "tables": [
     {
@@ -100,9 +98,7 @@
       "schema": "public",
       "indexes": [
         {
-          "columnNames": [
-            "username"
-          ],
+          "columnNames": ["username"],
           "composite": false,
           "keyName": "user_username_index",
           "constraint": false,
@@ -110,9 +106,7 @@
           "unique": false
         },
         {
-          "columnNames": [
-            "username"
-          ],
+          "columnNames": ["username"],
           "composite": false,
           "keyName": "user_username_unique",
           "constraint": true,
@@ -121,9 +115,7 @@
         },
         {
           "keyName": "user_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -180,9 +172,7 @@
       "indexes": [
         {
           "keyName": "table_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -193,13 +183,9 @@
       "foreignKeys": {
         "table_exhibitor_id_foreign": {
           "constraintName": "table_exhibitor_id_foreign",
-          "columnNames": [
-            "exhibitor_id"
-          ],
+          "columnNames": ["exhibitor_id"],
           "localTableName": "public.table",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.user",
           "deleteRule": "set null",
           "updateRule": "cascade"
@@ -280,9 +266,7 @@
       "schema": "public",
       "indexes": [
         {
-          "columnNames": [
-            "table_id"
-          ],
+          "columnNames": ["table_id"],
           "composite": false,
           "keyName": "exhibition_table_id_unique",
           "constraint": true,
@@ -291,9 +275,7 @@
         },
         {
           "keyName": "exhibition_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -304,26 +286,18 @@
       "foreignKeys": {
         "exhibition_table_id_foreign": {
           "constraintName": "exhibition_table_id_foreign",
-          "columnNames": [
-            "table_id"
-          ],
+          "columnNames": ["table_id"],
           "localTableName": "public.exhibition",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.table",
           "deleteRule": "set null",
           "updateRule": "cascade"
         },
         "exhibition_exhibitor_id_foreign": {
           "constraintName": "exhibition_exhibitor_id_foreign",
-          "columnNames": [
-            "exhibitor_id"
-          ],
+          "columnNames": ["exhibitor_id"],
           "localTableName": "public.exhibition",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.user",
           "updateRule": "cascade"
         }

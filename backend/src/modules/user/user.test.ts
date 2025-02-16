@@ -12,11 +12,11 @@ beforeAll(async () => {
 afterAll(async () => {
   // we close only the fastify app - it will close the database connection via onClose hook automatically
   await app.close()
-  await deleteDatabase(dbName)
+  deleteDatabase(dbName)
 })
 
 test('login', async () => {
-  const res1 = await app.inject({
+  let res = await app.inject({
     method: 'post',
     url: '/user/sign-in',
     payload: {
@@ -25,12 +25,12 @@ test('login', async () => {
     },
   })
 
-  expect(res1.statusCode).toBe(200)
-  expect(res1.json()).toMatchObject({
+  expect(res).toHaveStatus(200)
+  expect(res.json()).toMatchObject({
     fullName: 'Harald Eder',
   })
 
-  const res2 = await app.inject({
+  res = await app.inject({
     method: 'post',
     url: '/user/sign-in',
     payload: {
@@ -39,14 +39,14 @@ test('login', async () => {
     },
   })
 
-  expect(res2.statusCode).toBe(401)
-  expect(res2.json()).toMatchObject({
+  expect(res).toHaveStatus(401)
+  expect(res.json()).toMatchObject({
     error: 'Invalid combination of username and password',
   })
 })
 
 test('update', async () => {
-  const res1 = await app.inject({
+  let res = await app.inject({
     method: 'post',
     url: '/user/sign-in',
     payload: {
@@ -55,23 +55,23 @@ test('update', async () => {
     },
   })
 
-  expect(res1.statusCode).toBe(200)
-  const user = res1.json()
+  expect(res).toHaveStatus(200)
+  const user = res.json()
   expect(user).toMatchObject({
     fullName: 'Harald Eder',
   })
 
-  const res2 = await app.inject({
+  res = await app.inject({
     method: 'get',
     url: '/user/profile',
     headers: {
       Authorization: `Bearer ${user.token}`,
     },
   })
-  expect(res2.statusCode).toBe(200)
-  expect(res2.json()).toMatchObject({ username: 'MeisterEder' })
+  expect(res).toHaveStatus(200)
+  expect(res.json()).toMatchObject({ username: 'MeisterEder' })
 
-  const res3 = await app.inject({
+  res = await app.inject({
     method: 'patch',
     url: '/user/profile',
     headers: {
@@ -81,25 +81,39 @@ test('update', async () => {
       bio: 'I was born with a plastic spoon in my mouth',
     },
   })
-  expect(res3.statusCode).toBe(200)
+  expect(res).toHaveStatus(200)
 
-  const res4 = await app.inject({
+  res = await app.inject({
     method: 'get',
     url: '/user/profile',
     headers: {
       Authorization: `Bearer ${user.token}`,
     },
   })
-  expect(res4.statusCode).toBe(200)
-  expect(res4.json()).toMatchObject({
+  expect(res).toHaveStatus(200)
+  expect(res.json()).toMatchObject({
     bio: 'I was born with a plastic spoon in my mouth',
   })
+
+  res = await app.inject({
+    method: 'patch',
+    url: '/user/profile',
+    headers: {
+      Authorization: `Bearer ${user.token}`,
+    },
+    payload: {
+      isAdministrator: true,
+    },
+  })
+  expect(res).toHaveStatus(400)
+  // fixme: should really look at the validation error
+  expect(res.body).toMatch(/unrecognized_keys.*isAdministrator/)
 })
 
 test('lookups', async () => {
   let res = await app.inject({
     method: 'get',
-    url: '/user/1002'
+    url: '/user/1002',
   })
   expect(res).toHaveStatus(200)
   expect(res.json()).not.toContain('password')
@@ -112,4 +126,8 @@ test('lookups', async () => {
     url: '/user/MeisterEder',
   })
   expect(res).toHaveStatus(200)
+  expect(res.json()).toMatchObject({
+    username: 'MeisterEder',
+    fullName: 'Harald Eder',
+  })
 })

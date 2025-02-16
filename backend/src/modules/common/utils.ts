@@ -1,4 +1,3 @@
-
 export class AuthError extends Error {}
 export class PermissionDeniedError extends Error {}
 

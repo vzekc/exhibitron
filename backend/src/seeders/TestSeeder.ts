@@ -1,7 +1,7 @@
 import type { EntityManager } from '@mikro-orm/core'
 import { Seeder } from '@mikro-orm/seeder'
 import { User } from '../modules/user/user.entity.js'
-import { Table } from '../modules/exhibition/table.entity.js'
+import { Table } from '../modules/table/table.entity.js'
 
 export class TestSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {
@@ -34,6 +34,11 @@ export class TestSeeder extends Seeder {
           { id: 1003, title: 'IBM Mainframes' },
           { id: 1004, title: 'HP calculators' },
         ],
+      },
+      {
+        id: 1004,
+        username: 'admin',
+        isAdministrator: true,
       },
     ].forEach((user) => em.create(User, { ...user, password: 'secret' }))
   }

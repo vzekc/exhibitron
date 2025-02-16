@@ -1,22 +1,18 @@
-import {
-  EntityManager,
-  EntityRepository,
-  MikroORM,
-  Options,
-} from '@mikro-orm/postgresql'
+import { EntityManager, MikroORM, Options } from '@mikro-orm/postgresql'
 import config from './mikro-orm.config.js'
 import { User } from './modules/user/user.entity.js'
 import { UserRepository } from './modules/user/user.repository.js'
 import { ExhibitionRepository } from './modules/exhibition/exhibition.repository.js'
 import { Exhibition } from './modules/exhibition/exhibition.entity.js'
-import { Table } from './modules/exhibition/table.entity.js'
+import { Table } from './modules/table/table.entity.js'
+import { TableRepository } from './modules/table/table.repository.js'
 
 export interface Services {
   orm: MikroORM
   em: EntityManager
   user: UserRepository
   exhibition: ExhibitionRepository
-  table: EntityRepository<Table>
+  table: TableRepository
 }
 
 let cache: Services

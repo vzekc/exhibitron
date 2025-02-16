@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, expect, test } from 'vitest'
 import { FastifyInstance } from 'fastify'
-import { deleteDatabase, initTestApp } from '../../test/utils.js'
+import { deleteDatabase, initTestApp, login } from '../../test/utils.js'
 
 let app: FastifyInstance
 let dbName: string
@@ -64,22 +64,8 @@ test('try making updates without being logged in', async () => {
   expect(res).toHaveStatus(403)
 })
 
-const login = async (username: string, password: string = 'secret') => {
-  const res = await app.inject({
-    method: 'post',
-    url: '/user/sign-in',
-    payload: {
-      username,
-      password,
-    },
-  })
-
-  expect(res).toHaveStatus(200)
-  return res.json()
-}
-
 test('exhibition updates', async () => {
-  const user = await login('daffy')
+  const user = await login(app, 'daffy')
 
   // reject unknown property
   let res = await app.inject({
@@ -132,7 +118,7 @@ test('exhibition updates', async () => {
   })
   expect(res).toHaveStatus(403)
 
-  const user2 = await login('donald')
+  const user2 = await login(app, 'donald')
 
   // deny update to other user's exhibition
   res = await app.inject({
@@ -219,7 +205,7 @@ test('exhibition updates', async () => {
       Authorization: `Bearer ${user2.token}`,
     },
     payload: {
-      title: 'The grossest C64 of all times'
+      title: 'The grossest C64 of all times',
     },
   })
   expect(res).toHaveStatus(200)

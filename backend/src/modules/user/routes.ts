@@ -1,27 +1,40 @@
 import { FastifyInstance } from 'fastify'
 import { initORM } from '../../db.js'
 import { wrap } from '@mikro-orm/core'
-import { User } from './user.entity.js'
 import { getUserFromToken } from '../common/utils.js'
 import { z } from 'zod'
+import { User } from './user.entity.js'
 
-const contactsSchema = z.object({
-  email: z.string().optional(),
-  phone: z.string().optional(),
-  website: z.string().optional(),
-  mastodon: z.string().optional(),
-  twitter: z.string().optional(),
-  facebook: z.string().optional(),
-  linkedin: z.string().optional(),
-})
+const contactsSchema = z
+  .object({
+    email: z.string().optional(),
+    phone: z.string().optional(),
+    website: z.string().optional(),
+    mastodon: z.string().optional(),
+    twitter: z.string().optional(),
+    facebook: z.string().optional(),
+    linkedin: z.string().optional(),
+  })
+  .strict()
 
-const userCreateSchema = z.object({
-  username: z.string(),
-  fullName: z.string().optional(),
-  password: z.string(),
-  bio: z.string().optional(),
-  social: contactsSchema.optional(),
-})
+const userCreateSchema = z
+  .object({
+    username: z.string(),
+    fullName: z.string().optional(),
+    password: z.string(),
+    bio: z.string().optional(),
+    social: contactsSchema.optional(),
+  })
+  .strict()
+
+const userUpdateSchema = z
+  .object({
+    fullName: z.string().optional(),
+    password: z.string().optional(),
+    bio: z.string().optional(),
+    social: contactsSchema.optional(),
+  })
+  .strict()
 
 export async function registerUserRoutes(app: FastifyInstance) {
   const db = await initORM()
@@ -62,14 +75,13 @@ export async function registerUserRoutes(app: FastifyInstance) {
 
   app.get('/:id', async (request) => {
     const { id } = request.params as { id: string }
-    const where = id.match(/^\d+$/) ? { id: +id } : { username: id }
-    const user = await db.user.findOneOrFail(where, { populate: ['tables', 'exhibitions']})
-    return user
+    return await db.user.lookup(id)
   })
 
   app.patch('/profile', async (request) => {
+    const dto = userUpdateSchema.parse(request.body)
     const user = getUserFromToken(request)
-    wrap(user).assign(request.body as User)
+    wrap(user).assign(dto as User)
     await db.em.flush()
     return user
   })

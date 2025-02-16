@@ -1,4 +1,4 @@
-import {  } from 'fastify'
+import {} from 'fastify'
 
 declare global {
   namespace jest {

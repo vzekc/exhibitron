@@ -10,6 +10,7 @@ import { registerUserRoutes } from './modules/user/routes.js'
 import { AuthError, PermissionDeniedError } from './modules/common/utils.js'
 import { registerExhibitionRoutes } from './modules/exhibition/routes.js'
 import { ZodError } from 'zod'
+import { registerTableRoutes } from './modules/table/routes.js'
 
 const registerErrorHandler = (app: FastifyInstance) => {
   // register global error handler to process 404 errors from `findOneOrFail` calls
@@ -68,6 +69,7 @@ export async function bootstrap({
   // register routes here
   app.register(registerUserRoutes, { prefix: 'user' })
   app.register(registerExhibitionRoutes, { prefix: 'exhibition' })
+  app.register(registerTableRoutes, { prefix: 'table' })
 
   const url = await app.listen({ port })
 
