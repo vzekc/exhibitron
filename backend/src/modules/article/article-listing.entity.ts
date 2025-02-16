@@ -1,34 +1,31 @@
-import { Entity, EntityManager, Property } from '@mikro-orm/core';
-import { Article } from './article.entity.js';
-import { ArticleRepository } from './article.repository.js';
+import { Entity, EntityManager, Property } from '@mikro-orm/core'
+import { Article } from './article.entity.js'
+import { ArticleRepository } from './article.repository.js'
 
 @Entity({
   expression: (em: EntityManager) => {
-    return (em.getRepository(Article) as ArticleRepository).listArticlesQuery();
-  }
+    return (em.getRepository(Article) as ArticleRepository).listArticlesQuery()
+  },
 })
-
 export class ArticleListing {
+  @Property()
+  slug!: string
 
   @Property()
-  slug!: string;
+  title!: string
 
   @Property()
-  title!: string;
+  description!: string
 
   @Property()
-  description!: string;
+  tags!: string[]
 
   @Property()
-  tags!: string[];
+  authorId!: number
 
   @Property()
-  authorId!: number;
+  authorName!: string
 
   @Property()
-  authorName!: string;
-
-  @Property()
-  totalComments!: number;
-
+  totalComments!: number
 }

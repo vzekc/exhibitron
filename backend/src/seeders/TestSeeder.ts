@@ -1,9 +1,8 @@
-import type { EntityManager } from '@mikro-orm/core';
-import { Seeder } from '@mikro-orm/seeder';
-import { User } from '../modules/user/user.entity.js';
+import type { EntityManager } from '@mikro-orm/core'
+import { Seeder } from '@mikro-orm/seeder'
+import { User } from '../modules/user/user.entity.js'
 
 export class TestSeeder extends Seeder {
-
   async run(em: EntityManager): Promise<void> {
     em.create(User, {
       fullName: 'Foo Bar',
@@ -14,7 +13,10 @@ export class TestSeeder extends Seeder {
           title: 'title 1/3',
           description: 'desc 1/3',
           text: 'text text text 1/3',
-          tags: [{ id: 1, name: 'foo1' }, { id: 2, name: 'foo2' }],
+          tags: [
+            { id: 1, name: 'foo1' },
+            { id: 2, name: 'foo2' },
+          ],
         },
         {
           title: 'title 2/3',
@@ -26,10 +28,12 @@ export class TestSeeder extends Seeder {
           title: 'title 3/3',
           description: 'desc 3/3',
           text: 'text text text 3/3',
-          tags: [{ id: 2, name: 'foo2' }, { id: 3, name: 'foo3' }],
+          tags: [
+            { id: 2, name: 'foo2' },
+            { id: 3, name: 'foo3' },
+          ],
         },
       ],
-    });
+    })
   }
-
 }

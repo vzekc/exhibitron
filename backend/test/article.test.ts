@@ -1,29 +1,29 @@
-import { afterAll, beforeAll, expect, test } from 'vitest';
-import { FastifyInstance } from 'fastify';
-import { initTestApp, deleteDatabase } from './utils.js';
+import { afterAll, beforeAll, expect, test } from 'vitest'
+import { FastifyInstance } from 'fastify'
+import { initTestApp, deleteDatabase } from './utils.js'
 
-let app: FastifyInstance;
-let dbName: string;
+let app: FastifyInstance
+let dbName: string
 
 beforeAll(async () => {
-  ({ app, dbName } = await initTestApp());
-});
+  ;({ app, dbName } = await initTestApp())
+})
 
 afterAll(async () => {
   // we close only the fastify app - it will close the database connection via onClose hook automatically
-  await app.close();
-  await deleteDatabase(dbName);
-});
+  await app.close()
+  await deleteDatabase(dbName)
+})
 
 test('list all articles', async () => {
   // mimic the http request via `app.inject()`
   const res = await app.inject({
     method: 'get',
     url: '/article',
-  });
+  })
 
   // assert it was successful response
-  expect(res.statusCode).toBe(200);
+  expect(res.statusCode).toBe(200)
 
   // with expected shape
   expect(res.json()).toMatchObject({
@@ -33,8 +33,8 @@ test('list all articles', async () => {
       { authorName: 'Foo Bar', slug: 'title-33', title: 'title 3/3' },
     ],
     total: 3,
-  });
-});
+  })
+})
 
 const login = async () => {
   const res = await app.inject({
@@ -44,24 +44,24 @@ const login = async () => {
       email: 'foo@bar.com',
       password: 'password123',
     },
-  });
+  })
 
-  expect(res.statusCode).toBe(200);
-  return res.json();
-};
+  expect(res.statusCode).toBe(200)
+  return res.json()
+}
 
 test('comment on article', async () => {
-  const user = await login();
+  const user = await login()
 
   // get articles
   const res2 = await app.inject({
     method: 'get',
     url: '/article',
-  });
-  expect(res2.statusCode).toBe(200);
+  })
+  expect(res2.statusCode).toBe(200)
 
-  const { slug } = res2.json().items[0];
-  expect(slug).toBe('title-13');
+  const { slug } = res2.json().items[0]
+  expect(slug).toBe('title-13')
 
   // test comment posting
   const res3 = await app.inject({
@@ -73,18 +73,18 @@ test('comment on article', async () => {
     payload: {
       text: 'this is the first comment',
     },
-  });
-  expect(res3.statusCode).toBe(200);
+  })
+  expect(res3.statusCode).toBe(200)
 
   const res4 = await app.inject({
     method: 'get',
     url: `/article/${slug}`,
-  });
-  expect(res4.statusCode).toBe(200);
-  const article = res4.json();
-  expect(article.comments.length).toBe(1);
-  const comment = article.comments[0];
-  expect(comment).toMatchObject({ text: 'this is the first comment' });
-  const author = comment.author;
-  expect(author).toMatchObject({ email: 'foo@bar.com' });
-});
+  })
+  expect(res4.statusCode).toBe(200)
+  const article = res4.json()
+  expect(article.comments.length).toBe(1)
+  const comment = article.comments[0]
+  expect(comment).toMatchObject({ text: 'this is the first comment' })
+  const author = comment.author
+  expect(author).toMatchObject({ email: 'foo@bar.com' })
+})

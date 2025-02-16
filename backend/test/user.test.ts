@@ -1,19 +1,19 @@
-import { FastifyInstance } from 'fastify';
-import { afterAll, beforeAll, expect, test } from 'vitest';
-import { initTestApp, deleteDatabase } from './utils.js';
+import { FastifyInstance } from 'fastify'
+import { afterAll, beforeAll, expect, test } from 'vitest'
+import { initTestApp, deleteDatabase } from './utils.js'
 
-let app: FastifyInstance;
-let dbName: string;
+let app: FastifyInstance
+let dbName: string
 
 beforeAll(async () => {
-  ({ app, dbName } = await initTestApp());
-});
+  ;({ app, dbName } = await initTestApp())
+})
 
 afterAll(async () => {
   // we close only the fastify app - it will close the database connection via onClose hook automatically
-  await app.close();
-  await deleteDatabase(dbName);
-});
+  await app.close()
+  await deleteDatabase(dbName)
+})
 
 test('login', async () => {
   const res1 = await app.inject({
@@ -23,12 +23,12 @@ test('login', async () => {
       email: 'foo@bar.com',
       password: 'password123',
     },
-  });
+  })
 
-  expect(res1.statusCode).toBe(200);
+  expect(res1.statusCode).toBe(200)
   expect(res1.json()).toMatchObject({
     fullName: 'Foo Bar',
-  });
+  })
 
   const res2 = await app.inject({
     method: 'post',
@@ -37,11 +37,13 @@ test('login', async () => {
       email: 'foo@bar.com',
       password: 'password456',
     },
-  });
+  })
 
-  expect(res2.statusCode).toBe(401);
-  expect(res2.json()).toMatchObject({ error: 'Invalid combination of email and password' });
-});
+  expect(res2.statusCode).toBe(401)
+  expect(res2.json()).toMatchObject({
+    error: 'Invalid combination of email and password',
+  })
+})
 
 test('update', async () => {
   const res1 = await app.inject({
@@ -51,23 +53,23 @@ test('update', async () => {
       email: 'foo@bar.com',
       password: 'password123',
     },
-  });
+  })
 
-  expect(res1.statusCode).toBe(200);
-  const user = res1.json();
+  expect(res1.statusCode).toBe(200)
+  const user = res1.json()
   expect(user).toMatchObject({
     fullName: 'Foo Bar',
-  });
+  })
 
   const res2 = await app.inject({
     method: 'get',
     url: '/user/profile',
     headers: {
-      Authorization: `Bearer ${user.token}`
-    }
-  });
-  expect(res2.statusCode).toBe(200);
-  expect(res2.json()).toMatchObject({ email: 'foo@bar.com' });
+      Authorization: `Bearer ${user.token}`,
+    },
+  })
+  expect(res2.statusCode).toBe(200)
+  expect(res2.json()).toMatchObject({ email: 'foo@bar.com' })
 
   const res3 = await app.inject({
     method: 'patch',
@@ -76,18 +78,20 @@ test('update', async () => {
       Authorization: `Bearer ${user.token}`,
     },
     payload: {
-      bio: 'I was born with a plastic spoon in my mouth'
-    }
+      bio: 'I was born with a plastic spoon in my mouth',
+    },
   })
-  expect(res3.statusCode).toBe(200);
+  expect(res3.statusCode).toBe(200)
 
   const res4 = await app.inject({
     method: 'get',
     url: '/user/profile',
     headers: {
       Authorization: `Bearer ${user.token}`,
-    }
+    },
   })
-  expect(res4.statusCode).toBe(200);
-  expect(res4.json()).toMatchObject({ bio: 'I was born with a plastic spoon in my mouth' });
-});
+  expect(res4.statusCode).toBe(200)
+  expect(res4.json()).toMatchObject({
+    bio: 'I was born with a plastic spoon in my mouth',
+  })
+})

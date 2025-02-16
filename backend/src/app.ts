@@ -15,7 +15,10 @@ import { fileURLToPath } from 'node:url'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-export async function bootstrap(port: number | undefined, migrate: boolean | undefined) {
+export async function bootstrap(
+  port: number | undefined,
+  migrate: boolean | undefined,
+) {
   const db = await initORM()
 
   if (migrate) {
@@ -26,7 +29,7 @@ export async function bootstrap(port: number | undefined, migrate: boolean | und
   const app = fastify()
 
   app.register(fastifyStatic, {
-    root: path.join(__dirname, '../../frontend/dist')
+    root: path.join(__dirname, '../../frontend/dist'),
   })
 
   await app.register(fastifySwagger, {
@@ -35,15 +38,15 @@ export async function bootstrap(port: number | undefined, migrate: boolean | und
       info: {
         title: 'CC-Katalog API',
         description: 'API Server for the CC-Katalog Application',
-        version: '0.1.0'
+        version: '0.1.0',
       },
       servers: [
         {
           url: 'http://localhost:3001',
-          description: 'Development server'
-        }
+          description: 'Development server',
+        },
       ],
-    }
+    },
   })
 
   await app.register(fastifySwaggerUi, {
@@ -52,7 +55,7 @@ export async function bootstrap(port: number | undefined, migrate: boolean | und
 
   // register JWT plugin
   app.register(fastifyJWT, {
-    secret: process.env.JWT_SECRET ?? '12345678' // fallback for testing
+    secret: process.env.JWT_SECRET ?? '12345678', // fallback for testing
   })
 
   // register request context hook
