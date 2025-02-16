@@ -1,10 +1,17 @@
 import { NotFoundError, RequestContext } from '@mikro-orm/core';
 import { fastify } from 'fastify';
 import fastifyJWT from '@fastify/jwt';
+import fastifyStatic from '@fastify/static';
 import { initORM } from './db.js';
 import { registerArticleRoutes } from './modules/article/routes.js';
 import { registerUserRoutes } from './modules/user/routes.js';
 import { AuthError } from './modules/common/utils.js';
+import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+// Get the directory name of the current module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export async function bootstrap(port: number | undefined, migrate: boolean | undefined) {
   const db = await initORM();
@@ -15,6 +22,10 @@ export async function bootstrap(port: number | undefined, migrate: boolean | und
   }
 
   const app = fastify();
+
+  app.register(fastifyStatic, {
+    root: path.join(__dirname, '../../frontend/dist')
+  })
 
   // register JWT plugin
   app.register(fastifyJWT, {
