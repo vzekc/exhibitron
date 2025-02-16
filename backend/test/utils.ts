@@ -32,7 +32,7 @@ export async function initTestApp() {
   await orm.schema.refreshDatabase() // Drops & re-creates schema
   await orm.seeder.seed(TestSeeder)
 
-  const { app } = await bootstrap(undefined, false)
+  const { app } = await bootstrap()
 
   return { app, dbName }
 }

@@ -1,79 +1,15 @@
-import { NotFoundError, RequestContext } from '@mikro-orm/core'
-import { fastify } from 'fastify'
-import fastifyJWT from '@fastify/jwt'
-import fastifyStatic from '@fastify/static'
-import fastifySwagger from '@fastify/swagger'
-import fastifySwaggerUi from '@fastify/swagger-ui'
-import { initORM } from './db.js'
+import { NotFoundError } from '@mikro-orm/core'
+import { fastify, FastifyInstance } from 'fastify'
+import * as swagger from './app/swagger.js'
+import * as staticFiles from './app/static.js'
+import * as oidc from './app/oidc.js'
+import * as orm from './app/orm.js'
+import * as jwt from './app/jwt.js'
 import { registerArticleRoutes } from './modules/article/routes.js'
 import { registerUserRoutes } from './modules/user/routes.js'
 import { AuthError } from './modules/common/utils.js'
-import * as path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
-// Get the directory name of the current module
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-
-export async function bootstrap(
-  port: number | undefined,
-  migrate: boolean | undefined,
-) {
-  const db = await initORM()
-
-  if (migrate) {
-    // sync the schema
-    await db.orm.migrator.up()
-  }
-
-  const app = fastify()
-
-  app.register(fastifyStatic, {
-    root: path.join(__dirname, '../../frontend/dist'),
-  })
-
-  await app.register(fastifySwagger, {
-    openapi: {
-      openapi: '3.0.0',
-      info: {
-        title: 'CC-Katalog API',
-        description: 'API Server for the CC-Katalog Application',
-        version: '0.1.0',
-      },
-      servers: [
-        {
-          url: 'http://localhost:3001',
-          description: 'Development server',
-        },
-      ],
-    },
-  })
-
-  await app.register(fastifySwaggerUi, {
-    routePrefix: '/documentation',
-  })
-
-  // register JWT plugin
-  app.register(fastifyJWT, {
-    secret: process.env.JWT_SECRET ?? '12345678', // fallback for testing
-  })
-
-  // register request context hook
-  app.addHook('onRequest', (request, reply, done) => {
-    RequestContext.create(db.em, done)
-  })
-
-  // register auth hook after the ORM one to use the context
-  app.addHook('onRequest', async (request) => {
-    try {
-      const ret = await request.jwtVerify<{ id: number }>()
-      request.user = await db.user.findOneOrFail(ret.id)
-    } catch (e) {
-      app.log.error(e)
-      // ignore token errors, we validate the request.user exists only where needed
-    }
-  })
-
+const registerErrorHandler = (app: FastifyInstance) => {
   // register global error handler to process 404 errors from `findOneOrFail` calls
   app.setErrorHandler((error, request, reply) => {
     if (error instanceof AuthError) {
@@ -85,14 +21,20 @@ export async function bootstrap(
     }
 
     app.log.error(error)
-    console.log(error)
     reply.status(500).send({ error: error.message })
   })
+}
 
-  // shut down the connection when closing the app
-  app.addHook('onClose', async () => {
-    await db.orm.close()
-  })
+export async function bootstrap({ port, migrate }: { port?: number, migrate?: boolean } = {}) {
+  const app = fastify()
+
+  oidc.register(app)
+  staticFiles.register(app)
+  await swagger.register(app)
+  await orm.register(app, !!migrate)
+  await jwt.register(app)
+
+  registerErrorHandler(app)
 
   // register routes here
   app.register(registerArticleRoutes, { prefix: 'article' })
@@ -100,5 +42,5 @@ export async function bootstrap(
 
   const url = await app.listen({ port })
 
-  return { app, url, db }
+  return { app, url }
 }
