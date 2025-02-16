@@ -20,28 +20,28 @@ test('login', async () => {
     method: 'post',
     url: '/user/sign-in',
     payload: {
-      email: 'foo@bar.com',
+      username: 'MeisterEder',
       password: 'password123',
     },
   })
 
   expect(res1.statusCode).toBe(200)
   expect(res1.json()).toMatchObject({
-    fullName: 'Foo Bar',
+    fullName: 'Harald Eder',
   })
 
   const res2 = await app.inject({
     method: 'post',
     url: '/user/sign-in',
     payload: {
-      email: 'foo@bar.com',
+      username: 'MeisterEder',
       password: 'password456',
     },
   })
 
   expect(res2.statusCode).toBe(401)
   expect(res2.json()).toMatchObject({
-    error: 'Invalid combination of email and password',
+    error: 'Invalid combination of username and password',
   })
 })
 
@@ -50,7 +50,7 @@ test('update', async () => {
     method: 'post',
     url: '/user/sign-in',
     payload: {
-      email: 'foo@bar.com',
+      username: 'MeisterEder',
       password: 'password123',
     },
   })
@@ -58,7 +58,7 @@ test('update', async () => {
   expect(res1.statusCode).toBe(200)
   const user = res1.json()
   expect(user).toMatchObject({
-    fullName: 'Foo Bar',
+    fullName: 'Harald Eder',
   })
 
   const res2 = await app.inject({
@@ -69,7 +69,7 @@ test('update', async () => {
     },
   })
   expect(res2.statusCode).toBe(200)
-  expect(res2.json()).toMatchObject({ email: 'foo@bar.com' })
+  expect(res2.json()).toMatchObject({ username: 'MeisterEder' })
 
   const res3 = await app.inject({
     method: 'patch',
@@ -94,4 +94,22 @@ test('update', async () => {
   expect(res4.json()).toMatchObject({
     bio: 'I was born with a plastic spoon in my mouth',
   })
+})
+
+test('lookups', async () => {
+  let res = await app.inject({
+    method: 'get',
+    url: '/user/1002'
+  })
+  expect(res).toHaveStatus(200)
+  expect(res.json()).not.toContain('password')
+  expect(res.json()).toMatchObject({
+    username: 'daffy',
+    fullName: 'Daffy Duck',
+  })
+  res = await app.inject({
+    method: 'get',
+    url: '/user/MeisterEder',
+  })
+  expect(res).toHaveStatus(200)
 })

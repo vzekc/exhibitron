@@ -27,25 +27,25 @@ test('list all exhibitions', async () => {
       {
         id: 1001,
         title: 'The first Macintosh',
-        exhibitorId: 2,
+        exhibitorId: 1002,
         exhibitorName: 'Daffy Duck',
       },
       {
         id: 1002,
         title: 'Old DEC systems',
-        exhibitorId: 2,
+        exhibitorId: 1002,
         exhibitorName: 'Daffy Duck',
       },
       {
         id: 1003,
         title: 'IBM Mainframes',
-        exhibitorId: 3,
+        exhibitorId: 1003,
         exhibitorName: 'Donald Duck',
       },
       {
         id: 1004,
         title: 'HP calculators',
-        exhibitorId: 3,
+        exhibitorId: 1003,
         exhibitorName: 'Donald Duck',
       },
     ],
@@ -64,12 +64,12 @@ test('try making updates without being logged in', async () => {
   expect(res).toHaveStatus(403)
 })
 
-const login = async (email: string, password: string = 'secret') => {
+const login = async (username: string, password: string = 'secret') => {
   const res = await app.inject({
     method: 'post',
     url: '/user/sign-in',
     payload: {
-      email,
+      username,
       password,
     },
   })
@@ -79,7 +79,7 @@ const login = async (email: string, password: string = 'secret') => {
 }
 
 test('exhibition updates', async () => {
-  const user = await login('daffy@duck.com')
+  const user = await login('daffy')
 
   // reject unknown property
   let res = await app.inject({
@@ -132,7 +132,7 @@ test('exhibition updates', async () => {
   })
   expect(res).toHaveStatus(403)
 
-  const user2 = await login('donald@duck.com')
+  const user2 = await login('donald')
 
   // deny update to other user's exhibition
   res = await app.inject({
@@ -184,27 +184,27 @@ test('exhibition updates', async () => {
       {
         id: 1001,
         title: 'The first Macintosh',
-        exhibitorId: 2,
+        exhibitorId: 1002,
         exhibitorName: 'Daffy Duck',
         table: 1,
       },
       {
         id: 1002,
         title: 'Old DEC systems',
-        exhibitorId: 2,
+        exhibitorId: 1002,
         exhibitorName: 'Daffy Duck',
       },
       {
         id: 1003,
         title: 'IBM Mainframes',
-        exhibitorId: 3,
+        exhibitorId: 1003,
         exhibitorName: 'Donald Duck',
         table: 2,
       },
       {
         id: 1004,
         title: 'HP calculators',
-        exhibitorId: 3,
+        exhibitorId: 1003,
         exhibitorName: 'Donald Duck',
       },
     ],

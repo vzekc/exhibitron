@@ -38,15 +38,15 @@ const makeResponseDto = ({ id, title, text, table, exhibitor }: Exhibition) =>
     id,
     title,
     text: text || undefined,
-    table: table?.number,
-    exhibitor: exhibitor.fullName,
+    table: table?.id,
+    exhibitor: exhibitor.username,
   })
 
 export async function registerExhibitionRoutes(app: FastifyInstance) {
   const db = await initORM()
 
   const getOwnedTable = async (user: User, tableNumber: number) => {
-    const table = await db.table.findOneOrFail({ number: tableNumber })
+    const table = await db.table.findOneOrFail({ id: tableNumber })
     if (table.exhibitor && table.exhibitor !== user) {
       throw new PermissionDeniedError(
         'The requested table is assigned to another exhibitor',

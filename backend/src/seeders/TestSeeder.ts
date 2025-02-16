@@ -6,27 +6,30 @@ import { Table } from '../modules/exhibition/table.entity.js'
 export class TestSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {
     em.create(User, {
-      fullName: 'Foo Bar',
-      email: 'foo@bar.com',
+      id: 1001,
+      fullName: 'Harald Eder',
+      username: 'MeisterEder',
       password: 'password123',
     })
 
-    for (let number = 1; number <= 10; number++) {
-      em.create(Table, { id: number + 1000, number })
+    for (let id = 1; id <= 10; id++) {
+      em.create(Table, { id })
     }
 
     ;[
       {
+        id: 1002,
         fullName: 'Daffy Duck',
-        email: 'daffy@duck.com',
+        username: 'daffy',
         exhibitions: [
           { id: 1001, title: 'The first Macintosh' },
           { id: 1002, title: 'Old DEC systems' },
         ],
       },
       {
+        id: 1003,
         fullName: 'Donald Duck',
-        email: 'donald@duck.com',
+        username: 'donald',
         exhibitions: [
           { id: 1003, title: 'IBM Mainframes' },
           { id: 1004, title: 'HP calculators' },

@@ -10,7 +10,7 @@ export class ExhibitionRepository extends EntityRepository<Exhibition> {
       .select(['id', 'title', 'text'])
       .addSelect(sql.ref('u.full_name').as('"exhibitorName"'))
       .addSelect(sql.ref('u.id').as('"exhibitorId"'))
-      .addSelect(sql.ref('t.number').as('"table"'))
+      .addSelect(sql.ref('t.id').as('"table"'))
       .join('exhibitor', 'u')
       .leftJoin('table', 't')
       .orderBy({ id: 'asc' })

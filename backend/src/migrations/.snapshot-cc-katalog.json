@@ -43,10 +43,11 @@
           "primary": false,
           "nullable": false,
           "length": 255,
+          "default": "''",
           "mappedType": "string"
         },
-        "email": {
-          "name": "email",
+        "username": {
+          "name": "username",
           "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
@@ -85,8 +86,8 @@
           "default": "false",
           "mappedType": "boolean"
         },
-        "social": {
-          "name": "social",
+        "contacts": {
+          "name": "contacts",
           "type": "jsonb",
           "unsigned": false,
           "autoincrement": false,
@@ -98,6 +99,26 @@
       "name": "user",
       "schema": "public",
       "indexes": [
+        {
+          "columnNames": [
+            "username"
+          ],
+          "composite": false,
+          "keyName": "user_username_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
+            "username"
+          ],
+          "composite": false,
+          "keyName": "user_username_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
         {
           "keyName": "user_pkey",
           "columnNames": [
@@ -144,15 +165,6 @@
           "length": 6,
           "mappedType": "datetime"
         },
-        "number": {
-          "name": "number",
-          "type": "int",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "integer"
-        },
         "exhibitor_id": {
           "name": "exhibitor_id",
           "type": "int",
@@ -166,16 +178,6 @@
       "name": "table",
       "schema": "public",
       "indexes": [
-        {
-          "columnNames": [
-            "number"
-          ],
-          "composite": false,
-          "keyName": "table_number_unique",
-          "constraint": true,
-          "primary": false,
-          "unique": true
-        },
         {
           "keyName": "table_pkey",
           "columnNames": [
