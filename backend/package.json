@@ -26,7 +26,8 @@
     "build": "tsc && npx mikro-orm-esm cache:generate --combined",
     "start": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/server.ts",
     "start:prod": "NODE_ENV=production node dist/server.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "pnpm": {
     "patchedDependencies": {
