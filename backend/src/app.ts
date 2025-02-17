@@ -1,5 +1,6 @@
 import { NotFoundError } from '@mikro-orm/core'
 import { fastify, FastifyInstance } from 'fastify'
+import responseValidator from '@fastify/response-validation'
 import * as swagger from './app/swagger.js'
 import * as staticFiles from './app/static.js'
 import * as oidc from './app/oidc.js'
@@ -78,6 +79,13 @@ export async function bootstrap({
       },
     },
   })
+/*
+  await app.register(responseValidator, {
+    ajv: {
+      coerceTypes: true
+    }
+  })
+ */
 
   oidc.register(app)
   staticFiles.register(app)

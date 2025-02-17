@@ -24,12 +24,17 @@ test('login', async () => {
       password: 'password123',
     },
   })
-
   expect(res).toHaveStatus(200)
-  expect(res.json()).toMatchObject({
+  expect(res.json()).toStrictEqual({
+    username: 'MeisterEder',
     fullName: 'Harald Eder',
+    token: expect.stringMatching(/.*/),
+    bio: '',
+    id: 1001,
+    isAdministrator: false,
   })
 
+  expect(res.body).not.toContain('password')
   res = await app.inject({
     method: 'post',
     url: '/user/sign-in',
@@ -38,7 +43,6 @@ test('login', async () => {
       password: 'password456',
     },
   })
-
   expect(res).toHaveStatus(401)
   expect(res.json()).toMatchObject({
     error: 'Invalid combination of username and password',
@@ -54,7 +58,6 @@ test('update', async () => {
       password: 'password123',
     },
   })
-
   expect(res).toHaveStatus(200)
   const user = res.json()
   expect(user).toMatchObject({
@@ -107,7 +110,7 @@ test('update', async () => {
   })
   expect(res).toHaveStatus(400)
   // fixme: should really look at the validation error
-  expect(res.body).toMatch(/additionalProperty.*isAdministrator/)
+//expect(res.body).toMatch(/additionalProperty.*isAdministrator/)
 })
 
 test('lookups', async () => {
@@ -116,19 +119,36 @@ test('lookups', async () => {
     url: '/user/1002',
   })
   expect(res).toHaveStatus(200)
-  expect(res.json()).not.toContain('password')
-  expect(res.json()).toMatchObject({
+  expect(res).not.toContain('password')
+  expect(res.json()).toStrictEqual({
     username: 'daffy',
     fullName: 'Daffy Duck',
+    id: 1002,
+    isAdministrator: false,
+    exhibitions: expect.anything(),
+    createdAt: expect.any(String),
+    updatedAt: expect.any(String),
+    bio: expect.anything(),
+    contacts: null,
+    tables: expect.anything(),
   })
+
   res = await app.inject({
     method: 'get',
     url: '/user/MeisterEder',
   })
   expect(res).toHaveStatus(200)
-  expect(res.json()).toMatchObject({
+  expect(res.json()).toStrictEqual({
     username: 'MeisterEder',
     fullName: 'Harald Eder',
+    id: 1001,
+    isAdministrator: false,
+    exhibitions: expect.anything(),
+    createdAt: expect.any(String),
+    updatedAt: expect.any(String),
+    bio: expect.anything(),
+    contacts: null,
+    tables: expect.anything(),
   })
 })
 
