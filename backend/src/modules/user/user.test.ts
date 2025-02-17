@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify'
 import { afterAll, beforeAll, expect, test } from 'vitest'
-import { initTestApp, deleteDatabase } from '../../test/utils.js'
+import { initTestApp, deleteDatabase, login } from '../../test/utils.js';
 
 let app: FastifyInstance
 let dbName: string
@@ -129,5 +129,35 @@ test('lookups', async () => {
   expect(res.json()).toMatchObject({
     username: 'MeisterEder',
     fullName: 'Harald Eder',
+  })
+})
+
+test('profile', async () => {
+  // check that admin has the isAdministrator flag
+  const admin = await login(app, 'admin')
+  let res = await app.inject({
+    method: 'get',
+    url: '/user/profile',
+    headers: {
+      Authorization: `Bearer ${admin.token}`,
+    },
+  })
+  expect(res).toHaveStatus(200)
+  expect(res.json()).toMatchObject({
+    isAdministrator: true
+  })
+
+  // check that donald does not have isAdministrator set
+  const donald = await login(app, 'donald')
+  res = await app.inject({
+    method: 'get',
+    url: '/user/profile',
+    headers: {
+      Authorization: `Bearer ${donald.token}`,
+    },
+  })
+  expect(res).toHaveStatus(200)
+  expect(res.json()).toMatchObject({
+    isAdministrator: false
   })
 })
