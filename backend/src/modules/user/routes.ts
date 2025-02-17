@@ -1,8 +1,8 @@
-import { FastifyInstance } from 'fastify';
-import { initORM } from '../../db.js';
-import { wrap } from '@mikro-orm/core';
-import { BadRequestError, getUserFromToken } from '../common/utils.js';
-import { User } from './user.entity.js';
+import { FastifyInstance } from 'fastify'
+import { initORM } from '../../db.js'
+import { wrap } from '@mikro-orm/core'
+import { BadRequestError, getUserFromToken } from '../common/utils.js'
+import { User } from './user.entity.js'
 
 const userBaseSchema = {
   type: 'object',
@@ -24,7 +24,7 @@ const userBaseSchema = {
     },
   },
   additionalProperties: false,
-};
+}
 
 const userResponseSchema = {
   ...userBaseSchema,
@@ -35,7 +35,7 @@ const userResponseSchema = {
     ...userBaseSchema.properties,
     isAdministrator: { type: 'boolean' },
   },
-};
+}
 
 const genericErrorResponseSchema = {
   type: 'object',
@@ -46,7 +46,7 @@ const genericErrorResponseSchema = {
 }
 
 export async function registerUserRoutes(app: FastifyInstance) {
-  const db = await initORM();
+  const db = await initORM()
 
   // register new user
   app.post(
@@ -69,31 +69,31 @@ export async function registerUserRoutes(app: FastifyInstance) {
           },
           400: {
             description: 'The user account could not be created.',
-            ...genericErrorResponseSchema
+            ...genericErrorResponseSchema,
           },
         },
       },
     },
     async (request) => {
-      const body = request.body as User;
+      const body = request.body as User
 
       if (await db.user.exists(body.username)) {
         throw new BadRequestError(
           'This username is already registered, maybe you want to sign in?',
-        );
+        )
       }
 
-      const user = db.user.create(body);
-      await db.em.flush();
+      const user = db.user.create(body)
+      await db.em.flush()
 
-      user.token = app.jwt.sign({ id: user.id });
+      user.token = app.jwt.sign({ id: user.id })
 
       // after flush, we have the `user.id` set
-      console.log(`User ${user.id} created`);
+      console.log(`User ${user.id} created`)
 
-      return user;
+      return user
     },
-  );
+  )
 
   app.post(
     '/sign-in',
@@ -120,11 +120,11 @@ export async function registerUserRoutes(app: FastifyInstance) {
           },
           400: {
             description: 'Invalid input parameter(s).',
-            ...genericErrorResponseSchema
+            ...genericErrorResponseSchema,
           },
           401: {
             description: 'Invalid username or password',
-            ...genericErrorResponseSchema
+            ...genericErrorResponseSchema,
           },
         },
       },
@@ -133,19 +133,19 @@ export async function registerUserRoutes(app: FastifyInstance) {
       const { username, password } = request.body as {
         username: string
         password: string
-      };
-      const user = await db.user.login(username, password);
-      user.token = app.jwt.sign({ id: user.id });
-      return user;
+      }
+      const user = await db.user.login(username, password)
+      user.token = app.jwt.sign({ id: user.id })
+      return user
     },
-  );
+  )
 
-  app.get('/profile', async (request) => getUserFromToken(request));
+  app.get('/profile', async (request) => getUserFromToken(request))
 
   app.get('/:id', async (request) => {
-    const { id } = request.params as { id: string };
-    return await db.user.lookup(id);
-  });
+    const { id } = request.params as { id: string }
+    return await db.user.lookup(id)
+  })
 
   app.patch(
     '/profile',
@@ -166,17 +166,17 @@ export async function registerUserRoutes(app: FastifyInstance) {
           },
           400: {
             description: 'The user account could not be created.',
-            ...genericErrorResponseSchema
+            ...genericErrorResponseSchema,
           },
         },
       },
     },
     async (request) => {
-      const updates = request.body as User;
-      const user = getUserFromToken(request);
-      wrap(user).assign(updates);
-      await db.em.flush();
-      return { ...user, blub: 1 };
+      const updates = request.body as User
+      const user = getUserFromToken(request)
+      wrap(user).assign(updates)
+      await db.em.flush()
+      return { ...user, blub: 1 }
     },
-  );
+  )
 }

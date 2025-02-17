@@ -110,7 +110,7 @@ test('update', async () => {
   })
   expect(res).toHaveStatus(400)
   // fixme: should really look at the validation error
-//expect(res.body).toMatch(/additionalProperty.*isAdministrator/)
+  //expect(res.body).toMatch(/additionalProperty.*isAdministrator/)
 })
 
 test('lookups', async () => {

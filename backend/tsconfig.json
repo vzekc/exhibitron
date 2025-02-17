@@ -9,9 +9,7 @@
     "experimentalDecorators": true,
     "types": ["vitest/globals", "src/types/customMatchers"]
   },
-  "include": [
-    "./src/**/*.ts"
-  ],
+  "include": ["./src/**/*.ts"],
   "ts-node": {
     "esm": true,
     "transpileOnly": true
