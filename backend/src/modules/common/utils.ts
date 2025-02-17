@@ -1,8 +1,5 @@
-export class AuthError extends Error {}
-export class PermissionDeniedError extends Error {}
-export class BadRequestError extends Error {}
-
 import { FastifyRequest } from 'fastify'
+import { AuthError } from './errors.js'
 
 export function getUserFromToken(req: FastifyRequest) {
   if (!req.user) {

@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify'
 import { initORM } from '../../db.js'
-import { PermissionDeniedError } from '../common/utils.js'
+import { errorSchema, PermissionDeniedError } from '../common/errors.js'
 
 export async function registerTableRoutes(app: FastifyInstance) {
   const db = await initORM()
@@ -24,11 +24,11 @@ export async function registerTableRoutes(app: FastifyInstance) {
         response: {
           204: {
             description: 'The table was claimed',
-            type: 'null',
+            ...errorSchema,
           },
           403: {
             description: 'The table is already claimed by another user',
-            type: 'null',
+            ...errorSchema,
           },
         },
       },
@@ -64,11 +64,11 @@ export async function registerTableRoutes(app: FastifyInstance) {
         response: {
           204: {
             description: 'The table was released',
-            type: 'null',
+            ...errorSchema,
           },
           403: {
             description: 'The table is not claimed by the current user',
-            type: 'null',
+            ...errorSchema,
           },
         },
       },
@@ -111,11 +111,11 @@ export async function registerTableRoutes(app: FastifyInstance) {
         response: {
           204: {
             description: 'The table was claimed',
-            type: 'null',
+            ...errorSchema,
           },
           403: {
             description: 'Current user does not have administrative rights',
-            type: 'null',
+            ...errorSchema,
           },
         },
       },

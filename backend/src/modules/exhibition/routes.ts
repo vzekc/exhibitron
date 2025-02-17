@@ -1,10 +1,10 @@
 import { FastifyInstance } from 'fastify'
 import { initORM } from '../../db.js'
 import { z } from 'zod'
-import { PermissionDeniedError } from '../common/utils.js'
 import { wrap } from '@mikro-orm/core'
 import { Exhibition } from './exhibition.entity.js'
 import { Table } from '../table/table.entity.js'
+import { PermissionDeniedError } from '../common/errors.js'
 
 const exhibitionCreateSchema = z
   .object({

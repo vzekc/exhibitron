@@ -1,6 +1,6 @@
 import { EntityRepository } from '@mikro-orm/postgresql'
 import { User } from './user.entity.js'
-import { AuthError } from '../common/utils.js'
+import { AuthError } from '../common/errors.js'
 
 export class UserRepository extends EntityRepository<User> {
   async exists(username: string) {

@@ -1,8 +1,9 @@
 import { FastifyInstance } from 'fastify'
 import { initORM } from '../../db.js'
 import { wrap } from '@mikro-orm/core'
-import { BadRequestError, getUserFromToken } from '../common/utils.js'
+import { getUserFromToken } from '../common/utils.js'
 import { User } from './user.entity.js'
+import { BadRequestError } from '../common/errors.js'
 
 const userBaseSchema = {
   type: 'object',

@@ -1,7 +1,7 @@
 import { EntityRepository } from '@mikro-orm/postgresql'
-import { PermissionDeniedError } from '../common/utils.js'
 import { User } from '../user/user.entity.js'
 import { Table } from './table.entity.js'
+import { PermissionDeniedError } from '../common/errors.js'
 
 export class TableRepository extends EntityRepository<Table> {
   async claim(tableNumber: number, user: User) {
