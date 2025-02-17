@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify'
 import { afterAll, beforeAll, expect, test } from 'vitest'
-import { initTestApp, deleteDatabase, login } from '../../test/utils.js';
+import { initTestApp, deleteDatabase, login } from '../../test/utils.js'
 
 let app: FastifyInstance
 let dbName: string
@@ -107,7 +107,7 @@ test('update', async () => {
   })
   expect(res).toHaveStatus(400)
   // fixme: should really look at the validation error
-  expect(res.body).toMatch(/unrecognized_keys.*isAdministrator/)
+  expect(res.body).toMatch(/additionalProperty.*isAdministrator/)
 })
 
 test('lookups', async () => {
@@ -144,7 +144,7 @@ test('profile', async () => {
   })
   expect(res).toHaveStatus(200)
   expect(res.json()).toMatchObject({
-    isAdministrator: true
+    isAdministrator: true,
   })
 
   // check that donald does not have isAdministrator set
@@ -158,6 +158,6 @@ test('profile', async () => {
   })
   expect(res).toHaveStatus(200)
   expect(res.json()).toMatchObject({
-    isAdministrator: false
+    isAdministrator: false,
   })
 })

@@ -1,75 +1,129 @@
 import { FastifyInstance } from 'fastify'
 import { initORM } from '../../db.js'
 import { wrap } from '@mikro-orm/core'
-import { getUserFromToken } from '../common/utils.js'
-import { z } from 'zod'
+import { BadRequestError, getUserFromToken } from '../common/utils.js'
 import { User } from './user.entity.js'
 
-const contactsSchema = z
-  .object({
-    email: z.string().optional(),
-    phone: z.string().optional(),
-    website: z.string().optional(),
-    mastodon: z.string().optional(),
-    twitter: z.string().optional(),
-    facebook: z.string().optional(),
-    linkedin: z.string().optional(),
-  })
-  .strict()
+const userBaseSchema = {
+  type: 'object',
+  properties: {
+    fullName: { type: 'string' },
+    bio: { type: 'string' },
+    social: {
+      type: 'object',
+      properties: {
+        email: { type: 'string' },
+        phone: { type: 'string' },
+        website: { type: 'string' },
+        mastodon: { type: 'string' },
+        twitter: { type: 'string' },
+        facebook: { type: 'string' },
+        linkedin: { type: 'string' },
+      },
+      additionalProperties: false,
+    },
+  },
+  additionalProperties: false,
+}
 
-const userCreateSchema = z
-  .object({
-    username: z.string(),
-    fullName: z.string().optional(),
-    password: z.string(),
-    bio: z.string().optional(),
-    social: contactsSchema.optional(),
-  })
-  .strict()
-
-const userUpdateSchema = z
-  .object({
-    fullName: z.string().optional(),
-    password: z.string().optional(),
-    bio: z.string().optional(),
-    social: contactsSchema.optional(),
-  })
-  .strict()
+const userResponseSchema = {
+  ...userBaseSchema,
+  required: ['id', 'username', 'isAdministrator'],
+  properties: {
+    id: { type: 'integer' },
+    username: { type: 'string' },
+    ...userBaseSchema.properties,
+    isAdministrator: { type: 'boolean' },
+  },
+}
 
 export async function registerUserRoutes(app: FastifyInstance) {
   const db = await initORM()
 
   // register new user
-  app.post('/sign-up', async (request) => {
-    const dto = userCreateSchema.parse(request.body)
+  app.post(
+    '/sign-up',
+    {
+      schema: {
+        description: 'Create a user account',
+        body: {
+          ...userBaseSchema,
+          required: ['username', 'password'],
+          properties: {
+            ...userBaseSchema.properties,
+            password: { type: 'string' },
+          },
+        },
+        response: {
+          200: {
+            description: 'The user account was created',
+            ...userResponseSchema,
+          },
+          400: {
+            description: 'The user account could not be created.',
+          },
+        },
+      },
+    },
+    async (request) => {
+      const body = request.body as User
 
-    if (await db.user.exists(dto.username)) {
-      throw new Error(
-        'This username is already registered, maybe you want to sign in?',
-      )
-    }
+      if (await db.user.exists(body.username)) {
+        throw new BadRequestError(
+          'This username is already registered, maybe you want to sign in?',
+        )
+      }
 
-    const user = db.user.create(dto)
-    await db.em.flush()
+      const user = db.user.create(body)
+      await db.em.flush()
 
-    user.token = app.jwt.sign({ id: user.id })
+      user.token = app.jwt.sign({ id: user.id })
 
-    // after flush, we have the `user.id` set
-    console.log(`User ${user.id} created`)
+      // after flush, we have the `user.id` set
+      console.log(`User ${user.id} created`)
 
-    return user
-  })
+      return user
+    },
+  )
 
-  app.post('/sign-in', async (request) => {
-    const { username, password } = request.body as {
-      username: string
-      password: string
-    }
-    const user = await db.user.login(username, password)
-    user.token = app.jwt.sign({ id: user.id })
+  app.post(
+    '/sign-in',
+    {
+      schema: {
+        description: 'Log in',
+        body: {
+          type: 'object',
+          required: ['username', 'password'],
+          properties: {
+            username: { type: 'string' },
+            password: { type: 'string' },
+          },
+          additionalProperties: false,
+        },
+        response: {
+          200: {
+            description: 'The user was logged in',
+          },
+          400: {
+            description: 'Invalid input parameter(s).',
+          },
+          401: {
+            description: 'Invalid username or password',
+          },
+        },
+      },
+    },
+    async (request) => {
+      const { username, password } = request.body as {
+        username: string
+        password: string
+      }
+      const user = await db.user.login(username, password)
+      user.token = app.jwt.sign({ id: user.id })
 
-    return user
-  })
+      return user
+    },
+  )
 
   app.get('/profile', async (request) => getUserFromToken(request))
 
@@ -78,11 +132,35 @@ export async function registerUserRoutes(app: FastifyInstance) {
     return await db.user.lookup(id)
   })
 
-  app.patch('/profile', async (request) => {
-    const dto = userUpdateSchema.parse(request.body)
-    const user = getUserFromToken(request)
-    wrap(user).assign(dto as User)
-    await db.em.flush()
-    return user
-  })
+  app.patch(
+    '/profile',
+    {
+      schema: {
+        description: 'Update user account',
+        body: {
+          ...userBaseSchema,
+          properties: {
+            ...userBaseSchema.properties,
+            password: { type: 'string' },
+          },
+        },
+        response: {
+          200: {
+            description: 'The user account was updated',
+            ...userResponseSchema,
+          },
+          400: {
+            description: 'The user account could not be created.',
+          },
+        },
+      },
+    },
+    async (request) => {
+      const updates = request.body as User
+      const user = getUserFromToken(request)
+      wrap(user).assign(updates)
+      await db.em.flush()
+      return user
+    },
+  )
 }

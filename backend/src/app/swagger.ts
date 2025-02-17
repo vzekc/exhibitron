@@ -11,6 +11,15 @@ export const register = async (app: FastifyInstance) => {
         description: 'API Server for the CC-Katalog Application',
         version: '0.1.0',
       },
+      components: {
+        securitySchemes: {
+          BearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+          },
+        },
+      },
       servers: [
         {
           url: 'http://localhost:3000',
