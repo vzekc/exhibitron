@@ -24,7 +24,7 @@ export async function registerTableRoutes(app: FastifyInstance) {
         response: {
           204: {
             description: 'The table was claimed',
-            ...errorSchema,
+            type: 'null',
           },
           403: {
             description: 'The table is already claimed by another user',
@@ -64,7 +64,7 @@ export async function registerTableRoutes(app: FastifyInstance) {
         response: {
           204: {
             description: 'The table was released',
-            ...errorSchema,
+            type: 'null',
           },
           403: {
             description: 'The table is not claimed by the current user',
@@ -111,7 +111,7 @@ export async function registerTableRoutes(app: FastifyInstance) {
         response: {
           204: {
             description: 'The table was claimed',
-            ...errorSchema,
+            type: 'null',
           },
           403: {
             description: 'Current user does not have administrative rights',
