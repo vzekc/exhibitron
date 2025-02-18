@@ -241,7 +241,7 @@ test('exhibit updates', async () => {
   expect(res.json().items.length).toBe(6)
 })
 
-test("nonexistent exhibit", async () => {
+test('nonexistent exhibit', async () => {
   let res = await app.inject({
     method: 'get',
     url: '/exhibit/3456',

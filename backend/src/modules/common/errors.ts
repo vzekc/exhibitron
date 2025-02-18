@@ -45,7 +45,12 @@ export const errorHandler = (
 export const errorSchema = {
   type: 'object',
   properties: {
-    error: { type: 'string', examples: ['Software Failure. Press left mouse button to continue. Guru Meditation #00000000.00000000'] },
+    error: {
+      type: 'string',
+      examples: [
+        'Software Failure. Press left mouse button to continue. Guru Meditation #00000000.00000000',
+      ],
+    },
   },
   additionalProperties: true,
 }

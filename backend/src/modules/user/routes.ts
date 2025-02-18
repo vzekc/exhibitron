@@ -9,7 +9,10 @@ export const userBaseSchema = {
   type: 'object',
   properties: {
     fullName: { type: 'string', examples: ['Daffy Duck'] },
-    bio: { type: 'string', examples: ['I was born with a plastic spoon in my mouth.'] },
+    bio: {
+      type: 'string',
+      examples: ['I was born with a plastic spoon in my mouth.'],
+    },
     social: {
       type: 'object',
       properties: {
