@@ -21,7 +21,7 @@ export class TestSeeder extends Seeder {
         id: 1002,
         fullName: 'Daffy Duck',
         username: 'daffy',
-        exhibitions: [
+        exhibits: [
           { id: 1001, title: 'The first Macintosh' },
           { id: 1002, title: 'Old DEC systems' },
         ],
@@ -30,7 +30,7 @@ export class TestSeeder extends Seeder {
         id: 1003,
         fullName: 'Donald Duck',
         username: 'donald',
-        exhibitions: [
+        exhibits: [
           { id: 1003, title: 'IBM Mainframes' },
           { id: 1004, title: 'HP calculators' },
         ],

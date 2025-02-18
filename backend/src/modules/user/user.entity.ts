@@ -13,7 +13,7 @@ import {
 import { BaseEntity } from '../common/base.entity.js'
 import { hash, verify } from 'argon2'
 import { UserRepository } from './user.repository.js'
-import { Exhibition } from '../exhibition/exhibition.entity.js'
+import { Exhibit } from '../exhibit/exhibit.entity.js'
 import { Table } from '../table/table.entity.js'
 
 @Embeddable()
@@ -29,15 +29,6 @@ export class Contacts {
 
   @Property()
   website?: string
-
-  @Property()
-  twitter?: string
-
-  @Property()
-  facebook?: string
-
-  @Property()
-  linkedin?: string
 }
 
 @Entity({ repository: () => UserRepository })
@@ -67,7 +58,7 @@ export class User extends BaseEntity<'isAdministrator' | 'fullName' | 'bio'> {
   contacts?: Contacts
 
   @OneToMany({ mappedBy: 'exhibitor' })
-  exhibitions = new Collection<Exhibition>(this)
+  exhibits = new Collection<Exhibit>(this)
 
   @OneToMany({ mappedBy: 'exhibitor' })
   tables = new Collection<Table>(this)

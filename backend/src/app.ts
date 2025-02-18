@@ -7,7 +7,7 @@ import * as orm from './app/orm.js'
 import * as jwt from './app/jwt.js'
 import * as session from './app/session.js'
 import { registerUserRoutes } from './modules/user/routes.js'
-import { registerExhibitionRoutes } from './modules/exhibition/routes.js'
+import { registerExhibitRoutes } from './modules/exhibit/routes.js'
 import { registerTableRoutes } from './modules/table/routes.js'
 import { errorHandler } from './modules/common/errors.js'
 
@@ -58,7 +58,7 @@ export async function createApp({
 
   // register routes here
   app.register(registerUserRoutes, { prefix: 'user' })
-  app.register(registerExhibitionRoutes, { prefix: 'exhibition' })
+  app.register(registerExhibitRoutes, { prefix: 'exhibit' })
   app.register(registerTableRoutes, { prefix: 'table' })
 
   return app

@@ -1,10 +1,10 @@
 import { FindOptions, sql, EntityRepository } from '@mikro-orm/postgresql'
-import { Exhibition } from './exhibition.entity.js'
-import { ExhibitionListing } from './exhibition-listing.entity.js'
+import { Exhibit } from './exhibit.entity.js'
+import { ExhibitListing } from './exhibit-listing.entity.js'
 
 // extending the EntityRepository exported from driver package, so we can access things like the QB factory
-export class ExhibitionRepository extends EntityRepository<Exhibition> {
-  listExhibitionsQuery() {
+export class ExhibitRepository extends EntityRepository<Exhibit> {
+  listExhibitsQuery() {
     // build final query
     return this.createQueryBuilder('e')
       .select(['id', 'title', 'text'])
@@ -16,9 +16,9 @@ export class ExhibitionRepository extends EntityRepository<Exhibition> {
       .orderBy({ id: 'asc' })
   }
 
-  async listExhibitions(options: FindOptions<ExhibitionListing>) {
+  async listExhibits(options: FindOptions<ExhibitListing>) {
     const [items, total] = await this.em.findAndCount(
-      ExhibitionListing,
+      ExhibitListing,
       {},
       options,
     )

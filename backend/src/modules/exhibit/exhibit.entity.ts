@@ -8,11 +8,11 @@ import {
 import { User } from '../user/user.entity.js'
 import { BaseEntity } from '../common/base.entity.js'
 import { Table } from '../table/table.entity.js'
-import { ExhibitionRepository } from './exhibition.repository.js'
+import { ExhibitRepository } from './exhibit.repository.js'
 
-@Entity({ repository: () => ExhibitionRepository })
-export class Exhibition extends BaseEntity<'text' | 'table'> {
-  [EntityRepositoryType]?: ExhibitionRepository
+@Entity({ repository: () => ExhibitRepository })
+export class Exhibit extends BaseEntity<'text' | 'table'> {
+  [EntityRepositoryType]?: ExhibitRepository
 
   @Property()
   title!: string

@@ -19,7 +19,7 @@ const generateRandomString = (length: number): string => {
 export async function initTestApp() {
   // this will create all the ORM services and cache them
   const dbName = `cc-katalog-test-${generateRandomString(8)}`
-  await createDatabase(dbName)
+  createDatabase(dbName)
   const { orm } = await initORM({
     // first, include the main config
     ...config,

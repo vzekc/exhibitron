@@ -15,10 +15,10 @@ export class Migration20250216195656 extends Migration {
     )
 
     this.addSql(
-      `create table "exhibition" ("id" serial primary key, "created_at" timestamptz not null, "updated_at" timestamptz null, "title" varchar(255) not null, "text" text null, "table_id" int null, "exhibitor_id" int not null);`,
+      `create table "exhibit" ("id" serial primary key, "created_at" timestamptz not null, "updated_at" timestamptz null, "title" varchar(255) not null, "text" text null, "table_id" int null, "exhibitor_id" int not null);`,
     )
     this.addSql(
-      `alter table "exhibition" add constraint "exhibition_table_id_unique" unique ("table_id");`,
+      `alter table "exhibit" add constraint "exhibit_table_id_unique" unique ("table_id");`,
     )
 
     this.addSql(
@@ -26,10 +26,10 @@ export class Migration20250216195656 extends Migration {
     )
 
     this.addSql(
-      `alter table "exhibition" add constraint "exhibition_table_id_foreign" foreign key ("table_id") references "table" ("id") on update cascade on delete set null;`,
+      `alter table "exhibit" add constraint "exhibit_table_id_foreign" foreign key ("table_id") references "table" ("id") on update cascade on delete set null;`,
     )
     this.addSql(
-      `alter table "exhibition" add constraint "exhibition_exhibitor_id_foreign" foreign key ("exhibitor_id") references "user" ("id") on update cascade;`,
+      `alter table "exhibit" add constraint "exhibit_exhibitor_id_foreign" foreign key ("exhibitor_id") references "user" ("id") on update cascade;`,
     )
   }
 }

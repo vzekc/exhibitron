@@ -5,21 +5,18 @@ import { getUserFromToken } from '../common/utils.js'
 import { User } from './user.entity.js'
 import { BadRequestError } from '../common/errors.js'
 
-const userBaseSchema = {
+export const userBaseSchema = {
   type: 'object',
   properties: {
-    fullName: { type: 'string' },
-    bio: { type: 'string' },
+    fullName: { type: 'string', examples: ['Daffy Duck'] },
+    bio: { type: 'string', examples: ['I was born with a plastic spoon in my mouth.'] },
     social: {
       type: 'object',
       properties: {
-        email: { type: 'string' },
-        phone: { type: 'string' },
-        website: { type: 'string' },
-        mastodon: { type: 'string' },
-        twitter: { type: 'string' },
-        facebook: { type: 'string' },
-        linkedin: { type: 'string' },
+        email: { type: 'string', examples: ['daffy@duck.com'] },
+        phone: { type: 'string', examples: ['0123 567 7890'] },
+        website: { type: 'string', examples: ['https://daffy-duck.com/'] },
+        mastodon: { type: 'string', examples: ['@daffyduck@mastodon.social'] },
       },
       additionalProperties: false,
     },

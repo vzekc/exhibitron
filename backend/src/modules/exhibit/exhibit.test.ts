@@ -15,11 +15,11 @@ afterAll(async () => {
   await deleteDatabase(dbName)
 })
 
-test('list all exhibitions', async () => {
-  // list exhibitions and verify response
+test('list all exhibits', async () => {
+  // list exhibits and verify response
   const res = await app.inject({
     method: 'get',
-    url: '/exhibition',
+    url: '/exhibit',
   })
   expect(res).toHaveStatus(200)
   expect(res.json()).toMatchObject({
@@ -56,7 +56,7 @@ test('list all exhibitions', async () => {
 test('try making updates without being logged in', async () => {
   const res = await app.inject({
     method: 'PATCH',
-    url: '/exhibition/1001',
+    url: '/exhibit/1001',
     body: {
       table: 1,
     },
@@ -64,13 +64,13 @@ test('try making updates without being logged in', async () => {
   expect(res).toHaveStatus(403)
 })
 
-test('exhibition updates', async () => {
+test('exhibit updates', async () => {
   const user = await login(app, 'daffy')
 
   // reject unknown property
   let res = await app.inject({
     method: 'PATCH',
-    url: '/exhibition/1001',
+    url: '/exhibit/1001',
     headers: {
       Authorization: `Bearer ${user.token}`,
     },
@@ -83,7 +83,7 @@ test('exhibition updates', async () => {
   // succeed
   res = await app.inject({
     method: 'PATCH',
-    url: '/exhibition/1001',
+    url: '/exhibit/1001',
     headers: {
       Authorization: `Bearer ${user.token}`,
     },
@@ -96,7 +96,7 @@ test('exhibition updates', async () => {
   // check that table is assigned
   res = await app.inject({
     method: 'GET',
-    url: '/exhibition/1001',
+    url: '/exhibit/1001',
   })
   expect(res).toHaveStatus(200)
   expect(res.json()).toMatchObject({
@@ -105,10 +105,10 @@ test('exhibition updates', async () => {
     table: 1,
   })
 
-  // reject update of exhibition by different user
+  // reject update of exhibit by different user
   res = await app.inject({
     method: 'PATCH',
-    url: '/exhibition/1003',
+    url: '/exhibit/1003',
     headers: {
       Authorization: `Bearer ${user.token}`,
     },
@@ -120,10 +120,10 @@ test('exhibition updates', async () => {
 
   const user2 = await login(app, 'donald')
 
-  // deny update to other user's exhibition
+  // deny update to other user's exhibit
   res = await app.inject({
     method: 'PATCH',
-    url: '/exhibition/1001',
+    url: '/exhibit/1001',
     headers: {
       Authorization: `Bearer ${user2.token}`,
     },
@@ -133,10 +133,10 @@ test('exhibition updates', async () => {
   })
   expect(res).toHaveStatus(403)
 
-  // deny update to own exhibition and other user's table
+  // deny update to own exhibit and other user's table
   res = await app.inject({
     method: 'PATCH',
-    url: '/exhibition/1003',
+    url: '/exhibit/1003',
     headers: {
       Authorization: `Bearer ${user2.token}`,
     },
@@ -146,10 +146,10 @@ test('exhibition updates', async () => {
   })
   expect(res).toHaveStatus(403)
 
-  // suceed updating own exhibition to free table
+  // suceed updating own exhibit to free table
   res = await app.inject({
     method: 'PATCH',
-    url: '/exhibition/1003',
+    url: '/exhibit/1003',
     headers: {
       Authorization: `Bearer ${user2.token}`,
     },
@@ -159,10 +159,10 @@ test('exhibition updates', async () => {
   })
   expect(res).toHaveStatus(200)
 
-  // verify changes in exhibition list
+  // verify changes in exhibit list
   res = await app.inject({
     method: 'get',
-    url: '/exhibition',
+    url: '/exhibit',
   })
   expect(res).toHaveStatus(200)
   expect(res.json()).toMatchObject({
@@ -197,10 +197,10 @@ test('exhibition updates', async () => {
     total: 4,
   })
 
-  // create new exhibition
+  // create new exhibit
   res = await app.inject({
     method: 'post',
-    url: '/exhibition',
+    url: '/exhibit',
     headers: {
       Authorization: `Bearer ${user2.token}`,
     },
@@ -210,18 +210,18 @@ test('exhibition updates', async () => {
   })
   expect(res).toHaveStatus(200)
 
-  // verify changes new exhibition
+  // verify changes new exhibit
   res = await app.inject({
     method: 'get',
-    url: '/exhibition',
+    url: '/exhibit',
   })
   expect(res).toHaveStatus(200)
   expect(res.json().items.length).toBe(5)
 
-  // create new exhibition and assign to table
+  // create new exhibit and assign to table
   res = await app.inject({
     method: 'post',
-    url: '/exhibition',
+    url: '/exhibit',
     headers: {
       Authorization: `Bearer ${user2.token}`,
     },
@@ -232,11 +232,25 @@ test('exhibition updates', async () => {
   })
   expect(res).toHaveStatus(200)
 
-  // verify changes new exhibition
+  // verify changes new exhibit
   res = await app.inject({
     method: 'get',
-    url: '/exhibition',
+    url: '/exhibit',
   })
   expect(res).toHaveStatus(200)
   expect(res.json().items.length).toBe(6)
+})
+
+test("nonexistent exhibit", async () => {
+  let res = await app.inject({
+    method: 'get',
+    url: '/exhibit/3456',
+  })
+  expect(res).toHaveStatus(404)
+
+  res = await app.inject({
+    method: 'get',
+    url: '/exhibit/nonexistent',
+  })
+  expect(res).toHaveStatus(400)
 })

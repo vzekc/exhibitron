@@ -29,7 +29,7 @@ export class UserRepository extends EntityRepository<User> {
   async lookup(id: string) {
     const where = id.match(/^\d+$/) ? { id: +id } : { username: id }
     return await this.findOneOrFail(where, {
-      populate: ['tables', 'exhibitions'],
+      populate: ['tables', 'exhibits'],
     })
   }
 }
