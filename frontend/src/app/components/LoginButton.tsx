@@ -1,9 +1,9 @@
-"use client";
+'use client'
 
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signIn, signOut, useSession } from 'next-auth/react'
 
 export default function LoginButton() {
-  const { data: session } = useSession();
+  const { data: session } = useSession()
 
   return session ? (
     <div>
@@ -11,6 +11,6 @@ export default function LoginButton() {
       <button onClick={() => signOut()}>Sign Out</button>
     </div>
   ) : (
-    <button onClick={() => signIn("google")}>Sign In with Google</button>
-  );
+    <button onClick={() => signIn('google')}>Sign In with Google</button>
+  )
 }

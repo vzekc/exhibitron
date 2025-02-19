@@ -1,18 +1,18 @@
-import LoginButton from "./components/LoginButton";
-import axios from "axios";
+import LoginButton from './components/LoginButton'
+import axios from 'axios'
 
 async function getUsers() {
   try {
-    const response = await axios.get("/users");
-    return response.data;
+    const response = await axios.get('/users')
+    return response.data
   } catch (error) {
-    console.error("Error fetching users", error);
-    return [];
+    console.error('Error fetching users', error)
+    return []
   }
 }
 
 export default async function Home() {
-  const users = await getUsers();
+  const users = await getUsers()
 
   return (
     <div>
@@ -24,5 +24,5 @@ export default async function Home() {
         ))}
       </ul>
     </div>
-  );
+  )
 }

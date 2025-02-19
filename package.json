@@ -6,7 +6,7 @@
   "scripts": {
     "test": "cd backend && pnpm test",
     "lint": "cd backend && pnpm lint",
-    "prettier": "prettier -w backend/src",
+    "prettier": "prettier backend/src frontend/src",
     "prepare": "husky"
   },
   "keywords": [],
