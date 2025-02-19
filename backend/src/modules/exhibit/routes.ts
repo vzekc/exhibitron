@@ -60,7 +60,7 @@ export async function registerExhibitRoutes(app: FastifyInstance) {
     async (request) => {
       if (!request.user) {
         throw new PermissionDeniedError(
-          'You need to be logged in to create exhibits',
+          'You must be logged in to create exhibits',
         )
       }
       const props = request.body as {

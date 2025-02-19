@@ -10,6 +10,7 @@ export class TestSeeder extends Seeder {
       fullName: 'Harald Eder',
       username: 'MeisterEder',
       password: 'password123',
+      contacts: {},
     })
 
     for (let id = 1; id <= 10; id++) {
@@ -40,6 +41,8 @@ export class TestSeeder extends Seeder {
         username: 'admin',
         isAdministrator: true,
       },
-    ].forEach((user) => em.create(User, { ...user, password: 'secret' }))
+    ].forEach((user) =>
+      em.create(User, { ...user, password: 'geheim', contacts: {} }),
+    )
   }
 }

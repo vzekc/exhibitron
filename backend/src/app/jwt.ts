@@ -13,12 +13,10 @@ export const register = async (app: FastifyInstance) => {
 
   // register auth hook after the ORM one to use the context
   app.addHook('onRequest', async (request) => {
-    try {
+    if (request.headers.authorization) {
       const ret = await request.jwtVerify<{ id: number }>()
       request.user = await db.user.findOneOrFail(ret.id)
-    } catch (e) {
-      app.log.debug('could not verify JWT token, user not set', e)
-      // ignore token errors, we validate the request.user exists only where needed
+      app.log.debug(`User: ${request.user.username} set from JWT`)
     }
   })
 }
