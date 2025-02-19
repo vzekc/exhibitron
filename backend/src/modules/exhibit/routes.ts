@@ -6,7 +6,7 @@ import { errorSchema, PermissionDeniedError } from '../common/errors.js'
 import { userBaseSchema } from '../user/routes.js'
 import { exhibitListingSchema } from './exhibit-listing.entity.js'
 
-const exhibitBaseSchema = {
+export const exhibitBaseSchema = {
   type: 'object',
   properties: {
     title: { type: 'string', examples: ['My first computer'] },
@@ -29,7 +29,6 @@ const existingExhibitSchema = {
     exhibitor: {
       ...userBaseSchema,
     },
-    table: { type: 'number' },
   },
   required: ['title', 'id', 'exhibitor'],
 }

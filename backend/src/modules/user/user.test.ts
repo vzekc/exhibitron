@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify'
 import { afterAll, beforeAll, expect, test } from 'vitest'
-import { initTestApp, deleteDatabase, login } from '../../test/utils.js'
+import { deleteDatabase, initTestApp, login } from '../../test/utils.js'
 
 let app: FastifyInstance
 let dbName: string
@@ -30,8 +30,11 @@ test('login', async () => {
     fullName: 'Harald Eder',
     token: expect.stringMatching(/.*/),
     bio: '',
+    contacts: {},
     id: 1001,
     isAdministrator: false,
+    exhibits: expect.any(Array),
+    tables: expect.any(Array),
   })
 
   expect(res.body).not.toContain('password')
@@ -125,14 +128,11 @@ test('lookups', async () => {
     fullName: 'Daffy Duck',
     id: 1002,
     isAdministrator: false,
-    exhibits: expect.anything(),
-    createdAt: expect.any(String),
-    updatedAt: expect.any(String),
     bio: expect.anything(),
-    contacts: null,
-    tables: expect.anything(),
+    contacts: {},
+    exhibits: expect.any(Array),
+    tables: expect.any(Array),
   })
-
   res = await app.inject({
     method: 'get',
     url: '/user/MeisterEder',
@@ -143,12 +143,10 @@ test('lookups', async () => {
     fullName: 'Harald Eder',
     id: 1001,
     isAdministrator: false,
-    exhibits: expect.anything(),
-    createdAt: expect.any(String),
-    updatedAt: expect.any(String),
     bio: expect.anything(),
-    contacts: null,
-    tables: expect.anything(),
+    contacts: {},
+    exhibits: expect.any(Array),
+    tables: expect.any(Array),
   })
 })
 
