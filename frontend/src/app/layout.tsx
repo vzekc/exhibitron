@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
-import SessionProvider from './components/SessionProvider' // ✅ Import Client Component
 
 export const metadata: Metadata = {
-  title: 'My App',
-  description: 'Next.js + Nest.js + TypeORM',
+  title: 'Classic Computing 2025',
+  description: 'Catalog Application for Classic Computing 2025',
+  icons: {
+    icon: 'favicon.ico',
+  },
 }
 
 export default function RootLayout({
@@ -13,10 +15,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
-        <SessionProvider>{children}</SessionProvider>{' '}
-        {/* ✅ Wrap with Client Component */}
-      </body>
+      <body>{children}</body>
     </html>
   )
 }

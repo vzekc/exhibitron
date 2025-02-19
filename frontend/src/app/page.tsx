@@ -1,26 +1,38 @@
-import LoginButton from './components/LoginButton'
-import axios from 'axios'
+'use client'
 
-async function getUsers() {
-  try {
-    const response = await axios.get('/users')
-    return response.data
-  } catch (error) {
-    console.error('Error fetching users', error)
-    return []
-  }
-}
+import React, { useEffect, useState } from 'react'
+import * as backend from '../api/index'
+import { client as backendClient } from '../api/client.gen'
+import { GetExhibitResponse } from '@/api'
 
-export default async function Home() {
-  const users = await getUsers()
+backendClient.setConfig({
+  baseURL: '/api',
+})
+
+type Exhibit = NonNullable<GetExhibitResponse['items']>[number]
+
+export default function Home() {
+  const [exhibits, setExhibits] = useState<Exhibit[]>([])
+
+  useEffect(() => {
+    async function fetchExhibits() {
+      const response = await backend.getExhibit()
+      setExhibits(response.data?.items || [])
+    }
+
+    fetchExhibits().catch((error) =>
+      console.error('Error in useEffect:', error),
+    )
+  }, [])
 
   return (
     <div>
-      <LoginButton />
-      <h1>Users</h1>
+      <h1>Exhibits</h1>
       <ul>
-        {users.map((user: any) => (
-          <li key={user.id}>{user.name}</li>
+        {exhibits.map((exhibit) => (
+          <li key={exhibit.id}>
+            {exhibit.title} ({exhibit.exhibitorName})
+          </li>
         ))}
       </ul>
     </div>

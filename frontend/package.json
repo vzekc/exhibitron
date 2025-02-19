@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@hey-api/client-axios": "^0.6.1",
     "axios": "^1.7.9",
     "next": "15.1.7",
     "next-auth": "^4.24.11",
