@@ -6,7 +6,7 @@ import { errorSchema, PermissionDeniedError } from '../common/errors.js'
 import { userBaseSchema } from '../user/routes.js'
 import { exhibitListingSchema } from './exhibit-listing.entity.js'
 
-export const exhibitBaseSchema = {
+export const exhibitBaseSchema = () => ({
   type: 'object',
   properties: {
     title: { type: 'string', examples: ['My first computer'] },
@@ -19,19 +19,19 @@ export const exhibitBaseSchema = {
     table: { type: 'number', examples: [23] },
   },
   additionalProperties: false,
-}
+})
 
-const existingExhibitSchema = {
-  ...exhibitBaseSchema,
+const existingExhibitSchema = () => ({
+  ...exhibitBaseSchema(),
   properties: {
     id: { type: 'number' },
-    ...exhibitBaseSchema.properties,
+    ...exhibitBaseSchema().properties,
     exhibitor: {
-      ...userBaseSchema,
+      ...userBaseSchema(),
     },
   },
   required: ['title', 'id', 'exhibitor'],
-}
+})
 
 export async function registerExhibitRoutes(app: FastifyInstance) {
   const db = await initORM()
@@ -42,13 +42,13 @@ export async function registerExhibitRoutes(app: FastifyInstance) {
       schema: {
         description: 'Create exhibit',
         body: {
-          ...exhibitBaseSchema,
+          ...exhibitBaseSchema(),
           required: ['title'],
         },
         response: {
           200: {
             description: 'The exhibit was created',
-            ...existingExhibitSchema,
+            ...existingExhibitSchema(),
           },
           403: {
             description: 'Not logged in',
@@ -132,7 +132,7 @@ export async function registerExhibitRoutes(app: FastifyInstance) {
         response: {
           200: {
             description: 'The exhibit was found',
-            ...existingExhibitSchema,
+            ...existingExhibitSchema(),
           },
           404: {
             description: 'The exhibit does not exist',

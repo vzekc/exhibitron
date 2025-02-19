@@ -55,7 +55,7 @@ export class User extends BaseEntity<'isAdministrator' | 'fullName' | 'bio'> {
   isAdministrator: boolean = false
 
   @Embedded(() => Contacts, { object: true })
-  contacts?: Contacts
+  contacts: Contacts = {}
 
   @OneToMany({ mappedBy: 'exhibitor' })
   exhibits = new Collection<Exhibit>(this)

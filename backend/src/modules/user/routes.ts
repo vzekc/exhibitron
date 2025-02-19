@@ -6,7 +6,7 @@ import { User } from './user.entity.js'
 import { BadRequestError, errorSchema } from '../common/errors.js'
 import { exhibitBaseSchema } from '../exhibit/routes.js'
 
-export const userBaseSchema = {
+export const userBaseSchema = () => ({
   type: 'object',
   properties: {
     fullName: { type: 'string', examples: ['Daffy Duck'] },
@@ -26,20 +26,20 @@ export const userBaseSchema = {
     },
   },
   additionalProperties: false,
-}
+})
 
-const userResponseSchema = {
-  ...userBaseSchema,
+const userResponseSchema = () => ({
+  ...userBaseSchema(),
   required: ['id', 'username', 'isAdministrator'],
   properties: {
     id: { type: 'integer', examples: [23] },
     username: { type: 'string', examples: ['donald'] },
-    ...userBaseSchema.properties,
+    ...userBaseSchema().properties,
     isAdministrator: { type: 'boolean' },
     tables: { type: 'array', items: { type: 'number' } },
-    exhibits: { type: 'array', items: exhibitBaseSchema },
+    exhibits: { type: 'array', items: exhibitBaseSchema() },
   },
-}
+})
 
 export async function registerUserRoutes(app: FastifyInstance) {
   const db = await initORM()
@@ -48,7 +48,6 @@ export async function registerUserRoutes(app: FastifyInstance) {
     await db.em.populate(user, ['exhibits', 'tables'])
     return {
       ...user,
-      contacts: user.contacts ?? {},
       tables: user.tables.map(({ id }) => id),
       exhibits: user.exhibits.map((x) => x),
     }
@@ -61,17 +60,17 @@ export async function registerUserRoutes(app: FastifyInstance) {
       schema: {
         description: 'Create a user account',
         body: {
-          ...userBaseSchema,
+          ...userBaseSchema(),
           required: ['username', 'password'],
           properties: {
-            ...userBaseSchema.properties,
+            ...userBaseSchema().properties,
             password: { type: 'string', examples: ['geheim'] },
           },
         },
         response: {
           200: {
             description: 'The user account was created',
-            ...userResponseSchema,
+            ...userResponseSchema(),
           },
           400: {
             description: 'The user account could not be created.',
@@ -118,9 +117,9 @@ export async function registerUserRoutes(app: FastifyInstance) {
         response: {
           200: {
             description: 'The user was logged in',
-            ...userResponseSchema,
+            ...userResponseSchema(),
             properties: {
-              ...userResponseSchema.properties,
+              ...userResponseSchema().properties,
               token: {
                 type: 'string',
                 examples: [
@@ -162,7 +161,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
           200: {
             description:
               'The profile of the currently logged in user is returned',
-            ...userResponseSchema,
+            ...userResponseSchema(),
           },
           401: {
             description: 'Not logged in.',
@@ -195,7 +194,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
         response: {
           200: {
             description: 'The profile of the user is returned',
-            ...userResponseSchema,
+            ...userResponseSchema(),
           },
           404: {
             description: 'No user was found matching the given ID',
@@ -217,16 +216,16 @@ export async function registerUserRoutes(app: FastifyInstance) {
       schema: {
         description: 'Update user account',
         body: {
-          ...userBaseSchema,
+          ...userBaseSchema(),
           properties: {
-            ...userBaseSchema.properties,
+            ...userBaseSchema().properties,
             password: { type: 'string', examples: ['geheim'] },
           },
         },
         response: {
           200: {
             description: 'The user account was updated',
-            ...userResponseSchema,
+            ...userResponseSchema(),
           },
           400: {
             description: 'The user account could not be created.',
