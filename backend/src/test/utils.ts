@@ -67,7 +67,7 @@ export const login = async (
 ) => {
   const res = await app.inject({
     method: 'post',
-    url: '/user/sign-in',
+    url: '/api/user/sign-in',
     payload: {
       username,
       password,

@@ -23,7 +23,7 @@ test('claim and release', async () => {
   const tablePost = (url: string, user: { token: string }) =>
     app.inject({
       method: 'post',
-      url,
+      url: `/api${url}`,
       headers: {
         Authorization: `Bearer ${user.token}`,
       },

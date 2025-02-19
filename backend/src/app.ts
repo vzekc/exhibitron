@@ -57,9 +57,9 @@ export async function createApp({
   registerErrorHandler(app)
 
   // register routes here
-  app.register(registerUserRoutes, { prefix: 'user' })
-  app.register(registerExhibitRoutes, { prefix: 'exhibit' })
-  app.register(registerTableRoutes, { prefix: 'table' })
+  app.register(registerUserRoutes, { prefix: '/api/user' })
+  app.register(registerExhibitRoutes, { prefix: '/api/exhibit' })
+  app.register(registerTableRoutes, { prefix: '/api/table' })
 
   return app
 }

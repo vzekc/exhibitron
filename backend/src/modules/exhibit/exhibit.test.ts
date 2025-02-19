@@ -19,7 +19,7 @@ test('list all exhibits', async () => {
   // list exhibits and verify response
   const res = await app.inject({
     method: 'get',
-    url: '/exhibit',
+    url: '/api/exhibit',
   })
   expect(res).toHaveStatus(200)
   expect(res.json()).toMatchObject({
@@ -56,7 +56,7 @@ test('list all exhibits', async () => {
 test('try making updates without being logged in', async () => {
   const res = await app.inject({
     method: 'PATCH',
-    url: '/exhibit/1001',
+    url: '/api/exhibit/1001',
     body: {
       table: 1,
     },
@@ -70,7 +70,7 @@ test('exhibit updates', async () => {
   // reject unknown property
   let res = await app.inject({
     method: 'PATCH',
-    url: '/exhibit/1001',
+    url: '/api/exhibit/1001',
     headers: {
       Authorization: `Bearer ${user.token}`,
     },
@@ -83,7 +83,7 @@ test('exhibit updates', async () => {
   // succeed
   res = await app.inject({
     method: 'PATCH',
-    url: '/exhibit/1001',
+    url: '/api/exhibit/1001',
     headers: {
       Authorization: `Bearer ${user.token}`,
     },
@@ -96,7 +96,7 @@ test('exhibit updates', async () => {
   // check that table is assigned
   res = await app.inject({
     method: 'GET',
-    url: '/exhibit/1001',
+    url: '/api/exhibit/1001',
   })
   expect(res).toHaveStatus(200)
   expect(res.json()).toMatchObject({
@@ -108,7 +108,7 @@ test('exhibit updates', async () => {
   // reject update of exhibit by different user
   res = await app.inject({
     method: 'PATCH',
-    url: '/exhibit/1003',
+    url: '/api/exhibit/1003',
     headers: {
       Authorization: `Bearer ${user.token}`,
     },
@@ -123,7 +123,7 @@ test('exhibit updates', async () => {
   // deny update to other user's exhibit
   res = await app.inject({
     method: 'PATCH',
-    url: '/exhibit/1001',
+    url: '/api/exhibit/1001',
     headers: {
       Authorization: `Bearer ${user2.token}`,
     },
@@ -136,7 +136,7 @@ test('exhibit updates', async () => {
   // deny update to own exhibit and other user's table
   res = await app.inject({
     method: 'PATCH',
-    url: '/exhibit/1003',
+    url: '/api/exhibit/1003',
     headers: {
       Authorization: `Bearer ${user2.token}`,
     },
@@ -149,7 +149,7 @@ test('exhibit updates', async () => {
   // suceed updating own exhibit to free table
   res = await app.inject({
     method: 'PATCH',
-    url: '/exhibit/1003',
+    url: '/api/exhibit/1003',
     headers: {
       Authorization: `Bearer ${user2.token}`,
     },
@@ -162,7 +162,7 @@ test('exhibit updates', async () => {
   // verify changes in exhibit list
   res = await app.inject({
     method: 'get',
-    url: '/exhibit',
+    url: '/api/exhibit',
   })
   expect(res).toHaveStatus(200)
   expect(res.json()).toMatchObject({
@@ -200,7 +200,7 @@ test('exhibit updates', async () => {
   // create new exhibit
   res = await app.inject({
     method: 'post',
-    url: '/exhibit',
+    url: '/api/exhibit',
     headers: {
       Authorization: `Bearer ${user2.token}`,
     },
@@ -213,7 +213,7 @@ test('exhibit updates', async () => {
   // verify changes new exhibit
   res = await app.inject({
     method: 'get',
-    url: '/exhibit',
+    url: '/api/exhibit',
   })
   expect(res).toHaveStatus(200)
   expect(res.json().items.length).toBe(5)
@@ -221,7 +221,7 @@ test('exhibit updates', async () => {
   // create new exhibit and assign to table
   res = await app.inject({
     method: 'post',
-    url: '/exhibit',
+    url: '/api/exhibit',
     headers: {
       Authorization: `Bearer ${user2.token}`,
     },
@@ -235,7 +235,7 @@ test('exhibit updates', async () => {
   // verify changes new exhibit
   res = await app.inject({
     method: 'get',
-    url: '/exhibit',
+    url: '/api/exhibit',
   })
   expect(res).toHaveStatus(200)
   expect(res.json().items.length).toBe(6)
@@ -244,13 +244,13 @@ test('exhibit updates', async () => {
 test('nonexistent exhibit', async () => {
   let res = await app.inject({
     method: 'get',
-    url: '/exhibit/3456',
+    url: '/api/exhibit/3456',
   })
   expect(res).toHaveStatus(404)
 
   res = await app.inject({
     method: 'get',
-    url: '/exhibit/nonexistent',
+    url: '/api/exhibit/nonexistent',
   })
   expect(res).toHaveStatus(400)
 })

@@ -2,7 +2,7 @@ import { bootstrap } from './app.js'
 
 try {
   const { url } = await bootstrap({
-    port: 3000,
+    port: 3001,
     migrate: true,
     logLevel: process.env.LOG_LEVEL ?? 'INFO',
   })

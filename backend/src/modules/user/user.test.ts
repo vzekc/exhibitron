@@ -18,7 +18,7 @@ afterAll(async () => {
 test('login', async () => {
   let res = await app.inject({
     method: 'post',
-    url: '/user/sign-in',
+    url: '/api/user/sign-in',
     payload: {
       username: 'MeisterEder',
       password: 'password123',
@@ -40,7 +40,7 @@ test('login', async () => {
   expect(res.body).not.toContain('password')
   res = await app.inject({
     method: 'post',
-    url: '/user/sign-in',
+    url: '/api/user/sign-in',
     payload: {
       username: 'MeisterEder',
       password: 'password456',
@@ -55,7 +55,7 @@ test('login', async () => {
 test('update', async () => {
   let res = await app.inject({
     method: 'post',
-    url: '/user/sign-in',
+    url: '/api/user/sign-in',
     payload: {
       username: 'MeisterEder',
       password: 'password123',
@@ -69,7 +69,7 @@ test('update', async () => {
 
   res = await app.inject({
     method: 'get',
-    url: '/user/profile',
+    url: '/api/user/profile',
     headers: {
       Authorization: `Bearer ${user.token}`,
     },
@@ -79,7 +79,7 @@ test('update', async () => {
 
   res = await app.inject({
     method: 'patch',
-    url: '/user/profile',
+    url: '/api/user/profile',
     headers: {
       Authorization: `Bearer ${user.token}`,
     },
@@ -91,7 +91,7 @@ test('update', async () => {
 
   res = await app.inject({
     method: 'get',
-    url: '/user/profile',
+    url: '/api/user/profile',
     headers: {
       Authorization: `Bearer ${user.token}`,
     },
@@ -103,7 +103,7 @@ test('update', async () => {
 
   res = await app.inject({
     method: 'patch',
-    url: '/user/profile',
+    url: '/api/user/profile',
     headers: {
       Authorization: `Bearer ${user.token}`,
     },
@@ -119,7 +119,7 @@ test('update', async () => {
 test('lookups', async () => {
   let res = await app.inject({
     method: 'get',
-    url: '/user/1002',
+    url: '/api/user/1002',
   })
   expect(res).toHaveStatus(200)
   expect(res).not.toContain('password')
@@ -135,7 +135,7 @@ test('lookups', async () => {
   })
   res = await app.inject({
     method: 'get',
-    url: '/user/MeisterEder',
+    url: '/api/user/MeisterEder',
   })
   expect(res).toHaveStatus(200)
   expect(res.json()).toStrictEqual({
@@ -155,7 +155,7 @@ test('profile', async () => {
   const admin = await login(app, 'admin')
   let res = await app.inject({
     method: 'get',
-    url: '/user/profile',
+    url: '/api/user/profile',
     headers: {
       Authorization: `Bearer ${admin.token}`,
     },
@@ -169,7 +169,7 @@ test('profile', async () => {
   const donald = await login(app, 'donald')
   res = await app.inject({
     method: 'get',
-    url: '/user/profile',
+    url: '/api/user/profile',
     headers: {
       Authorization: `Bearer ${donald.token}`,
     },

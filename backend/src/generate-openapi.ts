@@ -9,3 +9,5 @@ const specPath = 'dist/openapi.json'
 fs.writeFileSync(specPath, JSON.stringify(openapiSpec, null, 2))
 
 console.log('✅ OpenAPI spec generated:', specPath)
+
+app.close()

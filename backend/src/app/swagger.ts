@@ -22,7 +22,11 @@ export const register = async (app: FastifyInstance) => {
       },
       servers: [
         {
-          url: 'http://localhost:3000',
+          url: '/api',
+          description: 'Colocated server',
+        },
+        {
+          url: 'http://localhost:3001',
           description: 'Development server',
         },
       ],
