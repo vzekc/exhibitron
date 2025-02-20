@@ -35,9 +35,9 @@ const NavBar = () => {
           type="text"
           value={searchQuery}
           onChange={handleSearchChange}
-          placeholder="Tischnummer, Stichwort..."
+          placeholder="Tischnummer..."
         />
-        <button type="submit">Suchen</button>
+        <button type="submit">Tisch suchen</button>
       </form>
     </nav>
   )

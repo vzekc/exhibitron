@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getBookmarks, Exhibit as ExhibitType } from '../utils/bookmarks'
+import { getBookmarks } from '../utils/bookmarks'
+import type { Exhibit } from '../types.ts'
 
 const Bookmarks = () => {
   const navigate = useNavigate()
-  const [exhibits, setExhibits] = useState<ExhibitType[]>([])
+  const [exhibits, setExhibits] = useState<Exhibit[]>([])
 
   useEffect(() => {
     const loadBookmarks = () => {

@@ -1,8 +1,4 @@
-import * as backend from '../api/index'
-
-type Exhibit = NonNullable<
-  Awaited<ReturnType<typeof backend.getExhibitById>>['data']
->
+import type { Exhibit } from '../types.ts'
 
 export const getBookmarks = (): Exhibit[] => {
   const bookmarks = localStorage.getItem('bookmarks')
