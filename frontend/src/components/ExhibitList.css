@@ -1,8 +1,7 @@
-
 .clickable-row:hover {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .clickable-row:hover td {
-    background-color: #d0d0d0;
+  background-color: #d0d0d0;
 }

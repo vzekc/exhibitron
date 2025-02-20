@@ -560,5 +560,5 @@ export type PostTableByNumberAssignToByUserIdResponse =
   PostTableByNumberAssignToByUserIdResponses[keyof PostTableByNumberAssignToByUserIdResponses]
 
 export type ClientOptions = {
-  baseURL: `${string}://${string}/api` | 'http://localhost:3001' | (string & {})
+  baseURL: `${string}://${string}/api` | (string & {})
 }

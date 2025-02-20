@@ -7,6 +7,7 @@ import Home from './components/Home.tsx'
 import Schedule from './components/Schedule.tsx'
 import { Suspense } from 'react'
 import Exhibit from './components/Exhibit.tsx'
+import Bookmarks from './components/Bookmarks.tsx'
 
 const App = () => (
   <Router>
@@ -24,6 +25,7 @@ const App = () => (
             <Route path="/exhibits" element={<ExhibitList />} />
             <Route path="/exhibit/:id" element={<Exhibit />} />
             <Route path="/schedule" element={<Schedule />} />
+            <Route path="/bookmarks" element={<Bookmarks />} />
           </Routes>
         </Suspense>
       </ErrorBoundary>

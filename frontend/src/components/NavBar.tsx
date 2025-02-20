@@ -26,6 +26,9 @@ const NavBar = () => {
         <li>
           <Link to="/schedule">Zeitplan</Link>
         </li>
+        <li>
+          <Link to="/bookmarks">Lesezeichen</Link>
+        </li>
       </ul>
       <form onSubmit={handleSearchSubmit}>
         <input
