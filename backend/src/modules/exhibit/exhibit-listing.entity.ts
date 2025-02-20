@@ -14,7 +14,7 @@ export class ExhibitListing {
   title!: string
 
   @Property()
-  description!: string
+  text!: string
 
   @Property()
   exhibitorId!: number
@@ -40,7 +40,7 @@ export const exhibitListingSchema = {
       type: 'string',
       examples: ['The first Macintosh', 'Old DEC systems', 'IBM Mainframes'],
     },
-    description: {
+    text: {
       description: 'Description',
       type: 'string',
       examples: [

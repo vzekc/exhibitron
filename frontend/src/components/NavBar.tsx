@@ -1,17 +1,24 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 
 const NavBar = () => {
   const [searchQuery, setSearchQuery] = useState('')
+  const navigate = useNavigate()
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value)
+    const value = e.target.value
+    if (/^\d*$/.test(value)) {
+      // Only allow numeric input
+      setSearchQuery(value)
+    }
   }
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    // Implement search functionality here
-    console.log('Search query:', searchQuery)
+    if (searchQuery) {
+      setSearchQuery('')
+      navigate(`/table/${searchQuery}`)
+    }
   }
 
   return (

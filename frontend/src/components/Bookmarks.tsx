@@ -1,48 +1,19 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { getBookmarks } from '../utils/bookmarks'
-import type { Exhibit } from '../types.ts'
+import ExhibitTable from './ExhibitTable'
 
 const Bookmarks = () => {
-  const navigate = useNavigate()
-  const [exhibits, setExhibits] = useState<Exhibit[]>([])
-
-  useEffect(() => {
-    const loadBookmarks = () => {
-      const data = getBookmarks()
-      setExhibits(data)
-    }
-    loadBookmarks()
-  }, [])
-
-  const handleRowClick = (id: number) => {
-    navigate(`/exhibit/${id}`)
-  }
+  const exhibits = getBookmarks()
 
   return (
     <article>
       <h2>Meine Lesezeichen</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Titel</th>
-            <th>Aussteller</th>
-            <th>Tisch</th>
-          </tr>
-        </thead>
-        <tbody>
-          {exhibits?.map((exhibit, index: number) => (
-            <tr
-              key={index}
-              onClick={() => handleRowClick(exhibit.id)}
-              className="clickable-row">
-              <td>{exhibit.title}</td>
-              <td>{exhibit.exhibitor.fullName}</td>
-              <td>{exhibit.table || ''}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <ExhibitTable
+        exhibits={exhibits.map(({ exhibitor, ...e }) => ({
+          ...e,
+          exhibitorId: exhibitor.id!,
+          exhibitorName: exhibitor.username!,
+        }))}
+      />
     </article>
   )
 }

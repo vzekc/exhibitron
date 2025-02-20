@@ -28,6 +28,11 @@ const existingExhibitSchema = () => ({
     ...exhibitBaseSchema().properties,
     exhibitor: {
       ...userBaseSchema(),
+      properties: {
+        ...userBaseSchema().properties,
+        id: { type: 'number', examples: [53] },
+        username: { type: 'string', examples: ['donald'] },
+      },
     },
   },
   required: ['title', 'id', 'exhibitor'],

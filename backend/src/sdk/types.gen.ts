@@ -299,7 +299,7 @@ export type GetExhibitResponses = {
       /**
        * Description
        */
-      description?: string
+      text?: string
       /**
        * User ID of the exhibitor
        */
@@ -360,6 +360,8 @@ export type PostExhibitResponses = {
         website?: string
         mastodon?: string
       }
+      id?: number
+      username?: string
     }
   }
 }
@@ -407,6 +409,8 @@ export type GetExhibitByIdResponses = {
         website?: string
         mastodon?: string
       }
+      id?: number
+      username?: string
     }
   }
 }

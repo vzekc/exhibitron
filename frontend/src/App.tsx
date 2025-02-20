@@ -8,6 +8,7 @@ import Schedule from './components/Schedule.tsx'
 import { Suspense } from 'react'
 import Exhibit from './components/Exhibit.tsx'
 import Bookmarks from './components/Bookmarks.tsx'
+import TableSearchResult from './components/TableSearchResult.tsx'
 
 const App = () => (
   <Router>
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/exhibit/:id" element={<Exhibit />} />
             <Route path="/schedule" element={<Schedule />} />
             <Route path="/bookmarks" element={<Bookmarks />} />
+            <Route path="/table/:id" element={<TableSearchResult />} />
           </Routes>
         </Suspense>
       </ErrorBoundary>
