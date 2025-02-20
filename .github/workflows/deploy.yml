@@ -22,9 +22,4 @@ jobs:
 
       - name: Deploy to Server
         run: |
-          ssh user@${{ secrets.SERVER_IP }} << 'EOF'
-            cd /path/to/your/app
-            git pull origin main  # Ensure you use the correct branch
-            npm install --production
-            pm2 restart all  # Restart your app (adjust this as needed)
-          EOF
+          ssh hans@${{ secrets.SERVER_IP }} ./deploy-cc-katalog.sh
