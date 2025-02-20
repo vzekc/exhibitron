@@ -13,7 +13,7 @@
     "lint": "eslint src",
     "prepare": "husky",
     "seed-demo": "dropdb cc-katalog && createdb cc-katalog && mikro-orm-esm migration:up && mikro-orm-esm seeder:run -c DemoSeeder",
-    "make-sdk": "pnpm generate-openapi && openapi-ts -i dist/openapi.json -o src/sdk -c @hey-api/client-axios"
+    "make-sdk": "pnpm generate-openapi && openapi-ts -i dist/openapi.json -o src/sdk -c @hey-api/client-axios && pnpm prettier -w src/sdk"
   },
   "pnpm": {
     "patchedDependencies": {

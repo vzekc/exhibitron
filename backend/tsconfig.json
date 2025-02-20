@@ -7,9 +7,10 @@
     "outDir": "dist",
     "declaration": true,
     "experimentalDecorators": true,
-    "types": ["vitest/globals", "src/types/customMatchers"]
+    "types": ["vitest/globals", "./src/types/customMatchers"]
   },
   "include": ["./src/**/*.ts"],
+  "exclude": ["./src/sdk"],
   "ts-node": {
     "esm": true,
     "transpileOnly": true
