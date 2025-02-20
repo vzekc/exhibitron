@@ -6,6 +6,7 @@
   "scripts": {
     "test": "cd backend && pnpm test",
     "lint": "cd backend && pnpm lint",
+    "build": "cd frontend && pnpm build && cd ../backend && pnpm build",
     "prettier": "prettier backend/src frontend/src",
     "prepare": "husky"
   },
