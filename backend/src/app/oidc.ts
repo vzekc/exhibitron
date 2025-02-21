@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import type { Credentials, ProviderConfiguration } from '@fastify/oauth2'
 import fastifyOauth2 from '@fastify/oauth2'
+import fastifyCookie from '@fastify/cookie'
 import { FastifyInstance } from 'fastify'
 
 const woltlabBaseUrl = 'https://forum.classic-computing.de'
@@ -31,6 +32,7 @@ export const register = (app: FastifyInstance) => {
   const credentials = getOAuth2Credentials()
   if (!credentials) {
     app.log.warn('OIDC authentication disabled')
+    app.register(fastifyCookie)
     return
   }
 
