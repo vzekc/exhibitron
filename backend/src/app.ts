@@ -48,7 +48,6 @@ export async function createApp({
   })
 
   oidc.register(app)
-  staticFiles.register(app)
   await swagger.register(app)
   await orm.register(app, !!migrate)
   await jwt.register(app)
@@ -60,6 +59,8 @@ export async function createApp({
   app.register(registerUserRoutes, { prefix: '/api/user' })
   app.register(registerExhibitRoutes, { prefix: '/api/exhibit' })
   app.register(registerTableRoutes, { prefix: '/api/table' })
+
+  staticFiles.register(app)
 
   return app
 }

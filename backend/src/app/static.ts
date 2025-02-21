@@ -8,7 +8,20 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 export const register = (app: FastifyInstance) => {
+  const distDir = path.join(__dirname, '../../../frontend/dist')
+
   app.register(fastifyStatic, {
-    root: path.join(__dirname, '../../../frontend/dist'),
+    root: distDir,
+  })
+
+  app.setNotFoundHandler((request, reply) => {
+    if (
+      !request.url.startsWith('/api/') &&
+      request.headers.accept?.includes('text/html')
+    ) {
+      reply.sendFile('index.html')
+    } else {
+      reply.code(404).send({ error: 'Not Found' })
+    }
   })
 }
