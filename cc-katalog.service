@@ -1,0 +1,13 @@
+[Unit]
+Description=CC Katalog Backend
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/pnpm start:prod
+WorkingDirectory=/home/hans/cc-katalog/backend
+Restart=always
+User=hans
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=default.target
