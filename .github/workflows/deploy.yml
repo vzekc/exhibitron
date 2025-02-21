@@ -63,10 +63,10 @@ jobs:
       - name: Set up SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.DEPLOYMENT_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.DEPLOYMENT_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy to Server
         run: |
-          ssh hans@${{ secrets.SERVER_IP }} ./deploy-cc-katalog.sh
+          ssh hans@${{ secrets.DEPLOYMENT_HOST }} ./deploy-cc-katalog.sh
