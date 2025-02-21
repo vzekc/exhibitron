@@ -41,7 +41,7 @@ export const register = (app: FastifyInstance) => {
     scope: ['openid', 'nickname', 'email', 'rank', 'profile'],
     credentials,
     startRedirectPath: '/auth/forum',
-    callbackUri: 'http://localhost:3000/auth/callback',
+    callbackUri: (req) => `${req.protocol}://${req.headers.host}/auth/callback`,
   })
 
   app.get('/auth/callback', async function (request, reply) {
