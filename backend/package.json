@@ -11,14 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint src",
-    "prepare": "husky",
     "seed-demo": "dropdb cc-katalog && createdb cc-katalog && mikro-orm-esm migration:up && mikro-orm-esm seeder:run -c DemoSeeder",
     "make-sdk": "pnpm generate-openapi && openapi-ts -i dist/openapi.json -o src/sdk -c @hey-api/client-axios && pnpm prettier -w src/sdk"
-  },
-  "pnpm": {
-    "patchedDependencies": {
-      "@mikro-orm/core@6.4.6": "patches/@mikro-orm__core@6.4.6.patch"
-    }
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
@@ -58,6 +52,6 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.24.0",
-    "vitest": "^2.1.4"
+    "vitest": "^2.1.9"
   }
 }
