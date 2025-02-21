@@ -24,6 +24,7 @@ export async function createApp({
   logLevel?: string
 } = {}) {
   const app = fastify({
+    trustProxy: true,
     logger: {
       level: logLevel,
       transport: {
