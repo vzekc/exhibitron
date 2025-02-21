@@ -10,7 +10,7 @@
     "build": "cd frontend && pnpm build && cd ../backend && pnpm build",
     "prettier": "prettier backend/src frontend/src",
     "prepare": "husky",
-    "install": "cd frontend && pnpm install && cd ../frontend && pnpm install"
+    "install": "cd frontend && pnpm install && cd ../backend && pnpm install"
   },
   "keywords": [],
   "author": "",

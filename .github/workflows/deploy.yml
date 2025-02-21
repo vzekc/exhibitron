@@ -39,8 +39,6 @@ jobs:
           node-version: 22
           cache: 'pnpm'
 
-      - run: env
-
       - name: Install dependencies
         run: |
           pnpm install --frozen-lockfile
