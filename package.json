@@ -5,12 +5,12 @@
   "main": "index.js",
   "packageManager": "pnpm@8.15.9",
   "scripts": {
-    "test": "cd backend && pnpm test",
-    "lint": "cd backend && pnpm lint",
-    "build": "cd frontend && pnpm build && cd ../backend && pnpm build",
-    "prettier": "prettier backend/src frontend/src",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint",
+    "build": "pnpm --filter backend run make-sdk && pnpm --filter frontend run build && pnpm --filter backend run build",
+    "prettier": "prettier frontend/src backend/src",
     "prepare": "husky",
-    "install": "cd frontend && pnpm install && cd ../backend && pnpm install"
+    "install": "pnpm install --recursive"
   },
   "keywords": [],
   "author": "",
