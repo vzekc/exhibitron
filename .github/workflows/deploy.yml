@@ -69,4 +69,4 @@ jobs:
 
       - name: Deploy to Server
         run: |
-          ssh hans@${{ secrets.DEPLOYMENT_HOST }} ./deploy-cc-katalog.sh
+          git push hans@${{ secrets.DEPLOYMENT_HOST }}:cc-katalog HEAD:deploy 

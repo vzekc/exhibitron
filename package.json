@@ -9,8 +9,7 @@
     "lint": "pnpm -r lint",
     "build": "pnpm --filter backend run make-sdk && pnpm --filter frontend run build && pnpm --filter backend run build",
     "prettier": "prettier frontend/src backend/src",
-    "prepare": "husky",
-    "install": "pnpm install --recursive"
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "",
