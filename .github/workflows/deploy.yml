@@ -13,8 +13,8 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_USER: testuser
-          POSTGRES_PASSWORD: testpassword
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: geheim
           POSTGRES_DB: testdb
         ports:
           - 5432:5432
@@ -46,7 +46,9 @@ jobs:
 
       - name: Run tests
         env:
-          DATABASE_URL: postgres://testuser:testpassword@localhost:5432/testdb
+          PGHOST: localhost
+          PGUSER: postgres
+          PGPASSWORD: geheim
         run: pnpm test
 
   deploy:
