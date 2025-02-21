@@ -68,4 +68,4 @@ jobs:
 
       - name: Deploy to Server
         run: |
-          git push hans@${{ secrets.DEPLOYMENT_HOST }}:cc-katalog HEAD:deploy 
+          git push -f hans@${{ secrets.DEPLOYMENT_HOST }}:cc-katalog HEAD:deploy 
