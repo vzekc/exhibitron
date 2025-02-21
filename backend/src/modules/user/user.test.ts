@@ -179,3 +179,15 @@ test('profile', async () => {
     isAdministrator: false,
   })
 })
+
+test('user list', async () => {
+  const res = await app.inject({
+    method: 'get',
+    url: '/api/user',
+  })
+  expect(res).toHaveStatus(200)
+  expect(res.json()).toMatchObject({
+    items: expect.any(Array),
+    total: expect.any(Number),
+  })
+})

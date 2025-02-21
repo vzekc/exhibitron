@@ -49,7 +49,10 @@ export async function registerUserRoutes(app: FastifyInstance) {
     return {
       ...user,
       tables: user.tables.map(({ id }) => id),
-      exhibits: user.exhibits.map((x) => x),
+      exhibits: user.exhibits.map(({ table, ...exhibit }) => ({
+        ...exhibit,
+        table: table?.id,
+      })),
     }
   }
 
@@ -173,6 +176,35 @@ export async function registerUserRoutes(app: FastifyInstance) {
     async (request) => {
       const user = getUserFromToken(request)
       return makeUserResponse(user)
+    },
+  )
+
+  app.get(
+    '/',
+    {
+      schema: {
+        description: 'Retrieve the full user list',
+        response: {
+          200: {
+            description: 'The user list is returned',
+            type: 'object',
+            properties: {
+              items: {
+                type: 'array',
+                items: userResponseSchema(),
+              },
+              total: { type: 'number' },
+            },
+          },
+        },
+      },
+    },
+    async () => {
+      const users = await db.user.findAll({ populate: ['tables', 'exhibits'] })
+      return {
+        items: await Promise.all(users.map(makeUserResponse)),
+        total: users.length,
+      }
     },
   )
 

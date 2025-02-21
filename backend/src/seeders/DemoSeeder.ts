@@ -85,6 +85,8 @@ export class DemoSeeder extends Seeder {
     tables[1].exhibitor = users[0]
     tables[2].exhibitor = users[2]
     tables[3].exhibitor = users[2]
+    tables[4].exhibitor = users[1]
+    tables[5].exhibitor = users[1]
 
     await em.persistAndFlush([...tables, ...users, ...exhibits])
   }

@@ -16,7 +16,7 @@ export const register = (app: FastifyInstance) => {
 
   app.setNotFoundHandler((request, reply) => {
     if (
-      !request.url.startsWith('/api/') &&
+      !request.url.match(/^\/(api|auth)\//) &&
       request.headers.accept?.includes('text/html')
     ) {
       reply.sendFile('index.html')
