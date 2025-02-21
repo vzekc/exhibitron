@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "packageManager": "pnpm@8.15.9",
   "scripts": {
     "test": "cd backend && pnpm test",
     "lint": "cd backend && pnpm lint",
