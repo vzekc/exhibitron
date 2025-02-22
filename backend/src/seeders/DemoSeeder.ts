@@ -39,38 +39,43 @@ export class DemoSeeder extends Seeder {
     const exhibits = [
       em.create(Exhibit, {
         title: 'Bildschirmtext',
+        text: 'Bildschirmtext war ein interaktives Textsystem, das in den 1990er Jahren in Deutschland weit verbreitet war.',
         table: tables[0],
         exhibitor: users[0],
       }),
       em.create(Exhibit, {
         title: 'TELEBAHN',
+        text: 'TELEBAHN ist ein X.25-Netzwerk.',
         exhibitor: users[0],
       }),
       em.create(Exhibit, {
         title: 'GIGI',
+        text: 'Der GIGI ist ein Grafikterminal, welches auch ein eingebautes Microsoft BASIC besitzt.',
         table: tables[1],
         exhibitor: users[0],
       }),
       em.create(Exhibit, {
         title: 'PDP-8',
-        text: `Der PDP-8 (bei Anwendern meist 'die PDP-8') war ein 12-Bit
+        text: `Der [PDP-8](https://de.wikipedia.org/wiki/PDP-8) (bei Anwendern meist 'die PDP-8') war ein 12-Bit
          Minirechner aus der Reihe Programmed Data Processor von Digital 
          Equipment Corporation (DEC). Es war der erste kommerziell erfolgreiche 
          Minicomputer mit weit über 50.000 verkauften Exemplaren, Schätzungen
          gehen sogar von bis zu 300.000 Exemplaren aus bei Berücksichtigung 
          von kompatiblen Nachbauten.
 
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Digital_pdp8-e2.jpg/2880px-Digital_pdp8-e2.jpg"/>
+![image](https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Digital_pdp8-e2.jpg/2880px-Digital_pdp8-e2.jpg)
         `,
         exhibitor: users[1],
       }),
       em.create(Exhibit, {
         title: 'Patcher',
+        text: 'Der Patcher ist ein **Retro-Universal-Laptop** auf Raspberry-Pi-Basis.',
         table: tables[2],
         exhibitor: users[2],
       }),
       em.create(Exhibit, {
         title: 'Macintosh SE/30',
+        text: 'Der Macintosh SE/30 war ein Computer der Firma Apple.',
         table: tables[3],
         exhibitor: users[2],
       }),

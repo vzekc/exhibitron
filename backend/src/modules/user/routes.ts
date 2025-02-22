@@ -221,7 +221,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
             ...userResponseSchema(),
           },
           400: {
-            description: 'The user account could not be created.',
+            description: 'The user account could not be updated.',
             ...errorSchema,
           },
         },

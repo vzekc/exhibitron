@@ -150,6 +150,7 @@ export async function registerExhibitRoutes(app: FastifyInstance) {
       const params = request.params as { id: string }
       const exhibit = await db.exhibit.findOneOrFail(+params.id, {
         populate: ['exhibitor', 'table'],
+        disableIdentityMap: true,
       })
       return {
         ...exhibit,

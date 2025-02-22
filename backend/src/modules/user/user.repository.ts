@@ -1,6 +1,5 @@
 // src/modules/user/user.repository.ts
 import { EntityRepository } from '@mikro-orm/postgresql'
-import { wrap } from '@mikro-orm/core'
 import { User } from './user.entity.js'
 import { AuthError } from '../common/errors.js'
 
@@ -48,7 +47,7 @@ export class UserRepository extends EntityRepository<User> {
       logger.debug(`ensureUser found existing user: ${username}`)
       if (isAdministrator) {
         // Administrator rights are only granted, but never revoked from the forum
-        wrap(user).assign({ isAdministrator })
+        user.isAdministrator = true
       }
     } else {
       logger.info(`ensureUser created user: ${username}`)
