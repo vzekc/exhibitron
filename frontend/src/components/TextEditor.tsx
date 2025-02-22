@@ -4,7 +4,6 @@ import { Crepe } from '@milkdown/crepe'
 import { Milkdown, useEditor } from '@milkdown/react'
 
 import '@milkdown/crepe/theme/common/style.css'
-import '@milkdown/crepe/theme/frame.css'
 
 interface TextEditorProps {
   markdown: string
@@ -20,6 +19,12 @@ export const TextEditor: FC<TextEditorProps> = ({
       const crepe = new Crepe({
         root,
         defaultValue: markdown,
+        featureConfigs: {
+          [Crepe.Feature.Placeholder]: {
+            text: 'Text eingeben...',
+            mode: 'doc',
+          },
+        },
       })
       crepe.setReadonly(readonly)
       return crepe

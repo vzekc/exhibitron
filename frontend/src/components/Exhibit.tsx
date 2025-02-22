@@ -8,6 +8,7 @@ import { addBookmark, isBookmarked, removeBookmark } from '../utils/bookmarks'
 import { useUser } from '../contexts/userUtils.ts'
 import { TextEditor } from './TextEditor.tsx'
 import { MilkdownProvider } from '@milkdown/react'
+import ContentEditable, { ContentEditableEvent } from 'react-contenteditable'
 
 backendClient.setConfig({
   baseURL: '/api',
@@ -23,6 +24,7 @@ const Exhibit = () => {
   const exhibit = response.data
   const [bookmarked, setBookmarked] = useState(isBookmarked(Number(id)))
   const { user } = useUser()
+  const [title, setTitle] = useState(exhibit?.title || '')
 
   const handleBookmark = () => {
     if (bookmarked) {
@@ -32,6 +34,9 @@ const Exhibit = () => {
     }
     setBookmarked(!bookmarked) // Update the state to trigger a re-render
   }
+
+  const handleTitleChange = (e: ContentEditableEvent) =>
+    setTitle(e.target.value)
 
   if (!exhibit) {
     return <p>Ausstellung nicht gefunden ({response.status})</p>
@@ -43,7 +48,12 @@ const Exhibit = () => {
   return (
     <MilkdownProvider>
       <article>
-        <h2 contentEditable={editable}>{exhibit.title}</h2>
+        <ContentEditable
+          html={title}
+          disabled={!editable}
+          onChange={handleTitleChange}
+          tagName="h2"
+        />
         <p>Aussteller: {exhibit.exhibitor.fullName}</p>
         {editable ? (
           <select>
