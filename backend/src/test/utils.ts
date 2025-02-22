@@ -20,6 +20,7 @@ export async function initTestApp() {
   // this will create all the ORM services and cache them
   const dbName = `cc-katalog-test-${generateRandomString(8)}`
   createDatabase(dbName)
+
   const { orm } = await initORM({
     // first, include the main config
     ...config,
@@ -67,7 +68,7 @@ export const login = async (
 ) => {
   const res = await app.inject({
     method: 'post',
-    url: '/api/user/sign-in',
+    url: '/api/user/login',
     payload: {
       username,
       password,

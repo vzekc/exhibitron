@@ -70,6 +70,9 @@ importers:
       fastify:
         specifier: ^5.2.1
         version: 5.2.1
+      pino:
+        specifier: ^9.6.0
+        version: 9.6.0
       zod:
         specifier: ^3.24.2
         version: 3.24.2

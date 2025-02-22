@@ -47,8 +47,7 @@ export async function createApp({
       coerceTypes: true,
     },
   })
-
-  oidc.register(app)
+  await oidc.register(app)
   await swagger.register(app)
   await orm.register(app, !!migrate)
   await jwt.register(app)

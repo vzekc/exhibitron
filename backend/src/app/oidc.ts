@@ -4,6 +4,8 @@ import fastifyOauth2 from '@fastify/oauth2'
 import fastifyCookie from '@fastify/cookie'
 import { FastifyInstance } from 'fastify'
 import axios from 'axios'
+import { initORM } from '../db.js'
+import { AuthError } from '../modules/common/errors.js'
 
 const woltlabBaseUrl = 'https://forum.classic-computing.de'
 const woltlabAuth: ProviderConfiguration = {
@@ -12,6 +14,14 @@ const woltlabAuth: ProviderConfiguration = {
   tokenHost: woltlabBaseUrl,
   tokenPath: '/index.php?oauth2-token/',
 }
+
+const administratorRanks = [
+  'Schiedsrichter',
+  'Vorstand',
+  'Moderator',
+  'Administrator',
+]
+const memberRanks = ['Fördermitglied', 'Vereinsmitglied', ...administratorRanks]
 
 const getOAuth2Credentials = (): Credentials | void => {
   const { OIDC_CLIENT_ID: id, OIDC_CLIENT_SECRET: secret } = process.env
@@ -29,6 +39,12 @@ const getOAuth2Credentials = (): Credentials | void => {
   }
 }
 
+type WoltlabUserInfo = {
+  nickname: string
+  email?: string
+  rank: string
+}
+
 const getUserInfo = async (token: string) => {
   const userInfoEndpoint = `${woltlabBaseUrl}/index.php?open-id-user-information/`
   const response = await axios.get(userInfoEndpoint, {
@@ -39,7 +55,9 @@ const getUserInfo = async (token: string) => {
   return response.data as WoltlabUserInfo
 }
 
-export const register = (app: FastifyInstance) => {
+export const register = async (app: FastifyInstance) => {
+  const db = await initORM()
+
   const credentials = getOAuth2Credentials()
   if (!credentials) {
     app.log.warn('OIDC authentication disabled')
@@ -67,7 +85,15 @@ export const register = (app: FastifyInstance) => {
     const userInfo = await getUserInfo(token.access_token)
     console.log('user info:', userInfo)
 
-    request.session.user = { token, userInfo }
+    const { nickname, rank } = userInfo
+
+    if (!memberRanks.includes(rank)) {
+      throw new AuthError(`Dein Benutzerstatus ${rank} ist nicht ausreichend`)
+    }
+
+    await db.user.ensureUser(nickname, administratorRanks.includes(rank))
+
+    request.session.user = { username: userInfo.nickname }
 
     // Redirect the user to the frontend application
     reply.redirect(`/`)

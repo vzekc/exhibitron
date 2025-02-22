@@ -92,7 +92,7 @@ export const postUserSignIn = <ThrowOnError extends boolean = false>(
     PostUserSignInError,
     ThrowOnError
   >({
-    url: '/user/sign-in',
+    url: '/user/login',
     ...options,
     headers: {
       'Content-Type': 'application/json',

@@ -18,7 +18,7 @@ afterAll(async () => {
 test('login', async () => {
   let res = await app.inject({
     method: 'post',
-    url: '/api/user/sign-in',
+    url: '/api/user/login',
     payload: {
       username: 'MeisterEder',
       password: 'password123',
@@ -40,7 +40,7 @@ test('login', async () => {
   expect(res.body).not.toContain('password')
   res = await app.inject({
     method: 'post',
-    url: '/api/user/sign-in',
+    url: '/api/user/login',
     payload: {
       username: 'MeisterEder',
       password: 'password456',
@@ -55,7 +55,7 @@ test('login', async () => {
 test('update', async () => {
   let res = await app.inject({
     method: 'post',
-    url: '/api/user/sign-in',
+    url: '/api/user/login',
     payload: {
       username: 'MeisterEder',
       password: 'password123',

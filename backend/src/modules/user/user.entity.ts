@@ -32,12 +32,11 @@ export class Contacts {
 }
 
 @Entity({ repository: () => UserRepository })
-export class User extends BaseEntity<'isAdministrator' | 'fullName' | 'bio'> {
+export class User extends BaseEntity<
+  'password' | 'isAdministrator' | 'fullName' | 'bio' | 'contacts'
+> {
   // for automatic inference via `em.getRepository(User)`
   [EntityRepositoryType]?: UserRepository
-
-  @Property({ persist: false })
-  token?: string
 
   @Property()
   fullName: string = ''
@@ -45,8 +44,11 @@ export class User extends BaseEntity<'isAdministrator' | 'fullName' | 'bio'> {
   @Property({ unique: true, index: true })
   username!: string
 
+  @Property({ persist: false })
+  token?: string
+
   @Property({ lazy: true })
-  password!: string
+  password?: string
 
   @Property({ type: 'text' })
   bio: string = ''
@@ -81,6 +83,6 @@ export class User extends BaseEntity<'isAdministrator' | 'fullName' | 'bio'> {
   }
 
   async verifyPassword(password: string) {
-    return verify(this.password, password)
+    return this.password && verify(this.password, password)
   }
 }

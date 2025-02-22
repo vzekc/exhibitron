@@ -1,5 +1,5 @@
 // src/types/fastify.d.ts
-import { OAuth2Namespace, Token } from '@fastify/oauth2'
+import { OAuth2Namespace } from '@fastify/oauth2'
 import { User } from '../modules/user/user.entity.js'
 
 declare module 'fastify' {
@@ -17,8 +17,7 @@ declare module '@fastify/jwt' {
 declare module '@fastify/session' {
   interface FastifySessionObject {
     user?: {
-      token: Token
-      userInfo: WoltlabUserInfo
+      username: string
     }
   }
 }

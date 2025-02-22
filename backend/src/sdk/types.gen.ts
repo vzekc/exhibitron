@@ -65,7 +65,7 @@ export type PostUserSignInData = {
   }
   path?: never
   query?: never
-  url: '/user/sign-in'
+  url: '/user/login'
 }
 
 export type PostUserSignInErrors = {

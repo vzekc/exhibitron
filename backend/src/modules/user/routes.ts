@@ -3,7 +3,7 @@ import { initORM } from '../../db.js'
 import { wrap } from '@mikro-orm/core'
 import { getUserFromToken } from '../common/utils.js'
 import { User } from './user.entity.js'
-import { BadRequestError, errorSchema } from '../common/errors.js'
+import { errorSchema } from '../common/errors.js'
 import { exhibitBaseSchema } from '../exhibit/routes.js'
 
 export const userBaseSchema = () => ({
@@ -56,55 +56,8 @@ export async function registerUserRoutes(app: FastifyInstance) {
     }
   }
 
-  // register new user
   app.post(
-    '/sign-up',
-    {
-      schema: {
-        description: 'Create a user account',
-        body: {
-          ...userBaseSchema(),
-          required: ['username', 'password'],
-          properties: {
-            ...userBaseSchema().properties,
-            password: { type: 'string', examples: ['geheim'] },
-          },
-        },
-        response: {
-          200: {
-            description: 'The user account was created',
-            ...userResponseSchema(),
-          },
-          400: {
-            description: 'The user account could not be created.',
-            ...errorSchema,
-          },
-        },
-      },
-    },
-    async (request) => {
-      const body = request.body as User
-
-      if (await db.user.exists(body.username)) {
-        throw new BadRequestError(
-          'This username is already registered, maybe you want to sign in?',
-        )
-      }
-
-      const user = db.user.create(body)
-      await db.em.flush()
-
-      user.token = app.jwt.sign({ id: user.id })
-
-      // after flush, we have the `user.id` set
-      console.log(`User ${user.id} created`)
-
-      return user
-    },
-  )
-
-  app.post(
-    '/sign-in',
+    '/login',
     {
       schema: {
         description: 'Log in',
@@ -147,11 +100,10 @@ export async function registerUserRoutes(app: FastifyInstance) {
         username: string
         password: string
       }
-      const user = await makeUserResponse(
-        await db.user.login(username, password),
-      )
+      const user = await db.user.login(username, password)
       user.token = app.jwt.sign({ id: user.id })
-      return user
+      request.session.user = { username }
+      return makeUserResponse(user)
     },
   )
 
