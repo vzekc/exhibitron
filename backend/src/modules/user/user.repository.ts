@@ -46,11 +46,16 @@ export class UserRepository extends EntityRepository<User> {
     let user = await this.findOne({ username })
     if (user) {
       logger.debug(`ensureUser found existing user: ${username}`)
-      wrap(user).assign({ isAdministrator })
+      if (isAdministrator) {
+        // Administrator rights are only granted, but never revoked from the forum
+        wrap(user).assign({ isAdministrator })
+      }
     } else {
       logger.info(`ensureUser created user: ${username}`)
       user = this.create({ username, isAdministrator })
+      this.getEntityManager().persist(user)
     }
+    await this.getEntityManager().flush()
     return user
   }
 }
