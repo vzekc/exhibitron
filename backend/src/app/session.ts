@@ -16,5 +16,12 @@ export const register = (app: FastifyInstance) => {
 
   app.register(fastifySession, {
     secret: getSessionSecret(),
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      sameSite: 'lax',
+      path: '/',
+    },
+    saveUninitialized: false,
   })
 }

@@ -3,6 +3,7 @@ import type { Credentials, ProviderConfiguration } from '@fastify/oauth2'
 import fastifyOauth2 from '@fastify/oauth2'
 import fastifyCookie from '@fastify/cookie'
 import { FastifyInstance } from 'fastify'
+import axios from 'axios'
 
 const woltlabBaseUrl = 'https://forum.classic-computing.de'
 const woltlabAuth: ProviderConfiguration = {
@@ -28,6 +29,16 @@ const getOAuth2Credentials = (): Credentials | void => {
   }
 }
 
+const getUserInfo = async (token: string) => {
+  const userInfoEndpoint = `${woltlabBaseUrl}/index.php?open-id-user-information/`
+  const response = await axios.get(userInfoEndpoint, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+  return response.data as WoltlabUserInfo
+}
+
 export const register = (app: FastifyInstance) => {
   const credentials = getOAuth2Credentials()
   if (!credentials) {
@@ -50,13 +61,15 @@ export const register = (app: FastifyInstance) => {
     const { token } =
       await this.forumOAuth2.getAccessTokenFromAuthorizationCodeFlow(request)
 
-    console.log('/auth/callback', token)
+    console.log('token:', token)
 
-    // if later need to refresh the token this can be used
-    // const { token: newToken } = await this.getNewAccessTokenUsingRefreshToken(token)
+    // Retrieve user info from IdP
+    const userInfo = await getUserInfo(token.access_token)
+    console.log('user info:', userInfo)
 
-    reply.send({ access_token: token.access_token })
+    request.session.user = { token, userInfo }
 
-    app.log.info('OIDC authentication enabled')
+    // Redirect the user to the frontend application
+    reply.redirect(`/`)
   })
 }
