@@ -46,6 +46,7 @@ const NavBar = () => {
         </li>
         {user ? (
           <li>
+            @{user.username}{' '}
             <a href="#" onClick={handleLogout}>
               Logout
             </a>
