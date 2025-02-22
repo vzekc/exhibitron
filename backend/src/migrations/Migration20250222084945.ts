@@ -1,7 +1,11 @@
 import { Migration } from '@mikro-orm/migrations'
 
-export class Migration20250222063720 extends Migration {
+export class Migration20250222084945 extends Migration {
   override async up(): Promise<void> {
+    this.addSql(
+      `create table "session" ("sid" varchar(255) not null, "sess" jsonb not null, "expire" timestamptz not null, constraint "session_pkey" primary key ("sid"));`,
+    )
+
     this.addSql(
       `create table "user" ("id" serial primary key, "created_at" timestamptz not null, "updated_at" timestamptz null, "full_name" varchar(255) not null default '', "username" varchar(255) not null, "password" varchar(255) null, "bio" text not null default '', "is_administrator" boolean not null default false, "contacts" jsonb not null);`,
     )

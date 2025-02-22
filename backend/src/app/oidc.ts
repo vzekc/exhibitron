@@ -74,16 +74,11 @@ export const register = async (app: FastifyInstance) => {
   })
 
   app.get('/auth/callback', async function (request, reply) {
-    console.log('handling oauth callback', request.cookies)
-
     const { token } =
       await this.forumOAuth2.getAccessTokenFromAuthorizationCodeFlow(request)
 
-    console.log('token:', token)
-
     // Retrieve user info from IdP
     const userInfo = await getUserInfo(token.access_token)
-    console.log('user info:', userInfo)
 
     const { nickname, rank } = userInfo
 

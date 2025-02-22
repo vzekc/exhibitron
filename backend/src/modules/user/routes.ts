@@ -151,9 +151,8 @@ export async function registerUserRoutes(app: FastifyInstance) {
         },
       },
     },
-    async (request) => {
+    async () => {
       const users = await db.user.findAll({ populate: ['tables', 'exhibits'] })
-      console.log('user', request.session.user)
       return {
         items: await Promise.all(users.map(makeUserResponse)),
         total: users.length,

@@ -1,8 +1,12 @@
 import 'dotenv/config'
 import fastifySession from '@fastify/session'
 import { FastifyInstance } from 'fastify'
+import { SessionStore } from '../modules/session/session-store.js'
+import { initORM } from '../db.js'
 
-export const register = (app: FastifyInstance) => {
+export const register = async (app: FastifyInstance) => {
+  const db = await initORM()
+
   const getSessionSecret = () => {
     const secret = process.env.SESSION_SECRET
     if (secret) {
@@ -15,6 +19,7 @@ export const register = (app: FastifyInstance) => {
   }
 
   app.register(fastifySession, {
+    store: new SessionStore(db.em),
     secret: getSessionSecret(),
     cookie: {
       secure: process.env.NODE_ENV === 'production',
@@ -23,5 +28,14 @@ export const register = (app: FastifyInstance) => {
       path: '/',
     },
     saveUninitialized: false,
+  })
+
+  app.addHook('onRequest', async (request) => {
+    if (request.session.user) {
+      request.user = await db.user.findOneOrFail({
+        username: request.session.user.username,
+      })
+      app.log.debug(`User: ${request.user.username} set from session`)
+    }
   })
 }
