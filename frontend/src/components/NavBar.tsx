@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
-import { useUser } from '../contexts/UserContext.tsx'
 import * as backend from '../api/index'
+import { useUser } from '../contexts/userUtils.ts'
 
 const NavBar = () => {
   const [searchQuery, setSearchQuery] = useState('')
