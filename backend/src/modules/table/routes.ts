@@ -1,9 +1,47 @@
 import { FastifyInstance } from 'fastify'
 import { initORM } from '../../db.js'
 import { errorSchema, PermissionDeniedError } from '../common/errors.js'
+import { userBaseResponseSchema } from '../user/routes.js'
 
 export async function registerTableRoutes(app: FastifyInstance) {
   const db = await initORM()
+
+  app.get(
+    '/:number',
+    {
+      schema: {
+        description: 'Retrieve the status of a table',
+        params: {
+          type: 'object',
+          properties: {
+            number: {
+              type: 'integer',
+              description: 'Number of the table to inspect',
+            },
+          },
+          required: ['number'],
+        },
+        response: {
+          200: {
+            description: 'Owner of the table',
+            properties: {
+              exhibitor: {
+                anyOf: [userBaseResponseSchema(), { type: 'null' }],
+              },
+            },
+          },
+          404: errorSchema,
+        },
+      },
+    },
+    async (request) => {
+      const { number } = request.params as { number: string }
+      return await db.table.findOneOrFail(
+        { id: +number },
+        { populate: ['exhibitor'] },
+      )
+    },
+  )
 
   app.post(
     '/:number/claim',

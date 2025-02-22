@@ -9,29 +9,32 @@ import { Suspense } from 'react'
 import Exhibit from './components/Exhibit.tsx'
 import Bookmarks from './components/Bookmarks.tsx'
 import TableSearchResult from './components/TableSearchResult.tsx'
+import { UserProvider } from './contexts/UserContext.tsx'
 
 const App = () => (
   <Router>
-    <main className="container">
-      <NavBar />
-      <ErrorBoundary
-        fallback={
-          <p style={{ color: 'red' }}>
-            Irgendwas ist schief gegangen - Versuch's noch mal!
-          </p>
-        }>
-        <Suspense fallback={<p>Laden...</p>}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/exhibits" element={<ExhibitList />} />
-            <Route path="/exhibit/:id" element={<Exhibit />} />
-            <Route path="/schedule" element={<Schedule />} />
-            <Route path="/bookmarks" element={<Bookmarks />} />
-            <Route path="/table/:id" element={<TableSearchResult />} />
-          </Routes>
-        </Suspense>
-      </ErrorBoundary>
-    </main>
+    <Suspense fallback={<p>Laden...</p>}>
+      <UserProvider>
+        <main className="container">
+          <NavBar />
+          <ErrorBoundary
+            fallback={
+              <p style={{ color: 'red' }}>
+                Irgendwas ist schief gegangen - Versuch's noch mal!
+              </p>
+            }>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/exhibits" element={<ExhibitList />} />
+              <Route path="/exhibit/:id" element={<Exhibit />} />
+              <Route path="/schedule" element={<Schedule />} />
+              <Route path="/bookmarks" element={<Bookmarks />} />
+              <Route path="/table/:id" element={<TableSearchResult />} />
+            </Routes>
+          </ErrorBoundary>
+        </main>
+      </UserProvider>
+    </Suspense>
   </Router>
 )
 

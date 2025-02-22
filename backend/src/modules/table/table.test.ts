@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify'
 import { afterAll, beforeAll, expect, test } from 'vitest'
-import { initTestApp, deleteDatabase, login } from '../../test/utils.js'
+import { deleteDatabase, initTestApp, login } from '../../test/utils.js'
 
 let app: FastifyInstance
 let dbName: string
@@ -72,4 +72,22 @@ test('claim and release', async () => {
   // expect that donald can claim the table now (already owns it)
   res = await tablePost('/table/2/claim', donald)
   expect(res).toHaveStatus(204)
+
+  // expect that the table is reported as free
+  res = await app.inject({ method: 'get', url: '/api/table/7' })
+  expect(res).toHaveStatus(200)
+  expect(res.json()).toMatchObject({ exhibitor: null })
+
+  // expect that donald can claim the table
+  res = await tablePost('/table/7/claim', donald)
+  expect(res).toHaveStatus(204)
+
+  // check that donald is now the owner of the table
+  res = await app.inject({ method: 'get', url: '/api/table/7' })
+  expect(res).toHaveStatus(200)
+  expect(res.json()).toMatchObject({ exhibitor: { username: 'donald' } })
+
+  // check that a nonexistent table is correctly reported
+  res = await app.inject({ method: 'get', url: '/api/table/2000' })
+  expect(res).toHaveStatus(404)
 })

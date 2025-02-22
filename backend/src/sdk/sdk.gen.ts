@@ -6,18 +6,19 @@ import type {
   Client,
 } from '@hey-api/client-axios'
 import type {
-  PostUserSignUpData,
-  PostUserSignUpResponse,
-  PostUserSignUpError,
-  PostUserSignInData,
-  PostUserSignInResponse,
-  PostUserSignInError,
+  PostAuthLogoutData,
+  PostAuthLogoutResponse,
+  PostUserLoginData,
+  PostUserLoginResponse,
+  PostUserLoginError,
   GetUserProfileData,
   GetUserProfileResponse,
   GetUserProfileError,
   PatchUserProfileData,
   PatchUserProfileResponse,
   PatchUserProfileError,
+  GetUserData,
+  GetUserResponse,
   GetUserByIdData,
   GetUserByIdResponse,
   GetUserByIdError,
@@ -32,6 +33,9 @@ import type {
   PatchExhibitByIdData,
   PatchExhibitByIdResponse,
   PatchExhibitByIdError,
+  GetTableByNumberData,
+  GetTableByNumberResponse,
+  GetTableByNumberError,
   PostTableByNumberClaimData,
   PostTableByNumberClaimResponse,
   PostTableByNumberClaimError,
@@ -62,34 +66,30 @@ export type Options<
 }
 
 /**
- * Create a user account
+ * Log out the current user and destroy the session
  */
-export const postUserSignUp = <ThrowOnError extends boolean = false>(
-  options: Options<PostUserSignUpData, ThrowOnError>,
+export const postAuthLogout = <ThrowOnError extends boolean = false>(
+  options?: Options<PostAuthLogoutData, ThrowOnError>,
 ) => {
-  return (options.client ?? _heyApiClient).post<
-    PostUserSignUpResponse,
-    PostUserSignUpError,
+  return (options?.client ?? _heyApiClient).post<
+    PostAuthLogoutResponse,
+    unknown,
     ThrowOnError
   >({
-    url: '/user/sign-up',
+    url: '/auth/logout',
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
   })
 }
 
 /**
  * Log in
  */
-export const postUserSignIn = <ThrowOnError extends boolean = false>(
-  options: Options<PostUserSignInData, ThrowOnError>,
+export const postUserLogin = <ThrowOnError extends boolean = false>(
+  options: Options<PostUserLoginData, ThrowOnError>,
 ) => {
   return (options.client ?? _heyApiClient).post<
-    PostUserSignInResponse,
-    PostUserSignInError,
+    PostUserLoginResponse,
+    PostUserLoginError,
     ThrowOnError
   >({
     url: '/user/login',
@@ -134,6 +134,22 @@ export const patchUserProfile = <ThrowOnError extends boolean = false>(
       'Content-Type': 'application/json',
       ...options?.headers,
     },
+  })
+}
+
+/**
+ * Retrieve the full user list
+ */
+export const getUser = <ThrowOnError extends boolean = false>(
+  options?: Options<GetUserData, ThrowOnError>,
+) => {
+  return (options?.client ?? _heyApiClient).get<
+    GetUserResponse,
+    unknown,
+    ThrowOnError
+  >({
+    url: '/user/',
+    ...options,
   })
 }
 
@@ -222,6 +238,22 @@ export const patchExhibitById = <ThrowOnError extends boolean = false>(
       'Content-Type': 'application/json',
       ...options?.headers,
     },
+  })
+}
+
+/**
+ * Retrieve the status of a table
+ */
+export const getTableByNumber = <ThrowOnError extends boolean = false>(
+  options: Options<GetTableByNumberData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).get<
+    GetTableByNumberResponse,
+    GetTableByNumberError,
+    ThrowOnError
+  >({
+    url: '/table/{number}',
+    ...options,
   })
 }
 

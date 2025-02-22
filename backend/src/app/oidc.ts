@@ -2,7 +2,7 @@ import 'dotenv/config'
 import type { Credentials, ProviderConfiguration } from '@fastify/oauth2'
 import fastifyOauth2 from '@fastify/oauth2'
 import fastifyCookie from '@fastify/cookie'
-import { FastifyInstance } from 'fastify'
+import { FastifyInstance, FastifyRequest } from 'fastify'
 import axios from 'axios'
 import { initORM } from '../db.js'
 import { AuthError } from '../modules/common/errors.js'
@@ -69,9 +69,25 @@ export const register = async (app: FastifyInstance) => {
     name: 'forumOAuth2',
     scope: ['openid', 'nickname', 'email', 'rank', 'profile'],
     credentials,
-    startRedirectPath: '/auth/forum',
     callbackUri: (req) => `${req.protocol}://${req.headers.host}/auth/callback`,
   })
+
+  interface AuthForumQuery {
+    redirectUrl?: string
+  }
+
+  app.get(
+    '/auth/forum',
+    async (request: FastifyRequest<{ Querystring: AuthForumQuery }>, reply) => {
+      const redirectUrl = request.headers.referer || '/'
+      const authUrl = await app.forumOAuth2.generateAuthorizationUri(
+        request,
+        reply,
+      )
+      request.session.redirectUrl = redirectUrl
+      return reply.redirect(authUrl)
+    },
+  )
 
   app.get('/auth/callback', async function (request, reply) {
     const { token } =
@@ -90,7 +106,10 @@ export const register = async (app: FastifyInstance) => {
 
     request.session.user = { username: userInfo.nickname }
 
+    const { redirectUrl } = request.session
+    delete request.session['redirectUrl']
+
     // Redirect the user to the frontend application
-    reply.redirect(`/`)
+    return reply.redirect(redirectUrl ?? '/')
   })
 }

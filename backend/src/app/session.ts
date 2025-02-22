@@ -38,4 +38,29 @@ export const register = async (app: FastifyInstance) => {
       app.log.debug(`User: ${request.user.username} set from session`)
     }
   })
+
+  app.post(
+    '/api/auth/logout',
+    {
+      schema: {
+        description: 'Log out the current user and destroy the session',
+        response: {
+          204: {
+            description:
+              'The user was logged out and the session was destroyed',
+            type: 'null',
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      if (request.session) {
+        await request.session.destroy()
+      }
+      reply
+        .setCookie('sessionid', '', { path: '/', expires: new Date(0) })
+        .status(204)
+        .send()
+    },
+  )
 }

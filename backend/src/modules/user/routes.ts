@@ -28,7 +28,8 @@ export const userBaseSchema = () => ({
   additionalProperties: false,
 })
 
-const userResponseSchema = () => ({
+// An existing user reported without their tables or exhibitions
+export const userBaseResponseSchema = () => ({
   ...userBaseSchema(),
   required: ['id', 'username', 'isAdministrator'],
   properties: {
@@ -36,6 +37,14 @@ const userResponseSchema = () => ({
     username: { type: 'string', examples: ['donald'] },
     ...userBaseSchema().properties,
     isAdministrator: { type: 'boolean' },
+  },
+})
+
+export const userResponseSchema = () => ({
+  ...userBaseResponseSchema(),
+  required: ['id', 'username', 'isAdministrator'],
+  properties: {
+    ...userBaseResponseSchema().properties,
     tables: { type: 'array', items: { type: 'number' } },
     exhibits: { type: 'array', items: exhibitBaseSchema() },
   },

@@ -19,5 +19,6 @@ declare module '@fastify/session' {
     user?: {
       username: string
     }
+    redirectUrl?: string
   }
 }

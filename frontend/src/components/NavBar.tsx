@@ -1,9 +1,12 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import { useUser } from '../contexts/UserContext.tsx'
+import * as backend from '../api/index'
 
 const NavBar = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const navigate = useNavigate()
+  const { user } = useUser()
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
@@ -21,6 +24,11 @@ const NavBar = () => {
     }
   }
 
+  const handleLogout = async () => {
+    await backend.postAuthLogout()
+    window.location.reload()
+  }
+
   return (
     <nav>
       <ul>
@@ -36,9 +44,17 @@ const NavBar = () => {
         <li>
           <Link to="/bookmarks">Lesezeichen</Link>
         </li>
-        <li>
-          <a href="/auth/forum">Login</a>
-        </li>
+        {user ? (
+          <li>
+            <a href="#" onClick={handleLogout}>
+              Logout
+            </a>
+          </li>
+        ) : (
+          <li>
+            <a href="/auth/forum">Login</a>
+          </li>
+        )}
       </ul>
       <form onSubmit={handleSearchSubmit}>
         <input
