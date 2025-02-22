@@ -36,6 +36,9 @@ const NavBar = () => {
         <li>
           <Link to="/bookmarks">Lesezeichen</Link>
         </li>
+        <li>
+          <a href="/auth/forum">Login</a>
+        </li>
       </ul>
       <form onSubmit={handleSearchSubmit}>
         <input

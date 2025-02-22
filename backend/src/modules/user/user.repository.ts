@@ -4,8 +4,10 @@ import { wrap } from '@mikro-orm/core'
 import { User } from './user.entity.js'
 import { AuthError } from '../common/errors.js'
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const logger = require('pino')()
+import pino from 'pino'
+
+// @ts-expect-error ts2349
+const logger = pino()
 
 export class UserRepository extends EntityRepository<User> {
   async exists(username: string) {
