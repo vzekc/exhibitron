@@ -33,6 +33,16 @@
           "length": 6,
           "mappedType": "datetime"
         },
+        "event_id": {
+          "name": "event_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
         "name": {
           "name": "name",
           "type": "varchar(255)",
@@ -59,7 +69,7 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "length": 255,
           "mappedType": "string"
         },
@@ -86,9 +96,17 @@
       "schema": "public",
       "indexes": [
         {
-          "columnNames": ["email"],
+          "columnNames": ["event_id"],
           "composite": false,
-          "keyName": "registration_email_unique",
+          "keyName": "registration_event_id_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "registration_event_id_email_unique",
+          "columnNames": ["event_id", "email"],
+          "composite": true,
           "constraint": true,
           "primary": false,
           "unique": true

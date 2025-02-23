@@ -609,9 +609,48 @@ export type PostTableByNumberAssignToByUserIdResponses = {
 export type PostTableByNumberAssignToByUserIdResponse =
   PostTableByNumberAssignToByUserIdResponses[keyof PostTableByNumberAssignToByUserIdResponses]
 
-export type PostRegistrationData = {
+export type GetRegistrationByEventIdData = {
+  body?: never
+  path: {
+    /**
+     * ID of the event to register for
+     */
+    eventId: string
+  }
+  query?: never
+  url: '/registration/{eventId}'
+}
+
+export type GetRegistrationByEventIdResponses = {
   /**
-   * Registration data, note that other properties are allowed and stored in the registration data field
+   * Default Response
+   */
+  200: Array<{
+    /**
+     * Unique ID of the registration
+     */
+    id: number
+    /**
+     * Timestamp when the registration was created
+     */
+    createdAt: string
+    updatedAt?: string | unknown
+    name: string
+    email: string
+    nickname?: string
+    message?: string
+    data: {
+      [key: string]: unknown
+    }
+  }>
+}
+
+export type GetRegistrationByEventIdResponse =
+  GetRegistrationByEventIdResponses[keyof GetRegistrationByEventIdResponses]
+
+export type PostRegistrationByEventIdData = {
+  /**
+   * Registration data, the data field contains event specific properties
    */
   body: {
     name: string
@@ -622,20 +661,38 @@ export type PostRegistrationData = {
       [key: string]: unknown
     }
   }
-  path?: never
+  path: {
+    /**
+     * ID of the event to register for
+     */
+    eventId: string
+  }
   query?: never
-  url: '/registration/'
+  url: '/registration/{eventId}'
 }
 
-export type PostRegistrationResponses = {
+export type PostRegistrationByEventIdErrors = {
+  /**
+   * The email address is already registered for the given event
+   */
+  409: {
+    error?: string
+    [key: string]: unknown | string | undefined
+  }
+}
+
+export type PostRegistrationByEventIdError =
+  PostRegistrationByEventIdErrors[keyof PostRegistrationByEventIdErrors]
+
+export type PostRegistrationByEventIdResponses = {
   /**
    * The registration was created
    */
   204: void
 }
 
-export type PostRegistrationResponse =
-  PostRegistrationResponses[keyof PostRegistrationResponses]
+export type PostRegistrationByEventIdResponse =
+  PostRegistrationByEventIdResponses[keyof PostRegistrationByEventIdResponses]
 
 export type ClientOptions = {
   baseURL: `${string}://${string}/api` | (string & {})

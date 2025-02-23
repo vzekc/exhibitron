@@ -41,6 +41,15 @@ const NavBar = () => {
         <li>
           <Link to="/schedule">Zeitplan</Link>
         </li>
+        {user?.isAdministrator && (
+          <li>
+            <DropdownMenu label="Verwaltung">
+              <li>
+                <Link to="/admin/registration">Anmeldungen</Link>
+              </li>
+            </DropdownMenu>
+          </li>
+        )}
       </ul>
       <ul>
         {user ? (

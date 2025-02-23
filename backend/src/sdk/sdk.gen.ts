@@ -45,8 +45,11 @@ import type {
   PostTableByNumberAssignToByUserIdData,
   PostTableByNumberAssignToByUserIdResponse,
   PostTableByNumberAssignToByUserIdError,
-  PostRegistrationData,
-  PostRegistrationResponse,
+  GetRegistrationByEventIdData,
+  GetRegistrationByEventIdResponse,
+  PostRegistrationByEventIdData,
+  PostRegistrationByEventIdResponse,
+  PostRegistrationByEventIdError,
 } from './types.gen'
 import { client as _heyApiClient } from './client.gen'
 
@@ -328,17 +331,33 @@ export const postTableByNumberAssignToByUserId = <
 }
 
 /**
- * Create a registration
+ * Retrieve all registrations
  */
-export const postRegistration = <ThrowOnError extends boolean = false>(
-  options: Options<PostRegistrationData, ThrowOnError>,
+export const getRegistrationByEventId = <ThrowOnError extends boolean = false>(
+  options: Options<GetRegistrationByEventIdData, ThrowOnError>,
 ) => {
-  return (options.client ?? _heyApiClient).post<
-    PostRegistrationResponse,
+  return (options.client ?? _heyApiClient).get<
+    GetRegistrationByEventIdResponse,
     unknown,
     ThrowOnError
   >({
-    url: '/registration/',
+    url: '/registration/{eventId}',
+    ...options,
+  })
+}
+
+/**
+ * Create a registration
+ */
+export const postRegistrationByEventId = <ThrowOnError extends boolean = false>(
+  options: Options<PostRegistrationByEventIdData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).post<
+    PostRegistrationByEventIdResponse,
+    PostRegistrationByEventIdError,
+    ThrowOnError
+  >({
+    url: '/registration/{eventId}',
     ...options,
     headers: {
       'Content-Type': 'application/json',

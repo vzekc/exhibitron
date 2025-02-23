@@ -1,7 +1,17 @@
 import { Migration } from '@mikro-orm/migrations'
 
-export class Migration20250222084945 extends Migration {
+export class Migration20250223144554 extends Migration {
   override async up(): Promise<void> {
+    this.addSql(
+      `create table "registration" ("id" serial primary key, "created_at" timestamptz not null, "updated_at" timestamptz null, "event_id" varchar(255) not null, "name" varchar(255) not null, "email" varchar(255) not null, "nickname" varchar(255) not null, "message" text null, "data" jsonb not null);`,
+    )
+    this.addSql(
+      `create index "registration_event_id_index" on "registration" ("event_id");`,
+    )
+    this.addSql(
+      `alter table "registration" add constraint "registration_event_id_email_unique" unique ("event_id", "email");`,
+    )
+
     this.addSql(
       `create table "session" ("sid" varchar(255) not null, "sess" jsonb not null, "expire" timestamptz not null, constraint "session_pkey" primary key ("sid"));`,
     )
