@@ -1,16 +1,33 @@
 import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import * as backend from '../api/index'
 import { useUser } from '../contexts/userUtils.ts'
 import DropdownMenu from './DropdownMenu.tsx'
 import SearchTableNumber from './SearchTableNumber.tsx'
+import { getBookmarks } from '../utils/bookmarks.ts'
 
 const NavBar = () => {
   const { user } = useUser()
+  const [hasBookmarks, setHasBookmarks] = useState(getBookmarks().length > 0)
 
   const handleLogout = async () => {
     await backend.postAuthLogout()
     window.location.reload()
   }
+
+  useEffect(() => {
+    const updateBookmarks = () => {
+      setHasBookmarks(getBookmarks().length > 0)
+    }
+
+    window.addEventListener('storage', updateBookmarks)
+    window.addEventListener('bookmarksUpdated', updateBookmarks)
+
+    return () => {
+      window.removeEventListener('storage', updateBookmarks)
+      window.removeEventListener('bookmarksUpdated', updateBookmarks)
+    }
+  }, [])
 
   return (
     <nav>
@@ -48,7 +65,7 @@ const NavBar = () => {
           <Link to="/bookmarks">
             <button className="button image-only-button">
               <img
-                src="/bookmark.svg"
+                src={hasBookmarks ? '/bookmarked.svg' : '/bookmark.svg'}
                 className="button-image inverted-image"></img>
             </button>
           </Link>

@@ -70,8 +70,10 @@ const Exhibit = () => {
         {(exhibit.text || editable) && (
           <TextEditor markdown={exhibit.text || ''} readonly={!editable} />
         )}
-        <button onClick={handleBookmark}>
-          {bookmarked ? 'Lesezeichen entfernen' : 'Lesezeichen setzen'}
+        <button onClick={handleBookmark} className="button image-only-button">
+          <img
+            src={bookmarked ? '/bookmarked.svg' : '/bookmark.svg'}
+            className="button-image inverted-image"></img>
         </button>
       </article>
     </MilkdownProvider>

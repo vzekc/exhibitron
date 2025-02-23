@@ -10,6 +10,7 @@ export const addBookmark = (exhibit: Exhibit) => {
   if (!bookmarks.some((b) => b.id === exhibit.id)) {
     bookmarks.push(exhibit)
     localStorage.setItem('bookmarks', JSON.stringify(bookmarks))
+    window.dispatchEvent(new Event('bookmarksUpdated'))
   }
 }
 
@@ -17,6 +18,7 @@ export const removeBookmark = (id: number) => {
   let bookmarks = getBookmarks()
   bookmarks = bookmarks.filter((bookmark) => bookmark.id !== id)
   localStorage.setItem('bookmarks', JSON.stringify(bookmarks))
+  window.dispatchEvent(new Event('bookmarksUpdated'))
 }
 
 export const isBookmarked = (id: number): boolean => {

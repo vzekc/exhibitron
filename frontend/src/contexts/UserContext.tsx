@@ -1,5 +1,5 @@
 import { ReactNode, use } from 'react'
-import { fetchUserProfile, UserContext as UserContext1 } from './userUtils.ts'
+import { fetchUserProfile, UserContext } from './userUtils.ts'
 
 interface UserProviderProps {
   children: ReactNode
@@ -8,5 +8,5 @@ interface UserProviderProps {
 export const UserProvider = ({ children }: UserProviderProps) => {
   const user = use(fetchUserProfile)
 
-  return <UserContext1 value={{ user }}>{children}</UserContext1>
+  return <UserContext value={{ user }}>{children}</UserContext>
 }
