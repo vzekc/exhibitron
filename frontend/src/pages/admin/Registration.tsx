@@ -49,10 +49,22 @@ const downloadCSV = (csv: string, filename: string) => {
   window.URL.revokeObjectURL(url)
 }
 
+const tableColumns = [
+  'id',
+  'name',
+  'email',
+  'nickname',
+  'message',
+  'createdAt',
+  'updatedAt',
+] as const
+
+type TableColumn = (typeof tableColumns)[number]
+
 const Registration = () => {
   const registrations = use(data)
   const [sortConfig, setSortConfig] = useState<{
-    key: string
+    key: (typeof tableColumns)[number]
     direction: 'ascending' | 'descending'
   } | null>(null)
   const [hoveredRow, setHoveredRow] = useState<number | null>(null)
@@ -76,7 +88,7 @@ const Registration = () => {
     return registrations
   }, [registrations, sortConfig])
 
-  const requestSort = (key: string) => {
+  const requestSort = (key: TableColumn) => {
     let direction: 'ascending' | 'descending' = 'ascending'
     if (
       sortConfig &&
@@ -92,16 +104,6 @@ const Registration = () => {
     setTooltipPosition({ x: event.clientX, y: event.clientY })
   }
 
-  const columns = [
-    'id',
-    'name',
-    'email',
-    'nickname',
-    'message',
-    'createdAt',
-    'updatedAt',
-  ]
-
   const handleDownload = () => {
     const csv = generateCSV(registrations)
     downloadCSV(csv, 'registrations.csv')
@@ -115,7 +117,7 @@ const Registration = () => {
       <table>
         <thead>
           <tr>
-            {columns.map((column) => (
+            {tableColumns.map((column) => (
               <th key={column} onClick={() => requestSort(column)}>
                 {column}
               </th>
@@ -129,7 +131,7 @@ const Registration = () => {
               onMouseEnter={() => setHoveredRow(index)}
               onMouseLeave={() => setHoveredRow(null)}
               onMouseMove={handleMouseMove}>
-              {columns.map((column) => (
+              {tableColumns.map((column) => (
                 <td key={column}>{registration[column]}</td>
               ))}
               {hoveredRow === index && (
@@ -137,7 +139,7 @@ const Registration = () => {
                   className="tooltip"
                   style={{ top: tooltipPosition.y, left: tooltipPosition.x }}>
                   <table>
-                    {columns.map((column) => (
+                    {tableColumns.map((column) => (
                       <tr key={column}>
                         <td>{column}</td>
                         <td>{registration[column]}</td>
