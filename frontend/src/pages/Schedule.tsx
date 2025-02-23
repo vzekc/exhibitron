@@ -1,5 +1,5 @@
 const Schedule = () => (
-  <div>
+  <article>
     <h2>Zeitplan</h2>
     <div>
       <h3>Samstag</h3>
@@ -35,7 +35,7 @@ const Schedule = () => (
         </li>
       </ul>
     </div>
-  </div>
+  </article>
 )
 
 export default Schedule

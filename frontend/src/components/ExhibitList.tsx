@@ -1,24 +1,44 @@
-import { use } from 'react'
-import exhibitListService from '../services/exhibitListService'
-import ExhibitTable from './ExhibitTable'
-import './ExhibitList.css'
+import { useNavigate } from 'react-router-dom'
+import { ExhibitListItem } from '../types'
 
-const dataPromise = exhibitListService.fetchExhibits()
+interface ExhibitListProps {
+  exhibits: ExhibitListItem[]
+  notFoundLabel?: string
+}
 
-const ExhibitList = () => {
-  const exhibits = use(dataPromise) // Suspense will handle loading state
+const ExhibitList = ({ exhibits, notFoundLabel }: ExhibitListProps) => {
+  const navigate = useNavigate()
 
-  const sortedExhibits = exhibits.sort((a, b) => {
-    const titleA = a.title?.toLowerCase() || ''
-    const titleB = b.title?.toLowerCase() || ''
-    return titleA.localeCompare(titleB)
-  })
+  const handleRowClick = (id: number) => {
+    navigate(`/exhibit/${id}`)
+  }
+
+  if (!exhibits.length) {
+    return <p>{notFoundLabel || 'Keine Ausstellungen gefunden'}</p>
+  }
 
   return (
-    <article>
-      <h2>Liste der Ausstellungen</h2>
-      <ExhibitTable exhibits={sortedExhibits} />
-    </article>
+    <table>
+      <thead>
+        <tr>
+          <th>Titel</th>
+          <th>Aussteller</th>
+          <th>Tisch</th>
+        </tr>
+      </thead>
+      <tbody>
+        {exhibits.map((exhibit, index: number) => (
+          <tr
+            key={index}
+            onClick={() => handleRowClick(exhibit.id)}
+            className="clickable-row">
+            <td>{exhibit.title}</td>
+            <td>{exhibit.exhibitorName}</td>
+            <td>{exhibit.table || ''}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   )
 }
 

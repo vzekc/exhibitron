@@ -1,28 +1,11 @@
-import { Link, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import * as backend from '../api/index'
 import { useUser } from '../contexts/userUtils.ts'
+import DropdownMenu from './DropdownMenu.tsx'
+import SearchTableNumber from './SearchTableNumber.tsx'
 
 const NavBar = () => {
-  const [searchQuery, setSearchQuery] = useState('')
-  const navigate = useNavigate()
   const { user } = useUser()
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    if (/^\d*$/.test(value)) {
-      // Only allow numeric input
-      setSearchQuery(value)
-    }
-  }
-
-  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    if (searchQuery) {
-      setSearchQuery('')
-      navigate(`/table/${searchQuery}`)
-    }
-  }
 
   const handleLogout = async () => {
     await backend.postAuthLogout()
@@ -46,10 +29,16 @@ const NavBar = () => {
         </li>
         {user ? (
           <li>
-            @{user.username}{' '}
-            <a href="#" onClick={handleLogout}>
-              Logout
-            </a>
+            <DropdownMenu label={`@${user.username}`}>
+              <li>
+                <Link to="/profile">Profil</Link>
+              </li>
+              <li>
+                <a href="#" onClick={handleLogout}>
+                  Logout
+                </a>
+              </li>
+            </DropdownMenu>
           </li>
         ) : (
           <li>
@@ -57,15 +46,11 @@ const NavBar = () => {
           </li>
         )}
       </ul>
-      <form onSubmit={handleSearchSubmit}>
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={handleSearchChange}
-          placeholder="Tischnummer..."
-        />
-        <button type="submit">Tisch suchen</button>
-      </form>
+      <ul>
+        <li>
+          <SearchTableNumber />
+        </li>
+      </ul>
     </nav>
   )
 }

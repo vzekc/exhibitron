@@ -2,7 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import React, { use } from 'react'
 import exhibitListService from '../services/exhibitListService'
 import { ExhibitListItem } from '../types'
-import ExhibitTable from './ExhibitTable'
+import ExhibitList from './ExhibitList.tsx'
 import { useUser } from '../contexts/userUtils.ts'
 import { client as backendClient } from '../api/client.gen'
 import * as backend from '../api/index'
@@ -58,13 +58,13 @@ const TableSearchResult = () => {
       {tableExhibits.length && (
         <section>
           <h3>Ausstellungen auf Tisch {tableId}</h3>
-          <ExhibitTable exhibits={tableExhibits} />
+          <ExhibitList exhibits={tableExhibits} />
         </section>
       )}
       {userExhibits.length && (
         <section>
           <h3>Andere Ausstellungen des Benutzers</h3>
-          <ExhibitTable exhibits={userExhibits} />
+          <ExhibitList exhibits={userExhibits} />
         </section>
       )}
     </article>
