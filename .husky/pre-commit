@@ -1,3 +1,3 @@
 pnpm prettier -c
-pnpm test
 pnpm lint
+pnpm test

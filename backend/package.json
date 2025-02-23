@@ -10,7 +10,7 @@
     "start:prod": "NODE_ENV=production node dist/server.js",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint src",
+    "lint": "eslint src && tsc -b",
     "make-demo-db": "npx mikro-orm-esm migration:fresh --drop-db --seed DemoSeeder",
     "make-sdk": "pnpm generate-openapi && openapi-ts -i dist/openapi.json -o src/sdk -c @hey-api/client-axios && pnpm prettier -w src/sdk"
   },

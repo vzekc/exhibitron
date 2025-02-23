@@ -62,31 +62,6 @@ const tableColumns = [
 
 type TableColumn = (typeof tableColumns)[number]
 
-const makePopup = (
-  registration: Registration,
-  dialogRef: React.RefObject<HTMLDialogElement>,
-) => {
-  return (
-    <dialog ref={dialogRef}>
-      <article>
-        <p>{registration.message}</p>
-        <table>
-          <tbody>
-            {Object.entries(registration.data)
-              .filter(([, v]) => !!v)
-              .map(([key, value]) => (
-                <tr key={key}>
-                  <th>{key}</th>
-                  <td>{value}</td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
-      </article>
-    </dialog>
-  )
-}
-
 const Registration = () => {
   const registrations = use(data)
   const [sortConfig, setSortConfig] = useState<{
@@ -98,10 +73,10 @@ const Registration = () => {
   const sortedRegistrations = React.useMemo(() => {
     if (sortConfig !== null) {
       return [...registrations].sort((a, b) => {
-        if (a[sortConfig.key] < b[sortConfig.key]) {
+        if (String(a[sortConfig.key]) < String(b[sortConfig.key])) {
           return sortConfig.direction === 'ascending' ? -1 : 1
         }
-        if (a[sortConfig.key] > b[sortConfig.key]) {
+        if (String(a[sortConfig.key]) > String(b[sortConfig.key])) {
           return sortConfig.direction === 'ascending' ? 1 : -1
         }
         return 0
@@ -133,9 +108,31 @@ const Registration = () => {
     }
   }
 
+  const makePopup = (registration: Registration) => {
+    return (
+      <dialog ref={dialogRef}>
+        <article>
+          <p>{registration.message}</p>
+          <table>
+            <tbody>
+              {Object.entries(registration.data)
+                .filter(([, v]) => !!v)
+                .map(([key, value]) => (
+                  <tr key={key}>
+                    <th>{key}</th>
+                    <td>{String(value)}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </article>
+      </dialog>
+    )
+  }
+
   return (
     <article>
-      {makePopup(registrations[0], dialogRef)}
+      {dialogRef.current && makePopup(registrations[0])}
       <h2>Anmeldungen verwalten</h2>
       <button onClick={handleDownload}>Download CSV</button>
       <p></p>
@@ -153,7 +150,7 @@ const Registration = () => {
           {sortedRegistrations.map((registration) => (
             <tr key={registration.id} onClick={() => handleRowClick()}>
               {tableColumns.map((column) => (
-                <td key={column}>{registration[column]}</td>
+                <td key={column}>{String(registration[column])}</td>
               ))}
             </tr>
           ))}
