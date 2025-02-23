@@ -18,6 +18,8 @@ const getRegistrations = async () => {
 
 const data = getRegistrations()
 
+type Registration = Awaited<typeof data>[number]
+
 const generateCSV = (registrations: Awaited<typeof data>) => {
   const flattenedRegistrations = registrations?.map(({ data, ...rest }) => ({
     ...data,
@@ -54,12 +56,36 @@ const tableColumns = [
   'name',
   'email',
   'nickname',
-  'message',
   'createdAt',
   'updatedAt',
 ] as const
 
 type TableColumn = (typeof tableColumns)[number]
+
+const makePopup = (
+  registration: Registration,
+  dialogRef: React.RefObject<HTMLDialogElement>,
+) => {
+  return (
+    <dialog ref={dialogRef}>
+      <article>
+        <p>{registration.message}</p>
+        <table>
+          <tbody>
+            {Object.entries(registration.data)
+              .filter(([, v]) => !!v)
+              .map(([key, value]) => (
+                <tr key={key}>
+                  <th>{key}</th>
+                  <td>{value}</td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </article>
+    </dialog>
+  )
+}
 
 const Registration = () => {
   const registrations = use(data)
@@ -67,11 +93,7 @@ const Registration = () => {
     key: (typeof tableColumns)[number]
     direction: 'ascending' | 'descending'
   } | null>(null)
-  const [hoveredRow, setHoveredRow] = useState<number | null>(null)
-  const [tooltipPosition, setTooltipPosition] = useState<{
-    x: number
-    y: number
-  }>({ x: 0, y: 0 })
+  const dialogRef = React.useRef<HTMLDialogElement>(null)
 
   const sortedRegistrations = React.useMemo(() => {
     if (sortConfig !== null) {
@@ -100,17 +122,20 @@ const Registration = () => {
     setSortConfig({ key, direction })
   }
 
-  const handleMouseMove = (event: React.MouseEvent) => {
-    setTooltipPosition({ x: event.clientX, y: event.clientY })
-  }
-
   const handleDownload = () => {
     const csv = generateCSV(registrations)
     downloadCSV(csv, 'registrations.csv')
   }
 
+  const handleRowClick = () => {
+    if (dialogRef.current) {
+      dialogRef.current.showModal()
+    }
+  }
+
   return (
     <article>
+      {makePopup(registrations[0], dialogRef)}
       <h2>Anmeldungen verwalten</h2>
       <button onClick={handleDownload}>Download CSV</button>
       <p></p>
@@ -125,29 +150,11 @@ const Registration = () => {
           </tr>
         </thead>
         <tbody>
-          {sortedRegistrations.map((registration, index) => (
-            <tr
-              key={registration.id}
-              onMouseEnter={() => setHoveredRow(index)}
-              onMouseLeave={() => setHoveredRow(null)}
-              onMouseMove={handleMouseMove}>
+          {sortedRegistrations.map((registration) => (
+            <tr key={registration.id} onClick={() => handleRowClick()}>
               {tableColumns.map((column) => (
                 <td key={column}>{registration[column]}</td>
               ))}
-              {hoveredRow === index && (
-                <td
-                  className="tooltip"
-                  style={{ top: tooltipPosition.y, left: tooltipPosition.x }}>
-                  <table>
-                    {tableColumns.map((column) => (
-                      <tr key={column}>
-                        <td>{column}</td>
-                        <td>{registration[column]}</td>
-                      </tr>
-                    ))}
-                  </table>
-                </td>
-              )}
             </tr>
           ))}
         </tbody>

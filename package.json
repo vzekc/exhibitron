@@ -8,7 +8,7 @@
     "test": "pnpm -r test",
     "lint": "pnpm -r lint",
     "build": "pnpm --filter backend run make-sdk && pnpm --filter frontend run build && pnpm --filter backend run build",
-    "prettier": "prettier frontend/src backend/src",
+    "prettier": "prettier -w frontend/src backend/src",
     "prepare": "husky"
   },
   "keywords": [],
