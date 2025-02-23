@@ -132,7 +132,7 @@ const Registration = () => {
 
   return (
     <article>
-      {dialogRef.current && makePopup(registrations[0])}
+      {makePopup(registrations[0])}
       <h2>Anmeldungen verwalten</h2>
       <button onClick={handleDownload}>Download CSV</button>
       <p></p>
