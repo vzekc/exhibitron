@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
+import { Route, Routes, useLocation } from 'react-router-dom'
 import '@picocss/pico/css/pico.min.css'
 import Exhibits from './pages/Exhibits.tsx'
 import ErrorBoundary from './components/ErrorBoundary.tsx'
@@ -12,13 +12,16 @@ import TableSearchResult from './components/TableSearchResult.tsx'
 import { UserProvider } from './contexts/UserContext.tsx'
 import Profile from './pages/Profile.tsx'
 import './App.css'
+import Register from './pages/Register.tsx'
 
-const App = () => (
-  <Router>
+const App = () => {
+  const location = useLocation()
+
+  return (
     <Suspense fallback={<p>Laden...</p>}>
       <UserProvider>
         <main className="container">
-          <NavBar />
+          {location.pathname !== '/register' && <NavBar />}
           <ErrorBoundary
             fallback={
               <p style={{ color: 'red' }}>
@@ -33,12 +36,12 @@ const App = () => (
               <Route path="/bookmarks" element={<Bookmarks />} />
               <Route path="/table/:id" element={<TableSearchResult />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/register" element={<Register />} />
             </Routes>
           </ErrorBoundary>
         </main>
       </UserProvider>
     </Suspense>
-  </Router>
-)
-
+  )
+}
 export default App

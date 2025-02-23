@@ -1,0 +1,10 @@
+form.exhibitor-registration fieldset {
+  border: 1px solid #ccc;
+  padding: 1em;
+}
+
+.validation-message {
+  color: red;
+  font-size: 0.9em;
+  margin-bottom: 1em;
+}

@@ -1,0 +1,185 @@
+import './Register.css'
+import { useForm, SubmitHandler } from 'react-hook-form'
+
+type Inputs = {
+  name: string
+  vzekcMember: boolean
+  email: string
+  nickname: string
+  forum: string
+  topic: string
+  topicExtras: string
+  friday: boolean
+  saturday: boolean
+  sunday: boolean
+  setupHelper: boolean
+  gameCornerSupporter: boolean
+  dailyLunch: boolean
+  talk: boolean
+  tableWidth: number
+  tableNextTo: string
+}
+
+const Register = () => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<Inputs>()
+  const onSubmit: SubmitHandler<Inputs> = (data) => console.log(data)
+
+  return (
+    <article>
+      <h1>Aussteller-Registrierung</h1>
+      <form
+        className="exhibitor-registration"
+        onSubmit={handleSubmit(onSubmit)}>
+        <fieldset>
+          <label>
+            Nachname, Vorname
+            <input
+              type="text"
+              autoComplete="name"
+              {...register('name', { required: true })}
+            />
+            {errors.name && (
+              <div className="validation-message">Ein Name wird benötigt</div>
+            )}
+          </label>
+          <label>
+            <input type="checkbox" {...register('vzekcMember')} />
+            Ich bin Mitglied im VzEkC e.V
+          </label>
+          <p />
+          <label>
+            E-Mail Adresse
+            <input
+              type="email"
+              autoComplete="email"
+              {...register('email', { required: true })}
+            />
+            {errors.email && (
+              <div className="validation-message">
+                Eine Email-Adresse wird benötigt, damit wir Kontakt aufnehmen
+                können
+              </div>
+            )}
+          </label>
+          <label>
+            Nickname (Benutzername) im Forum
+            <input
+              type="text"
+              autoComplete="nickname"
+              {...register('nickname', { required: true })}
+            />
+            {errors.nickname && (
+              <div className="validation-message">
+                Ein Nickname wird als Benutzername in unserem Verwaltungssystem
+                benötigt
+              </div>
+            )}
+          </label>
+          <label>
+            Registriert im Forum
+            <select {...register('forum')}>
+              <option>forum.classic-computing.de</option>
+              <option>www.a1k.org</option>
+              <option>forum.atari-home.de</option>
+              <option>forum64.de</option>
+              <option>anderes Forum</option>
+              <option>(kein Forum)</option>
+            </select>
+          </label>
+        </fieldset>
+        <fieldset>
+          <label>
+            Hauptthema meiner Ausstellung
+            <select {...register('topic')}>
+              <option></option>
+              <option>Atari 8-Bit und ST/TT/Falcon</option>
+              <option>Apple 8-Bit und Macintosh</option>
+              <option>Commodore CBM</option>
+              <option>Commodore VC20, C64, AMIGA und andere</option>
+              <option>Sinclair</option>
+              <option>Amstrad/Schneider</option>
+              <option>CP/M Rechner</option>
+              <option>IBM PC und kompatible</option>
+              <option>MSX Computer</option>
+              <option>Workstations (*)</option>
+              <option>Konsolen (*)</option>
+              <option>Etwas anderes (*)</option>
+            </select>
+          </label>
+          <label>
+            Weitere Angaben
+            <input type="text" {...register('topicExtras')} />
+          </label>
+          <label>
+            Teilnahme an folgenden Tagen:
+            <p />
+            <label>
+              <input type="checkbox" {...register('friday')} />
+              Freitag
+            </label>
+            <label>
+              <input type="checkbox" {...register('saturday')} />
+              Samstag
+            </label>
+            <label>
+              <input type="checkbox" {...register('sunday')} />
+              Sonntag
+            </label>
+          </label>
+        </fieldset>
+        <fieldset>
+          <label>
+            <input type="checkbox" {...register('setupHelper')} />
+            Ich unterstütze beim Aufbau der CC 2024 am Donnerstag
+          </label>
+          <label>
+            <input type="checkbox" {...register('gameCornerSupporter')} />
+            Ich unterstütze die Spiele-Ecke mit eigener Hardware
+          </label>
+          <label>
+            <input type="checkbox" {...register('dailyLunch')} />
+            Ich wünsche mir ein tägliches Mittagessen in der Halle
+            (Möglichkeiten werden noch geprüft)
+          </label>
+          <label>
+            <input type="checkbox" {...register('talk')} />
+            Ich plane einen Vortrag
+          </label>
+        </fieldset>
+        <fieldset>
+          <label>
+            Gewünschte Tischbreite
+            <select {...register('tableWidth', { required: true })}>
+              <option></option>
+              <option value={0}>kein Tisch</option>
+              <option value={1}>1 Meter</option>
+              <option value={2}>2 Meter</option>
+              <option value={3}>3 Meter</option>
+              <option value={4}>4 Meter</option>
+            </select>
+            {errors.name && (
+              <div className="validation-message">
+                Bitte wähle aus, wie breit deine Ausstellungsfläche sein soll
+              </div>
+            )}
+          </label>
+          <p>
+            Je nach Anzahl der Anmeldungen behalten wir uns vor, nicht mehr als
+            2 Meter pro Person zu vergeben
+          </p>
+          <label>
+            Ich wünsche mir einen Tisch neben:
+            <input type="text" {...register('tableNextTo')} />
+          </label>
+        </fieldset>
+        <button type="submit">Anmeldung absenden</button>
+      </form>
+    </article>
+  )
+}
+
+export default Register
