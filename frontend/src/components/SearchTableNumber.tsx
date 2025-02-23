@@ -1,6 +1,12 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+const isMobileDevice = (): boolean => {
+  // @ts-expect-error ts2339
+  const userAgent = navigator.userAgent || navigator.vendor || window.opera
+  return /android|iPad|iPhone|iPod/.test(userAgent.toLowerCase())
+}
+
 const SearchTableNumber = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const navigate = useNavigate()
@@ -28,11 +34,13 @@ const SearchTableNumber = () => {
   return (
     <form onSubmit={handleSearchSubmit}>
       <fieldset role="group">
-        <button className="button image-only-button" onClick={scanQrCode}>
-          <img
-            src="/scan-qr-code.svg"
-            className="inverted-image button-image"></img>
-        </button>
+        {isMobileDevice() && (
+          <button className="button image-only-button" onClick={scanQrCode}>
+            <img
+              src="/scan-qr-code.svg"
+              className="inverted-image button-image"></img>
+          </button>
+        )}
         <input
           type="text"
           value={searchQuery}
