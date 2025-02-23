@@ -142,7 +142,7 @@ export type PatchUserProfileData = {
 
 export type PatchUserProfileErrors = {
   /**
-   * The user account could not be created.
+   * The user account could not be updated.
    */
   400: {
     error?: string
@@ -608,6 +608,34 @@ export type PostTableByNumberAssignToByUserIdResponses = {
 
 export type PostTableByNumberAssignToByUserIdResponse =
   PostTableByNumberAssignToByUserIdResponses[keyof PostTableByNumberAssignToByUserIdResponses]
+
+export type PostRegistrationData = {
+  /**
+   * Registration data, note that other properties are allowed and stored in the registration data field
+   */
+  body: {
+    name: string
+    email: string
+    nickname: string
+    message?: string
+    data?: {
+      [key: string]: unknown
+    }
+  }
+  path?: never
+  query?: never
+  url: '/registration/'
+}
+
+export type PostRegistrationResponses = {
+  /**
+   * The registration was created
+   */
+  204: void
+}
+
+export type PostRegistrationResponse =
+  PostRegistrationResponses[keyof PostRegistrationResponses]
 
 export type ClientOptions = {
   baseURL: `${string}://${string}/api` | (string & {})

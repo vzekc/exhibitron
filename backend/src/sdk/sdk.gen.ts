@@ -45,6 +45,8 @@ import type {
   PostTableByNumberAssignToByUserIdData,
   PostTableByNumberAssignToByUserIdResponse,
   PostTableByNumberAssignToByUserIdError,
+  PostRegistrationData,
+  PostRegistrationResponse,
 } from './types.gen'
 import { client as _heyApiClient } from './client.gen'
 
@@ -322,5 +324,25 @@ export const postTableByNumberAssignToByUserId = <
     ],
     url: '/table/{number}/assign-to/{userId}',
     ...options,
+  })
+}
+
+/**
+ * Create a registration
+ */
+export const postRegistration = <ThrowOnError extends boolean = false>(
+  options: Options<PostRegistrationData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).post<
+    PostRegistrationResponse,
+    unknown,
+    ThrowOnError
+  >({
+    url: '/registration/',
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
   })
 }

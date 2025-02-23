@@ -1,5 +1,7 @@
-import './Register.css'
 import { useForm, SubmitHandler } from 'react-hook-form'
+import * as backend from '../api/index'
+
+import './Register.css'
 
 type Inputs = {
   name: string
@@ -37,7 +39,13 @@ const Register = () => {
 
   const topic = watch('topic')
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => console.log(data)
+  const onSubmit: SubmitHandler<Inputs> = async (inputs) => {
+    const { name, email, nickname, message, ...data } = inputs
+    const result = await backend.postRegistration({
+      body: { name, email, nickname, message, data },
+    })
+    console.log('posted', result.status)
+  }
 
   return (
     <article>
