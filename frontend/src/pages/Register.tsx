@@ -18,6 +18,7 @@ type Inputs = {
   talk: boolean
   tableWidth: number
   tableNextTo: string
+  message: string
 }
 
 const Register = () => {
@@ -25,7 +26,17 @@ const Register = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<Inputs>()
+    watch,
+  } = useForm<Inputs>({
+    defaultValues: {
+      friday: true,
+      saturday: true,
+      sunday: true,
+    },
+  })
+
+  const topic = watch('topic')
+
   const onSubmit: SubmitHandler<Inputs> = (data) => console.log(data)
 
   return (
@@ -94,7 +105,7 @@ const Register = () => {
         <fieldset>
           <label>
             Hauptthema meiner Ausstellung
-            <select {...register('topic')}>
+            <select {...register('topic', { required: true })}>
               <option></option>
               <option>Atari 8-Bit und ST/TT/Falcon</option>
               <option>Apple 8-Bit und Macintosh</option>
@@ -110,10 +121,28 @@ const Register = () => {
               <option>Etwas anderes (*)</option>
             </select>
           </label>
-          <label>
-            Weitere Angaben
-            <input type="text" {...register('topicExtras')} />
-          </label>
+          {errors.topic && (
+            <div className="validation-message">
+              Bitte wähle aus, was du ausstellen möchtest
+            </div>
+          )}
+          {topic?.includes('*') && (
+            <label>
+              Weitere Angaben
+              <input
+                type="text"
+                {...register('topicExtras', { required: true })}
+                disabled={!topic?.includes('*')}
+              />
+              {errors.topicExtras && (
+                <div className="validation-message">
+                  Bitte erläutere, was du ausstellen möchtest
+                </div>
+              )}
+            </label>
+          )}
+        </fieldset>
+        <fieldset>
           <label>
             Teilnahme an folgenden Tagen:
             <p />
@@ -174,6 +203,12 @@ const Register = () => {
           <label>
             Ich wünsche mir einen Tisch neben:
             <input type="text" {...register('tableNextTo')} />
+          </label>
+        </fieldset>
+        <fieldset>
+          <label>
+            Mitteilung ans Orga-Team:
+            <textarea rows={5} {...register('message')}></textarea>
           </label>
         </fieldset>
         <button type="submit">Anmeldung absenden</button>
