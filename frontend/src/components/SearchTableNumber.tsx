@@ -21,13 +21,6 @@ const SearchTableNumber = () => {
     }
   }
 
-  const imageOnlyButtonStyle = { padding: '0px 10px 00px 10px' }
-  const buttonImageStyle = {
-    width: '2em',
-    height: '2em',
-    filter: 'invert(1)',
-  }
-
   const scanQrCode = () => {
     console.log('scan qr code')
   }
@@ -35,11 +28,10 @@ const SearchTableNumber = () => {
   return (
     <form onSubmit={handleSearchSubmit}>
       <fieldset role="group">
-        <button
-          className="button"
-          style={imageOnlyButtonStyle}
-          onClick={scanQrCode}>
-          <img src="/scan-qr-code.svg" style={buttonImageStyle}></img>
+        <button className="button image-only-button" onClick={scanQrCode}>
+          <img
+            src="/scan-qr-code.svg"
+            className="inverted-image button-image"></img>
         </button>
         <input
           type="text"
@@ -47,8 +39,10 @@ const SearchTableNumber = () => {
           onChange={handleSearchChange}
           style={{ width: '4em' }}
         />
-        <button className="button" style={imageOnlyButtonStyle} type="submit">
-          <img src="/search-table.svg" style={buttonImageStyle}></img>
+        <button className="butto image-only-button" type="submit">
+          <img
+            src="/search-table.svg"
+            className="inverted-image button-image"></img>
         </button>
       </fieldset>
     </form>

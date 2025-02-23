@@ -24,9 +24,8 @@ const NavBar = () => {
         <li>
           <Link to="/schedule">Zeitplan</Link>
         </li>
-        <li>
-          <Link to="/bookmarks">Lesezeichen</Link>
-        </li>
+      </ul>
+      <ul>
         {user ? (
           <li>
             <DropdownMenu label={`@${user.username}`}>
@@ -45,8 +44,15 @@ const NavBar = () => {
             <a href="/auth/forum">Login</a>
           </li>
         )}
-      </ul>
-      <ul>
+        <li>
+          <Link to="/bookmarks">
+            <button className="button image-only-button">
+              <img
+                src="/bookmark.svg"
+                className="button-image inverted-image"></img>
+            </button>
+          </Link>
+        </li>
         <li>
           <SearchTableNumber />
         </li>

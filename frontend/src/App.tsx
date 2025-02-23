@@ -11,6 +11,7 @@ import Bookmarks from './pages/Bookmarks.tsx'
 import TableSearchResult from './components/TableSearchResult.tsx'
 import { UserProvider } from './contexts/UserContext.tsx'
 import Profile from './pages/Profile.tsx'
+import './App.css'
 
 const App = () => (
   <Router>

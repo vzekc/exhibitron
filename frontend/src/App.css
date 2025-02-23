@@ -1,0 +1,17 @@
+.image-only-button {
+  padding: 3px 10px 3px 10px;
+}
+
+.button-image {
+  width: 2em;
+  height: 2em;
+}
+
+.inverted-image {
+  filter: invert(1);
+}
+
+nav form {
+  position: relative;
+  top: 10px; /* Adjust this value as needed */
+}
