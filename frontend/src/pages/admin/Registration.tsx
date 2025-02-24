@@ -30,6 +30,7 @@ const generateCSV = (registrations: Awaited<typeof data>) => {
     .reduce((acc, set) => new Set([...acc, ...set]), new Set<string>())
   const columns = [
     'id',
+    'status',
     'name',
     'email',
     'nickname',
@@ -52,6 +53,7 @@ const downloadCSV = (csv: string, filename: string) => {
 
 const tableColumns = [
   'id',
+  'status',
   'name',
   'email',
   'nickname',
@@ -67,7 +69,8 @@ const Registration = () => {
     key: TableColumn
     direction: 'ascending' | 'descending'
   } | null>(null)
-  const dialogRef = React.useRef<HTMLDialogElement>(null)
+  const [popupRegistration, setPopupRegistration] =
+    useState<Registration | null>(null)
 
   const sortedRegistrations = React.useMemo(() => {
     if (sortConfig !== null) {
@@ -101,39 +104,49 @@ const Registration = () => {
     downloadCSV(csv, 'registrations.csv')
   }
 
-  const handleRowClick = () => {
-    if (dialogRef.current) {
-      dialogRef.current.showModal()
-    }
-  }
-
-  const makePopup = (registration: Registration) => {
+  const makePopup = () => {
+    console.log('makePopup', popupRegistration)
     return (
-      <dialog ref={dialogRef} onClick={() => dialogRef.current?.close()}>
-        <article>
-          <p>{registration.message}</p>
-          <table>
-            <tbody>
-              {Object.entries(registration.data)
-                .filter(([, v]) => !!v)
-                .map(([key, value]) => (
-                  <tr key={key}>
-                    <th>{key}</th>
-                    <td>
-                      {formatValue(key, value as string | number | boolean)}
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </article>
-      </dialog>
+      popupRegistration && (
+        <dialog
+          className="registration-details"
+          open
+          onClick={() => setPopupRegistration(null)}>
+          <article>
+            <p>{popupRegistration.message}</p>
+            <table>
+              <tbody>
+                {Object.entries(popupRegistration.data)
+                  .filter(([, v]) => !!v)
+                  .map(([key, value]) => (
+                    <tr key={key}>
+                      <th>{key}</th>
+                      <td>
+                        {formatValue(key, value as string | number | boolean)}
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </article>
+        </dialog>
+      )
     )
   }
 
   const formatValue = (key: string, value: string | number | boolean) => {
     if (key === 'createdAt' || key === 'updatedAt') {
       return new Date(String(value)).toLocaleString()
+    } else if (key === 'status') {
+      switch (String(value)) {
+        case 'new':
+          return 'Neu'
+        case 'approved':
+          return 'Angenommen'
+        case 'rejected':
+          return 'Abgelehnt'
+      }
+      return value
     } else if (typeof value === 'boolean') {
       return value ? 'Ja' : 'Nein'
     } else {
@@ -143,7 +156,7 @@ const Registration = () => {
 
   return (
     <article>
-      {makePopup(registrations[0])}
+      {popupRegistration && makePopup()}
       <h2>Anmeldungen verwalten</h2>
       <button onClick={handleDownload}>Daten als CSV herunterladen</button>
       <p></p>
@@ -158,8 +171,8 @@ const Registration = () => {
           </tr>
         </thead>
         <tbody>
-          {sortedRegistrations.map((registration) => (
-            <tr key={registration.id} onClick={() => handleRowClick()}>
+          {sortedRegistrations.map((registration, index) => (
+            <tr key={index} onClick={() => setPopupRegistration(registration)}>
               {tableColumns.map((column) => (
                 <td key={column}>
                   {formatValue(
@@ -168,7 +181,6 @@ const Registration = () => {
                   )}
                 </td>
               ))}
-              <td></td>
             </tr>
           ))}
         </tbody>

@@ -1,10 +1,16 @@
 import { FastifyInstance } from 'fastify'
 import { initORM } from '../../db.js'
 import { errorSchema, PermissionDeniedError } from '../common/errors.js'
+import { RegistrationStatus } from './registration.entity.js'
 
 const registrationBaseSchema = () => ({
   type: 'object',
   properties: {
+    status: {
+      type: 'string',
+      enum: Object.values(RegistrationStatus),
+      examples: Object.values(RegistrationStatus),
+    },
     name: { type: 'string', examples: ['John Doe'] },
     email: { type: 'string', examples: ['john@doe.com'] },
     nickname: { type: 'string', examples: ['johnny'] },
@@ -67,6 +73,7 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
       }
 
       await db.registration.register({
+        status: RegistrationStatus.NEW,
         eventId,
         name,
         email,
@@ -121,7 +128,15 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
                 },
                 ...registrationBaseSchema().properties,
               },
-              required: ['id', 'eventId', 'name', 'email', 'data', 'createdAt'],
+              required: [
+                'id',
+                'status',
+                'eventId',
+                'name',
+                'email',
+                'data',
+                'createdAt',
+              ],
             },
           },
           403: {
@@ -138,6 +153,7 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
         )
       }
       const registrations = await db.registration.findAll()
+      console.log('read registrations', registrations)
       return registrations.map((registration) => ({
         ...registration,
         createdAt: registration.createdAt.toISOString(),

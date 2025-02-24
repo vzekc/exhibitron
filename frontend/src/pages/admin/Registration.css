@@ -13,3 +13,7 @@ th,
 tr {
   cursor: pointer;
 }
+
+dialog.registration-details {
+  --pico-modal-overlay-backdrop-filter: blur(5px);
+}

@@ -648,6 +648,7 @@ export type GetRegistrationByEventIdResponses = {
      */
     createdAt: string
     updatedAt?: string | unknown
+    status: 'new' | 'approved' | 'rejected'
     name: string
     email: string
     nickname?: string
@@ -666,6 +667,7 @@ export type PostRegistrationByEventIdData = {
    * Registration data, the data field contains event specific properties
    */
   body: {
+    status?: 'new' | 'approved' | 'rejected'
     name: string
     email: string
     nickname: string
