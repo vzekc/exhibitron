@@ -206,26 +206,20 @@ const Register = () => {
             </fieldset>
             <fieldset>
               <label>
-                Gewünschte Tischbreite
+                Gewünschte Anzahl Tische (je 165cm x 80cm)
                 <select {...register('tableWidth', { required: true })}>
                   <option></option>
                   <option value={0}>kein Tisch</option>
-                  <option value={1}>1 Meter</option>
-                  <option value={2}>2 Meter</option>
-                  <option value={3}>3 Meter</option>
-                  <option value={4}>4 Meter</option>
+                  <option value={1}>1</option>
+                  <option value={2}>2 (wenn verfügbar)</option>
                 </select>
                 {errors.name && (
                   <div className="validation-message">
-                    Bitte wähle aus, wie breit deine Ausstellungsfläche sein
-                    soll
+                    Bitte wähle aus, wie viele Tische Deine Ausstellung belegen
+                    wird
                   </div>
                 )}
               </label>
-              <p>
-                Je nach Anzahl der Anmeldungen behalten wir uns vor, nicht mehr
-                als 2 Meter pro Person zu vergeben
-              </p>
               <label>
                 Ich wünsche mir einen Tisch neben:
                 <input type="text" {...register('tableNextTo')} />
