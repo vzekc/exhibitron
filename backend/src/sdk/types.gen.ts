@@ -636,27 +636,36 @@ export type GetRegistrationByEventIdError =
 
 export type GetRegistrationByEventIdResponses = {
   /**
-   * Default Response
+   * List of registrations
    */
-  200: Array<{
+  200: {
     /**
-     * Unique ID of the registration
+     * Total number of registrations
      */
-    id: number
+    total?: number
     /**
-     * Timestamp when the registration was created
+     * List of registrations
      */
-    createdAt: string
-    updatedAt?: string | unknown
-    status: 'new' | 'approved' | 'rejected'
-    name: string
-    email: string
-    nickname?: string
-    message?: string
-    data: {
-      [key: string]: unknown
-    }
-  }>
+    items?: Array<{
+      /**
+       * Unique ID of the registration
+       */
+      id: number
+      /**
+       * Timestamp when the registration was created
+       */
+      createdAt: string
+      updatedAt?: string | unknown
+      status: 'new' | 'approved' | 'rejected'
+      name: string
+      email: string
+      nickname?: string
+      message?: string
+      data: {
+        [key: string]: unknown
+      }
+    }>
+  }
 }
 
 export type GetRegistrationByEventIdResponse =

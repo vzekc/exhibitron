@@ -1,7 +1,8 @@
 import { FastifyInstance } from 'fastify'
 import { initORM } from '../../db.js'
 import { errorSchema, PermissionDeniedError } from '../common/errors.js'
-import { RegistrationStatus } from './registration.entity.js'
+import { RegistrationStatus, Registration } from './registration.entity.js'
+import { wrap } from '@mikro-orm/core'
 
 const registrationBaseSchema = () => ({
   type: 'object',
@@ -18,6 +19,31 @@ const registrationBaseSchema = () => ({
     data: { type: 'object', additionalProperties: true },
   },
   required: ['name', 'email', 'nickname'],
+})
+
+const registrationSchema = () => ({
+  type: 'object',
+  properties: {
+    id: {
+      type: 'number',
+      description: 'Unique ID of the registration',
+    },
+    createdAt: {
+      type: 'string',
+      description: 'Timestamp when the registration was created',
+    },
+    updatedAt: {
+      oneOf: [
+        {
+          type: 'string',
+          description: 'Timestamp when the registration was last updated',
+        },
+        { type: 'null' },
+      ],
+    },
+    ...registrationBaseSchema().properties,
+  },
+  required: ['id', 'status', 'eventId', 'name', 'email', 'data', 'createdAt'],
 })
 
 export async function registerRegistrationRoutes(app: FastifyInstance) {
@@ -104,39 +130,21 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
         },
         response: {
           200: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                id: {
-                  type: 'number',
-                  description: 'Unique ID of the registration',
-                },
-                createdAt: {
-                  type: 'string',
-                  description: 'Timestamp when the registration was created',
-                },
-                updatedAt: {
-                  oneOf: [
-                    {
-                      type: 'string',
-                      description:
-                        'Timestamp when the registration was last updated',
-                    },
-                    { type: 'null' },
-                  ],
-                },
-                ...registrationBaseSchema().properties,
+            description: 'List of registrations',
+            type: 'object',
+            properties: {
+              total: {
+                type: 'number',
+                description: 'Total number of registrations',
               },
-              required: [
-                'id',
-                'status',
-                'eventId',
-                'name',
-                'email',
-                'data',
-                'createdAt',
-              ],
+              items: {
+                description: 'List of registrations',
+                type: 'array',
+                items: {
+                  description: 'Registration data',
+                  ...registrationSchema(),
+                },
+              },
             },
           },
           403: {
@@ -153,12 +161,126 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
         )
       }
       const registrations = await db.registration.findAll()
-      console.log('read registrations', registrations)
-      return registrations.map((registration) => ({
-        ...registration,
-        createdAt: registration.createdAt.toISOString(),
-        updatedAt: registration.updatedAt.toISOString(),
-      }))
+      return {
+        total: registrations.length,
+        items: registrations.map((registration) => ({
+          ...registration,
+          createdAt: registration.createdAt.toISOString(),
+          updatedAt: registration.updatedAt.toISOString(),
+        })),
+      }
+    },
+  )
+
+  app.get(
+    '/:eventId/:registrationId',
+    {
+      schema: {
+        description: 'Update a registration',
+        security: [{ BearerAuth: [] }], // Requires Authorization header
+        params: {
+          type: 'object',
+          properties: {
+            eventId: {
+              type: 'string',
+              description: 'ID of the event',
+              examples: ['cc2025'],
+            },
+            registrationId: {
+              type: 'number',
+              description: 'ID of the registration to update',
+              examples: [1],
+            },
+          },
+          required: ['eventId', 'registrationId'],
+        },
+        response: {
+          200: {
+            description: 'Registration data',
+            ...registrationBaseSchema(),
+          },
+          403: {
+            description: 'Current user does not have administrative rights',
+            ...errorSchema,
+          },
+          404: {
+            description: 'Registration not found',
+            ...errorSchema,
+          },
+        },
+      },
+    },
+    async (request) => {
+      if (!request.user || !request.user.isAdministrator) {
+        throw new PermissionDeniedError(
+          'Must be logged as administrator to retrieve registrations',
+        )
+      }
+      const { registrationId } = request.params as { registrationId: number }
+      return await db.registration.findOne({ id: registrationId })
+    },
+  )
+
+  app.patch(
+    '/:eventId/:registrationId',
+    {
+      schema: {
+        description: 'Update a registration',
+        security: [{ BearerAuth: [] }], // Requires Authorization header
+        params: {
+          type: 'object',
+          properties: {
+            eventId: {
+              type: 'string',
+              description: 'ID of the event',
+              examples: ['cc2025'],
+            },
+            registrationId: {
+              type: 'number',
+              description: 'ID of the registration to update',
+              examples: [1],
+            },
+          },
+          required: ['eventId', 'registrationId'],
+        },
+        body: {
+          description: 'Updated registration data',
+          ...registrationBaseSchema(),
+          required: [],
+        },
+        response: {
+          204: {
+            description: 'The registration was updated',
+            ...registrationSchema(),
+          },
+          403: {
+            description: 'Current user does not have administrative rights',
+            ...errorSchema,
+          },
+          404: {
+            description: 'Registration not found',
+            ...errorSchema,
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      if (!request.user || !request.user.isAdministrator) {
+        throw new PermissionDeniedError(
+          'Must be logged as administrator to update registrations',
+        )
+      }
+      const { registrationId } = request.params as { registrationId: number }
+      const updates = request.body as Partial<Registration>
+      const registration = await db.registration.findOne({ id: registrationId })
+      if (!registration) {
+        return reply.status(404).send({
+          error: 'Registration not found',
+        })
+      }
+      wrap(registration).assign(updates)
+      await db.em.flush()
+      reply.status(204).send()
     },
   )
 }

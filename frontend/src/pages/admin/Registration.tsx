@@ -12,8 +12,9 @@ backendClient.setConfig({
 const getRegistrations = async () => {
   const result = await backend.getRegistrationByEventId({
     path: { eventId: 'cc2025' },
+    validateStatus: (status) => status == 200,
   })
-  return result.data || []
+  return result.data?.items || []
 }
 
 const data = getRegistrations()
