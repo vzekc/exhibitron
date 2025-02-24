@@ -25,9 +25,6 @@ export class Contacts {
   phone?: string
 
   @Property()
-  email?: string
-
-  @Property()
   website?: string
 }
 
@@ -38,11 +35,14 @@ export class User extends BaseEntity<
   // for automatic inference via `em.getRepository(User)`
   [EntityRepositoryType]?: UserRepository
 
+  @Property({ unique: true, index: true })
+  email!: string
+
   @Property()
   fullName: string = ''
 
   @Property({ unique: true, index: true })
-  username!: string
+  nickname?: string
 
   @Property({ persist: false })
   token?: string
@@ -65,9 +65,9 @@ export class User extends BaseEntity<
   @OneToMany({ mappedBy: 'exhibitor' })
   tables = new Collection<Table>(this)
 
-  constructor(username: string, password: string) {
+  constructor(email: string, password: string) {
     super()
-    this.username = username
+    this.email = email
     this.password = password // keep plain text, will be hashed via hooks
   }
 

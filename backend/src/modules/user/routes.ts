@@ -10,6 +10,7 @@ export const userBaseSchema = () => ({
   type: 'object',
   properties: {
     fullName: { type: 'string', examples: ['Daffy Duck'] },
+    email: { type: 'string', examples: ['daffy@duck.com'] },
     bio: {
       type: 'string',
       examples: ['I was born with a plastic spoon in my mouth.'],
@@ -17,7 +18,6 @@ export const userBaseSchema = () => ({
     contacts: {
       type: 'object',
       properties: {
-        email: { type: 'string', examples: ['daffy@duck.com'] },
         phone: { type: 'string', examples: ['0123 567 7890'] },
         website: { type: 'string', examples: ['https://daffy-duck.com/'] },
         mastodon: { type: 'string', examples: ['@daffyduck@mastodon.social'] },
@@ -31,10 +31,10 @@ export const userBaseSchema = () => ({
 // An existing user reported without their tables or exhibitions
 export const userBaseResponseSchema = () => ({
   ...userBaseSchema(),
-  required: ['id', 'username', 'isAdministrator'],
+  required: ['id', 'email', 'isAdministrator'],
   properties: {
     id: { type: 'integer', examples: [23] },
-    username: { type: 'string', examples: ['donald'] },
+    nickname: { type: 'string', examples: ['donald'] },
     ...userBaseSchema().properties,
     isAdministrator: { type: 'boolean' },
   },
@@ -42,7 +42,7 @@ export const userBaseResponseSchema = () => ({
 
 export const userResponseSchema = () => ({
   ...userBaseResponseSchema(),
-  required: ['id', 'username', 'isAdministrator'],
+  required: ['id', 'email', 'isAdministrator'],
   properties: {
     ...userBaseResponseSchema().properties,
     tables: { type: 'array', items: { type: 'number' } },
@@ -72,9 +72,9 @@ export async function registerUserRoutes(app: FastifyInstance) {
         description: 'Log in',
         body: {
           type: 'object',
-          required: ['username', 'password'],
+          required: ['email', 'password'],
           properties: {
-            username: { type: 'string', examples: ['donald'] },
+            email: { type: 'string', examples: ['donald@example.com'] },
             password: { type: 'string', examples: ['geheim'] },
           },
           additionalProperties: false,
@@ -98,20 +98,20 @@ export async function registerUserRoutes(app: FastifyInstance) {
             ...errorSchema,
           },
           401: {
-            description: 'Invalid username or password',
+            description: 'Invalid email address or password',
             ...errorSchema,
           },
         },
       },
     },
     async (request) => {
-      const { username, password } = request.body as {
-        username: string
+      const { email, password } = request.body as {
+        email: string
         password: string
       }
-      const user = await db.user.login(username, password)
+      const user = await db.user.login(email, password)
       user.token = app.jwt.sign({ id: user.id })
-      request.session.user = { username }
+      request.session.user = { userId: user.id }
       return makeUserResponse(user)
     },
   )
@@ -179,7 +179,8 @@ export async function registerUserRoutes(app: FastifyInstance) {
           properties: {
             id: {
               type: 'string',
-              description: 'Username or ID of the user to look up',
+              description:
+                'Username, email address or ID of the user to look up',
             },
           },
           required: ['id'],

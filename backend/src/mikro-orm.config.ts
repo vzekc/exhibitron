@@ -30,7 +30,8 @@ if (
 }
 
 export default defineConfig({
-  dbName: 'cc-katalog',
+  clientUrl:
+    process.env.DATABASE_URL || 'postgresql://postgres@localhost/cc-katalog',
   entities: ['dist/**/*.entity.js'],
   entitiesTs: ['src/**/*.entity.ts'],
   // enable debug mode to log SQL queries and discovery information

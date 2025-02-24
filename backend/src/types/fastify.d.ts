@@ -17,7 +17,7 @@ declare module '@fastify/jwt' {
 declare module '@fastify/session' {
   interface FastifySessionObject {
     user?: {
-      username: string
+      userId: number
     }
     redirectUrl?: string
   }

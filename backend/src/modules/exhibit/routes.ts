@@ -31,7 +31,7 @@ const existingExhibitSchema = () => ({
       properties: {
         ...userBaseSchema().properties,
         id: { type: 'number', examples: [53] },
-        username: { type: 'string', examples: ['donald'] },
+        exhibitorId: { type: 'string', examples: ['donald'] },
       },
     },
   },

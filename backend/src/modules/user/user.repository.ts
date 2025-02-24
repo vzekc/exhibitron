@@ -2,6 +2,7 @@
 import { EntityRepository } from '@mikro-orm/postgresql'
 import { User } from './user.entity.js'
 import { AuthError } from '../common/errors.js'
+import { match, P } from 'ts-pattern'
 
 import pino from 'pino'
 
@@ -9,17 +10,19 @@ import pino from 'pino'
 const logger = pino()
 
 export class UserRepository extends EntityRepository<User> {
-  async exists(username: string) {
-    logger.info(`Checking if user exists: ${username}`)
-    const count = await this.count({ username })
+  async exists(email: string) {
+    logger.info(`Checking if user exists: ${email}`)
+    const count = await this.count({ email })
     return count > 0
   }
 
-  async login(username: string, password: string) {
-    logger.info(`Attempting login for user: ${username}`)
-    const err = new AuthError('Invalid combination of username and password')
+  async login(email: string, password: string) {
+    logger.info(`Attempting login for user: ${email}`)
+    const err = new AuthError(
+      'Invalid combination of email address and password',
+    )
     const user = await this.findOneOrFail(
-      { username },
+      { email },
       {
         populate: ['password'],
         failHandler: () => err,
@@ -35,26 +38,39 @@ export class UserRepository extends EntityRepository<User> {
 
   async lookup(id: string) {
     logger.info(`Looking up user by id: ${id}`)
-    const where = id.match(/^\d+$/) ? { id: +id } : { username: id }
-    return await this.findOneOrFail(where, {
-      populate: ['tables', 'exhibits'],
-    })
+    return await this.findOneOrFail(
+      match(id)
+        .with(P.string.regex(/^\d+$/), () => ({ id: +id }))
+        .with(P.string.regex(/.+@.+\..+/), () => ({ email: id }))
+        .otherwise(() => ({ nickname: id })),
+      {
+        populate: ['tables', 'exhibits'],
+      },
+    )
   }
 
-  async ensureUser(username: string, isAdministrator: boolean) {
-    let user = await this.findOne({ username })
+  async ensureUser(nickname: string, email: string, isAdministrator: boolean) {
+    let user = await this.findOne({ email })
     if (user) {
-      logger.debug(`ensureUser found existing user: ${username}`)
+      logger.debug(`ensureUser found existing user: @{nickname} (${email})`)
       if (isAdministrator) {
         // Administrator rights are only granted, but never revoked from the forum
         user.isAdministrator = true
       }
     } else {
-      logger.info(`ensureUser created user: ${username}`)
-      user = this.create({ username, isAdministrator })
+      logger.info(`ensureUser created user: @{nickname} (${email})`)
+      user = this.create({ nickname, email, isAdministrator })
       this.getEntityManager().persist(user)
     }
     await this.getEntityManager().flush()
     return user
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async getEventAdmins(_eventId: string) {
+    // fixme need to check event id
+    return this.em.getRepository(User).find({
+      $and: [{ isAdministrator: true }],
+    })
   }
 }

@@ -63,14 +63,14 @@ export const deleteDatabase = (dbName: string) => {
 
 export const login = async (
   app: FastifyInstance,
-  username: string,
+  email: string,
   password: string = 'geheim',
 ) => {
   const res = await app.inject({
     method: 'post',
     url: '/api/user/login',
     payload: {
-      username,
+      email,
       password,
     },
   })

@@ -34,7 +34,6 @@ const generateCSV = (registrations: Awaited<typeof data>) => {
     'email',
     'nickname',
     'message',
-    'createdAt',
     'updatedAt',
     ...Array.from(keys).sort(),
   ]
@@ -65,7 +64,7 @@ type TableColumn = (typeof tableColumns)[number]
 const Registration = () => {
   const registrations = use(data)
   const [sortConfig, setSortConfig] = useState<{
-    key: (typeof tableColumns)[number]
+    key: TableColumn
     direction: 'ascending' | 'descending'
   } | null>(null)
   const dialogRef = React.useRef<HTMLDialogElement>(null)
@@ -110,7 +109,7 @@ const Registration = () => {
 
   const makePopup = (registration: Registration) => {
     return (
-      <dialog ref={dialogRef}>
+      <dialog ref={dialogRef} onClick={() => dialogRef.current?.close()}>
         <article>
           <p>{registration.message}</p>
           <table>
@@ -120,7 +119,9 @@ const Registration = () => {
                 .map(([key, value]) => (
                   <tr key={key}>
                     <th>{key}</th>
-                    <td>{String(value)}</td>
+                    <td>
+                      {formatValue(key, value as string | number | boolean)}
+                    </td>
                   </tr>
                 ))}
             </tbody>
@@ -128,6 +129,16 @@ const Registration = () => {
         </article>
       </dialog>
     )
+  }
+
+  const formatValue = (key: string, value: string | number | boolean) => {
+    if (key === 'createdAt' || key === 'updatedAt') {
+      return new Date(String(value)).toLocaleString()
+    } else if (typeof value === 'boolean') {
+      return value ? 'Ja' : 'Nein'
+    } else {
+      return value
+    }
   }
 
   return (
@@ -150,8 +161,14 @@ const Registration = () => {
           {sortedRegistrations.map((registration) => (
             <tr key={registration.id} onClick={() => handleRowClick()}>
               {tableColumns.map((column) => (
-                <td key={column}>{String(registration[column])}</td>
+                <td key={column}>
+                  {formatValue(
+                    column,
+                    registration[column] as string | number | boolean,
+                  )}
+                </td>
               ))}
+              <td></td>
             </tr>
           ))}
         </tbody>

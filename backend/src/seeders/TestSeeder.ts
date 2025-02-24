@@ -8,7 +8,8 @@ export class TestSeeder extends Seeder {
     em.create(User, {
       id: 1001,
       fullName: 'Harald Eder',
-      username: 'MeisterEder',
+      email: 'meistereder@example.com',
+      nickname: 'MeisterEder',
       password: 'password123',
       contacts: {},
     })
@@ -21,7 +22,7 @@ export class TestSeeder extends Seeder {
       {
         id: 1002,
         fullName: 'Daffy Duck',
-        username: 'daffy',
+        nickname: 'daffy',
         exhibits: [
           { id: 1001, title: 'The first Macintosh' },
           { id: 1002, title: 'Old DEC systems' },
@@ -30,7 +31,7 @@ export class TestSeeder extends Seeder {
       {
         id: 1003,
         fullName: 'Donald Duck',
-        username: 'donald',
+        nickname: 'donald',
         exhibits: [
           { id: 1003, title: 'IBM Mainframes' },
           { id: 1004, title: 'HP calculators' },
@@ -38,11 +39,16 @@ export class TestSeeder extends Seeder {
       },
       {
         id: 1004,
-        username: 'admin',
+        nickname: 'admin',
         isAdministrator: true,
       },
     ].forEach((user) =>
-      em.create(User, { ...user, password: 'geheim', contacts: {} }),
+      em.create(User, {
+        ...user,
+        email: `${user.nickname}@example.com`,
+        password: 'geheim',
+        contacts: {},
+      }),
     )
   }
 }

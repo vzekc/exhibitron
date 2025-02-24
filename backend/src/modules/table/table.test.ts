@@ -16,9 +16,9 @@ afterAll(async () => {
 })
 
 test('claim and release', async () => {
-  const donald = await login(app, 'donald')
-  const daffy = await login(app, 'daffy')
-  const admin = await login(app, 'admin')
+  const donald = await login(app, 'donald@example.com')
+  const daffy = await login(app, 'daffy@example.com')
+  const admin = await login(app, 'admin@example.com')
 
   const tablePost = (url: string, user: { token: string }) =>
     app.inject({
@@ -85,7 +85,7 @@ test('claim and release', async () => {
   // check that donald is now the owner of the table
   res = await app.inject({ method: 'get', url: '/api/table/7' })
   expect(res).toHaveStatus(200)
-  expect(res.json()).toMatchObject({ exhibitor: { username: 'donald' } })
+  expect(res.json()).toMatchObject({ exhibitor: { nickname: 'donald' } })
 
   // check that a nonexistent table is correctly reported
   res = await app.inject({ method: 'get', url: '/api/table/2000' })

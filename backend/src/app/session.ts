@@ -33,9 +33,9 @@ export const register = async (app: FastifyInstance) => {
   app.addHook('onRequest', async (request) => {
     if (request.session.user) {
       request.user = await db.user.findOneOrFail({
-        username: request.session.user.username,
+        id: request.session.user.userId,
       })
-      app.log.debug(`User: ${request.user.username} set from session`)
+      app.log.debug(`User: ${request.user.email} set from session`)
     }
   })
 

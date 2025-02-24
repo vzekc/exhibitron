@@ -15,22 +15,24 @@ export class DemoSeeder extends Seeder {
     const users = [
       em.create(User, {
         fullName: 'Hans Hübner',
-        username: 'hans',
+        email: 'hans.huebner@gmail.com',
+        nickname: 'hans',
         password: 'geheim',
         contacts: {
           mastodon: '@hanshuebner@mastodon.social',
-          email: 'hans.huebner@gmail.com',
         },
       }),
       em.create(User, {
         fullName: 'Volker',
-        username: 'gnupublic',
+        email: 'volker@example.com',
+        nickname: 'gnupublic',
         password: 'geheim',
         contacts: {},
       }),
       em.create(User, {
         fullName: 'Konstantin',
-        username: 'konnexus',
+        email: 'konstantin@example.com',
+        nickname: 'konnexus',
         password: 'geheim',
         contacts: {},
       }),

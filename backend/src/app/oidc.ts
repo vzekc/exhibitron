@@ -15,13 +15,14 @@ const woltlabAuth: ProviderConfiguration = {
   tokenPath: '/index.php?oauth2-token/',
 }
 
-const administratorRanks = [
+const administratorRanks = ['Vorstand', 'Administrator']
+const memberRanks = [
+  'Fördermitglied',
+  'Vereinsmitglied',
   'Schiedsrichter',
-  'Vorstand',
   'Moderator',
-  'Administrator',
+  ...administratorRanks,
 ]
-const memberRanks = ['Fördermitglied', 'Vereinsmitglied', ...administratorRanks]
 
 const getOAuth2Credentials = (): Credentials | void => {
   const { OIDC_CLIENT_ID: id, OIDC_CLIENT_SECRET: secret } = process.env
@@ -41,7 +42,7 @@ const getOAuth2Credentials = (): Credentials | void => {
 
 type WoltlabUserInfo = {
   nickname: string
-  email?: string
+  email: string
   rank: string
 }
 
@@ -96,15 +97,19 @@ export const register = async (app: FastifyInstance) => {
     // Retrieve user info from IdP
     const userInfo = await getUserInfo(token.access_token)
 
-    const { nickname, rank } = userInfo
+    const { nickname, rank, email } = userInfo
 
     if (!memberRanks.includes(rank)) {
       throw new AuthError(`Dein Benutzerstatus ${rank} ist nicht ausreichend`)
     }
 
-    await db.user.ensureUser(nickname, administratorRanks.includes(rank))
+    const user = await db.user.ensureUser(
+      nickname,
+      email,
+      administratorRanks.includes(rank),
+    )
 
-    request.session.user = { username: userInfo.nickname }
+    request.session.user = { userId: user.id }
 
     const { redirectUrl } = request.session
     delete request.session['redirectUrl']

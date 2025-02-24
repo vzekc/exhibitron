@@ -203,6 +203,16 @@
           "length": 6,
           "mappedType": "datetime"
         },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
         "full_name": {
           "name": "full_name",
           "type": "varchar(255)",
@@ -214,13 +224,13 @@
           "default": "''",
           "mappedType": "string"
         },
-        "username": {
-          "name": "username",
+        "nickname": {
+          "name": "nickname",
           "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "length": 255,
           "mappedType": "string"
         },
@@ -268,17 +278,33 @@
       "schema": "public",
       "indexes": [
         {
-          "columnNames": ["username"],
+          "columnNames": ["email"],
           "composite": false,
-          "keyName": "user_username_index",
+          "keyName": "user_email_index",
           "constraint": false,
           "primary": false,
           "unique": false
         },
         {
-          "columnNames": ["username"],
+          "columnNames": ["email"],
           "composite": false,
-          "keyName": "user_username_unique",
+          "keyName": "user_email_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": ["nickname"],
+          "composite": false,
+          "keyName": "user_nickname_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": ["nickname"],
+          "composite": false,
+          "keyName": "user_nickname_unique",
           "constraint": true,
           "primary": false,
           "unique": true

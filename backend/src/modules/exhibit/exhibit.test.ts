@@ -65,7 +65,7 @@ test('try making updates without being logged in', async () => {
 })
 
 test('exhibit updates', async () => {
-  const user = await login(app, 'daffy')
+  const user = await login(app, 'daffy@example.com')
 
   // reject unknown property
   let res = await app.inject({
@@ -118,7 +118,7 @@ test('exhibit updates', async () => {
   })
   expect(res).toHaveStatus(403)
 
-  const user2 = await login(app, 'donald')
+  const user2 = await login(app, 'donald@example.com')
 
   // deny update to other user's exhibit
   res = await app.inject({

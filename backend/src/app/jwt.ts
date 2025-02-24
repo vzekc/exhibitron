@@ -16,7 +16,7 @@ export const register = async (app: FastifyInstance) => {
     if (request.headers.authorization) {
       const ret = await request.jwtVerify<{ id: number }>()
       request.user = await db.user.findOneOrFail(ret.id)
-      app.log.debug(`User: ${request.user.username} set from JWT`)
+      app.log.debug(`User: ${request.user.email} set from JWT`)
     }
   })
 }

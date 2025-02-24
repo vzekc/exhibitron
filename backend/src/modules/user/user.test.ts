@@ -20,14 +20,15 @@ test('login', async () => {
     method: 'post',
     url: '/api/user/login',
     payload: {
-      username: 'MeisterEder',
+      email: 'meistereder@example.com',
       password: 'password123',
     },
   })
   expect(res).toHaveStatus(200)
   expect(res.json()).toStrictEqual({
-    username: 'MeisterEder',
+    nickname: 'MeisterEder',
     fullName: 'Harald Eder',
+    email: 'meistereder@example.com',
     token: expect.stringMatching(/.*/),
     bio: '',
     contacts: {},
@@ -42,13 +43,13 @@ test('login', async () => {
     method: 'post',
     url: '/api/user/login',
     payload: {
-      username: 'MeisterEder',
+      email: 'meistereder@example.com',
       password: 'password456',
     },
   })
   expect(res).toHaveStatus(401)
   expect(res.json()).toMatchObject({
-    error: 'Invalid combination of username and password',
+    error: 'Invalid combination of email address and password',
   })
 })
 
@@ -57,7 +58,7 @@ test('update', async () => {
     method: 'post',
     url: '/api/user/login',
     payload: {
-      username: 'MeisterEder',
+      email: 'meistereder@example.com',
       password: 'password123',
     },
   })
@@ -75,7 +76,7 @@ test('update', async () => {
     },
   })
   expect(res).toHaveStatus(200)
-  expect(res.json()).toMatchObject({ username: 'MeisterEder' })
+  expect(res.json()).toMatchObject({ nickname: 'MeisterEder' })
 
   res = await app.inject({
     method: 'patch',
@@ -124,7 +125,8 @@ test('lookups', async () => {
   expect(res).toHaveStatus(200)
   expect(res).not.toContain('password')
   expect(res.json()).toStrictEqual({
-    username: 'daffy',
+    nickname: 'daffy',
+    email: 'daffy@example.com',
     fullName: 'Daffy Duck',
     id: 1002,
     isAdministrator: false,
@@ -139,7 +141,8 @@ test('lookups', async () => {
   })
   expect(res).toHaveStatus(200)
   expect(res.json()).toStrictEqual({
-    username: 'MeisterEder',
+    nickname: 'MeisterEder',
+    email: 'meistereder@example.com',
     fullName: 'Harald Eder',
     id: 1001,
     isAdministrator: false,
@@ -152,7 +155,7 @@ test('lookups', async () => {
 
 test('profile', async () => {
   // check that admin has the isAdministrator flag
-  const admin = await login(app, 'admin')
+  const admin = await login(app, 'admin@example.com')
   let res = await app.inject({
     method: 'get',
     url: '/api/user/profile',
@@ -166,7 +169,7 @@ test('profile', async () => {
   })
 
   // check that donald does not have isAdministrator set
-  const donald = await login(app, 'donald')
+  const donald = await login(app, 'donald@example.com')
   res = await app.inject({
     method: 'get',
     url: '/api/user/profile',
