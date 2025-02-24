@@ -145,7 +145,7 @@ const Registration = () => {
     <article>
       {makePopup(registrations[0])}
       <h2>Anmeldungen verwalten</h2>
-      <button onClick={handleDownload}>Download CSV</button>
+      <button onClick={handleDownload}>Daten als CSV herunterladen</button>
       <p></p>
       <table>
         <thead>
