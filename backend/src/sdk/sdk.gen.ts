@@ -47,6 +47,7 @@ import type {
   PostTableByNumberAssignToByUserIdError,
   GetRegistrationByEventIdData,
   GetRegistrationByEventIdResponse,
+  GetRegistrationByEventIdError,
   PostRegistrationByEventIdData,
   PostRegistrationByEventIdResponse,
   PostRegistrationByEventIdError,
@@ -338,7 +339,7 @@ export const getRegistrationByEventId = <ThrowOnError extends boolean = false>(
 ) => {
   return (options.client ?? _heyApiClient).get<
     GetRegistrationByEventIdResponse,
-    unknown,
+    GetRegistrationByEventIdError,
     ThrowOnError
   >({
     url: '/registration/{eventId}',

@@ -19,7 +19,7 @@ export type PostAuthLogoutResponse =
 
 export type PostUserLoginData = {
   body: {
-    username: string
+    email: string
     password: string
   }
   path?: never
@@ -36,7 +36,7 @@ export type PostUserLoginErrors = {
     [key: string]: unknown | string | undefined
   }
   /**
-   * Invalid username or password
+   * Invalid email address or password
    */
   401: {
     error?: string
@@ -52,11 +52,11 @@ export type PostUserLoginResponses = {
    */
   200: {
     id: number
-    username: string
+    nickname?: string
     fullName?: string
+    email: string
     bio?: string
     contacts?: {
-      email?: string
       phone?: string
       website?: string
       mastodon?: string
@@ -101,11 +101,11 @@ export type GetUserProfileResponses = {
    */
   200: {
     id: number
-    username: string
+    nickname?: string
     fullName?: string
+    email: string
     bio?: string
     contacts?: {
-      email?: string
       phone?: string
       website?: string
       mastodon?: string
@@ -126,9 +126,9 @@ export type GetUserProfileResponse =
 export type PatchUserProfileData = {
   body?: {
     fullName?: string
+    email?: string
     bio?: string
     contacts?: {
-      email?: string
       phone?: string
       website?: string
       mastodon?: string
@@ -159,11 +159,11 @@ export type PatchUserProfileResponses = {
    */
   200: {
     id: number
-    username: string
+    nickname?: string
     fullName?: string
+    email: string
     bio?: string
     contacts?: {
-      email?: string
       phone?: string
       website?: string
       mastodon?: string
@@ -195,11 +195,11 @@ export type GetUserResponses = {
   200: {
     items?: Array<{
       id: number
-      username: string
+      nickname?: string
       fullName?: string
+      email: string
       bio?: string
       contacts?: {
-        email?: string
         phone?: string
         website?: string
         mastodon?: string
@@ -222,7 +222,7 @@ export type GetUserByIdData = {
   body?: never
   path: {
     /**
-     * Username or ID of the user to look up
+     * Username, email address or ID of the user to look up
      */
     id: string
   }
@@ -248,11 +248,11 @@ export type GetUserByIdResponses = {
    */
   200: {
     id: number
-    username: string
+    nickname?: string
     fullName?: string
+    email: string
     bio?: string
     contacts?: {
-      email?: string
       phone?: string
       website?: string
       mastodon?: string
@@ -348,15 +348,15 @@ export type PostExhibitResponses = {
     table?: number
     exhibitor: {
       fullName?: string
+      email?: string
       bio?: string
       contacts?: {
-        email?: string
         phone?: string
         website?: string
         mastodon?: string
       }
       id?: number
-      username?: string
+      exhibitorId?: string
     }
   }
 }
@@ -397,15 +397,15 @@ export type GetExhibitByIdResponses = {
     table?: number
     exhibitor: {
       fullName?: string
+      email?: string
       bio?: string
       contacts?: {
-        email?: string
         phone?: string
         website?: string
         mastodon?: string
       }
       id?: number
-      username?: string
+      exhibitorId?: string
     }
   }
 }
@@ -482,11 +482,11 @@ export type GetTableByNumberResponses = {
     exhibitor?:
       | {
           id: number
-          username: string
+          nickname?: string
           fullName?: string
+          email: string
           bio?: string
           contacts?: {
-            email?: string
             phone?: string
             website?: string
             mastodon?: string
@@ -620,6 +620,19 @@ export type GetRegistrationByEventIdData = {
   query?: never
   url: '/registration/{eventId}'
 }
+
+export type GetRegistrationByEventIdErrors = {
+  /**
+   * Current user does not have administrative rights
+   */
+  403: {
+    error?: string
+    [key: string]: unknown | string | undefined
+  }
+}
+
+export type GetRegistrationByEventIdError =
+  GetRegistrationByEventIdErrors[keyof GetRegistrationByEventIdErrors]
 
 export type GetRegistrationByEventIdResponses = {
   /**

@@ -20,3 +20,8 @@ nav form {
   position: relative;
   top: 10px; /* Adjust this value as needed */
 }
+
+.login-failed {
+  color: #e57373;
+  min-height: 1.5em;
+}

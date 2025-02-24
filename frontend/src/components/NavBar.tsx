@@ -5,10 +5,12 @@ import { useUser } from '../contexts/userUtils.ts'
 import DropdownMenu from './DropdownMenu.tsx'
 import SearchTableNumber from './SearchTableNumber.tsx'
 import { getBookmarks } from '../utils/bookmarks.ts'
+import LoginModal from './LoginModal.tsx'
 
 const NavBar = () => {
   const { user } = useUser()
   const [hasBookmarks, setHasBookmarks] = useState(getBookmarks().length > 0)
+  const [showLoginModal, setShowLoginModal] = useState(false)
 
   const handleLogout = async () => {
     await backend.postAuthLogout()
@@ -54,7 +56,11 @@ const NavBar = () => {
       <ul>
         {user ? (
           <li>
-            <DropdownMenu label={`@${user.username}`}>
+            <DropdownMenu
+              label={
+                (user.nickname ? `@${user.nickname}` : user.fullName) ||
+                'Profil'
+              }>
               <li>
                 <Link to="/profile">Profil</Link>
               </li>
@@ -67,7 +73,13 @@ const NavBar = () => {
           </li>
         ) : (
           <li>
-            <a href="/auth/forum">Login</a>
+            <button className="button" onClick={() => setShowLoginModal(true)}>
+              Login
+            </button>
+            <LoginModal
+              isOpen={showLoginModal}
+              onClose={() => setShowLoginModal(false)}
+            />
           </li>
         )}
         <li>

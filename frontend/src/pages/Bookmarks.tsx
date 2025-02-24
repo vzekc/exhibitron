@@ -5,7 +5,7 @@ const Bookmarks = () => {
   const bookmarks = getBookmarks().map(({ exhibitor, ...e }) => ({
     ...e,
     exhibitorId: exhibitor.id!,
-    exhibitorName: exhibitor.username!,
+    exhibitorName: exhibitor.fullName!,
   }))
 
   return (
