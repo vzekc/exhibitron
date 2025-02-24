@@ -39,7 +39,9 @@ export const register = async (app: FastifyInstance) => {
         request.user = user
         app.log.debug(`User: ${request.user.email} set from session`)
       } else {
-        app.log.warn(`User with ID ${request.session.user.userId} not found, invalid session ignored`)
+        app.log.warn(
+          `User with ID ${request.session.user.userId} not found, invalid session ignored`,
+        )
       }
     }
   })
