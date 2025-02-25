@@ -13,7 +13,8 @@ import { UserProvider } from './contexts/UserContext.tsx'
 import Profile from './pages/Profile.tsx'
 import './App.css'
 import Register from './pages/Register.tsx'
-import Registration from './pages/admin/Registration.tsx'
+import RegistrationList from './pages/admin/RegistrationList.tsx'
+import RegistrationDetails from './pages/admin/RegistrationDetails.tsx'
 
 const App = () => {
   const location = useLocation()
@@ -38,7 +39,14 @@ const App = () => {
               <Route path="/table/:id" element={<TableSearchResult />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/admin/registration" element={<Registration />} />
+              <Route
+                path="/admin/registrations"
+                element={<RegistrationList />}
+              />
+              <Route
+                path="/admin/registration/:id"
+                element={<RegistrationDetails />}
+              />
             </Routes>
           </ErrorBoundary>
         </main>

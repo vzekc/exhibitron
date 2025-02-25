@@ -3,7 +3,9 @@ import { use } from 'react'
 import * as backend from '../../api/index'
 import { client as backendClient } from '../../api/client.gen'
 import Papa from 'papaparse'
-import './Registration.css'
+import './RegistrationList.css'
+import { downloadCSV, formatValue } from './utils.ts'
+import { useNavigate } from 'react-router-dom'
 
 backendClient.setConfig({
   baseURL: '/api',
@@ -19,7 +21,7 @@ const getRegistrations = async () => {
 
 const data = getRegistrations()
 
-type Registration = Awaited<typeof data>[number]
+export type Registration = Awaited<typeof data>[number]
 
 const generateCSV = (registrations: Awaited<typeof data>) => {
   const flattenedRegistrations = registrations?.map(({ data, ...rest }) => ({
@@ -42,16 +44,6 @@ const generateCSV = (registrations: Awaited<typeof data>) => {
   return Papa.unparse(flattenedRegistrations, { columns })
 }
 
-const downloadCSV = (csv: string, filename: string) => {
-  const blob = new Blob([csv], { type: 'text/csv' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  a.click()
-  window.URL.revokeObjectURL(url)
-}
-
 const tableColumns = [
   'id',
   'status',
@@ -64,14 +56,13 @@ const tableColumns = [
 
 type TableColumn = (typeof tableColumns)[number]
 
-const Registration = () => {
+const RegistrationList = () => {
   const registrations = use(data)
   const [sortConfig, setSortConfig] = useState<{
     key: TableColumn
     direction: 'ascending' | 'descending'
   } | null>(null)
-  const [popupRegistration, setPopupRegistration] =
-    useState<Registration | null>(null)
+  const navigate = useNavigate()
 
   const sortedRegistrations = React.useMemo(() => {
     if (sortConfig !== null) {
@@ -105,59 +96,8 @@ const Registration = () => {
     downloadCSV(csv, 'registrations.csv')
   }
 
-  const makePopup = () => {
-    console.log('makePopup', popupRegistration)
-    return (
-      popupRegistration && (
-        <dialog
-          className="registration-details"
-          open
-          onClick={() => setPopupRegistration(null)}>
-          <article>
-            <p>{popupRegistration.message}</p>
-            <table>
-              <tbody>
-                {Object.entries(popupRegistration.data)
-                  .filter(([, v]) => !!v)
-                  .map(([key, value]) => (
-                    <tr key={key}>
-                      <th>{key}</th>
-                      <td>
-                        {formatValue(key, value as string | number | boolean)}
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </article>
-        </dialog>
-      )
-    )
-  }
-
-  const formatValue = (key: string, value: string | number | boolean) => {
-    if (key === 'createdAt' || key === 'updatedAt') {
-      return new Date(String(value)).toLocaleString()
-    } else if (key === 'status') {
-      switch (String(value)) {
-        case 'new':
-          return 'Neu'
-        case 'approved':
-          return 'Angenommen'
-        case 'rejected':
-          return 'Abgelehnt'
-      }
-      return value
-    } else if (typeof value === 'boolean') {
-      return value ? 'Ja' : 'Nein'
-    } else {
-      return value
-    }
-  }
-
   return (
     <article>
-      {popupRegistration && makePopup()}
       <h2>Anmeldungen verwalten</h2>
       <button onClick={handleDownload}>Daten als CSV herunterladen</button>
       <p></p>
@@ -173,7 +113,10 @@ const Registration = () => {
         </thead>
         <tbody>
           {sortedRegistrations.map((registration, index) => (
-            <tr key={index} onClick={() => setPopupRegistration(registration)}>
+            <tr
+              key={index}
+              onClick={() => navigate('/admin/registration/' + registration.id)}
+              className="clickable-row">
               {tableColumns.map((column) => (
                 <td key={column}>
                   {formatValue(
@@ -190,4 +133,4 @@ const Registration = () => {
   )
 }
 
-export default Registration
+export default RegistrationList

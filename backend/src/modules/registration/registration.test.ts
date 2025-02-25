@@ -174,6 +174,6 @@ test('update nonexistent registration', async () => {
   })
   expect(res).toHaveStatus(404)
   expect(res.json()).toMatchObject({
-    error: 'Registration not found',
+    error: 'Registration not found ({ id: 9999 })',
   })
 })

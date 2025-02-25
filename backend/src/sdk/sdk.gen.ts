@@ -51,6 +51,12 @@ import type {
   PostRegistrationByEventIdData,
   PostRegistrationByEventIdResponse,
   PostRegistrationByEventIdError,
+  GetRegistrationByEventIdByRegistrationIdData,
+  GetRegistrationByEventIdByRegistrationIdResponse,
+  GetRegistrationByEventIdByRegistrationIdError,
+  PatchRegistrationByEventIdByRegistrationIdData,
+  PatchRegistrationByEventIdByRegistrationIdResponse,
+  PatchRegistrationByEventIdByRegistrationIdError,
 } from './types.gen'
 import { client as _heyApiClient } from './client.gen'
 
@@ -359,6 +365,61 @@ export const postRegistrationByEventId = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     url: '/registration/{eventId}',
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
+  })
+}
+
+/**
+ * Update a registration
+ */
+export const getRegistrationByEventIdByRegistrationId = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<GetRegistrationByEventIdByRegistrationIdData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).get<
+    GetRegistrationByEventIdByRegistrationIdResponse,
+    GetRegistrationByEventIdByRegistrationIdError,
+    ThrowOnError
+  >({
+    security: [
+      {
+        scheme: 'bearer',
+        type: 'http',
+      },
+    ],
+    url: '/registration/{eventId}/{registrationId}',
+    ...options,
+  })
+}
+
+/**
+ * Update a registration
+ */
+export const patchRegistrationByEventIdByRegistrationId = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<
+    PatchRegistrationByEventIdByRegistrationIdData,
+    ThrowOnError
+  >,
+) => {
+  return (options.client ?? _heyApiClient).patch<
+    PatchRegistrationByEventIdByRegistrationIdResponse,
+    PatchRegistrationByEventIdByRegistrationIdError,
+    ThrowOnError
+  >({
+    security: [
+      {
+        scheme: 'bearer',
+        type: 'http',
+      },
+    ],
+    url: '/registration/{eventId}/{registrationId}',
     ...options,
     headers: {
       'Content-Type': 'application/json',

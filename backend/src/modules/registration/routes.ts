@@ -16,6 +16,7 @@ const registrationBaseSchema = () => ({
     email: { type: 'string', examples: ['john@doe.com'] },
     nickname: { type: 'string', examples: ['johnny'] },
     message: { type: 'string', examples: ['Hello!'] },
+    notes: { type: 'string', examples: ['In der Lärm-Ecke unterbringen! :)'] },
     data: { type: 'object', additionalProperties: true },
   },
   required: ['name', 'email', 'nickname'],
@@ -44,6 +45,12 @@ const registrationSchema = () => ({
     ...registrationBaseSchema().properties,
   },
   required: ['id', 'status', 'eventId', 'name', 'email', 'data', 'createdAt'],
+})
+
+const serializeRegistration = (registration: Registration) => ({
+  ...registration,
+  createdAt: registration.createdAt.toISOString(),
+  updatedAt: registration.updatedAt.toISOString(),
 })
 
 export async function registerRegistrationRoutes(app: FastifyInstance) {
@@ -163,11 +170,7 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
       const registrations = await db.registration.findAll()
       return {
         total: registrations.length,
-        items: registrations.map((registration) => ({
-          ...registration,
-          createdAt: registration.createdAt.toISOString(),
-          updatedAt: registration.updatedAt.toISOString(),
-        })),
+        items: registrations.map(serializeRegistration),
       }
     },
   )
@@ -197,7 +200,7 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
         response: {
           200: {
             description: 'Registration data',
-            ...registrationBaseSchema(),
+            ...registrationSchema(),
           },
           403: {
             description: 'Current user does not have administrative rights',
@@ -217,7 +220,9 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
         )
       }
       const { registrationId } = request.params as { registrationId: number }
-      return await db.registration.findOne({ id: registrationId })
+      return serializeRegistration(
+        await db.registration.findOneOrFail({ id: registrationId }),
+      )
     },
   )
 
@@ -272,12 +277,9 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
       }
       const { registrationId } = request.params as { registrationId: number }
       const updates = request.body as Partial<Registration>
-      const registration = await db.registration.findOne({ id: registrationId })
-      if (!registration) {
-        return reply.status(404).send({
-          error: 'Registration not found',
-        })
-      }
+      const registration = await db.registration.findOneOrFail({
+        id: registrationId,
+      })
       wrap(registration).assign(updates)
       await db.em.flush()
       reply.status(204).send()

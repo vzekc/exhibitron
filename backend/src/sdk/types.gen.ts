@@ -661,6 +661,7 @@ export type GetRegistrationByEventIdResponses = {
       email: string
       nickname?: string
       message?: string
+      notes?: string
       data: {
         [key: string]: unknown
       }
@@ -681,6 +682,7 @@ export type PostRegistrationByEventIdData = {
     email: string
     nickname: string
     message?: string
+    notes?: string
     data?: {
       [key: string]: unknown
     }
@@ -717,6 +719,149 @@ export type PostRegistrationByEventIdResponses = {
 
 export type PostRegistrationByEventIdResponse =
   PostRegistrationByEventIdResponses[keyof PostRegistrationByEventIdResponses]
+
+export type GetRegistrationByEventIdByRegistrationIdData = {
+  body?: never
+  path: {
+    /**
+     * ID of the event
+     */
+    eventId: string
+    /**
+     * ID of the registration to update
+     */
+    registrationId: number
+  }
+  query?: never
+  url: '/registration/{eventId}/{registrationId}'
+}
+
+export type GetRegistrationByEventIdByRegistrationIdErrors = {
+  /**
+   * Current user does not have administrative rights
+   */
+  403: {
+    error?: string
+    [key: string]: unknown | string | undefined
+  }
+  /**
+   * Registration not found
+   */
+  404: {
+    error?: string
+    [key: string]: unknown | string | undefined
+  }
+}
+
+export type GetRegistrationByEventIdByRegistrationIdError =
+  GetRegistrationByEventIdByRegistrationIdErrors[keyof GetRegistrationByEventIdByRegistrationIdErrors]
+
+export type GetRegistrationByEventIdByRegistrationIdResponses = {
+  /**
+   * Registration data
+   */
+  200: {
+    /**
+     * Unique ID of the registration
+     */
+    id: number
+    /**
+     * Timestamp when the registration was created
+     */
+    createdAt: string
+    updatedAt?: string | unknown
+    status: 'new' | 'approved' | 'rejected'
+    name: string
+    email: string
+    nickname?: string
+    message?: string
+    notes?: string
+    data: {
+      [key: string]: unknown
+    }
+  }
+}
+
+export type GetRegistrationByEventIdByRegistrationIdResponse =
+  GetRegistrationByEventIdByRegistrationIdResponses[keyof GetRegistrationByEventIdByRegistrationIdResponses]
+
+export type PatchRegistrationByEventIdByRegistrationIdData = {
+  /**
+   * Updated registration data
+   */
+  body?: {
+    status?: 'new' | 'approved' | 'rejected'
+    name?: string
+    email?: string
+    nickname?: string
+    message?: string
+    notes?: string
+    data?: {
+      [key: string]: unknown
+    }
+  }
+  path: {
+    /**
+     * ID of the event
+     */
+    eventId: string
+    /**
+     * ID of the registration to update
+     */
+    registrationId: number
+  }
+  query?: never
+  url: '/registration/{eventId}/{registrationId}'
+}
+
+export type PatchRegistrationByEventIdByRegistrationIdErrors = {
+  /**
+   * Current user does not have administrative rights
+   */
+  403: {
+    error?: string
+    [key: string]: unknown | string | undefined
+  }
+  /**
+   * Registration not found
+   */
+  404: {
+    error?: string
+    [key: string]: unknown | string | undefined
+  }
+}
+
+export type PatchRegistrationByEventIdByRegistrationIdError =
+  PatchRegistrationByEventIdByRegistrationIdErrors[keyof PatchRegistrationByEventIdByRegistrationIdErrors]
+
+export type PatchRegistrationByEventIdByRegistrationIdResponses = {
+  /**
+   * The registration was updated
+   */
+  204: {
+    /**
+     * Unique ID of the registration
+     */
+    id: number
+    /**
+     * Timestamp when the registration was created
+     */
+    createdAt: string
+    updatedAt?: string | unknown
+    status: 'new' | 'approved' | 'rejected'
+    name: string
+    email: string
+    nickname?: string
+    message?: string
+    notes?: string
+    data: {
+      [key: string]: unknown
+    }
+  }
+}
+
+export type PatchRegistrationByEventIdByRegistrationIdResponse =
+  PatchRegistrationByEventIdByRegistrationIdResponses[keyof PatchRegistrationByEventIdByRegistrationIdResponses]
 
 export type ClientOptions = {
   baseURL: `${string}://${string}/api` | (string & {})

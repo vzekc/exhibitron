@@ -47,7 +47,7 @@ const NavBar = () => {
           <li>
             <DropdownMenu label="Verwaltung">
               <li>
-                <Link to="/admin/registration">Anmeldungen</Link>
+                <Link to="/admin/registrations">Anmeldungen</Link>
               </li>
             </DropdownMenu>
           </li>
