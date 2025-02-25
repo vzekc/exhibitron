@@ -1,7 +1,7 @@
 import { EntityRepository } from '@mikro-orm/postgresql'
-import { Registration } from './registration.entity.js'
+import { Registration, RegistrationStatus } from './registration.entity.js'
 import { BaseEntity } from '../common/base.entity.js'
-import { makeNewRegistrationEmail } from './emails.js'
+import { makeNewRegistrationEmail, makeWelcomeEmail } from './emails.js'
 import { sendEmail } from '../common/sendEmail.js'
 import { User } from '../user/user.entity.js'
 
@@ -21,5 +21,21 @@ export class RegistrationRepository extends EntityRepository<Registration> {
         registration,
       ),
     )
+    return registration
+  }
+  async approve(registration: Registration) {
+    registration.status = RegistrationStatus.APPROVED
+    await this.em.flush()
+    await sendEmail(
+      makeWelcomeEmail(
+        registration.name,
+        registration.email,
+        'https://example.com',
+      ),
+    )
+  }
+  async reject(registration: Registration) {
+    registration.status = RegistrationStatus.REJECTED
+    await this.em.flush()
   }
 }

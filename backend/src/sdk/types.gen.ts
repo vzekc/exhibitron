@@ -677,7 +677,6 @@ export type PostRegistrationByEventIdData = {
    * Registration data, the data field contains event specific properties
    */
   body: {
-    status?: 'new' | 'approved' | 'rejected'
     name: string
     email: string
     nickname: string
@@ -714,11 +713,76 @@ export type PostRegistrationByEventIdResponses = {
   /**
    * The registration was created
    */
-  204: void
+  200: {
+    /**
+     * Unique ID of the registration
+     */
+    id: number
+    /**
+     * Timestamp when the registration was created
+     */
+    createdAt: string
+    updatedAt?: string | unknown
+    status: 'new' | 'approved' | 'rejected'
+    name: string
+    email: string
+    nickname?: string
+    message?: string
+    notes?: string
+    data: {
+      [key: string]: unknown
+    }
+  }
 }
 
 export type PostRegistrationByEventIdResponse =
   PostRegistrationByEventIdResponses[keyof PostRegistrationByEventIdResponses]
+
+export type DeleteRegistrationByEventIdByRegistrationIdData = {
+  body?: never
+  path: {
+    /**
+     * ID of the event
+     */
+    eventId: string
+    /**
+     * ID of the registration to update
+     */
+    registrationId: number
+  }
+  query?: never
+  url: '/registration/{eventId}/{registrationId}'
+}
+
+export type DeleteRegistrationByEventIdByRegistrationIdErrors = {
+  /**
+   * Current user does not have administrative rights
+   */
+  403: {
+    error?: string
+    [key: string]: unknown | string | undefined
+  }
+  /**
+   * Registration not found
+   */
+  404: {
+    error?: string
+    [key: string]: unknown | string | undefined
+  }
+}
+
+export type DeleteRegistrationByEventIdByRegistrationIdError =
+  DeleteRegistrationByEventIdByRegistrationIdErrors[keyof DeleteRegistrationByEventIdByRegistrationIdErrors]
+
+export type DeleteRegistrationByEventIdByRegistrationIdResponses = {
+  /**
+   * The registration was updated
+   */
+  204: void
+}
+
+export type DeleteRegistrationByEventIdByRegistrationIdResponse =
+  DeleteRegistrationByEventIdByRegistrationIdResponses[keyof DeleteRegistrationByEventIdByRegistrationIdResponses]
 
 export type GetRegistrationByEventIdByRegistrationIdData = {
   body?: never
@@ -790,7 +854,6 @@ export type PatchRegistrationByEventIdByRegistrationIdData = {
    * Updated registration data
    */
   body?: {
-    status?: 'new' | 'approved' | 'rejected'
     name?: string
     email?: string
     nickname?: string
@@ -838,30 +901,103 @@ export type PatchRegistrationByEventIdByRegistrationIdResponses = {
   /**
    * The registration was updated
    */
-  204: {
-    /**
-     * Unique ID of the registration
-     */
-    id: number
-    /**
-     * Timestamp when the registration was created
-     */
-    createdAt: string
-    updatedAt?: string | unknown
-    status: 'new' | 'approved' | 'rejected'
-    name: string
-    email: string
-    nickname?: string
-    message?: string
-    notes?: string
-    data: {
-      [key: string]: unknown
-    }
-  }
+  204: void
 }
 
 export type PatchRegistrationByEventIdByRegistrationIdResponse =
   PatchRegistrationByEventIdByRegistrationIdResponses[keyof PatchRegistrationByEventIdByRegistrationIdResponses]
+
+export type PutRegistrationByEventIdByRegistrationIdApproveData = {
+  body?: never
+  path: {
+    /**
+     * ID of the event
+     */
+    eventId: string
+    /**
+     * ID of the registration to update
+     */
+    registrationId: number
+  }
+  query?: never
+  url: '/registration/{eventId}/{registrationId}/approve'
+}
+
+export type PutRegistrationByEventIdByRegistrationIdApproveErrors = {
+  /**
+   * Current user does not have administrative rights
+   */
+  403: {
+    error?: string
+    [key: string]: unknown | string | undefined
+  }
+  /**
+   * Registration not found
+   */
+  404: {
+    error?: string
+    [key: string]: unknown | string | undefined
+  }
+}
+
+export type PutRegistrationByEventIdByRegistrationIdApproveError =
+  PutRegistrationByEventIdByRegistrationIdApproveErrors[keyof PutRegistrationByEventIdByRegistrationIdApproveErrors]
+
+export type PutRegistrationByEventIdByRegistrationIdApproveResponses = {
+  /**
+   * The registration was updated
+   */
+  204: void
+}
+
+export type PutRegistrationByEventIdByRegistrationIdApproveResponse =
+  PutRegistrationByEventIdByRegistrationIdApproveResponses[keyof PutRegistrationByEventIdByRegistrationIdApproveResponses]
+
+export type PutRegistrationByEventIdByRegistrationIdRejectData = {
+  body?: never
+  path: {
+    /**
+     * ID of the event
+     */
+    eventId: string
+    /**
+     * ID of the registration to update
+     */
+    registrationId: number
+  }
+  query?: never
+  url: '/registration/{eventId}/{registrationId}/reject'
+}
+
+export type PutRegistrationByEventIdByRegistrationIdRejectErrors = {
+  /**
+   * Current user does not have administrative rights
+   */
+  403: {
+    error?: string
+    [key: string]: unknown | string | undefined
+  }
+  /**
+   * Registration not found
+   */
+  404: {
+    error?: string
+    [key: string]: unknown | string | undefined
+  }
+}
+
+export type PutRegistrationByEventIdByRegistrationIdRejectError =
+  PutRegistrationByEventIdByRegistrationIdRejectErrors[keyof PutRegistrationByEventIdByRegistrationIdRejectErrors]
+
+export type PutRegistrationByEventIdByRegistrationIdRejectResponses = {
+  /**
+   * The registration was updated
+   */
+  204: void
+}
+
+export type PutRegistrationByEventIdByRegistrationIdRejectResponse =
+  PutRegistrationByEventIdByRegistrationIdRejectResponses[keyof PutRegistrationByEventIdByRegistrationIdRejectResponses]
 
 export type ClientOptions = {
   baseURL: `${string}://${string}/api` | (string & {})

@@ -7,7 +7,7 @@ export const makeWelcomeEmail = (
   email: string,
   registerUrl: string,
 ) => ({
-  to: email,
+  to: [email],
   subject: 'Willkommen als Aussteller auf der CC2025!',
   body: makeEmailBody(
     <article>

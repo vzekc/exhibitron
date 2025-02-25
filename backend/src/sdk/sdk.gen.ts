@@ -51,12 +51,21 @@ import type {
   PostRegistrationByEventIdData,
   PostRegistrationByEventIdResponse,
   PostRegistrationByEventIdError,
+  DeleteRegistrationByEventIdByRegistrationIdData,
+  DeleteRegistrationByEventIdByRegistrationIdResponse,
+  DeleteRegistrationByEventIdByRegistrationIdError,
   GetRegistrationByEventIdByRegistrationIdData,
   GetRegistrationByEventIdByRegistrationIdResponse,
   GetRegistrationByEventIdByRegistrationIdError,
   PatchRegistrationByEventIdByRegistrationIdData,
   PatchRegistrationByEventIdByRegistrationIdResponse,
   PatchRegistrationByEventIdByRegistrationIdError,
+  PutRegistrationByEventIdByRegistrationIdApproveData,
+  PutRegistrationByEventIdByRegistrationIdApproveResponse,
+  PutRegistrationByEventIdByRegistrationIdApproveError,
+  PutRegistrationByEventIdByRegistrationIdRejectData,
+  PutRegistrationByEventIdByRegistrationIdRejectResponse,
+  PutRegistrationByEventIdByRegistrationIdRejectError,
 } from './types.gen'
 import { client as _heyApiClient } from './client.gen'
 
@@ -374,6 +383,33 @@ export const postRegistrationByEventId = <ThrowOnError extends boolean = false>(
 }
 
 /**
+ * Delete a registration
+ */
+export const deleteRegistrationByEventIdByRegistrationId = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<
+    DeleteRegistrationByEventIdByRegistrationIdData,
+    ThrowOnError
+  >,
+) => {
+  return (options.client ?? _heyApiClient).delete<
+    DeleteRegistrationByEventIdByRegistrationIdResponse,
+    DeleteRegistrationByEventIdByRegistrationIdError,
+    ThrowOnError
+  >({
+    security: [
+      {
+        scheme: 'bearer',
+        type: 'http',
+      },
+    ],
+    url: '/registration/{eventId}/{registrationId}',
+    ...options,
+  })
+}
+
+/**
  * Update a registration
  */
 export const getRegistrationByEventIdByRegistrationId = <
@@ -425,5 +461,59 @@ export const patchRegistrationByEventIdByRegistrationId = <
       'Content-Type': 'application/json',
       ...options?.headers,
     },
+  })
+}
+
+/**
+ * Approve a registration
+ */
+export const putRegistrationByEventIdByRegistrationIdApprove = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<
+    PutRegistrationByEventIdByRegistrationIdApproveData,
+    ThrowOnError
+  >,
+) => {
+  return (options.client ?? _heyApiClient).put<
+    PutRegistrationByEventIdByRegistrationIdApproveResponse,
+    PutRegistrationByEventIdByRegistrationIdApproveError,
+    ThrowOnError
+  >({
+    security: [
+      {
+        scheme: 'bearer',
+        type: 'http',
+      },
+    ],
+    url: '/registration/{eventId}/{registrationId}/approve',
+    ...options,
+  })
+}
+
+/**
+ * Reject a registration
+ */
+export const putRegistrationByEventIdByRegistrationIdReject = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<
+    PutRegistrationByEventIdByRegistrationIdRejectData,
+    ThrowOnError
+  >,
+) => {
+  return (options.client ?? _heyApiClient).put<
+    PutRegistrationByEventIdByRegistrationIdRejectResponse,
+    PutRegistrationByEventIdByRegistrationIdRejectError,
+    ThrowOnError
+  >({
+    security: [
+      {
+        scheme: 'bearer',
+        type: 'http',
+      },
+    ],
+    url: '/registration/{eventId}/{registrationId}/reject',
+    ...options,
   })
 }

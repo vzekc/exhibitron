@@ -29,17 +29,43 @@ const RegistrationDetails = () => {
     return <div>Laden...</div>
   }
 
-  const changeStatus = (status: 'approved' | 'rejected') => async () => {
-    if (confirm('Status wirklich ändern?')) {
-      await backend.patchRegistrationByEventIdByRegistrationId({
+  const handleApprove = async () => {
+    if (confirm('Anmeldung bestätigen?')) {
+      await backend.putRegistrationByEventIdByRegistrationIdApprove({
         path: { eventId: 'cc2025', registrationId: +id },
-        body: { status },
       })
-      setRegistration({ ...registration, status })
+      const updated = await backend.getRegistrationByEventIdByRegistrationId({
+        path: {
+          eventId: 'cc2025',
+          registrationId: +id,
+        },
+      })
+      setRegistration(updated.data)
     }
   }
 
-  const deleteRegistration = async () => {}
+  const handleReject = async () => {
+    if (confirm('Anmeldung ablehnen?')) {
+      await backend.putRegistrationByEventIdByRegistrationIdReject({
+        path: { eventId: 'cc2025', registrationId: +id },
+      })
+      const updated = await backend.getRegistrationByEventIdByRegistrationId({
+        path: {
+          eventId: 'cc2025',
+          registrationId: +id,
+        },
+      })
+      setRegistration(updated.data)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (confirm('Anmeldung löschen?')) {
+      await backend.deleteRegistrationByEventIdByRegistrationId({
+        path: { eventId: 'cc2025', registrationId: +id },
+      })
+    }
+  }
 
   const formatted = (key: keyof typeof registration) =>
     formatValue(key, registration[key] as string | number | boolean)
@@ -55,17 +81,17 @@ const RegistrationDetails = () => {
               <div className="grid">
                 <input type="text" value={formatted('status')} readOnly />
                 {registration.status !== 'approved' && (
-                  <button type="button" onClick={changeStatus('approved')}>
+                  <button type="button" onClick={handleApprove}>
                     Annehmen
                   </button>
                 )}
                 {registration.status !== 'rejected' && (
-                  <button type="button" onClick={changeStatus('rejected')}>
+                  <button type="button" onClick={handleReject}>
                     Ablehnen
                   </button>
                 )}
                 {registration.status !== 'approved' && (
-                  <button type="button" onClick={deleteRegistration}>
+                  <button type="button" onClick={handleDelete}>
                     Löschen
                   </button>
                 )}

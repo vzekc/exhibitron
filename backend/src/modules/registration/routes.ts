@@ -1,17 +1,13 @@
 import { FastifyInstance } from 'fastify'
 import { initORM } from '../../db.js'
-import { errorSchema, PermissionDeniedError } from '../common/errors.js'
+import { errorSchema } from '../common/errors.js'
 import { RegistrationStatus, Registration } from './registration.entity.js'
 import { wrap } from '@mikro-orm/core'
+import { isAdmin } from '../middleware/auth.js'
 
 const registrationBaseSchema = () => ({
   type: 'object',
   properties: {
-    status: {
-      type: 'string',
-      enum: Object.values(RegistrationStatus),
-      examples: Object.values(RegistrationStatus),
-    },
     name: { type: 'string', examples: ['John Doe'] },
     email: { type: 'string', examples: ['john@doe.com'] },
     nickname: { type: 'string', examples: ['johnny'] },
@@ -19,6 +15,7 @@ const registrationBaseSchema = () => ({
     notes: { type: 'string', examples: ['In der Lärm-Ecke unterbringen! :)'] },
     data: { type: 'object', additionalProperties: true },
   },
+  additionalProperties: false,
   required: ['name', 'email', 'nickname'],
 })
 
@@ -42,10 +39,47 @@ const registrationSchema = () => ({
         { type: 'null' },
       ],
     },
+    status: {
+      type: 'string',
+      enum: Object.values(RegistrationStatus),
+      examples: Object.values(RegistrationStatus),
+    },
     ...registrationBaseSchema().properties,
   },
   required: ['id', 'status', 'eventId', 'name', 'email', 'data', 'createdAt'],
 })
+
+const registrationUpdateParamsSchema = {
+  type: 'object',
+  properties: {
+    eventId: {
+      type: 'string',
+      description: 'ID of the event',
+      examples: ['cc2025'],
+    },
+    registrationId: {
+      type: 'number',
+      description: 'ID of the registration to update',
+      examples: [1],
+    },
+  },
+  required: ['eventId', 'registrationId'],
+}
+
+const registrationUpdateResponseSchema = {
+  204: {
+    description: 'The registration was updated',
+    type: 'null',
+  },
+  403: {
+    description: 'Current user does not have administrative rights',
+    ...errorSchema,
+  },
+  404: {
+    description: 'Registration not found',
+    ...errorSchema,
+  },
+}
 
 const serializeRegistration = (registration: Registration) => ({
   ...registration,
@@ -78,9 +112,9 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
           ...registrationBaseSchema(),
         },
         response: {
-          204: {
+          200: {
             description: 'The registration was created',
-            type: 'null',
+            ...registrationSchema(),
           },
           409: {
             description:
@@ -105,7 +139,7 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
         })
       }
 
-      await db.registration.register({
+      const registration = await db.registration.register({
         status: RegistrationStatus.NEW,
         eventId,
         name,
@@ -115,7 +149,7 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
         data,
       })
       await db.em.flush()
-      reply.status(204).send()
+      return serializeRegistration(registration)
     },
   )
 
@@ -160,13 +194,11 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
           },
         },
       },
+      preHandler: isAdmin(
+        'Must be logged as administrator to retrieve registrations',
+      ),
     },
-    async (request) => {
-      if (!request.user || !request.user.isAdministrator) {
-        throw new PermissionDeniedError(
-          'Must be logged as administrator retrieve registrations',
-        )
-      }
+    async () => {
       const registrations = await db.registration.findAll()
       return {
         total: registrations.length,
@@ -212,13 +244,11 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
           },
         },
       },
+      preHandler: isAdmin(
+        'Must be logged as administrator to retrieve registrations',
+      ),
     },
     async (request) => {
-      if (!request.user || !request.user.isAdministrator) {
-        throw new PermissionDeniedError(
-          'Must be logged as administrator to retrieve registrations',
-        )
-      }
       const { registrationId } = request.params as { registrationId: number }
       return serializeRegistration(
         await db.registration.findOneOrFail({ id: registrationId }),
@@ -232,56 +262,107 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
       schema: {
         description: 'Update a registration',
         security: [{ BearerAuth: [] }], // Requires Authorization header
-        params: {
-          type: 'object',
-          properties: {
-            eventId: {
-              type: 'string',
-              description: 'ID of the event',
-              examples: ['cc2025'],
-            },
-            registrationId: {
-              type: 'number',
-              description: 'ID of the registration to update',
-              examples: [1],
-            },
-          },
-          required: ['eventId', 'registrationId'],
-        },
+        params: registrationUpdateParamsSchema,
         body: {
           description: 'Updated registration data',
           ...registrationBaseSchema(),
           required: [],
         },
+        response: registrationUpdateResponseSchema,
+      },
+      preHandler: isAdmin(
+        'Must be logged as administrator to update registrations',
+      ),
+    },
+    async (request, reply) => {
+      const { registrationId } = request.params as { registrationId: number }
+      const registration = await db.registration.findOneOrFail({
+        id: registrationId,
+      })
+      const updates = request.body as Partial<Registration>
+      wrap(registration).assign(updates)
+      await db.em.flush()
+      reply.status(204).send()
+    },
+  )
+
+  app.put(
+    '/:eventId/:registrationId/approve',
+    {
+      schema: {
+        description: 'Approve a registration',
+        security: [{ BearerAuth: [] }], // Requires Authorization header
+        params: registrationUpdateParamsSchema,
+        response: registrationUpdateResponseSchema,
+      },
+      preHandler: isAdmin(
+        'Must be logged as administrator to approve registrations',
+      ),
+    },
+    async (request, reply) => {
+      const { registrationId } = request.params as { registrationId: number }
+      const registration = await db.registration.findOneOrFail({
+        id: registrationId,
+      })
+      await db.registration.approve(registration)
+      reply.status(204).send()
+    },
+  )
+
+  app.put(
+    '/:eventId/:registrationId/reject',
+    {
+      schema: {
+        description: 'Reject a registration',
+        security: [{ BearerAuth: [] }], // Requires Authorization header
+        params: registrationUpdateParamsSchema,
+        response: registrationUpdateResponseSchema,
+      },
+      preHandler: isAdmin(
+        'Must be logged as administrator to reject registrations',
+      ),
+    },
+    async (request, reply) => {
+      const { registrationId } = request.params as { registrationId: number }
+      const registration = await db.registration.findOneOrFail({
+        id: registrationId,
+      })
+      await db.registration.reject(registration)
+      reply.status(204).send()
+    },
+  )
+
+  app.delete(
+    '/:eventId/:registrationId',
+    {
+      schema: {
+        description: 'Delete a registration',
+        security: [{ BearerAuth: [] }], // Requires Authorization header
+        params: registrationUpdateParamsSchema,
         response: {
-          204: {
-            description: 'The registration was updated',
-            ...registrationSchema(),
-          },
-          403: {
-            description: 'Current user does not have administrative rights',
-            ...errorSchema,
-          },
-          404: {
-            description: 'Registration not found',
+          ...registrationUpdateResponseSchema,
+          409: {
+            description: 'Cannot delete an approved registration',
             ...errorSchema,
           },
         },
       },
+      preHandler: isAdmin(
+        'Must be logged as administrator to delete registrations',
+      ),
     },
     async (request, reply) => {
-      if (!request.user || !request.user.isAdministrator) {
-        throw new PermissionDeniedError(
-          'Must be logged as administrator to update registrations',
-        )
-      }
       const { registrationId } = request.params as { registrationId: number }
-      const updates = request.body as Partial<Registration>
       const registration = await db.registration.findOneOrFail({
         id: registrationId,
       })
-      wrap(registration).assign(updates)
-      await db.em.flush()
+      // fixme: business logic here?
+      if (registration.status === RegistrationStatus.APPROVED) {
+        return reply
+          .status(409)
+          .send({ error: 'Cannot delete an approved registration' })
+      }
+      await db.em.removeAndFlush(registration)
       reply.status(204).send()
     },
   )

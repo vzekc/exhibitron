@@ -18,6 +18,18 @@ export async function sendEmail({
   body,
 }: EmailOptions): Promise<void> {
   const { SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD } = process.env
+  if (!SMTP_HOST) {
+    console.error('SMTP_HOST is not set, email will not be sent')
+    return
+  }
+  console.info(
+    'Sending email to',
+    to,
+    'with subject',
+    subject,
+    ' via ',
+    SMTP_HOST,
+  )
   const auth =
     (SMTP_USERNAME &&
       SMTP_PASSWORD && { user: SMTP_USERNAME, pass: SMTP_PASSWORD }) ||
