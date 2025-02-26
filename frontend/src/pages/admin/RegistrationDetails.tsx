@@ -70,7 +70,15 @@ const RegistrationDetails = () => {
     }
   }
 
-  const formatted = (key: keyof typeof registration) =>
+  const handleSaveNotes = async () => {
+    await backend.patchRegistrationByEventIdByRegistrationId({
+      path: { eventId: 'cc2025', registrationId: +id },
+      body: { notes },
+    })
+    setRegistration({ ...registration, notes })
+  }
+
+  const formatted = (key: keyof Registration) =>
     formatValue(key, registration[key] as string | number | boolean)
 
   return (
@@ -108,7 +116,9 @@ const RegistrationDetails = () => {
               />
             </label>
             {notes !== registration.notes && (
-              <button type="button">Speichern</button>
+              <button type="button" onClick={handleSaveNotes}>
+                Speichern
+              </button>
             )}
             <label>
               Name:
