@@ -1,7 +1,11 @@
 import { EntityRepository } from '@mikro-orm/postgresql'
 import { Registration, RegistrationStatus } from './registration.entity.js'
 import { BaseEntity } from '../common/base.entity.js'
-import { makeNewRegistrationEmail, makeWelcomeEmail } from './emails.js'
+import {
+  makeNewRegistrationEmail,
+  makeNewRegistrationReceivedEmail,
+  makeWelcomeEmail,
+} from './emails.js'
 import { sendEmail } from '../common/sendEmail.js'
 import { User } from '../user/user.entity.js'
 import { Exhibit } from '../exhibit/exhibit.entity.js'
@@ -17,6 +21,7 @@ export class RegistrationRepository extends EntityRepository<Registration> {
       await sendEmail(
         makeNewRegistrationEmail([process.env.ADMIN_EMAIL], registration),
       )
+      await sendEmail(makeNewRegistrationReceivedEmail(registration.email))
     } else {
       console.log('ADMIN_EMAIL not set, skipping email notification')
     }

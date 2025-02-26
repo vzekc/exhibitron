@@ -76,7 +76,12 @@ const Register = () => {
       case 'sending':
         return <p>Die Anmeldung wird gesendet...</p>
       case 'done':
-        return <p>Vielen Dank für deine Anmeldung!</p>
+        return (
+          <>
+            <h2>Vielen Dank für deine Anmeldung!</h2>
+            <p>Wir melden uns in den nächsten Tagen bei Dir!</p>
+          </>
+        )
       default:
         return (
           <form
@@ -246,7 +251,7 @@ const Register = () => {
   }
   return (
     <article>
-      <h1>Aussteller-Registrierung</h1>
+      <h1>Aussteller-Registrierung für die Classic Computing 2025</h1>
       {content()}
     </article>
   )

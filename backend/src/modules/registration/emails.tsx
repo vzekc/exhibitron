@@ -56,3 +56,17 @@ export const makeNewRegistrationEmail = (
     ],
   }
 }
+
+export const makeNewRegistrationReceivedEmail = (email: string) => ({
+  to: [email],
+  subject: 'Deine Anmeldung zur CC2025 ist eingegangen',
+  body: makeEmailBody(
+    <article>
+      <h1>Vielen Dank für deine Anmeldung zur CC2025!</h1>
+      <p>
+        Wir haben Deine Anmeldung empfangen und melden uns in den nächsten Tagen
+        bei Dir.
+      </p>
+    </article>,
+  ),
+})
