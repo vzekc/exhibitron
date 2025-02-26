@@ -660,6 +660,7 @@ export type GetRegistrationByEventIdResponses = {
       name: string
       email: string
       nickname?: string
+      topic?: string
       message?: string
       notes?: string
       data: {
@@ -680,6 +681,7 @@ export type PostRegistrationByEventIdData = {
     name: string
     email: string
     nickname: string
+    topic?: string
     message?: string
     notes?: string
     data?: {
@@ -727,6 +729,7 @@ export type PostRegistrationByEventIdResponses = {
     name: string
     email: string
     nickname?: string
+    topic?: string
     message?: string
     notes?: string
     data: {
@@ -766,6 +769,13 @@ export type DeleteRegistrationByEventIdByRegistrationIdErrors = {
    * Registration not found
    */
   404: {
+    error?: string
+    [key: string]: unknown | string | undefined
+  }
+  /**
+   * Cannot delete an approved registration
+   */
+  409: {
     error?: string
     [key: string]: unknown | string | undefined
   }
@@ -838,6 +848,7 @@ export type GetRegistrationByEventIdByRegistrationIdResponses = {
     name: string
     email: string
     nickname?: string
+    topic?: string
     message?: string
     notes?: string
     data: {
@@ -857,6 +868,7 @@ export type PatchRegistrationByEventIdByRegistrationIdData = {
     name?: string
     email?: string
     nickname?: string
+    topic?: string
     message?: string
     notes?: string
     data?: {

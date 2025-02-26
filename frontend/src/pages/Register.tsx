@@ -45,11 +45,19 @@ const Register = () => {
   const topic = watch('topic')
 
   const onSubmit: SubmitHandler<Inputs> = async (inputs) => {
-    const { name, email, nickname, message, ...data } = inputs
+    const { name, email, nickname, message, topic, topicExtras, ...data } =
+      inputs
     setState('sending')
     const result = await backend.postRegistrationByEventId({
       path: { eventId: 'cc2025' },
-      body: { name, email, nickname, message, data },
+      body: {
+        name,
+        email,
+        nickname,
+        topic: topicExtras ? topic.replace('*', topicExtras) : topic,
+        message,
+        data,
+      },
       validateStatus: (status) => status == 204 || status == 409,
     })
     if (result.status === 409) {

@@ -28,7 +28,7 @@ export const makeNewRegistrationEmail = (
   const name =
     registration.data?.forum === 'forum.classic-computing.de' &&
     registration.nickname
-      ? `@registration.nickname`
+      ? `@${registration.nickname}`
       : registration.name
   return {
     to,
@@ -41,12 +41,18 @@ export const makeNewRegistrationEmail = (
           <a href={`mailto:${registration.email}`}>{name}</a> ist eingegangen.
           Die Anmeldung wurde in der Datenbank gespeichert und kann über das{' '}
           <a
-            href={`https://2025.classic-computing.org/admin/registration?id=${registration.id}`}>
+            href={`https://2025.classic-computing.de/admin/registration?id=${registration.id}`}>
             Admin-Interface
-          </a>
+          </a>{' '}
           eingesehen und bestätigt werden.
         </p>
       </article>,
     ),
+    attachments: [
+      {
+        filename: `registration-${registration.eventId}-${registration.id}.json`,
+        content: JSON.stringify(registration, null, 2),
+      },
+    ],
   }
 }

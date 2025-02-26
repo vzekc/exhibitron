@@ -168,7 +168,8 @@ export async function registerTableRoutes(app: FastifyInstance) {
         number: string
         userId: string
       }
-      const user = await db.user.lookup(userId)
+      const user = await db.user.lookupOrFail(userId)
+      await db.user.populate(user, ['exhibits', 'tables'])
       await db.table.claim(+number, user)
       await db.em.flush()
       reply.status(204).send()

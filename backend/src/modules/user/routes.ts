@@ -199,7 +199,8 @@ export async function registerUserRoutes(app: FastifyInstance) {
     },
     async (request) => {
       const { id } = request.params as { id: string }
-      const user = await db.user.lookup(id)
+      const user = await db.user.lookupOrFail(id)
+      await db.user.populate(user, ['tables', 'exhibits'])
       return makeUserResponse(user)
     },
   )

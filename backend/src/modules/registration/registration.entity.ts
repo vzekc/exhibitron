@@ -35,6 +35,9 @@ export class Registration extends BaseEntity<'message'> {
   @Property()
   email!: string
 
+  @Property()
+  topic!: string
+
   @Property({ nullable: true })
   nickname?: string
 

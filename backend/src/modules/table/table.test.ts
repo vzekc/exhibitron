@@ -62,7 +62,7 @@ test('claim and release', async () => {
   expect(res).toHaveStatus(204)
 
   // Have administrator assign table 2 to donald
-  res = await tablePost('/table/2/assign-to/donald', admin)
+  res = await tablePost('/table/2/assign-to/donald@example.com', admin)
   expect(res).toHaveStatus(204)
 
   // expect that daffy cannot claim the table now

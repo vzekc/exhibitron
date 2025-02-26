@@ -24,6 +24,7 @@ describe('registration', () => {
         name: 'John Doe',
         email: 'john@doe.com',
         nickname: 'johnny',
+        topic: 'ZX Spectrum',
         message: 'Hello!',
         data: { key: 'value' },
       },
@@ -39,6 +40,7 @@ describe('registration', () => {
         name: 'John Doe',
         email: 'john@doe.com',
         nickname: 'johnny',
+        topic: 'ZX Spectrum',
         message: 'Hello!',
         data: { key: 'value' },
       },
@@ -50,6 +52,7 @@ describe('registration', () => {
         name: 'John Doe',
         email: 'john@doe.com',
         nickname: 'johnny',
+        topic: 'ZX Spectrum',
         message: 'Hello again!',
         data: { key: 'value' },
       },
@@ -135,6 +138,7 @@ describe('registration', () => {
     expect(updatedRegistration.message).toBe('Updated message')
     expect(updatedRegistration.email).toBe(originalRegistration.email)
     expect(updatedRegistration.nickname).toBe(originalRegistration.nickname)
+    expect(updatedRegistration.topic).toBe(originalRegistration.topic)
     expect(updatedRegistration.data).toEqual(originalRegistration.data)
   })
 
@@ -204,6 +208,7 @@ describe('registration', () => {
         name: 'Hinz Kunz',
         email: 'hinz@kunz.com',
         nickname: 'hinz',
+        topic: 'ZX Spectrum',
         message: 'Hello!',
         data: { key: 'value' },
       },

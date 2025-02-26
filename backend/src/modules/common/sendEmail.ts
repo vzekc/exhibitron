@@ -9,6 +9,7 @@ interface EmailOptions {
   to: string[]
   subject: string
   body: { html: string; text: string }
+  attachments?: { filename: string; content: string }[]
 }
 
 export async function sendEmail({
@@ -16,6 +17,7 @@ export async function sendEmail({
   to,
   subject,
   body,
+  attachments,
 }: EmailOptions): Promise<void> {
   const { SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD } = process.env
   if (!SMTP_HOST) {
@@ -50,6 +52,7 @@ export async function sendEmail({
     subject,
     text,
     html,
+    attachments,
   }
 
   await transporter.sendMail(mailOptions)

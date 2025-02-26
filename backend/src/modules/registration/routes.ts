@@ -11,6 +11,7 @@ const registrationBaseSchema = () => ({
     name: { type: 'string', examples: ['John Doe'] },
     email: { type: 'string', examples: ['john@doe.com'] },
     nickname: { type: 'string', examples: ['johnny'] },
+    topic: { type: 'string', examples: ['SID Inferno'] },
     message: { type: 'string', examples: ['Hello!'] },
     notes: { type: 'string', examples: ['In der Lärm-Ecke unterbringen! :)'] },
     data: { type: 'object', additionalProperties: true },
@@ -126,10 +127,11 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
     },
     async (request, reply) => {
       const { eventId } = request.params as { eventId: string }
-      const { name, email, nickname, message, data } = request.body as {
+      const { name, email, nickname, topic, message, data } = request.body as {
         name: string
         email: string
         nickname: string
+        topic: string
         message?: string
         data: { [key: string]: string | number | boolean }
       }
@@ -145,6 +147,7 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
         name,
         email,
         nickname,
+        topic,
         message,
         data,
       })
@@ -282,7 +285,7 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
       const updates = request.body as Partial<Registration>
       wrap(registration).assign(updates)
       await db.em.flush()
-      reply.status(204).send()
+      return reply.status(204).send()
     },
   )
 
@@ -305,7 +308,7 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
         id: registrationId,
       })
       await db.registration.approve(registration)
-      reply.status(204).send()
+      return reply.status(204).send()
     },
   )
 
@@ -328,7 +331,7 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
         id: registrationId,
       })
       await db.registration.reject(registration)
-      reply.status(204).send()
+      return reply.status(204).send()
     },
   )
 
@@ -363,7 +366,7 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
           .send({ error: 'Cannot delete an approved registration' })
       }
       await db.em.removeAndFlush(registration)
-      reply.status(204).send()
+      return reply.status(204).send()
     },
   )
 }

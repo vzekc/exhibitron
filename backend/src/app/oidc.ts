@@ -103,7 +103,7 @@ export const register = async (app: FastifyInstance) => {
       throw new AuthError(`Dein Benutzerstatus ${rank} ist nicht ausreichend`)
     }
 
-    const user = await db.user.ensureUser(
+    const user = await db.user.ensureVzEkCUser(
       nickname,
       email,
       administratorRanks.includes(rank),

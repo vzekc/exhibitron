@@ -137,7 +137,7 @@ test('lookups', async () => {
   })
   res = await app.inject({
     method: 'get',
-    url: '/api/user/MeisterEder',
+    url: '/api/user/meistereder@example.com',
   })
   expect(res).toHaveStatus(200)
   expect(res.json()).toStrictEqual({
