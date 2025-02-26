@@ -27,6 +27,7 @@ export class RegistrationRepository extends EntityRepository<Registration> {
     }
     return registration
   }
+
   async approve(registration: Registration) {
     registration.status = RegistrationStatus.APPROVED
     let user = await this.em.getRepository(User).lookup(registration.email)
@@ -55,8 +56,14 @@ export class RegistrationRepository extends EntityRepository<Registration> {
       ),
     )
   }
+
   async reject(registration: Registration) {
     registration.status = RegistrationStatus.REJECTED
+    await this.em.flush()
+  }
+
+  async inProgress(registration: Registration) {
+    registration.status = RegistrationStatus.IN_PROGRESS
     await this.em.flush()
   }
 }

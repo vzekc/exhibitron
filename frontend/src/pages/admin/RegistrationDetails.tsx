@@ -31,18 +31,32 @@ const RegistrationDetails = () => {
     return <div>Laden...</div>
   }
 
+  const reload = async () => {
+    const updated = await backend.getRegistrationByEventIdByRegistrationId({
+      path: {
+        eventId: 'cc2025',
+        registrationId: +id,
+      },
+    })
+    setRegistration(updated.data)
+  }
+
+  const handleInProgress = async () => {
+    await backend.putRegistrationByEventIdByRegistrationIdInProgress({
+      path: {
+        eventId: 'cc2025',
+        registrationId: +id,
+      },
+    })
+    await reload()
+  }
+
   const handleApprove = async () => {
     if (confirm('Anmeldung bestätigen?')) {
       await backend.putRegistrationByEventIdByRegistrationIdApprove({
         path: { eventId: 'cc2025', registrationId: +id },
       })
-      const updated = await backend.getRegistrationByEventIdByRegistrationId({
-        path: {
-          eventId: 'cc2025',
-          registrationId: +id,
-        },
-      })
-      setRegistration(updated.data)
+      await reload()
     }
   }
 
@@ -51,13 +65,7 @@ const RegistrationDetails = () => {
       await backend.putRegistrationByEventIdByRegistrationIdReject({
         path: { eventId: 'cc2025', registrationId: +id },
       })
-      const updated = await backend.getRegistrationByEventIdByRegistrationId({
-        path: {
-          eventId: 'cc2025',
-          registrationId: +id,
-        },
-      })
-      setRegistration(updated.data)
+      await reload()
     }
   }
 
@@ -91,6 +99,12 @@ const RegistrationDetails = () => {
               Status:
               <div className="grid">
                 <input type="text" value={formatted('status')} readOnly />
+                {registration.status !== 'approved' &&
+                  registration.status !== 'inProgress' && (
+                    <button type="button" onClick={handleInProgress}>
+                      In Bearbeitung
+                    </button>
+                  )}
                 {registration.status !== 'approved' && (
                   <button type="button" onClick={handleApprove}>
                     Annehmen

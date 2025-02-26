@@ -656,7 +656,7 @@ export type GetRegistrationByEventIdResponses = {
        */
       createdAt: string
       updatedAt?: string | unknown
-      status: 'new' | 'approved' | 'rejected'
+      status: 'new' | 'inProgress' | 'approved' | 'rejected'
       name: string
       email: string
       nickname?: string
@@ -725,7 +725,7 @@ export type PostRegistrationByEventIdResponses = {
      */
     createdAt: string
     updatedAt?: string | unknown
-    status: 'new' | 'approved' | 'rejected'
+    status: 'new' | 'inProgress' | 'approved' | 'rejected'
     name: string
     email: string
     nickname?: string
@@ -844,7 +844,7 @@ export type GetRegistrationByEventIdByRegistrationIdResponses = {
      */
     createdAt: string
     updatedAt?: string | unknown
-    status: 'new' | 'approved' | 'rejected'
+    status: 'new' | 'inProgress' | 'approved' | 'rejected'
     name: string
     email: string
     nickname?: string
@@ -1010,6 +1010,52 @@ export type PutRegistrationByEventIdByRegistrationIdRejectResponses = {
 
 export type PutRegistrationByEventIdByRegistrationIdRejectResponse =
   PutRegistrationByEventIdByRegistrationIdRejectResponses[keyof PutRegistrationByEventIdByRegistrationIdRejectResponses]
+
+export type PutRegistrationByEventIdByRegistrationIdInProgressData = {
+  body?: never
+  path: {
+    /**
+     * ID of the event
+     */
+    eventId: string
+    /**
+     * ID of the registration to update
+     */
+    registrationId: number
+  }
+  query?: never
+  url: '/registration/{eventId}/{registrationId}/inProgress'
+}
+
+export type PutRegistrationByEventIdByRegistrationIdInProgressErrors = {
+  /**
+   * Current user does not have administrative rights
+   */
+  403: {
+    error?: string
+    [key: string]: unknown | string | undefined
+  }
+  /**
+   * Registration not found
+   */
+  404: {
+    error?: string
+    [key: string]: unknown | string | undefined
+  }
+}
+
+export type PutRegistrationByEventIdByRegistrationIdInProgressError =
+  PutRegistrationByEventIdByRegistrationIdInProgressErrors[keyof PutRegistrationByEventIdByRegistrationIdInProgressErrors]
+
+export type PutRegistrationByEventIdByRegistrationIdInProgressResponses = {
+  /**
+   * The registration was updated
+   */
+  204: void
+}
+
+export type PutRegistrationByEventIdByRegistrationIdInProgressResponse =
+  PutRegistrationByEventIdByRegistrationIdInProgressResponses[keyof PutRegistrationByEventIdByRegistrationIdInProgressResponses]
 
 export type ClientOptions = {
   baseURL: `${string}://${string}/api` | (string & {})

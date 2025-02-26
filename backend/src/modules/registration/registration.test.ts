@@ -216,6 +216,26 @@ describe('registration', () => {
     expect(res).toHaveStatus(200)
     const registrationId = res.json().id as string
 
+    // Set the registration to in progress
+    res = await app.inject({
+      method: 'put',
+      url: `/api/registration/cc2025/${registrationId}/inProgress`,
+      headers: {
+        Authorization: `Bearer ${admin.token}`,
+      },
+    })
+    expect(res).toHaveStatus(204)
+
+    res = await app.inject({
+      method: 'get',
+      url: `/api/registration/cc2025/${registrationId}`,
+      headers: {
+        Authorization: `Bearer ${admin.token}`,
+      },
+    })
+    expect(res).toHaveStatus(200)
+    expect(res.json().status).toBe('inProgress')
+
     // Approve the registration
     res = await app.inject({
       method: 'put',

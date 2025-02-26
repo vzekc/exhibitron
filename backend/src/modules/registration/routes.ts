@@ -335,6 +335,29 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
     },
   )
 
+  app.put(
+    '/:eventId/:registrationId/inProgress',
+    {
+      schema: {
+        description: 'Set a registration to "in progress" state',
+        security: [{ BearerAuth: [] }], // Requires Authorization header
+        params: registrationUpdateParamsSchema,
+        response: registrationUpdateResponseSchema,
+      },
+      preHandler: isAdmin(
+        'Must be logged as administrator to update registrations',
+      ),
+    },
+    async (request, reply) => {
+      const { registrationId } = request.params as { registrationId: number }
+      const registration = await db.registration.findOneOrFail({
+        id: registrationId,
+      })
+      await db.registration.inProgress(registration)
+      return reply.status(204).send()
+    },
+  )
+
   app.delete(
     '/:eventId/:registrationId',
     {

@@ -66,6 +66,9 @@ import type {
   PutRegistrationByEventIdByRegistrationIdRejectData,
   PutRegistrationByEventIdByRegistrationIdRejectResponse,
   PutRegistrationByEventIdByRegistrationIdRejectError,
+  PutRegistrationByEventIdByRegistrationIdInProgressData,
+  PutRegistrationByEventIdByRegistrationIdInProgressResponse,
+  PutRegistrationByEventIdByRegistrationIdInProgressError,
 } from './types.gen'
 import { client as _heyApiClient } from './client.gen'
 
@@ -514,6 +517,33 @@ export const putRegistrationByEventIdByRegistrationIdReject = <
       },
     ],
     url: '/registration/{eventId}/{registrationId}/reject',
+    ...options,
+  })
+}
+
+/**
+ * Set a registration to "in progress" state
+ */
+export const putRegistrationByEventIdByRegistrationIdInProgress = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<
+    PutRegistrationByEventIdByRegistrationIdInProgressData,
+    ThrowOnError
+  >,
+) => {
+  return (options.client ?? _heyApiClient).put<
+    PutRegistrationByEventIdByRegistrationIdInProgressResponse,
+    PutRegistrationByEventIdByRegistrationIdInProgressError,
+    ThrowOnError
+  >({
+    security: [
+      {
+        scheme: 'bearer',
+        type: 'http',
+      },
+    ],
+    url: '/registration/{eventId}/{registrationId}/inProgress',
     ...options,
   })
 }

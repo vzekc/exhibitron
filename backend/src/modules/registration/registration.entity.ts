@@ -10,6 +10,7 @@ import { RegistrationRepository } from './registration.repository.js'
 
 export enum RegistrationStatus {
   NEW = 'new',
+  IN_PROGRESS = 'inProgress',
   APPROVED = 'approved',
   REJECTED = 'rejected',
 }

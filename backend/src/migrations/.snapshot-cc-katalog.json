@@ -52,7 +52,7 @@
           "nullable": false,
           "nativeEnumName": "registration_status",
           "default": "'new'",
-          "enumItems": ["new", "approved", "rejected"],
+          "enumItems": ["new", "inProgress", "approved", "rejected"],
           "mappedType": "enum"
         },
         "name": {
@@ -157,7 +157,7 @@
         "registration_status": {
           "name": "registration_status",
           "schema": "public",
-          "items": ["new", "approved", "rejected"]
+          "items": ["new", "inProgress", "approved", "rejected"]
         }
       }
     },
@@ -211,7 +211,7 @@
         "registration_status": {
           "name": "registration_status",
           "schema": "public",
-          "items": ["new", "approved", "rejected"]
+          "items": ["new", "inProgress", "approved", "rejected"]
         }
       }
     },
@@ -403,7 +403,7 @@
         "registration_status": {
           "name": "registration_status",
           "schema": "public",
-          "items": ["new", "approved", "rejected"]
+          "items": ["new", "inProgress", "approved", "rejected"]
         }
       }
     },
@@ -476,7 +476,7 @@
         "registration_status": {
           "name": "registration_status",
           "schema": "public",
-          "items": ["new", "approved", "rejected"]
+          "items": ["new", "inProgress", "approved", "rejected"]
         }
       }
     },
@@ -593,7 +593,7 @@
         "registration_status": {
           "name": "registration_status",
           "schema": "public",
-          "items": ["new", "approved", "rejected"]
+          "items": ["new", "inProgress", "approved", "rejected"]
         }
       }
     }
@@ -602,7 +602,7 @@
     "registration_status": {
       "name": "registration_status",
       "schema": "public",
-      "items": ["new", "approved", "rejected"]
+      "items": ["new", "inProgress", "approved", "rejected"]
     }
   }
 }

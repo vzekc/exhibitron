@@ -16,6 +16,8 @@ export const formatValue = (key: string, value: string | number | boolean) => {
     switch (String(value)) {
       case 'new':
         return 'Neu'
+      case 'inProgress':
+        return 'In Bearbeitung'
       case 'approved':
         return 'Angenommen'
       case 'rejected':
