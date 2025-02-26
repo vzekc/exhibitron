@@ -4,6 +4,7 @@ import * as backend from '../../api/index'
 import { client as backendClient } from '../../api/client.gen'
 import { Registration } from './RegistrationList.tsx'
 import useMandatoryParams from '../../utils/useMandatoryParams.ts'
+import { useNavigate } from 'react-router-dom'
 
 backendClient.setConfig({
   baseURL: '/api',
@@ -13,6 +14,7 @@ const RegistrationDetails = () => {
   const { id } = useMandatoryParams<{ id: string }>()
   const [registration, setRegistration] = useState<Registration | undefined>()
   const [notes, setNotes] = useState(registration?.notes || '')
+  const navigate = useNavigate()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -22,7 +24,7 @@ const RegistrationDetails = () => {
       setRegistration(data)
       setNotes(data?.notes || '')
     }
-    fetchData()
+    void fetchData()
   }, [id])
 
   if (!registration) {
@@ -64,6 +66,7 @@ const RegistrationDetails = () => {
       await backend.deleteRegistrationByEventIdByRegistrationId({
         path: { eventId: 'cc2025', registrationId: +id },
       })
+      navigate('/admin/registrations')
     }
   }
 

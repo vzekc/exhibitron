@@ -1,5 +1,4 @@
-import React, { useState } from 'react'
-import { use } from 'react'
+import { useEffect, useState } from 'react'
 import * as backend from '../../api/index'
 import { client as backendClient } from '../../api/client.gen'
 import Papa from 'papaparse'
@@ -10,39 +9,6 @@ import { useNavigate } from 'react-router-dom'
 backendClient.setConfig({
   baseURL: '/api',
 })
-
-const getRegistrations = async () => {
-  const result = await backend.getRegistrationByEventId({
-    path: { eventId: 'cc2025' },
-    validateStatus: (status) => status == 200,
-  })
-  return result.data?.items || []
-}
-
-const data = getRegistrations()
-
-export type Registration = Awaited<typeof data>[number]
-
-const generateCSV = (registrations: Awaited<typeof data>) => {
-  const flattenedRegistrations = registrations?.map(({ data, ...rest }) => ({
-    ...data,
-    ...rest,
-  }))
-  const keys = registrations
-    ?.map(({ data }) => new Set(Object.keys(data)))
-    .reduce((acc, set) => new Set([...acc, ...set]), new Set<string>())
-  const columns = [
-    'id',
-    'status',
-    'name',
-    'email',
-    'nickname',
-    'message',
-    'updatedAt',
-    ...Array.from(keys).sort(),
-  ]
-  return Papa.unparse(flattenedRegistrations, { columns })
-}
 
 const tableColumns = [
   'id',
@@ -56,17 +22,38 @@ const tableColumns = [
 
 type TableColumn = (typeof tableColumns)[number]
 
+export type Registration = NonNullable<
+  NonNullable<
+    Awaited<ReturnType<typeof backend.getRegistrationByEventId>>['data']
+  >['items']
+>[number]
+
 const RegistrationList = () => {
-  const registrations = use(data)
+  const [registrations, setRegistrations] = useState<Registration[]>([])
   const [sortConfig, setSortConfig] = useState<{
     key: TableColumn
     direction: 'ascending' | 'descending'
-  } | null>(null)
+  }>({ key: 'createdAt', direction: 'descending' })
+  const [sortedRegistrations, setSortedRegistrations] = useState<
+    Registration[]
+  >([])
   const navigate = useNavigate()
 
-  const sortedRegistrations = React.useMemo(() => {
-    if (sortConfig !== null) {
-      return [...registrations].sort((a, b) => {
+  useEffect(() => {
+    const getRegistrations = async () => {
+      const result = await backend.getRegistrationByEventId({
+        path: { eventId: 'cc2025' },
+        validateStatus: (status) => status == 200,
+      })
+      setRegistrations(result.data?.items || [])
+    }
+
+    void getRegistrations()
+  }, [])
+
+  useEffect(() => {
+    setSortedRegistrations(
+      [...registrations].sort((a, b) => {
         if (String(a[sortConfig.key]) < String(b[sortConfig.key])) {
           return sortConfig.direction === 'ascending' ? -1 : 1
         }
@@ -74,10 +61,30 @@ const RegistrationList = () => {
           return sortConfig.direction === 'ascending' ? 1 : -1
         }
         return 0
-      })
-    }
-    return registrations
-  }, [registrations, sortConfig])
+      }),
+    )
+  }, [sortConfig, registrations])
+
+  const generateCSV = (registrations: Registration[]) => {
+    const flattenedRegistrations = registrations?.map(({ data, ...rest }) => ({
+      ...data,
+      ...rest,
+    }))
+    const keys = registrations
+      ?.map(({ data }) => new Set(Object.keys(data)))
+      .reduce((acc, set) => new Set([...acc, ...set]), new Set<string>())
+    const columns = [
+      'id',
+      'status',
+      'name',
+      'email',
+      'nickname',
+      'message',
+      'updatedAt',
+      ...Array.from(keys).sort(),
+    ]
+    return Papa.unparse(flattenedRegistrations, { columns })
+  }
 
   const requestSort = (key: TableColumn) => {
     let direction: 'ascending' | 'descending' = 'ascending'
