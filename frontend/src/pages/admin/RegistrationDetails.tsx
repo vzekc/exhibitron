@@ -5,6 +5,7 @@ import { client as backendClient } from '../../api/client.gen'
 import { Registration } from './RegistrationList.tsx'
 import useMandatoryParams from '../../utils/useMandatoryParams.ts'
 import { useNavigate } from 'react-router-dom'
+import Confirm from '../../components/Confirm'
 
 backendClient.setConfig({
   baseURL: '/api',
@@ -14,6 +15,7 @@ const RegistrationDetails = () => {
   const { id } = useMandatoryParams<{ id: string }>()
   const [registration, setRegistration] = useState<Registration | undefined>()
   const [notes, setNotes] = useState(registration?.notes || '')
+  const [confirmAction, setConfirmAction] = useState<null | (() => void)>(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -51,32 +53,29 @@ const RegistrationDetails = () => {
     await reload()
   }
 
-  const handleApprove = async () => {
-    if (confirm('Anmeldung bestätigen?')) {
+  const handleApprove = () =>
+    setConfirmAction(async () => {
       await backend.putRegistrationByEventIdByRegistrationIdApprove({
         path: { eventId: 'cc2025', registrationId: +id },
       })
       await reload()
-    }
-  }
+    })
 
-  const handleReject = async () => {
-    if (confirm('Anmeldung ablehnen?')) {
+  const handleReject = () =>
+    setConfirmAction(async () => {
       await backend.putRegistrationByEventIdByRegistrationIdReject({
         path: { eventId: 'cc2025', registrationId: +id },
       })
       await reload()
-    }
-  }
+    })
 
-  const handleDelete = async () => {
-    if (confirm('Anmeldung löschen?')) {
+  const handleDelete = () =>
+    setConfirmAction(async () => {
       await backend.deleteRegistrationByEventIdByRegistrationId({
         path: { eventId: 'cc2025', registrationId: +id },
       })
       navigate('/admin/registrations')
-    }
-  }
+    })
 
   const handleSaveNotes = async () => {
     await backend.patchRegistrationByEventIdByRegistrationId({
@@ -99,16 +98,17 @@ const RegistrationDetails = () => {
               Status:
               <div className="grid">
                 <input type="text" value={formatted('status')} readOnly />
-                {registration.status !== 'approved' &&
-                  registration.status !== 'inProgress' && (
-                    <button type="button" onClick={handleInProgress}>
-                      In Bearbeitung
-                    </button>
-                  )}
                 {registration.status !== 'approved' && (
-                  <button type="button" onClick={handleApprove}>
-                    Annehmen
-                  </button>
+                  <>
+                    <button type="button" onClick={handleApprove}>
+                      Annehmen
+                    </button>
+                    {registration.status !== 'inProgress' && (
+                      <button type="button" onClick={handleInProgress}>
+                        In Bearbeitung
+                      </button>
+                    )}
+                  </>
                 )}
                 {registration.status !== 'rejected' && (
                   <button type="button" onClick={handleReject}>
@@ -166,6 +166,18 @@ const RegistrationDetails = () => {
             </tbody>
           </table>
         </form>
+        {confirmAction && (
+          <Confirm
+            title="Confirm Action"
+            message="Are you sure you want to proceed with this action?"
+            onConfirm={() => {
+              confirmAction()
+              setConfirmAction(null)
+            }}
+            onClose={() => setConfirmAction(null)}
+            isOpen={!!confirmAction}
+          />
+        )}
       </article>
     )
   )
