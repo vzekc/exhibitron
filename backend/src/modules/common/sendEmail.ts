@@ -19,9 +19,23 @@ export async function sendEmail({
   body,
   attachments,
 }: EmailOptions): Promise<void> {
-  const { SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD } = process.env
+  const {
+    SMTP_HOST,
+    SMTP_PORT,
+    SMTP_USERNAME,
+    SMTP_PASSWORD,
+    ADMIN_EMAIL,
+    ADMIN_EMAIL_NAME,
+    DEBUG_EMAIL,
+  } = process.env
   if (!SMTP_HOST) {
     console.error('SMTP_HOST is not set, email will not be sent')
+    return
+  }
+  if (!from && !ADMIN_EMAIL) {
+    console.error(
+      'ADMIN_EMAIL is not set, from address is required to send email',
+    )
     return
   }
   console.info(
@@ -41,13 +55,15 @@ export async function sendEmail({
     port: parseInt(SMTP_PORT || '587', 10),
     secure: false,
     auth,
+    debug: !!DEBUG_EMAIL,
+    logger: !!DEBUG_EMAIL,
   })
   const { html, text } = body
 
   const mailOptions = {
     from:
       from ||
-      `${process.env.SMTP_DEFAULT_FROM_NAME} <${process.env.SMTP_DEFAULT_FROM_ADDRESS}>`,
+      (ADMIN_EMAIL_NAME ? `${ADMIN_EMAIL_NAME} <${ADMIN_EMAIL}>` : ADMIN_EMAIL),
     to,
     subject,
     text,
