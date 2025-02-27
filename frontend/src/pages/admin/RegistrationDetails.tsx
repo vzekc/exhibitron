@@ -11,11 +11,18 @@ backendClient.setConfig({
   baseURL: '/api',
 })
 
+type ConfirmAction = {
+  title: string
+  message: string
+  actionName: string
+  action: () => void
+}
+
 const RegistrationDetails = () => {
   const { id } = useMandatoryParams<{ id: string }>()
   const [registration, setRegistration] = useState<Registration | undefined>()
   const [notes, setNotes] = useState(registration?.notes || '')
-  const [confirmAction, setConfirmAction] = useState<null | (() => void)>(null)
+  const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -54,27 +61,44 @@ const RegistrationDetails = () => {
   }
 
   const handleApprove = () =>
-    setConfirmAction(async () => {
-      await backend.putRegistrationByEventIdByRegistrationIdApprove({
-        path: { eventId: 'cc2025', registrationId: +id },
-      })
-      await reload()
+    setConfirmAction({
+      title: 'Anmeldung annehmen',
+      message: 'Anmeldung annehmen und E-Mail an Aussteller verschicken?',
+      actionName: 'Annehmen',
+      action: async () => {
+        await backend.putRegistrationByEventIdByRegistrationIdApprove({
+          path: { eventId: 'cc2025', registrationId: +id },
+        })
+        await reload()
+      },
     })
 
   const handleReject = () =>
-    setConfirmAction(async () => {
-      await backend.putRegistrationByEventIdByRegistrationIdReject({
-        path: { eventId: 'cc2025', registrationId: +id },
-      })
-      await reload()
+    setConfirmAction({
+      title: 'Anmeldung ablehnen',
+      message:
+        'Anmeldung ablehnen?  Bitte dann noch eine E-Mail an den Aussteller schicken.',
+      actionName: 'Ablehnen',
+      action: async () => {
+        await backend.putRegistrationByEventIdByRegistrationIdReject({
+          path: { eventId: 'cc2025', registrationId: +id },
+        })
+        await reload()
+      },
     })
 
   const handleDelete = () =>
-    setConfirmAction(async () => {
-      await backend.deleteRegistrationByEventIdByRegistrationId({
-        path: { eventId: 'cc2025', registrationId: +id },
-      })
-      navigate('/admin/registrations')
+    setConfirmAction({
+      title: 'Anmeldung löschen',
+      message:
+        'Anmeldung löschen?  Diese Aktion kann nicht rückgängig gemacht werden.',
+      actionName: 'Löschen',
+      action: async () => {
+        await backend.deleteRegistrationByEventIdByRegistrationId({
+          path: { eventId: 'cc2025', registrationId: +id },
+        })
+        navigate('/admin/registrations')
+      },
     })
 
   const handleSaveNotes = async () => {
@@ -168,10 +192,12 @@ const RegistrationDetails = () => {
         </form>
         {confirmAction && (
           <Confirm
-            title="Confirm Action"
-            message="Are you sure you want to proceed with this action?"
+            title={confirmAction.title}
+            message={confirmAction.message}
+            confirm={confirmAction.actionName}
+            cancel="Abbrechen"
             onConfirm={() => {
-              confirmAction()
+              confirmAction?.action()
               setConfirmAction(null)
             }}
             onClose={() => setConfirmAction(null)}
