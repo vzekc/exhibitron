@@ -125,14 +125,14 @@ const RegistrationDetails = () => {
                 <input type="text" value={formatted('status')} readOnly />
                 {registration.status !== 'approved' && (
                   <>
-                    <button type="button" onClick={handleApprove}>
-                      Annehmen
-                    </button>
                     {registration.status !== 'inProgress' && (
                       <button type="button" onClick={handleInProgress}>
                         In Bearbeitung
                       </button>
                     )}
+                    <button type="button" onClick={handleApprove}>
+                      Annehmen
+                    </button>
                   </>
                 )}
                 {registration.status !== 'rejected' && (
