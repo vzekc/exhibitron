@@ -19,7 +19,7 @@ type Inputs = {
   gameCornerSupporter: boolean
   dailyLunch: boolean
   talk: boolean
-  tableWidth: number
+  tables: number
   tableNextTo: string
   message: string
 }
@@ -220,7 +220,7 @@ const Register = () => {
             <fieldset>
               <label>
                 Gewünschte Anzahl Tische (je 165cm x 80cm)
-                <select {...register('tableWidth', { required: true })}>
+                <select {...register('tables', { required: true })}>
                   <option></option>
                   <option value={0}>kein Tisch</option>
                   <option value={1}>1</option>

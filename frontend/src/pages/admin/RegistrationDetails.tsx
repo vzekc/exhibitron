@@ -6,6 +6,7 @@ import { Registration } from './RegistrationList.tsx'
 import useMandatoryParams from '../../utils/useMandatoryParams.ts'
 import { useNavigate } from 'react-router-dom'
 import Confirm from '../../components/Confirm'
+import './RegistrationDetails.css'
 
 backendClient.setConfig({
   baseURL: '/api',
@@ -160,20 +161,32 @@ const RegistrationDetails = () => {
             )}
             <label>
               Name:
-              <input type="text" value={formatted('name')} readOnly />
+              <p>{registration.name}</p>
             </label>
             <label>
               Email:
-              <input type="text" value={formatted('email')} readOnly />
+              <p>
+                <a href={`mailto:${registration.email}`}>
+                  {registration.email}
+                </a>
+              </p>
             </label>
+            {registration.nickname && (
+              <label>
+                Nickname:
+                <p>{registration.nickname}</p>
+              </label>
+            )}
             <label>
-              Nickname:
-              <input type="text" value={formatted('nickname')} readOnly />
+              Thema:
+              <p>{registration.topic}</p>
             </label>
-            <label>
-              Nachricht:
-              <textarea value={formatted('message')} readOnly />
-            </label>
+            {registration.message && (
+              <label>
+                Nachricht:
+                <p>{registration.message}</p>
+              </label>
+            )}
           </fieldset>
           <table>
             <tbody>
