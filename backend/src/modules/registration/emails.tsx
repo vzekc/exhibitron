@@ -41,7 +41,7 @@ export const makeNewRegistrationEmail = (
           <a href={`mailto:${registration.email}`}>{name}</a> ist eingegangen.
           Die Anmeldung wurde in der Datenbank gespeichert und kann über das{' '}
           <a
-            href={`https://2025.classic-computing.de/admin/registrations/${registration.id}`}>
+            href={`https://2025.classic-computing.de/admin/registration/${registration.id}`}>
             Admin-Interface
           </a>{' '}
           eingesehen und bestätigt werden.
