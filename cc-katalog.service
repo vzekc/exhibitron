@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 ExecStart=/usr/bin/pnpm start:prod
-WorkingDirectory=/home/hans/cc-katalog/backend
+WorkingDirectory=/home/hans/exhibitron/backend
 Restart=always
 User=hans
 Environment=NODE_ENV=production

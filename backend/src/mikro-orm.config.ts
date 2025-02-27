@@ -31,7 +31,7 @@ if (
 
 export default defineConfig({
   clientUrl:
-    process.env.DATABASE_URL || 'postgresql://postgres@localhost/cc-katalog',
+    process.env.DATABASE_URL || 'postgresql://postgres@localhost/exhibitron',
   entities: ['dist/**/*.entity.js'],
   entitiesTs: ['src/**/*.entity.ts'],
   // enable debug mode to log SQL queries and discovery information

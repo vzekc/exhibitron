@@ -18,7 +18,7 @@ const generateRandomString = (length: number): string => {
 
 export async function initTestApp() {
   // this will create all the ORM services and cache them
-  const dbName = `cc-katalog-test-${generateRandomString(8)}`
+  const dbName = `exhibitron-test-${generateRandomString(8)}`
   createDatabase(dbName)
 
   const { orm } = await initORM({

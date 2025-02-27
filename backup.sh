@@ -3,7 +3,7 @@
 set -e
 
 # Set working directory
-cd "$HOME/cc-katalog-backups"
+cd "$HOME/exhibitron-backups"
 
 # Define temp file and backup name
 temp_file=".backup-temp.sql"
@@ -31,4 +31,3 @@ else
     # Changes detected, move temp file to final backup file
     mv "$temp_file" "$backup_file"
 fi
-
