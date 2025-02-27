@@ -15,6 +15,7 @@ import './App.css'
 import Register from './pages/Register.tsx'
 import RegistrationList from './pages/admin/RegistrationList.tsx'
 import RegistrationDetails from './pages/admin/RegistrationDetails.tsx'
+import { BreadcrumbProvider } from './components/BreadcrumbContext.tsx'
 
 const App = () => {
   const location = useLocation()
@@ -22,34 +23,36 @@ const App = () => {
   return (
     <Suspense fallback={<p>Laden...</p>}>
       <UserProvider>
-        <main className="container">
-          {location.pathname !== '/register' && <NavBar />}
-          <ErrorBoundary
-            fallback={
-              <p style={{ color: 'red' }}>
-                Irgendwas ist schief gegangen - Versuch's noch mal!
-              </p>
-            }>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/exhibits" element={<Exhibits />} />
-              <Route path="/exhibit/:id" element={<Exhibit />} />
-              <Route path="/schedule" element={<Schedule />} />
-              <Route path="/bookmarks" element={<Bookmarks />} />
-              <Route path="/table/:id" element={<TableSearchResult />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/register" element={<Register />} />
-              <Route
-                path="/admin/registrations"
-                element={<RegistrationList />}
-              />
-              <Route
-                path="/admin/registration/:id"
-                element={<RegistrationDetails />}
-              />
-            </Routes>
-          </ErrorBoundary>
-        </main>
+        <BreadcrumbProvider>
+          <main className="container">
+            {location.pathname !== '/register' && <NavBar />}
+            <ErrorBoundary
+              fallback={
+                <p style={{ color: 'red' }}>
+                  Irgendwas ist schief gegangen - Versuch's noch mal!
+                </p>
+              }>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/exhibit" element={<Exhibits />} />
+                <Route path="/exhibit/:id" element={<Exhibit />} />
+                <Route path="/schedule" element={<Schedule />} />
+                <Route path="/bookmarks" element={<Bookmarks />} />
+                <Route path="/table/:id" element={<TableSearchResult />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/register" element={<Register />} />
+                <Route
+                  path="/admin/registration"
+                  element={<RegistrationList />}
+                />
+                <Route
+                  path="/admin/registration/:id"
+                  element={<RegistrationDetails />}
+                />
+              </Routes>
+            </ErrorBoundary>
+          </main>
+        </BreadcrumbProvider>
       </UserProvider>
     </Suspense>
   )

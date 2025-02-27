@@ -7,6 +7,7 @@ import useMandatoryParams from '../../utils/useMandatoryParams.ts'
 import { useNavigate } from 'react-router-dom'
 import Confirm from '../../components/Confirm'
 import './RegistrationDetails.css'
+import { useBreadcrumb } from '../../components/BreadcrumbContext.tsx'
 
 backendClient.setConfig({
   baseURL: '/api',
@@ -25,6 +26,7 @@ const RegistrationDetails = () => {
   const [notes, setNotes] = useState(registration?.notes || '')
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null)
   const navigate = useNavigate()
+  const { setDetailName } = useBreadcrumb()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -33,9 +35,10 @@ const RegistrationDetails = () => {
       })
       setRegistration(data)
       setNotes(data?.notes || '')
+      setDetailName(data?.name || '')
     }
     void fetchData()
-  }, [id])
+  }, [id, setDetailName])
 
   if (!registration) {
     return <div>Laden...</div>
@@ -98,7 +101,7 @@ const RegistrationDetails = () => {
         await backend.deleteRegistrationByEventIdByRegistrationId({
           path: { eventId: 'cc2025', registrationId: +id },
         })
-        navigate('/admin/registrations')
+        navigate('/admin/registration')
       },
     })
 

@@ -6,6 +6,7 @@ import DropdownMenu from './DropdownMenu.tsx'
 import SearchTableNumber from './SearchTableNumber.tsx'
 import { getBookmarks } from '../utils/bookmarks.ts'
 import LoginModal from './LoginModal.tsx'
+import Breadcrumbs from './Breadcrumbs.tsx'
 
 const NavBar = () => {
   const { user } = useUser()
@@ -32,70 +33,75 @@ const NavBar = () => {
   }, [])
 
   return (
-    <nav>
-      <ul>
-        <li>
-          <Link to="/">Start</Link>
-        </li>
-        <li>
-          <Link to="/exhibits">Ausstellungen</Link>
-        </li>
-        <li>
-          <Link to="/schedule">Zeitplan</Link>
-        </li>
-        {user?.isAdministrator && (
+    <>
+      <nav className="menu">
+        <ul>
           <li>
-            <DropdownMenu label="Verwaltung">
-              <li>
-                <Link to="/admin/registrations">Anmeldungen</Link>
-              </li>
-            </DropdownMenu>
+            <Link to="/">Start</Link>
           </li>
-        )}
-      </ul>
-      <ul>
-        {user ? (
           <li>
-            <DropdownMenu
-              label={
-                (user.nickname ? `@${user.nickname}` : user.fullName) ||
-                'Profil'
-              }>
-              <li>
-                <Link to="/profile">Profil</Link>
-              </li>
-              <li>
-                <a href="#" onClick={handleLogout}>
-                  Logout
-                </a>
-              </li>
-            </DropdownMenu>
+            <Link to="/exhibit">Ausstellungen</Link>
           </li>
-        ) : (
           <li>
-            <button className="button" onClick={() => setShowLoginModal(true)}>
-              Login
-            </button>
-            <LoginModal
-              isOpen={showLoginModal}
-              onClose={() => setShowLoginModal(false)}
-            />
+            <Link to="/schedule">Zeitplan</Link>
           </li>
-        )}
-        <li>
-          <Link to="/bookmarks">
-            <button className="button image-only-button">
-              <img
-                src={hasBookmarks ? '/bookmarked.svg' : '/bookmark.svg'}
-                className="button-image inverted-image"></img>
-            </button>
-          </Link>
-        </li>
-        <li>
-          <SearchTableNumber />
-        </li>
-      </ul>
-    </nav>
+          {user?.isAdministrator && (
+            <li>
+              <DropdownMenu label="Verwaltung">
+                <li>
+                  <Link to="/admin/registration">Anmeldungen</Link>
+                </li>
+              </DropdownMenu>
+            </li>
+          )}
+        </ul>
+        <ul>
+          {user ? (
+            <li>
+              <DropdownMenu
+                label={
+                  (user.nickname ? `@${user.nickname}` : user.fullName) ||
+                  'Profil'
+                }>
+                <li>
+                  <Link to="/profile">Profil</Link>
+                </li>
+                <li>
+                  <a href="#" onClick={handleLogout}>
+                    Logout
+                  </a>
+                </li>
+              </DropdownMenu>
+            </li>
+          ) : (
+            <li>
+              <button
+                className="button"
+                onClick={() => setShowLoginModal(true)}>
+                Login
+              </button>
+              <LoginModal
+                isOpen={showLoginModal}
+                onClose={() => setShowLoginModal(false)}
+              />
+            </li>
+          )}
+          <li>
+            <Link to="/bookmarks">
+              <button className="button image-only-button">
+                <img
+                  src={hasBookmarks ? '/bookmarked.svg' : '/bookmark.svg'}
+                  className="button-image inverted-image"></img>
+              </button>
+            </Link>
+          </li>
+          <li>
+            <SearchTableNumber />
+          </li>
+        </ul>
+      </nav>
+      <Breadcrumbs />
+    </>
   )
 }
 

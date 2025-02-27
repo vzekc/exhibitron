@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom'
-import { use, useState } from 'react'
+import { use, useEffect, useState } from 'react'
 import * as backend from '../api/index'
 import { client as backendClient } from '../api/client.gen'
 import './ExhibitList.css'
@@ -9,6 +9,7 @@ import { useUser } from '../contexts/userUtils.ts'
 import { TextEditor } from './TextEditor.tsx'
 import { MilkdownProvider } from '@milkdown/react'
 import ContentEditable, { ContentEditableEvent } from 'react-contenteditable'
+import { useBreadcrumb } from './BreadcrumbContext.tsx'
 
 backendClient.setConfig({
   baseURL: '/api',
@@ -25,6 +26,7 @@ const Exhibit = () => {
   const [bookmarked, setBookmarked] = useState(isBookmarked(Number(id)))
   const { user } = useUser()
   const [title, setTitle] = useState(exhibit?.title || '')
+  const { setDetailName } = useBreadcrumb()
 
   const handleBookmark = () => {
     if (bookmarked) {
@@ -34,6 +36,12 @@ const Exhibit = () => {
     }
     setBookmarked(!bookmarked) // Update the state to trigger a re-render
   }
+
+  useEffect(() => {
+    const { title, exhibitor } = response.data || {}
+    const { fullName } = exhibitor || {}
+    setDetailName((title && fullName && `${title} (${fullName})`) || '')
+  }, [response, setDetailName])
 
   const handleTitleChange = (e: ContentEditableEvent) =>
     setTitle(e.target.value)
