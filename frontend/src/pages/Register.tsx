@@ -249,11 +249,7 @@ const Register = () => {
         )
     }
   }
-  return (
-    <article style={{transform: 'scale(0.9)', transformOrigin: '0 0'}}>
-      {content()}
-    </article>
-  )
+  return <article className="register-page">{content()}</article>
 }
 
 export default Register

@@ -1,7 +1,14 @@
-html, body {
+html,
+body {
   width: 100%;
   margin: 0;
   padding: 0;
+}
+
+.register-page {
+  margin-top: 2em;
+  transform: scale(0.9);
+  transform-origin: 0 0;
 }
 
 .exhibitor-registration {
