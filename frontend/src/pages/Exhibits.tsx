@@ -1,23 +1,29 @@
-import { use } from 'react'
-import exhibitListService from '../services/exhibitListService.ts'
+import * as backend from '../api/index'
+import { client as backendClient } from '../api/client.gen'
 import ExhibitList from '../components/ExhibitList.tsx'
+import { useEffect, useState } from 'react'
+import { type ExhibitListItem } from '../types.ts'
 import '../components/ExhibitList.css'
 
-const dataPromise = exhibitListService.fetchExhibits()
+backendClient.setConfig({
+  baseURL: '/api',
+})
 
 const Exhibits = () => {
-  const exhibits = use(dataPromise) // Suspense will handle loading state
+  const [exhibits, setExhibits] = useState<ExhibitListItem[]>([])
 
-  const sortedExhibits = exhibits.sort((a, b) => {
-    const titleA = a.title?.toLowerCase() || ''
-    const titleB = b.title?.toLowerCase() || ''
-    return titleA.localeCompare(titleB)
-  })
+  useEffect(() => {
+    const load = async () => {
+      const res = await backend.getExhibit()
+      setExhibits(res.data?.items || [])
+    }
+    void load()
+  }, [])
 
   return (
     <article>
       <h2>Liste der Ausstellungen</h2>
-      <ExhibitList exhibits={sortedExhibits} />
+      <ExhibitList exhibits={exhibits} />
     </article>
   )
 }

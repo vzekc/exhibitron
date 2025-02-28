@@ -1,28 +1,23 @@
 import { useParams } from 'react-router-dom'
-import { use, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import * as backend from '../api/index'
 import { client as backendClient } from '../api/client.gen'
 import './ExhibitList.css'
-import Cached from './Cached.ts'
 import { addBookmark, isBookmarked, removeBookmark } from '../utils/bookmarks'
-import { useUser } from '../contexts/userUtils.ts'
+import { useUser } from '../contexts/UserContext.ts'
 import { TextEditor } from './TextEditor.tsx'
 import { MilkdownProvider } from '@milkdown/react'
 import ContentEditable, { ContentEditableEvent } from 'react-contenteditable'
-import { useBreadcrumb } from './BreadcrumbContext.tsx'
+import { useBreadcrumb } from '../contexts/BreadcrumbContext.ts'
+import { type Exhibit } from '../types.ts'
 
 backendClient.setConfig({
   baseURL: '/api',
 })
 
-const fetchExhibit = new Cached((id: number) =>
-  backend.getExhibitById({ path: { id } }),
-)
-
 const Exhibit = () => {
   const { id } = useParams<{ id: string }>()
-  const response = use(fetchExhibit.get(Number(id)))
-  const exhibit = response.data
+  const [exhibit, setExhibit] = useState<Exhibit | undefined>()
   const [bookmarked, setBookmarked] = useState(isBookmarked(Number(id)))
   const { user } = useUser()
   const [title, setTitle] = useState(exhibit?.title || '')
@@ -38,16 +33,25 @@ const Exhibit = () => {
   }
 
   useEffect(() => {
-    const { title, exhibitor } = response.data || {}
+    const load = async () => {
+      const res = await backend.getExhibitById({ path: { id: Number(id) } })
+      setExhibit(res.data)
+    }
+
+    void load()
+  }, [setExhibit, id])
+
+  useEffect(() => {
+    const { title, exhibitor } = exhibit || {}
     const { fullName } = exhibitor || {}
     setDetailName((title && fullName && `${title} (${fullName})`) || '')
-  }, [response, setDetailName])
+  }, [exhibit, setDetailName])
 
   const handleTitleChange = (e: ContentEditableEvent) =>
     setTitle(e.target.value)
 
   if (!exhibit) {
-    return <p>Ausstellung nicht gefunden ({response.status})</p>
+    return <p>Lade Ausstellung...</p>
   }
 
   const editable = user?.id === exhibit.exhibitor.id

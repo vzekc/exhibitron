@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import * as backend from '../api/index'
-import { useUser } from '../contexts/userUtils.ts'
+import { useUser } from '../contexts/UserContext.ts'
 import DropdownMenu from './DropdownMenu.tsx'
 import SearchTableNumber from './SearchTableNumber.tsx'
 import { getBookmarks } from '../utils/bookmarks.ts'

@@ -1,9 +1,8 @@
 import { useNavigate, useParams } from 'react-router-dom'
-import React, { use } from 'react'
-import exhibitListService from '../services/exhibitListService'
+import React, { useEffect, useState } from 'react'
 import { ExhibitListItem } from '../types'
 import ExhibitList from './ExhibitList.tsx'
-import { useUser } from '../contexts/userUtils.ts'
+import { useUser } from '../contexts/UserContext.ts'
 import { client as backendClient } from '../api/client.gen'
 import * as backend from '../api/index'
 
@@ -11,13 +10,19 @@ backendClient.setConfig({
   baseURL: '/api',
 })
 
-const dataPromise = exhibitListService.fetchExhibits()
-
 const TableSearchResult = () => {
   const { id } = useParams<{ id: string }>()
-  const exhibits = use(dataPromise) as ExhibitListItem[]
   const { user } = useUser()
+  const [exhibits, setExhibits] = useState<ExhibitListItem[]>([])
   const navigate = useNavigate()
+
+  useEffect(() => {
+    const load = async () => {
+      const res = await backend.getExhibit()
+      setExhibits(res.data?.items || [])
+    }
+    void load()
+  }, [])
 
   const handleClaimTable = async (
     tableId: number,

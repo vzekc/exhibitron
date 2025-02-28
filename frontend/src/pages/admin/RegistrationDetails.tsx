@@ -7,7 +7,7 @@ import useMandatoryParams from '../../utils/useMandatoryParams.ts'
 import { useNavigate } from 'react-router-dom'
 import Confirm from '../../components/Confirm'
 import './RegistrationDetails.css'
-import { useBreadcrumb } from '../../components/BreadcrumbContext.tsx'
+import { useBreadcrumb } from '../../contexts/BreadcrumbContext.ts'
 
 backendClient.setConfig({
   baseURL: '/api',

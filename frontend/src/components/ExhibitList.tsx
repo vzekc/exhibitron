@@ -8,6 +8,11 @@ interface ExhibitListProps {
 
 const ExhibitList = ({ exhibits, notFoundLabel }: ExhibitListProps) => {
   const navigate = useNavigate()
+  const sortedExhibits = exhibits.sort((a, b) => {
+    const titleA = a.title?.toLowerCase() || ''
+    const titleB = b.title?.toLowerCase() || ''
+    return titleA.localeCompare(titleB)
+  })
 
   const handleRowClick = (id: number) => {
     navigate(`/exhibit/${id}`)
@@ -27,7 +32,7 @@ const ExhibitList = ({ exhibits, notFoundLabel }: ExhibitListProps) => {
         </tr>
       </thead>
       <tbody>
-        {exhibits.map((exhibit, index: number) => (
+        {sortedExhibits.map((exhibit, index: number) => (
           <tr
             key={index}
             onClick={() => handleRowClick(exhibit.id)}

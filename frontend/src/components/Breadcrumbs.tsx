@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import './Breadcrumbs.css'
-import { useBreadcrumb } from './BreadcrumbContext.tsx'
+import { useBreadcrumb } from '../contexts/BreadcrumbContext.ts'
 
 const breadcrumbMap: { [key: string]: string } = {
   registration: 'Anmeldungen',
