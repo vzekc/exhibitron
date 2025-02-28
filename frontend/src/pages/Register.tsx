@@ -250,8 +250,7 @@ const Register = () => {
     }
   }
   return (
-    <article>
-      <h1>Aussteller-Registrierung für die Classic Computing 2025</h1>
+    <article style={{transform: 'scale(0.9)', transformOrigin: '0 0'}}>
       {content()}
     </article>
   )
