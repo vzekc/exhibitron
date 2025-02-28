@@ -30,23 +30,28 @@ export class RegistrationRepository extends EntityRepository<Registration> {
 
   async approve(registration: Registration) {
     registration.status = RegistrationStatus.APPROVED
-    let user = await this.em.getRepository(User).lookup(registration.email)
+    const userRepository = this.em.getRepository(User)
+    let user = await userRepository.lookup(registration.email)
     if (!user) {
-      user = this.em.getRepository(User).create({
+      user = userRepository.create({
         email: registration.email,
         fullName: registration.name,
         isAdministrator: false,
         tables: [],
         exhibits: [],
       })
+    } else {
+      await userRepository.populate(user, ['exhibits'])
+      if (!user.exhibits.find((e) => e.title === registration.topic)) {
+        const exhibit = this.em.getRepository(Exhibit).create({
+          title: registration.topic,
+          exhibitor: user,
+        })
+        user.exhibits.add(exhibit)
+        this.em.persist(exhibit)
+      }
     }
-    const exhibit = this.em.getRepository(Exhibit).create({
-      title: registration.topic,
-      exhibitor: user,
-    })
-    user.exhibits.add(exhibit)
     this.em.persist(user)
-    this.em.persist(exhibit)
     await this.em.flush()
     await sendEmail(
       makeWelcomeEmail(
