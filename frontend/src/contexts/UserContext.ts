@@ -13,6 +13,7 @@ export const fetchUserProfile = async () => {
 
 export interface UserContextType {
   user: User | undefined
+  reloadUser: () => Promise<void>
 }
 
 export const UserContext = createContext<UserContextType | undefined>(undefined)

@@ -13,6 +13,7 @@ export const fetchExhibitList = async () => {
 
 export interface ExhibitionDataContextType {
   exhibitList: ExhibitListItem[] | undefined
+  reloadExhibitList: () => Promise<void>
 }
 
 export const ExhibitionDataContext = createContext<

@@ -19,6 +19,9 @@ import { Table } from '../table/table.entity.js'
 @Embeddable()
 export class Contacts {
   @Property()
+  email?: string
+
+  @Property()
   mastodon?: string
 
   @Property()

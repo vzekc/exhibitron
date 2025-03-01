@@ -19,6 +19,7 @@ export const userBaseSchema = () => ({
     contacts: {
       type: 'object',
       properties: {
+        email: { type: 'string', examples: ['daffy@duck.com'] },
         phone: { type: 'string', examples: ['0123 567 7890'] },
         website: { type: 'string', examples: ['https://daffy-duck.com/'] },
         mastodon: { type: 'string', examples: ['@daffyduck@mastodon.social'] },

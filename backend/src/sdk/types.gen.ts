@@ -57,6 +57,7 @@ export type PostUserLoginResponses = {
     email: string
     bio?: string
     contacts?: {
+      email?: string
       phone?: string
       website?: string
       mastodon?: string
@@ -73,6 +74,7 @@ export type PostUserLoginResponses = {
         email?: string
         bio?: string
         contacts?: {
+          email?: string
           phone?: string
           website?: string
           mastodon?: string
@@ -119,6 +121,7 @@ export type GetUserProfileResponses = {
     email: string
     bio?: string
     contacts?: {
+      email?: string
       phone?: string
       website?: string
       mastodon?: string
@@ -135,6 +138,7 @@ export type GetUserProfileResponses = {
         email?: string
         bio?: string
         contacts?: {
+          email?: string
           phone?: string
           website?: string
           mastodon?: string
@@ -155,6 +159,7 @@ export type PatchUserProfileData = {
     email?: string
     bio?: string
     contacts?: {
+      email?: string
       phone?: string
       website?: string
       mastodon?: string
@@ -190,6 +195,7 @@ export type PatchUserProfileResponses = {
     email: string
     bio?: string
     contacts?: {
+      email?: string
       phone?: string
       website?: string
       mastodon?: string
@@ -206,6 +212,7 @@ export type PatchUserProfileResponses = {
         email?: string
         bio?: string
         contacts?: {
+          email?: string
           phone?: string
           website?: string
           mastodon?: string
@@ -239,6 +246,7 @@ export type GetUserResponses = {
       email: string
       bio?: string
       contacts?: {
+        email?: string
         phone?: string
         website?: string
         mastodon?: string
@@ -255,6 +263,7 @@ export type GetUserResponses = {
           email?: string
           bio?: string
           contacts?: {
+            email?: string
             phone?: string
             website?: string
             mastodon?: string
@@ -305,6 +314,7 @@ export type GetUserByIdResponses = {
     email: string
     bio?: string
     contacts?: {
+      email?: string
       phone?: string
       website?: string
       mastodon?: string
@@ -321,6 +331,7 @@ export type GetUserByIdResponses = {
         email?: string
         bio?: string
         contacts?: {
+          email?: string
           phone?: string
           website?: string
           mastodon?: string
@@ -416,6 +427,7 @@ export type PostExhibitResponses = {
       email?: string
       bio?: string
       contacts?: {
+        email?: string
         phone?: string
         website?: string
         mastodon?: string
@@ -465,6 +477,7 @@ export type GetExhibitByIdResponses = {
       email?: string
       bio?: string
       contacts?: {
+        email?: string
         phone?: string
         website?: string
         mastodon?: string
@@ -552,6 +565,7 @@ export type GetTableByNumberResponses = {
           email: string
           bio?: string
           contacts?: {
+            email?: string
             phone?: string
             website?: string
             mastodon?: string
