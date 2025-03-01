@@ -344,7 +344,7 @@ export const postTableByNumberAssignToByUserId = <
         type: 'http',
       },
     ],
-    url: '/table/{number}/assign-to/{userId}',
+    url: '/table/{number}/assignTo/{userId}',
     ...options,
   })
 }

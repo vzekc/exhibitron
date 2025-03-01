@@ -54,10 +54,20 @@ export const userResponseSchema = () => ({
 export async function registerUserRoutes(app: FastifyInstance) {
   const db = await initORM()
 
-  const makeUserResponse = async (user: User) => {
-    await db.em.populate(user, ['exhibits', 'tables'])
+  const makeUserResponse = async (user_: User) => {
+    // If we directly serialize the user object, it is somehow changed and
+    // then cannot be written back to the database.  By creating a copy
+    // that is not connected to the identity map, we can avoid this problem.
+    // There should be a better way to do this, but I have not found it yet.
+    const token = user_.token
+    const user = await db.em.findOneOrFail(
+      User,
+      { id: user_.id },
+      { populate: ['exhibits', 'tables'], disableIdentityMap: true },
+    )
     return {
       ...user,
+      token,
       tables: user.tables.map(({ id }) => id),
       exhibits: user.exhibits.map(({ table, ...exhibit }) => ({
         ...exhibit,

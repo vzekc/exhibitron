@@ -64,9 +64,22 @@ export type PostUserLoginResponses = {
     isAdministrator: boolean
     tables?: Array<number>
     exhibits?: Array<{
-      title?: string
+      id: number
+      title: string
       text?: string
       table?: number
+      exhibitor: {
+        fullName?: string
+        email?: string
+        bio?: string
+        contacts?: {
+          phone?: string
+          website?: string
+          mastodon?: string
+        }
+        id?: number
+        exhibitorId?: string
+      }
     }>
     token?: string
   }
@@ -113,9 +126,22 @@ export type GetUserProfileResponses = {
     isAdministrator: boolean
     tables?: Array<number>
     exhibits?: Array<{
-      title?: string
+      id: number
+      title: string
       text?: string
       table?: number
+      exhibitor: {
+        fullName?: string
+        email?: string
+        bio?: string
+        contacts?: {
+          phone?: string
+          website?: string
+          mastodon?: string
+        }
+        id?: number
+        exhibitorId?: string
+      }
     }>
   }
 }
@@ -171,9 +197,22 @@ export type PatchUserProfileResponses = {
     isAdministrator: boolean
     tables?: Array<number>
     exhibits?: Array<{
-      title?: string
+      id: number
+      title: string
       text?: string
       table?: number
+      exhibitor: {
+        fullName?: string
+        email?: string
+        bio?: string
+        contacts?: {
+          phone?: string
+          website?: string
+          mastodon?: string
+        }
+        id?: number
+        exhibitorId?: string
+      }
     }>
   }
 }
@@ -207,9 +246,22 @@ export type GetUserResponses = {
       isAdministrator: boolean
       tables?: Array<number>
       exhibits?: Array<{
-        title?: string
+        id: number
+        title: string
         text?: string
         table?: number
+        exhibitor: {
+          fullName?: string
+          email?: string
+          bio?: string
+          contacts?: {
+            phone?: string
+            website?: string
+            mastodon?: string
+          }
+          id?: number
+          exhibitorId?: string
+        }
       }>
     }>
     total?: number
@@ -260,9 +312,22 @@ export type GetUserByIdResponses = {
     isAdministrator: boolean
     tables?: Array<number>
     exhibits?: Array<{
-      title?: string
+      id: number
+      title: string
       text?: string
       table?: number
+      exhibitor: {
+        fullName?: string
+        email?: string
+        bio?: string
+        contacts?: {
+          phone?: string
+          website?: string
+          mastodon?: string
+        }
+        id?: number
+        exhibitorId?: string
+      }
     }>
   }
 }
@@ -583,7 +648,7 @@ export type PostTableByNumberAssignToByUserIdData = {
     userId: string
   }
   query?: never
-  url: '/table/{number}/assign-to/{userId}'
+  url: '/table/{number}/assignTo/{userId}'
 }
 
 export type PostTableByNumberAssignToByUserIdErrors = {
