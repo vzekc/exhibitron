@@ -307,7 +307,10 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
       const registration = await db.registration.findOneOrFail({
         id: registrationId,
       })
-      await db.registration.approve(registration)
+      await db.registration.approve(
+        registration,
+        `${request.protocol}://${request.headers.host}/`,
+      )
       return reply.status(204).send()
     },
   )

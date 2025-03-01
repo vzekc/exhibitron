@@ -5,7 +5,7 @@ import { Registration } from './registration.entity.js'
 export const makeWelcomeEmail = (
   name: string,
   email: string,
-  registerUrl: string,
+  completeProfileUrl: string,
 ) => ({
   to: [email],
   subject: 'Willkommen als Aussteller auf der CC2025!',
@@ -16,7 +16,7 @@ export const makeWelcomeEmail = (
         Deine Anmeldung als Aussteller auf der CC2025 war erfolgreich. Bitte
         vervollständige deine Registrierung, um deine Anmeldung abzuschließen.
       </p>
-      <a href={registerUrl}>Registrierung vervollständigen</a>
+      <a href={completeProfileUrl}>Registrierung vervollständigen</a>
     </article>,
   ),
 })

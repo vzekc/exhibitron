@@ -4,7 +4,8 @@ import { wrap } from '@mikro-orm/core'
 import { getUserFromToken } from '../common/utils.js'
 import { User } from './user.entity.js'
 import { errorSchema } from '../common/errors.js'
-import { exhibitBaseSchema } from '../exhibit/routes.js'
+import { existingExhibitSchema } from '../exhibit/routes.js'
+import { isLoggedIn } from '../middleware/auth.js'
 
 export const userBaseSchema = () => ({
   type: 'object',
@@ -46,7 +47,7 @@ export const userResponseSchema = () => ({
   properties: {
     ...userBaseResponseSchema().properties,
     tables: { type: 'array', items: { type: 'number' } },
-    exhibits: { type: 'array', items: exhibitBaseSchema() },
+    exhibits: { type: 'array', items: existingExhibitSchema() },
   },
 })
 
@@ -133,11 +134,9 @@ export async function registerUserRoutes(app: FastifyInstance) {
           },
         },
       },
+      preHandler: [isLoggedIn('You must be logged in to view your profile')],
     },
-    async (request) => {
-      const user = getUserFromToken(request)
-      return makeUserResponse(user)
-    },
+    async (request) => makeUserResponse(request.user!),
   )
 
   app.get(

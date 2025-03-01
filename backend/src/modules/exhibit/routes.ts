@@ -21,7 +21,7 @@ export const exhibitBaseSchema = () => ({
   additionalProperties: false,
 })
 
-const existingExhibitSchema = () => ({
+export const existingExhibitSchema = () => ({
   ...exhibitBaseSchema(),
   properties: {
     id: { type: 'number' },

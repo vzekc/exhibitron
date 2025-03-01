@@ -127,7 +127,7 @@ export async function registerTableRoutes(app: FastifyInstance) {
   )
 
   app.post(
-    '/:number/assign-to/:userId',
+    '/:number/assignTo/:userId',
     {
       schema: {
         description: 'Assign a table to a user',

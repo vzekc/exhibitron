@@ -1,8 +1,16 @@
 import { useNavigate } from 'react-router-dom'
 import { ExhibitListItem } from '../types'
 
+type ExhibitDisplayListItem = Omit<
+  ExhibitListItem,
+  'exhibitorName' | 'exhibitorId'
+> & {
+  exhibitorName?: string
+  exhibitorId?: number
+}
+
 interface ExhibitListProps {
-  exhibits: ExhibitListItem[]
+  exhibits: ExhibitDisplayListItem[]
   notFoundLabel?: string
 }
 
