@@ -111,7 +111,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
       }
       const user = await db.user.login(email, password)
       user.token = app.jwt.sign({ id: user.id })
-      request.session.user = { userId: user.id }
+      request.session.userId = user.id
       return makeUserResponse(user)
     },
   )

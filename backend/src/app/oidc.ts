@@ -109,7 +109,7 @@ export const register = async (app: FastifyInstance) => {
       administratorRanks.includes(rank),
     )
 
-    request.session.user = { userId: user.id }
+    request.session.userId = user.id
 
     const { redirectUrl } = request.session
     delete request.session['redirectUrl']

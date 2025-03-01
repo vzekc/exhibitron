@@ -31,16 +31,16 @@ export const register = async (app: FastifyInstance) => {
   })
 
   app.addHook('onRequest', async (request) => {
-    if (request.session.user) {
+    if (request.session.userId) {
       const user = await db.user.findOne({
-        id: request.session.user.userId,
+        id: request.session.userId,
       })
       if (user) {
         request.user = user
         app.log.debug(`User: ${request.user.email} set from session`)
       } else {
         app.log.warn(
-          `User with ID ${request.session.user.userId} not found, invalid session ignored`,
+          `User with ID ${request.session.userId} not found, invalid session ignored`,
         )
       }
     }
