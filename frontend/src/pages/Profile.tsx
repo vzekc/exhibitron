@@ -3,6 +3,8 @@ import { useUser } from '../contexts/UserContext.ts'
 import ExhibitList from '../components/ExhibitList.tsx'
 import * as backend from '../api/index'
 import { useExhibitionData } from '../contexts/ExhibitionDataContext.ts'
+import { useEffect, useState } from 'react'
+import { User } from '../types.ts'
 
 type Inputs = {
   fullName: string
@@ -14,8 +16,9 @@ type Inputs = {
 }
 
 const Profile = () => {
-  const { user, reloadUser } = useUser()
+  const { reloadUser } = useUser()
   const { reloadExhibitList } = useExhibitionData()
+  const [user, setUser] = useState<User | undefined>()
   const {
     register,
     handleSubmit,
@@ -40,6 +43,14 @@ const Profile = () => {
     await reloadExhibitList()
     reset(inputs)
   }
+
+  useEffect(() => {
+    const load = async () => {
+      const response = await backend.getUserProfile()
+      setUser(response.data)
+    }
+    void load()
+  }, [setUser])
 
   return (
     user && (

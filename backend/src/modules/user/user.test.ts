@@ -18,6 +18,12 @@ afterAll(async () => {
 test('login', async () => {
   let res = await app.inject({
     method: 'get',
+    url: '/api/user/profile',
+  })
+  expect(res).toHaveStatus(401)
+
+  res = await app.inject({
+    method: 'get',
     url: '/api/user/current',
   })
   expect(res).toHaveStatus(204)

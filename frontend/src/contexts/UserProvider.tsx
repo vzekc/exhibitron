@@ -1,5 +1,5 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react'
-import { fetchUserProfile, UserContext } from './UserContext.ts'
+import { fetchCurrentUser, UserContext } from './UserContext.ts'
 import { User } from '../types.ts'
 
 interface UserProviderProps {
@@ -11,13 +11,13 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   const [loading, setLoading] = useState(true)
 
   const reloadUser = useCallback(async () => {
-    const userProfile = await fetchUserProfile()
+    const userProfile = await fetchCurrentUser()
     setUser(userProfile)
   }, [])
 
   useEffect(() => {
     const load = async () => {
-      setUser(await fetchUserProfile())
+      setUser(await fetchCurrentUser())
       setLoading(false)
     }
     void load()

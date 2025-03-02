@@ -1,17 +1,12 @@
 import { formatValue } from './utils.ts'
 import { useEffect, useState } from 'react'
 import * as backend from '../../api/index'
-import { client as backendClient } from '../../api/client.gen'
 import { Registration } from './RegistrationList.tsx'
 import useMandatoryParams from '../../utils/useMandatoryParams.ts'
 import { useNavigate } from 'react-router-dom'
 import Confirm from '../../components/Confirm'
 import './RegistrationDetails.css'
 import { useBreadcrumb } from '../../contexts/BreadcrumbContext.ts'
-
-backendClient.setConfig({
-  baseURL: '/api',
-})
 
 type ConfirmAction = {
   title: string

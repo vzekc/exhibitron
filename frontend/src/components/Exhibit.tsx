@@ -1,7 +1,6 @@
 import { useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import * as backend from '../api/index'
-import { client as backendClient } from '../api/client.gen'
 import './ExhibitList.css'
 import { addBookmark, isBookmarked, removeBookmark } from '../utils/bookmarks'
 import { useUser } from '../contexts/UserContext.ts'
@@ -10,10 +9,6 @@ import { MilkdownProvider } from '@milkdown/react'
 import ContentEditable, { ContentEditableEvent } from 'react-contenteditable'
 import { useBreadcrumb } from '../contexts/BreadcrumbContext.ts'
 import { type Exhibit } from '../types.ts'
-
-backendClient.setConfig({
-  baseURL: '/api',
-})
 
 const Exhibit = () => {
   const { id } = useParams<{ id: string }>()

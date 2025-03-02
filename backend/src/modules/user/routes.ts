@@ -131,7 +131,8 @@ export async function registerUserRoutes(app: FastifyInstance) {
     '/current',
     {
       schema: {
-        description: 'Retrieve the profile of the currently logged in user',
+        description:
+          'Retrieve the profile of the currently logged in user, if any',
         response: {
           200: {
             description:
@@ -149,6 +150,30 @@ export async function registerUserRoutes(app: FastifyInstance) {
       return request.user
         ? makeUserResponse(request.user)
         : response.status(204).send()
+    },
+  )
+
+  app.get(
+    '/profile',
+    {
+      schema: {
+        description: 'Retrieve the profile of the currently logged in user',
+        response: {
+          200: {
+            description:
+              'The profile of the currently logged in user is returned',
+            ...userResponseSchema(),
+          },
+          401: {
+            description: 'No user is currently logged in',
+            ...errorSchema,
+          },
+        },
+      },
+      preHandler: [isLoggedIn('You must be logged in to view your profile')],
+    },
+    async (request) => {
+      return makeUserResponse(request.user!)
     },
   )
 

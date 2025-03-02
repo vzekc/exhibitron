@@ -13,15 +13,18 @@ import type {
   PostUserLoginError,
   GetUserCurrentData,
   GetUserCurrentResponse,
+  GetUserProfileData,
+  GetUserProfileResponse,
+  GetUserProfileError,
+  PatchUserProfileData,
+  PatchUserProfileResponse,
+  PatchUserProfileError,
   GetUserData,
   GetUserResponse,
   GetUserError,
   GetUserByIdData,
   GetUserByIdResponse,
   GetUserByIdError,
-  PatchUserProfileData,
-  PatchUserProfileResponse,
-  PatchUserProfileError,
   GetExhibitData,
   GetExhibitResponse,
   PostExhibitData,
@@ -126,7 +129,7 @@ export const postUserLogin = <ThrowOnError extends boolean = false>(
 }
 
 /**
- * Retrieve the profile of the currently logged in user
+ * Retrieve the profile of the currently logged in user, if any
  */
 export const getUserCurrent = <ThrowOnError extends boolean = false>(
   options?: Options<GetUserCurrentData, ThrowOnError>,
@@ -138,6 +141,42 @@ export const getUserCurrent = <ThrowOnError extends boolean = false>(
   >({
     url: '/user/current',
     ...options,
+  })
+}
+
+/**
+ * Retrieve the profile of the currently logged in user
+ */
+export const getUserProfile = <ThrowOnError extends boolean = false>(
+  options?: Options<GetUserProfileData, ThrowOnError>,
+) => {
+  return (options?.client ?? _heyApiClient).get<
+    GetUserProfileResponse,
+    GetUserProfileError,
+    ThrowOnError
+  >({
+    url: '/user/profile',
+    ...options,
+  })
+}
+
+/**
+ * Update user account
+ */
+export const patchUserProfile = <ThrowOnError extends boolean = false>(
+  options?: Options<PatchUserProfileData, ThrowOnError>,
+) => {
+  return (options?.client ?? _heyApiClient).patch<
+    PatchUserProfileResponse,
+    PatchUserProfileError,
+    ThrowOnError
+  >({
+    url: '/user/profile',
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
   })
 }
 
@@ -170,26 +209,6 @@ export const getUserById = <ThrowOnError extends boolean = false>(
   >({
     url: '/user/{id}',
     ...options,
-  })
-}
-
-/**
- * Update user account
- */
-export const patchUserProfile = <ThrowOnError extends boolean = false>(
-  options?: Options<PatchUserProfileData, ThrowOnError>,
-) => {
-  return (options?.client ?? _heyApiClient).patch<
-    PatchUserProfileResponse,
-    PatchUserProfileError,
-    ThrowOnError
-  >({
-    url: '/user/profile',
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
   })
 }
 

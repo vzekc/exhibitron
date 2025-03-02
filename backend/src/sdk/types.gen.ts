@@ -144,6 +144,143 @@ export type GetUserCurrentResponses = {
 export type GetUserCurrentResponse =
   GetUserCurrentResponses[keyof GetUserCurrentResponses]
 
+export type GetUserProfileData = {
+  body?: never
+  path?: never
+  query?: never
+  url: '/user/profile'
+}
+
+export type GetUserProfileErrors = {
+  /**
+   * No user is currently logged in
+   */
+  401: {
+    error?: string
+    [key: string]: unknown | string | undefined
+  }
+}
+
+export type GetUserProfileError =
+  GetUserProfileErrors[keyof GetUserProfileErrors]
+
+export type GetUserProfileResponses = {
+  /**
+   * The profile of the currently logged in user is returned
+   */
+  200: {
+    id: number
+    nickname?: string
+    fullName?: string
+    email: string
+    bio?: string
+    contacts?: {
+      email?: string
+      phone?: string
+      website?: string
+      mastodon?: string
+    }
+    isAdministrator: boolean
+    tables?: Array<number>
+    exhibits?: Array<{
+      id: number
+      title: string
+      text?: string
+      table?: number
+      exhibitor: {
+        fullName?: string
+        email?: string
+        bio?: string
+        contacts?: {
+          email?: string
+          phone?: string
+          website?: string
+          mastodon?: string
+        }
+        id?: number
+        exhibitorId?: string
+      }
+    }>
+  }
+}
+
+export type GetUserProfileResponse =
+  GetUserProfileResponses[keyof GetUserProfileResponses]
+
+export type PatchUserProfileData = {
+  body?: {
+    fullName?: string
+    email?: string
+    bio?: string
+    contacts?: {
+      email?: string
+      phone?: string
+      website?: string
+      mastodon?: string
+    }
+    password?: string
+  }
+  path?: never
+  query?: never
+  url: '/user/profile'
+}
+
+export type PatchUserProfileErrors = {
+  /**
+   * The user account could not be updated.
+   */
+  400: {
+    error?: string
+    [key: string]: unknown | string | undefined
+  }
+}
+
+export type PatchUserProfileError =
+  PatchUserProfileErrors[keyof PatchUserProfileErrors]
+
+export type PatchUserProfileResponses = {
+  /**
+   * The user account was updated
+   */
+  200: {
+    id: number
+    nickname?: string
+    fullName?: string
+    email: string
+    bio?: string
+    contacts?: {
+      email?: string
+      phone?: string
+      website?: string
+      mastodon?: string
+    }
+    isAdministrator: boolean
+    tables?: Array<number>
+    exhibits?: Array<{
+      id: number
+      title: string
+      text?: string
+      table?: number
+      exhibitor: {
+        fullName?: string
+        email?: string
+        bio?: string
+        contacts?: {
+          email?: string
+          phone?: string
+          website?: string
+          mastodon?: string
+        }
+        id?: number
+        exhibitorId?: string
+      }
+    }>
+  }
+}
+
+export type PatchUserProfileResponse =
+  PatchUserProfileResponses[keyof PatchUserProfileResponses]
+
 export type GetUserData = {
   body?: never
   path?: never
@@ -274,80 +411,6 @@ export type GetUserByIdResponses = {
 
 export type GetUserByIdResponse =
   GetUserByIdResponses[keyof GetUserByIdResponses]
-
-export type PatchUserProfileData = {
-  body?: {
-    fullName?: string
-    email?: string
-    bio?: string
-    contacts?: {
-      email?: string
-      phone?: string
-      website?: string
-      mastodon?: string
-    }
-    password?: string
-  }
-  path?: never
-  query?: never
-  url: '/user/profile'
-}
-
-export type PatchUserProfileErrors = {
-  /**
-   * The user account could not be updated.
-   */
-  400: {
-    error?: string
-    [key: string]: unknown | string | undefined
-  }
-}
-
-export type PatchUserProfileError =
-  PatchUserProfileErrors[keyof PatchUserProfileErrors]
-
-export type PatchUserProfileResponses = {
-  /**
-   * The user account was updated
-   */
-  200: {
-    id: number
-    nickname?: string
-    fullName?: string
-    email: string
-    bio?: string
-    contacts?: {
-      email?: string
-      phone?: string
-      website?: string
-      mastodon?: string
-    }
-    isAdministrator: boolean
-    tables?: Array<number>
-    exhibits?: Array<{
-      id: number
-      title: string
-      text?: string
-      table?: number
-      exhibitor: {
-        fullName?: string
-        email?: string
-        bio?: string
-        contacts?: {
-          email?: string
-          phone?: string
-          website?: string
-          mastodon?: string
-        }
-        id?: number
-        exhibitorId?: string
-      }
-    }>
-  }
-}
-
-export type PatchUserProfileResponse =
-  PatchUserProfileResponses[keyof PatchUserProfileResponses]
 
 export type GetExhibitData = {
   body?: never

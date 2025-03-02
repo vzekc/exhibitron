@@ -3,12 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { ExhibitListItem } from '../types'
 import ExhibitList from './ExhibitList.tsx'
 import { useUser } from '../contexts/UserContext.ts'
-import { client as backendClient } from '../api/client.gen'
 import * as backend from '../api/index'
-
-backendClient.setConfig({
-  baseURL: '/api',
-})
 
 const TableSearchResult = () => {
   const { id } = useParams<{ id: string }>()

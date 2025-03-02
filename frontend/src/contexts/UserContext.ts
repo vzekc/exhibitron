@@ -2,7 +2,7 @@ import { getUserCurrent } from '../api'
 import { createContext, useContext } from 'react'
 import { User } from '../types.ts'
 
-export const fetchUserProfile = async (): Promise<User | undefined> => {
+export const fetchCurrentUser = async (): Promise<User | undefined> => {
   const response = await getUserCurrent({
     validateStatus: (status) => status == 200 || status == 204,
   })

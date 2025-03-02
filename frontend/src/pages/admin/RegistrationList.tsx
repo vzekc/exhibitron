@@ -1,14 +1,9 @@
 import { useEffect, useState } from 'react'
 import * as backend from '../../api/index'
-import { client as backendClient } from '../../api/client.gen'
 import Papa from 'papaparse'
 import './RegistrationList.css'
 import { downloadCSV, formatValue } from './utils.ts'
 import { useNavigate } from 'react-router-dom'
-
-backendClient.setConfig({
-  baseURL: '/api',
-})
 
 const tableColumns = [
   'id',
