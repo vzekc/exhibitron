@@ -1,12 +1,12 @@
-import { getUserProfile } from '../api'
+import { getUserCurrent } from '../api'
 import { createContext, useContext } from 'react'
 import { User } from '../types.ts'
 
-export const fetchUserProfile = async () => {
-  const response = await getUserProfile({
-    validateStatus: (status) => status == 200 || status == 401,
+export const fetchUserProfile = async (): Promise<User | undefined> => {
+  const response = await getUserCurrent({
+    validateStatus: (status) => status == 200 || status == 204,
   })
-  if (response.status === 200) {
+  if (response.status === 200 && response.data) {
     return response.data
   }
 }

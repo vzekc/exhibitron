@@ -90,4 +90,17 @@ test('claim and release', async () => {
   // check that a nonexistent table is correctly reported
   res = await app.inject({ method: 'get', url: '/api/table/2000' })
   expect(res).toHaveStatus(404)
+
+  // check free list handling
+  res = await app.inject({ method: 'get', url: '/api/exhibit' })
+  expect(res).toHaveStatus(200)
+  const [firstFreeTable, ...remainingFreeTables] = res.json().freeTables
+
+  // claim first free table
+  res = await tablePost(`/table/${firstFreeTable}/claim`, daffy)
+  expect(res).toHaveStatus(204)
+
+  res = await app.inject({ method: 'get', url: '/api/exhibit' })
+  expect(res).toHaveStatus(200)
+  expect(res.json().freeTables).toEqual(remainingFreeTables)
 })

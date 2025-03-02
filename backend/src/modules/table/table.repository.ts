@@ -25,4 +25,9 @@ export class TableRepository extends EntityRepository<Table> {
     table.exhibitor = undefined
     return table
   }
+
+  async freeTables() {
+    const tables = await this.find({ exhibitor: null })
+    return tables.map((table) => table.id)
+  }
 }

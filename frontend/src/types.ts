@@ -9,5 +9,5 @@ export type ExhibitListItem = NonNullable<
 >[number]
 
 export type User = NonNullable<
-  Awaited<ReturnType<typeof backend.getUserProfile>>['data']
+  Awaited<ReturnType<typeof backend.getUserCurrent>>['data']
 >

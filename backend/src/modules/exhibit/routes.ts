@@ -103,6 +103,11 @@ export async function registerExhibitRoutes(app: FastifyInstance) {
             properties: {
               items: { type: 'array', items: exhibitListingSchema },
               total: { type: 'number' },
+              freeTables: {
+                description: 'Array with numbers of table that are not claimed',
+                type: 'array',
+                items: { type: 'number' },
+              },
             },
           },
         },
@@ -113,12 +118,12 @@ export async function registerExhibitRoutes(app: FastifyInstance) {
         limit?: number
         offset?: number
       }
-      const { items, total } = await db.exhibit.listExhibits({
+      const { items, total, freeTables } = await db.exhibit.listExhibits({
         limit,
         offset,
       })
 
-      return { items, total }
+      return { items, total, freeTables }
     },
   )
 

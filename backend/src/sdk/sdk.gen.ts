@@ -11,17 +11,17 @@ import type {
   PostUserLoginData,
   PostUserLoginResponse,
   PostUserLoginError,
-  GetUserProfileData,
-  GetUserProfileResponse,
-  GetUserProfileError,
-  PatchUserProfileData,
-  PatchUserProfileResponse,
-  PatchUserProfileError,
+  GetUserCurrentData,
+  GetUserCurrentResponse,
   GetUserData,
   GetUserResponse,
+  GetUserError,
   GetUserByIdData,
   GetUserByIdResponse,
   GetUserByIdError,
+  PatchUserProfileData,
+  PatchUserProfileResponse,
+  PatchUserProfileError,
   GetExhibitData,
   GetExhibitResponse,
   PostExhibitData,
@@ -128,15 +128,47 @@ export const postUserLogin = <ThrowOnError extends boolean = false>(
 /**
  * Retrieve the profile of the currently logged in user
  */
-export const getUserProfile = <ThrowOnError extends boolean = false>(
-  options?: Options<GetUserProfileData, ThrowOnError>,
+export const getUserCurrent = <ThrowOnError extends boolean = false>(
+  options?: Options<GetUserCurrentData, ThrowOnError>,
 ) => {
   return (options?.client ?? _heyApiClient).get<
-    GetUserProfileResponse,
-    GetUserProfileError,
+    GetUserCurrentResponse,
+    unknown,
     ThrowOnError
   >({
-    url: '/user/profile',
+    url: '/user/current',
+    ...options,
+  })
+}
+
+/**
+ * Retrieve the full user list
+ */
+export const getUser = <ThrowOnError extends boolean = false>(
+  options?: Options<GetUserData, ThrowOnError>,
+) => {
+  return (options?.client ?? _heyApiClient).get<
+    GetUserResponse,
+    GetUserError,
+    ThrowOnError
+  >({
+    url: '/user/',
+    ...options,
+  })
+}
+
+/**
+ * Retrieve the profile of the user identified by ID
+ */
+export const getUserById = <ThrowOnError extends boolean = false>(
+  options: Options<GetUserByIdData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).get<
+    GetUserByIdResponse,
+    GetUserByIdError,
+    ThrowOnError
+  >({
+    url: '/user/{id}',
     ...options,
   })
 }
@@ -158,38 +190,6 @@ export const patchUserProfile = <ThrowOnError extends boolean = false>(
       'Content-Type': 'application/json',
       ...options?.headers,
     },
-  })
-}
-
-/**
- * Retrieve the full user list
- */
-export const getUser = <ThrowOnError extends boolean = false>(
-  options?: Options<GetUserData, ThrowOnError>,
-) => {
-  return (options?.client ?? _heyApiClient).get<
-    GetUserResponse,
-    unknown,
-    ThrowOnError
-  >({
-    url: '/user/',
-    ...options,
-  })
-}
-
-/**
- * Retrieve the profile of the user identified by ID
- */
-export const getUserById = <ThrowOnError extends boolean = false>(
-  options: Options<GetUserByIdData, ThrowOnError>,
-) => {
-  return (options.client ?? _heyApiClient).get<
-    GetUserByIdResponse,
-    GetUserByIdError,
-    ThrowOnError
-  >({
-    url: '/user/{id}',
-    ...options,
   })
 }
 

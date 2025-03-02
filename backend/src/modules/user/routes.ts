@@ -1,11 +1,10 @@
 import { FastifyInstance } from 'fastify'
 import { initORM } from '../../db.js'
 import { wrap } from '@mikro-orm/core'
-import { getUserFromToken } from '../common/utils.js'
 import { User } from './user.entity.js'
 import { errorSchema } from '../common/errors.js'
 import { existingExhibitSchema } from '../exhibit/routes.js'
-import { isLoggedIn } from '../middleware/auth.js'
+import { isAdmin, isLoggedIn } from '../middleware/auth.js'
 
 export const userBaseSchema = () => ({
   type: 'object',
@@ -129,7 +128,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
   )
 
   app.get(
-    '/profile',
+    '/current',
     {
       schema: {
         description: 'Retrieve the profile of the currently logged in user',
@@ -139,15 +138,18 @@ export async function registerUserRoutes(app: FastifyInstance) {
               'The profile of the currently logged in user is returned',
             ...userResponseSchema(),
           },
-          401: {
-            description: 'Not logged in.',
-            ...errorSchema,
+          204: {
+            description: 'No user is currently logged in',
+            type: 'null',
           },
         },
       },
-      preHandler: [isLoggedIn('You must be logged in to view your profile')],
     },
-    async (request) => makeUserResponse(request.user!),
+    async (request, response) => {
+      return request.user
+        ? makeUserResponse(request.user)
+        : response.status(204).send()
+    },
   )
 
   app.get(
@@ -167,8 +169,16 @@ export async function registerUserRoutes(app: FastifyInstance) {
               total: { type: 'number' },
             },
           },
+          403: {
+            description:
+              'You must be logged in as administrator to see the user list',
+            ...errorSchema,
+          },
         },
       },
+      preHandler: [
+        isAdmin('You must be logged in as administrator to see the user list'),
+      ],
     },
     async () => {
       const users = await db.user.findAll({ populate: ['tables', 'exhibits'] })
@@ -238,10 +248,11 @@ export async function registerUserRoutes(app: FastifyInstance) {
           },
         },
       },
+      preHandler: [isLoggedIn('You must be logged in to view your profile')],
     },
     async (request) => {
       const updates = request.body as User
-      const user = getUserFromToken(request)
+      const user = request.user!
       wrap(user).assign(updates)
       await db.em.flush()
       return makeUserResponse(user)
