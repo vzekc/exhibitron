@@ -59,6 +59,8 @@ export async function registerUserRoutes(app: FastifyInstance) {
     // then cannot be written back to the database.  By creating a copy
     // that is not connected to the identity map, we can avoid this problem.
     // There should be a better way to do this, but I have not found it yet.
+    // This is what toJSON is for, fix this eventually
+    // https://chatgpt.com/c/67c41f12-98e4-800d-86d2-3c3ead33e902
     const token = user_.token
     const user = await db.em.findOneOrFail(
       User,
