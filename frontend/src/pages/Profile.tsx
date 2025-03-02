@@ -24,16 +24,7 @@ const Profile = () => {
     handleSubmit,
     formState: { isDirty },
     reset,
-  } = useForm<Inputs>({
-    defaultValues: {
-      fullName: user?.fullName || '',
-      bio: user?.bio || '',
-      email: user?.contacts?.email || '',
-      mastodon: user?.contacts?.mastodon || '',
-      phone: user?.contacts?.phone || '',
-      website: user?.contacts?.website || '',
-    },
-  })
+  } = useForm<Inputs>()
 
   const updateProfile: SubmitHandler<Inputs> = async (inputs) => {
     console.log('Update profile', inputs)
@@ -47,10 +38,19 @@ const Profile = () => {
   useEffect(() => {
     const load = async () => {
       const response = await backend.getUserProfile()
-      setUser(response.data)
+      const newUser = response.data
+      setUser(newUser)
+      reset({
+        fullName: newUser?.fullName || '',
+        bio: newUser?.bio || '',
+        email: newUser?.contacts?.email || '',
+        mastodon: newUser?.contacts?.mastodon || '',
+        phone: newUser?.contacts?.phone || '',
+        website: newUser?.contacts?.website || '',
+      })
     }
     void load()
-  }, [setUser])
+  }, [setUser, reset])
 
   return (
     user && (

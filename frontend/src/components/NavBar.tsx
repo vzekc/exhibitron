@@ -15,7 +15,14 @@ const NavBar = () => {
 
   const handleLogout = async () => {
     await backend.postAuthLogout()
-    window.location.reload()
+    if (window.location.pathname === '/') {
+      window.location.reload()
+    }
+    window.location.pathname = '/'
+  }
+
+  const handleShowLoginModal = () => {
+    setShowLoginModal(true)
   }
 
   useEffect(() => {
@@ -25,10 +32,12 @@ const NavBar = () => {
 
     window.addEventListener('storage', updateBookmarks)
     window.addEventListener('bookmarksUpdated', updateBookmarks)
+    window.addEventListener('showLoginModal', handleShowLoginModal)
 
     return () => {
       window.removeEventListener('storage', updateBookmarks)
       window.removeEventListener('bookmarksUpdated', updateBookmarks)
+      window.removeEventListener('showLoginModal', handleShowLoginModal)
     }
   }, [])
 

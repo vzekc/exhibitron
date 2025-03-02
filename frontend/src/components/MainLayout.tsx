@@ -10,10 +10,8 @@ const MainLayout = () => {
     <UserProvider>
       <ExhibitionDataProvider>
         <BreadcrumbProvider>
-          <main className="container">
-            <NavBar />
-            <Outlet />
-          </main>
+          <NavBar />
+          <Outlet />
         </BreadcrumbProvider>
       </ExhibitionDataProvider>
     </UserProvider>

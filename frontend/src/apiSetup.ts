@@ -8,9 +8,7 @@ backendClient.instance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      const originalRequest = error.config
-      localStorage.setItem('originalUrl', originalRequest.url)
-      window.location.href = '/login'
+      window.dispatchEvent(new Event('showLoginModal'))
     }
     return Promise.reject(error)
   },
