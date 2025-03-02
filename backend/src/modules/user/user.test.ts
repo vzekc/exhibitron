@@ -1,12 +1,17 @@
 import { FastifyInstance } from 'fastify'
-import { afterAll, beforeAll, expect, test } from 'vitest'
+import { afterAll, beforeAll, expect, MockedFunction, vi, test } from 'vitest'
 import { deleteDatabase, initTestApp, login } from '../../test/utils.js'
+import { sendEmail } from '../common/sendEmail.js'
+
+vi.mock('../common/sendEmail')
+let mockedSendEmail: MockedFunction<typeof sendEmail>
 
 let app: FastifyInstance
 let dbName: string
 
 beforeAll(async () => {
   ;({ app, dbName } = await initTestApp())
+  mockedSendEmail = sendEmail as MockedFunction<typeof sendEmail>
 })
 
 afterAll(async () => {
@@ -215,4 +220,55 @@ test('user list', async () => {
     items: expect.any(Array),
     total: expect.any(Number),
   })
+})
+
+test('password reset', async () => {
+  // try to reset password with invalid token
+  let res = await app.inject({
+    method: 'post',
+    url: '/api/user/resetPassword',
+    body: {
+      token: '!invalid!',
+      password: 'newpassword',
+    },
+  })
+  expect(res).toHaveStatus(403)
+
+  res = await app.inject({
+    method: 'post',
+    url: '/api/user/requestPasswordReset',
+    body: {
+      email: 'donald@example.com',
+      resetUrl: '/resetPassword?token=',
+    },
+  })
+  expect(res).toHaveStatus(204)
+
+  expect(mockedSendEmail).toHaveBeenCalledTimes(1)
+  const emailArgs = mockedSendEmail.mock.calls[0][0]
+  expect(emailArgs.to).toStrictEqual(['donald@example.com'])
+  expect(emailArgs.body?.html).toMatch(/resetPassword\?token=[a-z0-9]+/)
+  const [, token] =
+    emailArgs.body?.html.match(/resetPassword\?token=([a-z0-9]+)/) ?? []
+
+  // try to reset password with invalid token
+  res = await app.inject({
+    method: 'post',
+    url: '/api/user/resetPassword',
+    body: {
+      token,
+      password: 'newpassword',
+    },
+  })
+  expect(res).toHaveStatus(204)
+
+  const donald = await login(app, 'donald@example.com', 'newpassword')
+  res = await app.inject({
+    method: 'get',
+    url: '/api/user/current',
+    headers: {
+      Authorization: `Bearer ${donald.token}`,
+    },
+  })
+  expect(res).toHaveStatus(200)
 })

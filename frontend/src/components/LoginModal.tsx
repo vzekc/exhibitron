@@ -2,6 +2,7 @@ import Modal from './Modal.tsx'
 import { useState } from 'react'
 import * as backend from '../api/index'
 import { useForm, SubmitHandler } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
 
 type Inputs = {
   email: string
@@ -16,6 +17,7 @@ type LoginModalProps = {
 const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const [loginFailed, setLoginFailed] = useState(false)
   const { register, handleSubmit } = useForm<Inputs>()
+  const navigate = useNavigate()
 
   const forumLogin = () => {
     window.location.href = '/auth/forum'
@@ -35,7 +37,8 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   }
 
   const forgotPassword = async () => {
-    console.log('forgot password not implemented')
+    navigate('/requestPasswordReset')
+    onClose()
   }
 
   return (
@@ -48,7 +51,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
           <input type="email" {...register('email', { required: true })} />
         </label>
         <label>
-          Password:{' '}
+          Passwort:{' '}
           <input
             type="password"
             {...register('password', { required: true })}

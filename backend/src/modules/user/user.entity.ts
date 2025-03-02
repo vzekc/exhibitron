@@ -57,7 +57,7 @@ export class User extends BaseEntity<
   passwordResetToken?: string
 
   @Property({ nullable: true, lazy: true })
-  paswordResetTokenExpires?: Date
+  passwordResetTokenExpires?: Date
 
   @Property({ type: 'text' })
   bio: string = ''

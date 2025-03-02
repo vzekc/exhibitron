@@ -412,6 +412,46 @@ export type GetUserByIdResponses = {
 export type GetUserByIdResponse =
   GetUserByIdResponses[keyof GetUserByIdResponses]
 
+export type PostUserRequestPasswordResetData = {
+  body: {
+    email: string
+    resetUrl: string
+  }
+  path?: never
+  query?: never
+  url: '/user/requestPasswordReset'
+}
+
+export type PostUserRequestPasswordResetResponses = {
+  /**
+   * The password reset was requested
+   */
+  204: void
+}
+
+export type PostUserRequestPasswordResetResponse =
+  PostUserRequestPasswordResetResponses[keyof PostUserRequestPasswordResetResponses]
+
+export type PostUserResetPasswordData = {
+  body: {
+    token: string
+    password: string
+  }
+  path?: never
+  query?: never
+  url: '/user/resetPassword'
+}
+
+export type PostUserResetPasswordResponses = {
+  /**
+   * The password reset was requested
+   */
+  204: void
+}
+
+export type PostUserResetPasswordResponse =
+  PostUserResetPasswordResponses[keyof PostUserResetPasswordResponses]
+
 export type GetExhibitData = {
   body?: never
   path?: never

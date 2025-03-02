@@ -25,6 +25,10 @@ import type {
   GetUserByIdData,
   GetUserByIdResponse,
   GetUserByIdError,
+  PostUserRequestPasswordResetData,
+  PostUserRequestPasswordResetResponse,
+  PostUserResetPasswordData,
+  PostUserResetPasswordResponse,
   GetExhibitData,
   GetExhibitResponse,
   PostExhibitData,
@@ -209,6 +213,48 @@ export const getUserById = <ThrowOnError extends boolean = false>(
   >({
     url: '/user/{id}',
     ...options,
+  })
+}
+
+/**
+ * Request a password reset
+ */
+export const postUserRequestPasswordReset = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<PostUserRequestPasswordResetData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).post<
+    PostUserRequestPasswordResetResponse,
+    unknown,
+    ThrowOnError
+  >({
+    url: '/user/requestPasswordReset',
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
+  })
+}
+
+/**
+ * Request a password reset
+ */
+export const postUserResetPassword = <ThrowOnError extends boolean = false>(
+  options: Options<PostUserResetPasswordData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).post<
+    PostUserResetPasswordResponse,
+    unknown,
+    ThrowOnError
+  >({
+    url: '/user/resetPassword',
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
+    },
   })
 }
 

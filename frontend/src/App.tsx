@@ -15,6 +15,8 @@ import RegistrationDetails from './pages/admin/RegistrationDetails.tsx'
 import MainLayout from './components/MainLayout.tsx'
 import './App.css'
 import NotFound from './pages/NotFound.tsx'
+import RequestPasswordReset from './pages/RequestPasswordReset.tsx'
+import ResetPassword from './pages/ResetPassword.tsx'
 
 const App = () => {
   return (
@@ -35,6 +37,11 @@ const App = () => {
             <Route path="/bookmarks" element={<Bookmarks />} />
             <Route path="/table/:id" element={<TableSearchResult />} />
             <Route path="/profile" element={<Profile />} />
+            <Route
+              path="/requestPasswordReset"
+              element={<RequestPasswordReset />}
+            />
+            <Route path="/resetPassword" element={<ResetPassword />} />
             <Route path="/admin/registration" element={<RegistrationList />} />
             <Route
               path="/admin/registration/:id"

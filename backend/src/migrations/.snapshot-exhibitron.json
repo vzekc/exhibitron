@@ -297,8 +297,8 @@
           "length": 255,
           "mappedType": "string"
         },
-        "pasword_reset_token_expires": {
-          "name": "pasword_reset_token_expires",
+        "password_reset_token_expires": {
+          "name": "password_reset_token_expires",
           "type": "timestamptz",
           "unsigned": false,
           "autoincrement": false,

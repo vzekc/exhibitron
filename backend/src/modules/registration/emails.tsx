@@ -1,5 +1,5 @@
 import React from 'react'
-import { makeEmailBody } from '../common/sendEmail.js'
+import { makeEmailBody } from '../common/emailUtils.js'
 import { Registration } from './registration.entity.js'
 
 export const makeWelcomeEmail = (
@@ -67,6 +67,22 @@ export const makeNewRegistrationReceivedEmail = (email: string) => ({
         Wir haben Deine Anmeldung empfangen und melden uns in den nächsten Tagen
         bei Dir.
       </p>
+    </article>,
+  ),
+})
+
+export const makePasswordResetEmail = (email: string, resetUrl: string) => ({
+  to: [email],
+  subject: 'Passwort zurücksetzen',
+  body: makeEmailBody(
+    <article>
+      <h1>Passwort zurücksetzen</h1>
+      <p>
+        Du (oder jemand anderes) hast um ein Zurücksetzen des Passworts gebeten.
+        Wenn das nicht stimmt, ignoriere diese E-Mail einfach. Klicke auf den
+        folgenden Link, um ein neues Passwort zu setzen:
+      </p>
+      <a href={resetUrl}>Passwort zurücksetzen</a>
     </article>,
   ),
 })

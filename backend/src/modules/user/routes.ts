@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify'
 import { initORM } from '../../db.js'
 import { wrap } from '@mikro-orm/core'
 import { User } from './user.entity.js'
-import { errorSchema } from '../common/errors.js'
+import { BadRequestError, errorSchema } from '../common/errors.js'
 import { existingExhibitSchema } from '../exhibit/routes.js'
 import { isAdmin, isLoggedIn } from '../middleware/auth.js'
 
@@ -281,6 +281,80 @@ export async function registerUserRoutes(app: FastifyInstance) {
       wrap(user).assign(updates)
       await db.em.flush()
       return makeUserResponse(user)
+    },
+  )
+
+  app.post(
+    '/requestPasswordReset',
+    {
+      schema: {
+        description: 'Request a password reset',
+        body: {
+          type: 'object',
+          properties: {
+            email: { type: 'string', examples: ['donald@duck.com'] },
+            resetUrl: { type: 'string', examples: ['/passwordReset?token='] },
+          },
+          required: ['email', 'resetUrl'],
+          additionalProperties: false,
+        },
+        response: {
+          204: {
+            description: 'The password reset was requested',
+            type: 'null',
+          },
+        },
+      },
+    },
+    async (request, response) => {
+      const { email, resetUrl } = request.body as {
+        email: string
+        resetUrl: string
+      }
+      if (!resetUrl.match(/^\/\w+/)) {
+        throw new BadRequestError('The reset URL must be a relative path')
+      }
+      await db.user.requestPasswordReset(
+        email,
+        `${request.protocol}://${request.headers.host}${resetUrl}`,
+      )
+      return response.status(204).send()
+    },
+  )
+
+  app.post(
+    '/resetPassword',
+    {
+      schema: {
+        description: 'Reset password using token',
+        body: {
+          type: 'object',
+          properties: {
+            token: { type: 'string', examples: ['djdri34nn4'] },
+            password: { type: 'string', examples: ['duck-eat-sponge-foot'] },
+          },
+          required: ['token', 'password'],
+          additionalProperties: false,
+        },
+        response: {
+          204: {
+            description: 'The password reset was requested',
+            type: 'null',
+          },
+          403: {
+            description: 'The password reset token is invalid or expired',
+            ...errorSchema,
+          },
+        },
+      },
+    },
+    async (request, response) => {
+      const { token, password } = request.body as {
+        token: string
+        password: string
+      }
+      await db.user.resetPassword(token, password)
+      return response.status(204).send()
     },
   )
 }
