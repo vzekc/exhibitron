@@ -8,7 +8,7 @@ import Schedule from './pages/Schedule.tsx'
 import Exhibit from './components/Exhibit.tsx'
 import Bookmarks from './pages/Bookmarks.tsx'
 import TableSearchResult from './components/TableSearchResult.tsx'
-import Profile from './pages/Profile.tsx'
+import Profile from './pages/user/Profile.tsx'
 import Register from './pages/Register.tsx'
 import RegistrationList from './pages/admin/RegistrationList.tsx'
 import RegistrationDetails from './pages/admin/RegistrationDetails.tsx'
@@ -17,6 +17,9 @@ import './App.css'
 import NotFound from './pages/NotFound.tsx'
 import RequestPasswordReset from './pages/RequestPasswordReset.tsx'
 import ResetPassword from './pages/ResetPassword.tsx'
+import Account from './pages/user/Account.tsx'
+import ExhibitorInfo from './pages/user/ExhibitorInfo.tsx'
+import UserExhibits from './pages/user/Exhibits.tsx'
 
 const App = () => {
   return (
@@ -36,7 +39,10 @@ const App = () => {
             <Route path="/schedule" element={<Schedule />} />
             <Route path="/bookmarks" element={<Bookmarks />} />
             <Route path="/table/:id" element={<TableSearchResult />} />
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/user/profile" element={<Profile />} />
+            <Route path="/user/account" element={<Account />} />
+            <Route path="/user/exhibitorInfo" element={<ExhibitorInfo />} />
+            <Route path="/user/exhibits" element={<UserExhibits />} />
             <Route
               path="/requestPasswordReset"
               element={<RequestPasswordReset />}

@@ -73,7 +73,16 @@ const NavBar = () => {
                   'Profil'
                 }>
                 <li>
-                  <Link to="/profile">Profil</Link>
+                  <Link to="/user/account">Konto</Link>
+                </li>
+                <li>
+                  <Link to="/user/profile">Profil</Link>
+                </li>
+                <li>
+                  <Link to="/user/exhibits">Meine Ausstellungen</Link>
+                </li>
+                <li>
+                  <Link to="/user/exhibitorInfo">Aussteller-Infos</Link>
                 </li>
                 <li>
                   <a href="#" onClick={handleLogout}>

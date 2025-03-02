@@ -1,10 +1,10 @@
 import { useForm, SubmitHandler } from 'react-hook-form'
-import { useUser } from '../contexts/UserContext.ts'
-import ExhibitList from '../components/ExhibitList.tsx'
-import * as backend from '../api/index'
-import { useExhibitionData } from '../contexts/ExhibitionDataContext.ts'
+import { useUser } from '../../contexts/UserContext.ts'
+import ExhibitList from '../../components/ExhibitList.tsx'
+import * as backend from '../../api'
+import { useExhibitionData } from '../../contexts/ExhibitionDataContext.ts'
 import { useEffect, useState } from 'react'
-import { User } from '../types.ts'
+import { User } from '../../types.ts'
 
 type Inputs = {
   fullName: string
