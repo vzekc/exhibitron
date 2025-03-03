@@ -1,10 +1,8 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 
 import { ExhibitListItem } from '../types.ts'
-import {
-  ExhibitionDataContext,
-  fetchExhibitList,
-} from './ExhibitionDataContext.ts'
+import { ExhibitionDataContext } from './ExhibitionDataContext.ts'
+import { fetchExhibitionData } from '../services/exhibitionData.ts'
 
 interface ExhibitionDataProviderProps {
   children: ReactNode
@@ -17,7 +15,7 @@ export const ExhibitionDataProvider = ({
   const [loading, setLoading] = useState(true)
 
   const reloadExhibitList = useCallback(async () => {
-    const result = await fetchExhibitList()
+    const result = await fetchExhibitionData()
     const { items } = result || {}
     if (items) {
       setExhibitList(items)
@@ -26,7 +24,7 @@ export const ExhibitionDataProvider = ({
 
   useEffect(() => {
     const load = async () => {
-      const result = await fetchExhibitList()
+      const result = await fetchExhibitionData()
       const { items } = result || {}
       if (items) {
         setExhibitList(items)

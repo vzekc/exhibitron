@@ -1,15 +1,5 @@
-import { getExhibit } from '../api'
 import { createContext, useContext } from 'react'
 import { ExhibitListItem } from '../types.ts'
-
-export const fetchExhibitList = async () => {
-  const response = await getExhibit({
-    validateStatus: (status) => status == 200,
-  })
-  if (response.status === 200) {
-    return response.data
-  }
-}
 
 export interface ExhibitionDataContextType {
   exhibitList: ExhibitListItem[] | undefined

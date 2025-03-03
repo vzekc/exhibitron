@@ -1,0 +1,96 @@
+scalar JSON
+
+type User {
+    id: Int!
+    email: String!
+    fullName: String
+    nickname: String
+    bio: String
+    isAdministrator: Boolean
+    contacts: Contacts
+}
+
+type Contacts {
+    email: String
+    mastodon: String
+    phone: String
+    website: String
+}
+
+type Table {
+    id: Int!
+    number: Int!
+    exhibitor: Exhibitor
+}
+
+type Exhibitor {
+    id: Int!
+    user: User!
+    exhibits: [Exhibit!]
+    tables: [Table!]
+}
+
+type Exhibit {
+    id: Int!
+    title: String!
+    text: String
+    table: Table
+    exhibitor: Exhibitor!
+}
+
+type Exhibition {
+    id: Int!
+    key: String!
+    title: String!
+    hostMatch: String!
+}
+
+type Registration {
+    id: Int!
+    name: String!
+    email: String!
+    nickname: String
+    topic: String!
+    message: String
+    notes: String
+    data: JSON
+    status: RegistrationStatus!
+}
+
+enum RegistrationStatus {
+    NEW
+    IN_PROGRESS
+    APPROVED
+    REJECTED
+}
+
+type Query {
+    getUser(id: Int!): User
+    getUsers: [User!]
+    getTable(number: Int!): Table
+    getTables: [Table!]
+    getExhibitor(id: Int!): Exhibitor
+    getExhibitors: [Exhibitor!]
+    getExhibit(id: Int!): Exhibit
+    getExhibits: [Exhibit!]
+    getExhibition(id: Int!): Exhibition
+    getExhibitions: [Exhibition!]
+    getRegistration(id: Int!): Registration
+    getRegistrations: [Registration!]
+}
+
+type Mutation {
+    login(email: String!, password: String!): User
+    requestPasswordReset(email: String!, resetUrl: String!): Boolean
+    resetPassword(token: String!, password: String!): Boolean
+    claimTable(number: Int!): Table
+    releaseTable(number: Int!): Table
+    assignTable(number: Int!, exhibitorId: Int!): Table
+    createExhibit(title: String!, text: String, table: Int): Exhibit
+    updateExhibit(id: Int!, title: String, text: String, table: Int): Exhibit
+    createRegistration(name: String!, email: String!, nickname: String!, topic: String!, message: String, data: JSON): Registration
+    updateRegistration(id: Int!, status: RegistrationStatus, notes: String): Registration
+    approveRegistration(id: Int!, siteUrl: String!): Boolean
+    rejectRegistration(id: Int!): Boolean
+    deleteRegistration(id: Int!): Boolean
+}

@@ -4,7 +4,6 @@ import { wrap } from '@mikro-orm/core'
 import { Table } from '../table/table.entity.js'
 import { errorSchema, PermissionDeniedError } from '../common/errors.js'
 import { userBaseSchema } from '../user/routes.js'
-import { exhibitListingSchema } from './exhibit-listing.entity.js'
 
 export const exhibitBaseSchema = () => ({
   type: 'object',
@@ -31,7 +30,7 @@ export const existingExhibitSchema = () => ({
       properties: {
         ...userBaseSchema().properties,
         id: { type: 'number', examples: [53] },
-        exhibitorId: { type: 'string', examples: ['donald'] },
+        exhibitorId: { type: 'number', examples: [2] },
       },
     },
   },
@@ -63,7 +62,7 @@ export async function registerExhibitRoutes(app: FastifyInstance) {
       },
     },
     async (request) => {
-      if (!request.user) {
+      if (!request.exhibitor) {
         throw new PermissionDeniedError(
           'You must be logged in to create exhibits',
         )
@@ -75,12 +74,13 @@ export async function registerExhibitRoutes(app: FastifyInstance) {
       }
       let table: Table | undefined = undefined
       if (props.table) {
-        table = await db.table.claim(props.table, request.user)
+        table = await db.table.claim(props.table, request.exhibitor)
         delete props.table
       }
       const exhibit = db.exhibit.create({
         ...props,
-        exhibitor: request.user,
+        exhibition: request.exhibition,
+        exhibitor: request.exhibitor,
         table,
       })
       await db.em.flush()
@@ -88,42 +88,6 @@ export async function registerExhibitRoutes(app: FastifyInstance) {
         ...exhibit,
         table: exhibit?.table?.id,
       }
-    },
-  )
-
-  app.get(
-    '/',
-    {
-      schema: {
-        description: 'Retrieve list of all exhibits',
-        response: {
-          200: {
-            description: 'One page of exhibits',
-            type: 'object',
-            properties: {
-              items: { type: 'array', items: exhibitListingSchema },
-              total: { type: 'number' },
-              freeTables: {
-                description: 'Array with numbers of table that are not claimed',
-                type: 'array',
-                items: { type: 'number' },
-              },
-            },
-          },
-        },
-      },
-    },
-    async (request) => {
-      const { limit, offset } = request.query as {
-        limit?: number
-        offset?: number
-      }
-      const { items, total, freeTables } = await db.exhibit.listExhibits({
-        limit,
-        offset,
-      })
-
-      return { items, total, freeTables }
     },
   )
 
@@ -202,7 +166,7 @@ export async function registerExhibitRoutes(app: FastifyInstance) {
       const exhibit = await db.exhibit.findOneOrFail(+params.id, {
         populate: ['exhibitor', 'table'],
       })
-      if (exhibit.exhibitor !== request.user) {
+      if (exhibit.exhibitor !== request.exhibitor) {
         throw new PermissionDeniedError(
           'You are not authorized to change this exhibit',
         )
@@ -213,7 +177,7 @@ export async function registerExhibitRoutes(app: FastifyInstance) {
         table?: number
       }
       if ('table' in dto && dto.table) {
-        exhibit.table = await db.table.claim(dto.table, request.user)
+        exhibit.table = await db.table.claim(dto.table, request.exhibitor)
         delete dto.table
       }
       wrap(exhibit).assign(dto)

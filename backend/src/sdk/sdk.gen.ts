@@ -29,6 +29,7 @@ import type {
   PostUserRequestPasswordResetResponse,
   PostUserResetPasswordData,
   PostUserResetPasswordResponse,
+  PostUserResetPasswordError,
   GetExhibitData,
   GetExhibitResponse,
   PostExhibitData,
@@ -239,14 +240,14 @@ export const postUserRequestPasswordReset = <
 }
 
 /**
- * Request a password reset
+ * Reset password using token
  */
 export const postUserResetPassword = <ThrowOnError extends boolean = false>(
   options: Options<PostUserResetPasswordData, ThrowOnError>,
 ) => {
   return (options.client ?? _heyApiClient).post<
     PostUserResetPasswordResponse,
-    unknown,
+    PostUserResetPasswordError,
     ThrowOnError
   >({
     url: '/user/resetPassword',

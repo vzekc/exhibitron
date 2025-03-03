@@ -2,9 +2,18 @@ import type { EntityManager } from '@mikro-orm/core'
 import { Seeder } from '@mikro-orm/seeder'
 import { User } from '../modules/user/user.entity.js'
 import { Table } from '../modules/table/table.entity.js'
+import { Exhibition } from '../modules/exhibition/exhibition.entity.js'
+import { Exhibitor } from '../modules/exhibitor/exhibitor.entity.js'
+import { Exhibit } from '../modules/exhibit/exhibit.entity.js'
 
 export class TestSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {
+    const exhibition = em.create(Exhibition, {
+      key: 'cc2025',
+      title: 'Classic Computing 2025',
+      hostMatch: 'localhost|2025\\.classic-computing\\.de',
+    })
+
     em.create(User, {
       id: 1001,
       fullName: 'Harald Eder',
@@ -14,8 +23,8 @@ export class TestSeeder extends Seeder {
       contacts: {},
     })
 
-    for (let id = 1; id <= 10; id++) {
-      em.create(Table, { id })
+    for (let number = 1; number <= 10; number++) {
+      em.create(Table, { exhibition, id: number, number })
     }
 
     ;[
@@ -42,13 +51,20 @@ export class TestSeeder extends Seeder {
         nickname: 'admin',
         isAdministrator: true,
       },
-    ].forEach((user) =>
-      em.create(User, {
-        ...user,
-        email: `${user.nickname}@example.com`,
+    ].forEach(({ exhibits, ...userProps }) => {
+      const user = em.create(User, {
+        ...userProps,
+        email: `${userProps.nickname}@example.com`,
         password: 'geheim',
         contacts: {},
-      }),
-    )
+      })
+      const exhibitor = em.create(Exhibitor, {
+        exhibition,
+        user,
+      })
+      exhibits?.forEach((props) =>
+        em.create(Exhibit, { ...props, exhibitor, exhibition }),
+      )
+    })
   }
 }

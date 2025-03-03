@@ -8,11 +8,7 @@
     "declaration": true,
     "experimentalDecorators": true,
     "jsx": "react",
-    "types": ["vitest/globals", "./src/types/customMatchers"],
-
-    "paths": {
-      "@/*": ["src/*"]
-    }
+    "types": ["vitest/globals", "./src/types/customMatchers"]
   },
   "include": ["./src/**/*.ts"],
   "exclude": ["./src/sdk"],

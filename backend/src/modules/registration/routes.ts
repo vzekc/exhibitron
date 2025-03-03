@@ -47,24 +47,19 @@ const registrationSchema = () => ({
     },
     ...registrationBaseSchema().properties,
   },
-  required: ['id', 'status', 'eventId', 'name', 'email', 'data', 'createdAt'],
+  required: ['id', 'status', 'name', 'email', 'data', 'createdAt'],
 })
 
 const registrationUpdateParamsSchema = {
   type: 'object',
   properties: {
-    eventId: {
-      type: 'string',
-      description: 'ID of the event',
-      examples: ['cc2025'],
-    },
     registrationId: {
       type: 'number',
       description: 'ID of the registration to update',
       examples: [1],
     },
   },
-  required: ['eventId', 'registrationId'],
+  required: ['registrationId'],
 }
 
 const registrationUpdateResponseSchema = {
@@ -92,21 +87,10 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
   const db = await initORM()
 
   app.post(
-    '/:eventId',
+    '/',
     {
       schema: {
         description: 'Create a registration',
-        params: {
-          type: 'object',
-          properties: {
-            eventId: {
-              type: 'string',
-              description: 'ID of the event to register for',
-              examples: ['cc2025'],
-            },
-          },
-          required: ['eventId'],
-        },
         body: {
           description:
             'Registration data, the data field contains event specific properties',
@@ -126,7 +110,6 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const { eventId } = request.params as { eventId: string }
       const { name, email, nickname, topic, message, data } = request.body as {
         name: string
         email: string
@@ -143,7 +126,7 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
 
       const registration = await db.registration.register({
         status: RegistrationStatus.NEW,
-        eventId,
+        exhibition: request.exhibition,
         name,
         email,
         nickname,
@@ -157,21 +140,10 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
   )
 
   app.get(
-    '/:eventId',
+    '/',
     {
       schema: {
         description: 'Retrieve all registrations',
-        params: {
-          type: 'object',
-          properties: {
-            eventId: {
-              type: 'string',
-              description: 'ID of the event to register for',
-              examples: ['cc2025'],
-            },
-          },
-          required: ['eventId'],
-        },
         response: {
           200: {
             description: 'List of registrations',
@@ -211,7 +183,7 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
   )
 
   app.get(
-    '/:eventId/:registrationId',
+    '/:registrationId',
     {
       schema: {
         description: 'Update a registration',
@@ -219,18 +191,13 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
         params: {
           type: 'object',
           properties: {
-            eventId: {
-              type: 'string',
-              description: 'ID of the event',
-              examples: ['cc2025'],
-            },
             registrationId: {
               type: 'number',
               description: 'ID of the registration to update',
               examples: [1],
             },
           },
-          required: ['eventId', 'registrationId'],
+          required: ['registrationId'],
         },
         response: {
           200: {
@@ -260,7 +227,7 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
   )
 
   app.patch(
-    '/:eventId/:registrationId',
+    '/:registrationId',
     {
       schema: {
         description: 'Update a registration',
@@ -290,7 +257,7 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
   )
 
   app.put(
-    '/:eventId/:registrationId/approve',
+    '/:registrationId/approve',
     {
       schema: {
         description: 'Approve a registration',
@@ -316,7 +283,7 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
   )
 
   app.put(
-    '/:eventId/:registrationId/reject',
+    '/:registrationId/reject',
     {
       schema: {
         description: 'Reject a registration',
@@ -339,7 +306,7 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
   )
 
   app.put(
-    '/:eventId/:registrationId/inProgress',
+    '/:registrationId/inProgress',
     {
       schema: {
         description: 'Set a registration to "in progress" state',
@@ -362,7 +329,7 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
   )
 
   app.delete(
-    '/:eventId/:registrationId',
+    '/:registrationId',
     {
       schema: {
         description: 'Delete a registration',

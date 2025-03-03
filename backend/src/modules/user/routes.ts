@@ -5,6 +5,7 @@ import { User } from './user.entity.js'
 import { BadRequestError, errorSchema } from '../common/errors.js'
 import { existingExhibitSchema } from '../exhibit/routes.js'
 import { isAdmin, isLoggedIn } from '../middleware/auth.js'
+import { Exhibitor } from '../exhibitor/exhibitor.entity.js'
 
 export const userBaseSchema = () => ({
   type: 'object',
@@ -54,24 +55,24 @@ export const userResponseSchema = () => ({
 export async function registerUserRoutes(app: FastifyInstance) {
   const db = await initORM()
 
-  const makeUserResponse = async (user_: User) => {
+  const makeExhibitorResponse = async (exhibitor_: Exhibitor) => {
     // If we directly serialize the user object, it is somehow changed and
     // then cannot be written back to the database.  By creating a copy
     // that is not connected to the identity map, we can avoid this problem.
     // There should be a better way to do this, but I have not found it yet.
     // This is what toJSON is for, fix this eventually
     // https://chatgpt.com/c/67c41f12-98e4-800d-86d2-3c3ead33e902
-    const token = user_.token
-    const user = await db.em.findOneOrFail(
-      User,
-      { id: user_.id },
+    const token = exhibitor_.user.token
+    const exhibitor = await db.em.findOneOrFail(
+      Exhibitor,
+      { id: exhibitor_.id },
       { populate: ['exhibits', 'tables'], disableIdentityMap: true },
     )
     return {
-      ...user,
+      ...exhibitor,
       token,
-      tables: user.tables.map(({ id }) => id),
-      exhibits: user.exhibits.map(({ table, ...exhibit }) => ({
+      tables: exhibitor.tables.map(({ id }) => id),
+      exhibits: exhibitor.exhibits.map(({ table, ...exhibit }) => ({
         ...exhibit,
         table: table?.id,
       })),
@@ -125,7 +126,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
       const user = await db.user.login(email, password)
       user.token = app.jwt.sign({ id: user.id })
       request.session.userId = user.id
-      return makeUserResponse(user)
+      return wrap(user).toJSON()
     },
   )
 
@@ -148,13 +149,10 @@ export async function registerUserRoutes(app: FastifyInstance) {
         },
       },
     },
-    async (request, response) => {
-      return request.user
-        ? makeUserResponse(request.user)
-        : response.status(204).send()
-    },
+    async (request, response) => request.user ?? response.status(204).send(),
   )
 
+  // fixme move to exhibitor
   app.get(
     '/profile',
     {
@@ -175,7 +173,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
       preHandler: [isLoggedIn('You must be logged in to view your profile')],
     },
     async (request) => {
-      return makeUserResponse(request.user!)
+      return makeExhibitorResponse(request.exhibitor!)
     },
   )
 
@@ -208,9 +206,9 @@ export async function registerUserRoutes(app: FastifyInstance) {
       ],
     },
     async () => {
-      const users = await db.user.findAll({ populate: ['tables', 'exhibits'] })
+      const users = await db.user.findAll()
       return {
-        items: await Promise.all(users.map(makeUserResponse)),
+        items: users.map((user) => wrap(user).toJSON()),
         total: users.length,
       }
     },
@@ -247,11 +245,11 @@ export async function registerUserRoutes(app: FastifyInstance) {
     async (request) => {
       const { id } = request.params as { id: string }
       const user = await db.user.lookupOrFail(id)
-      await db.user.populate(user, ['tables', 'exhibits'])
-      return makeUserResponse(user)
+      return wrap(user).toJSON()
     },
   )
 
+  // fixme move to exhibitor
   app.patch(
     '/profile',
     {
@@ -282,7 +280,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
       const user = request.user!
       wrap(user).assign(updates)
       await db.em.flush()
-      return makeUserResponse(user)
+      return wrap(user).toJSON()
     },
   )
 

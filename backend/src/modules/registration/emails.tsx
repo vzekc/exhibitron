@@ -50,7 +50,7 @@ export const makeNewRegistrationEmail = (
     ),
     attachments: [
       {
-        filename: `registration-${registration.eventId}-${registration.id}.json`,
+        filename: `registration-${registration.exhibition.key}-${registration.id}.json`,
         content: JSON.stringify(registration, null, 2),
       },
     ],

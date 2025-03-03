@@ -442,6 +442,19 @@ export type PostUserResetPasswordData = {
   url: '/user/resetPassword'
 }
 
+export type PostUserResetPasswordErrors = {
+  /**
+   * The password reset token is invalid or expired
+   */
+  403: {
+    error?: string
+    [key: string]: unknown | string | undefined
+  }
+}
+
+export type PostUserResetPasswordError =
+  PostUserResetPasswordErrors[keyof PostUserResetPasswordErrors]
+
 export type PostUserResetPasswordResponses = {
   /**
    * The password reset was requested

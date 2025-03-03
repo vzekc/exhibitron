@@ -68,12 +68,6 @@ export class User extends BaseEntity<
   @Embedded(() => Contacts, { object: true })
   contacts: Contacts = {}
 
-  @OneToMany({ mappedBy: 'exhibitor' })
-  exhibits = new Collection<Exhibit>(this)
-
-  @OneToMany({ mappedBy: 'exhibitor' })
-  tables = new Collection<Table>(this)
-
   constructor(email: string, password: string) {
     super()
     this.email = email

@@ -1,3 +1,4 @@
 temp/
 dist/
 sqlite.db
+src/generated/

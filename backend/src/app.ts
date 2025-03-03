@@ -4,13 +4,16 @@ import * as swagger from './app/swagger.js'
 import * as staticFiles from './app/static.js'
 import * as oidc from './app/oidc.js'
 import * as orm from './app/orm.js'
+import * as exhibition from './app/exhibition.js'
 import * as jwt from './app/jwt.js'
 import * as session from './app/session.js'
+import * as graphql from './app/graphql.js'
 import { registerUserRoutes } from './modules/user/routes.js'
 import { registerExhibitRoutes } from './modules/exhibit/routes.js'
 import { registerTableRoutes } from './modules/table/routes.js'
 import { errorHandler } from './modules/common/errors.js'
 import { registerRegistrationRoutes } from './modules/registration/routes.js'
+import { registerExhibitorRoutes } from './modules/exhibitor/routes.js'
 
 const registerErrorHandler = (app: FastifyInstance) => {
   // register global error handler to process 404 errors from `findOneOrFail` calls
@@ -52,15 +55,18 @@ export async function createApp({
   await swagger.register(app)
   await orm.register(app, !!migrate)
   await jwt.register(app)
-  session.register(app)
+  await session.register(app)
+  await exhibition.register(app)
+  await graphql.register(app)
 
   registerErrorHandler(app)
 
   // register routes here
   app.register(registerUserRoutes, { prefix: '/api/user' })
+  app.register(registerRegistrationRoutes, { prefix: '/api/registration' })
+  app.register(registerExhibitorRoutes, { prefix: '/api/exhibitor' })
   app.register(registerExhibitRoutes, { prefix: '/api/exhibit' })
   app.register(registerTableRoutes, { prefix: '/api/table' })
-  app.register(registerRegistrationRoutes, { prefix: '/api/registration' })
 
   staticFiles.register(app)
 

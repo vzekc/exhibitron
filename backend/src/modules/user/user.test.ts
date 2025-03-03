@@ -51,8 +51,6 @@ test('login', async () => {
     contacts: {},
     id: 1001,
     isAdministrator: false,
-    exhibits: expect.any(Array),
-    tables: expect.any(Array),
   })
 
   expect(res.body).not.toContain('password')
@@ -149,8 +147,6 @@ test('lookups', async () => {
     isAdministrator: false,
     bio: expect.anything(),
     contacts: {},
-    exhibits: expect.any(Array),
-    tables: expect.any(Array),
   })
   res = await app.inject({
     method: 'get',
@@ -165,8 +161,6 @@ test('lookups', async () => {
     isAdministrator: false,
     bio: expect.anything(),
     contacts: {},
-    exhibits: expect.any(Array),
-    tables: expect.any(Array),
   })
 })
 

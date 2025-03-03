@@ -85,22 +85,27 @@ test('claim and release', async () => {
   // check that donald is now the owner of the table
   res = await app.inject({ method: 'get', url: '/api/table/7' })
   expect(res).toHaveStatus(200)
-  expect(res.json()).toMatchObject({ exhibitor: { nickname: 'donald' } })
+  expect(res.json()).toMatchObject({ exhibitor: { user: donald.id } })
 
   // check that a nonexistent table is correctly reported
   res = await app.inject({ method: 'get', url: '/api/table/2000' })
   expect(res).toHaveStatus(404)
 
+  const getFreeTables = async () => {
+    const res = await app.inject({ method: 'get', url: '/api/table' })
+    expect(res).toHaveStatus(200)
+    return res
+      .json()
+      .items.filter(({ exhibitor }) => !exhibitor)
+      .map(({ number }) => number)
+      .sort()
+  }
   // check free list handling
-  res = await app.inject({ method: 'get', url: '/api/exhibit' })
-  expect(res).toHaveStatus(200)
-  const [firstFreeTable, ...remainingFreeTables] = res.json().freeTables
+  const [firstFreeTable, ...remainingFreeTables] = await getFreeTables()
 
   // claim first free table
   res = await tablePost(`/table/${firstFreeTable}/claim`, daffy)
   expect(res).toHaveStatus(204)
 
-  res = await app.inject({ method: 'get', url: '/api/exhibit' })
-  expect(res).toHaveStatus(200)
-  expect(res.json().freeTables).toEqual(remainingFreeTables)
+  expect(await getFreeTables()).toEqual(remainingFreeTables)
 })

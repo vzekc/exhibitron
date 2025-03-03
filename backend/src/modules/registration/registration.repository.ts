@@ -9,6 +9,7 @@ import {
 import { sendEmail } from '../common/sendEmail.js'
 import { User } from '../user/user.entity.js'
 import { Exhibit } from '../exhibit/exhibit.entity.js'
+import { Exhibitor } from '../exhibitor/exhibitor.entity.js'
 
 export type RegistrationData = Omit<Registration, keyof BaseEntity>
 
@@ -38,18 +39,32 @@ export class RegistrationRepository extends EntityRepository<Registration> {
         email: registration.email,
         fullName: registration.name,
         isAdministrator: false,
-        tables: [],
-        exhibits: [],
+      })
+      this.em.getRepository(Exhibitor).create({
+        exhibition: registration.exhibition,
+        user,
       })
       completeProfileUrl = `${siteUrl}/profile?token=${user.passwordResetToken}`
     } else {
-      await userRepository.populate(user, ['exhibits'])
-      if (!user.exhibits.find((e) => e.title === registration.topic)) {
-        const exhibit = this.em.getRepository(Exhibit).create({
-          title: registration.topic,
-          exhibitor: user,
+      let exhibitor = await this.em.getRepository(Exhibitor).findOne({
+        user,
+        exhibition: registration.exhibition,
+      })
+      if (!exhibitor) {
+        exhibitor = this.em.getRepository(Exhibitor).create({
+          exhibition: registration.exhibition,
+          user,
         })
-        user.exhibits.add(exhibit)
+        this.em.persist(exhibitor)
+      } else if (
+        !exhibitor.exhibits.find((e) => e.title === registration.topic)
+      ) {
+        const exhibit = this.em.getRepository(Exhibit).create({
+          exhibition: registration.exhibition,
+          title: registration.topic,
+          exhibitor,
+        })
+        exhibitor.exhibits.add(exhibit)
         this.em.persist(exhibit)
       }
     }

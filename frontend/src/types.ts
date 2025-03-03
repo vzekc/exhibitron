@@ -11,3 +11,15 @@ export type ExhibitListItem = NonNullable<
 export type User = NonNullable<
   Awaited<ReturnType<typeof backend.getUserCurrent>>['data']
 >
+
+type TableData = {
+  exhibits: Exhibit[]
+  exhibitor?: User
+}
+
+export type ExhibitionData = {
+  tables: Record<number, TableData>
+  freeTables: number[]
+  exhibitors: User[]
+  exhibits: Exhibit[]
+}

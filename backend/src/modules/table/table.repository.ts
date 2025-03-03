@@ -1,23 +1,23 @@
 import { EntityRepository } from '@mikro-orm/postgresql'
-import { User } from '../user/user.entity.js'
 import { Table } from './table.entity.js'
 import { PermissionDeniedError } from '../common/errors.js'
+import { Exhibitor } from '../exhibitor/exhibitor.entity.js'
 
 export class TableRepository extends EntityRepository<Table> {
-  async claim(tableNumber: number, user: User) {
+  async claim(tableNumber: number, exhibitor: Exhibitor) {
     const table = await this.findOneOrFail({ id: tableNumber })
-    if (table.exhibitor && table.exhibitor !== user) {
+    if (table.exhibitor && table.exhibitor !== exhibitor) {
       throw new PermissionDeniedError(
         'The requested table is assigned to another exhibitor',
       )
     }
-    table.exhibitor = user
+    table.exhibitor = exhibitor
     return table
   }
 
-  async release(tableNumber: number, user?: User) {
+  async release(tableNumber: number, exhibitor?: Exhibitor) {
     const table = await this.findOneOrFail({ id: tableNumber })
-    if (user && table.exhibitor !== user) {
+    if (exhibitor && table.exhibitor !== exhibitor) {
       throw new PermissionDeniedError(
         'Cannot release table claimed by another exhibitor',
       )

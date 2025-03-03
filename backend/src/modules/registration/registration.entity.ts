@@ -2,11 +2,13 @@ import {
   Entity,
   EntityRepositoryType,
   Enum,
+  ManyToOne,
   Property,
   Unique,
 } from '@mikro-orm/core'
 import { BaseEntity } from '../common/base.entity.js'
 import { RegistrationRepository } from './registration.repository.js'
+import { Exhibition } from '../exhibition/exhibition.entity.js'
 
 export enum RegistrationStatus {
   NEW = 'new',
@@ -16,12 +18,12 @@ export enum RegistrationStatus {
 }
 
 @Entity({ repository: () => RegistrationRepository })
-@Unique({ properties: ['eventId', 'email'] })
+@Unique({ properties: ['exhibition', 'email'] })
 export class Registration extends BaseEntity<'message'> {
   [EntityRepositoryType]?: RegistrationRepository
 
-  @Property({ index: true })
-  eventId!: string
+  @ManyToOne()
+  exhibition!: Exhibition
 
   @Enum({
     items: () => RegistrationStatus,

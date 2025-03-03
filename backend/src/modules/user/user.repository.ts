@@ -111,12 +111,4 @@ export class UserRepository extends EntityRepository<User> {
     user.passwordResetTokenExpires = undefined
     await this.getEntityManager().flush()
   }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async getEventAdmins(_eventId: string) {
-    // fixme need to check event id
-    return this.em.getRepository(User).find({
-      $and: [{ isAdministrator: true }],
-    })
-  }
 }
