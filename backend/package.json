@@ -71,6 +71,7 @@
     "eslint-typescript": "^1.1.0",
     "graphql-codegen-typescript-common": "0.18.2",
     "graphql-codegen-typescript-react-apollo": "0.18.2",
+    "graphql-tag": "^2.12.6",
     "husky": "^9.1.7",
     "jiti": "^2.4.2",
     "lint-staged": "^15.4.3",

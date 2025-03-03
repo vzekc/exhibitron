@@ -1,5 +1,5 @@
 import { GraphQLJSON } from 'graphql-type-json'
-import { RegistrationStatus } from './entities.js'
+import { RegistrationStatus } from './generated/graphql.js'
 import { initORM } from './db.js'
 import * as DB from './entities.js'
 
@@ -143,7 +143,7 @@ const resolvers = async () => {
       { exhibition },
     ) => {
       const registration = db.registration.create({
-        status: RegistrationStatus.NEW,
+        status: RegistrationStatus.New,
         exhibition,
         name,
         email,

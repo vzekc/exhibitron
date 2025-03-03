@@ -10,12 +10,7 @@ import { BaseEntity } from '../common/base.entity.js'
 import { RegistrationRepository } from './registration.repository.js'
 import { Exhibition } from '../exhibition/exhibition.entity.js'
 
-export enum RegistrationStatus {
-  NEW = 'new',
-  IN_PROGRESS = 'inProgress',
-  APPROVED = 'approved',
-  REJECTED = 'rejected',
-}
+import { RegistrationStatus } from '../../generated/graphql.js'
 
 @Entity({ repository: () => RegistrationRepository })
 @Unique({ properties: ['exhibition', 'email'] })
@@ -27,7 +22,7 @@ export class Registration extends BaseEntity<'message'> {
 
   @Enum({
     items: () => RegistrationStatus,
-    default: RegistrationStatus.NEW,
+    default: RegistrationStatus.New,
     nativeEnumName: 'registration_status',
   })
   status!: RegistrationStatus

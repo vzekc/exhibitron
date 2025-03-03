@@ -1,7 +1,8 @@
 import { FastifyInstance } from 'fastify'
 import { initORM } from '../../db.js'
 import { errorSchema } from '../common/errors.js'
-import { RegistrationStatus, Registration } from './registration.entity.js'
+import { Registration } from './registration.entity.js'
+import { RegistrationStatus } from '../../generated/graphql.js'
 import { wrap } from '@mikro-orm/core'
 import { isAdmin } from '../middleware/auth.js'
 
@@ -80,7 +81,7 @@ const registrationUpdateResponseSchema = {
 const serializeRegistration = (registration: Registration) => ({
   ...registration,
   createdAt: registration.createdAt.toISOString(),
-  updatedAt: registration.updatedAt.toISOString(),
+  updatedAt: registration.updatedAt?.toISOString(),
 })
 
 export async function registerRegistrationRoutes(app: FastifyInstance) {
@@ -125,7 +126,7 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
       }
 
       const registration = await db.registration.register({
-        status: RegistrationStatus.NEW,
+        status: RegistrationStatus.New,
         exhibition: request.exhibition,
         name,
         email,
@@ -353,7 +354,7 @@ export async function registerRegistrationRoutes(app: FastifyInstance) {
         id: registrationId,
       })
       // fixme: business logic here?
-      if (registration.status === RegistrationStatus.APPROVED) {
+      if (registration.status === RegistrationStatus.Approved) {
         return reply
           .status(409)
           .send({ error: 'Cannot delete an approved registration' })

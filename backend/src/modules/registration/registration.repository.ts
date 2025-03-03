@@ -1,5 +1,6 @@
 import { EntityRepository } from '@mikro-orm/postgresql'
-import { Registration, RegistrationStatus } from './registration.entity.js'
+import { Registration } from './registration.entity.js'
+import { RegistrationStatus } from '../../generated/graphql.js'
 import { BaseEntity } from '../common/base.entity.js'
 import {
   makeNewRegistrationEmail,
@@ -30,7 +31,7 @@ export class RegistrationRepository extends EntityRepository<Registration> {
   }
 
   async approve(registration: Registration, siteUrl: string) {
-    registration.status = RegistrationStatus.APPROVED
+    registration.status = RegistrationStatus.Approved
     const userRepository = this.em.getRepository(User)
     let user = await userRepository.lookup(registration.email)
     let completeProfileUrl = `${siteUrl}/profile`
@@ -80,12 +81,12 @@ export class RegistrationRepository extends EntityRepository<Registration> {
   }
 
   async reject(registration: Registration) {
-    registration.status = RegistrationStatus.REJECTED
+    registration.status = RegistrationStatus.Rejected
     await this.em.flush()
   }
 
   async inProgress(registration: Registration) {
-    registration.status = RegistrationStatus.IN_PROGRESS
+    registration.status = RegistrationStatus.InProgress
     await this.em.flush()
   }
 }

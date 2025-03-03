@@ -176,6 +176,9 @@ importers:
       graphql-codegen-typescript-react-apollo:
         specifier: 0.18.2
         version: 0.18.2(graphql-tag@2.12.6)(graphql@16.10.0)
+      graphql-tag:
+        specifier: ^2.12.6
+        version: 2.12.6(graphql@16.10.0)
       husky:
         specifier: ^9.1.7
         version: 9.1.7
