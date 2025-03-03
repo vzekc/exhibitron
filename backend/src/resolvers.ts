@@ -199,7 +199,7 @@ const resolvers = async () => {
 
   const registrationResolvers: RegistrationResolvers = {
     status: (registration) => {
-      return RegistrationStatus[registration.status]
+      return registration.status
     },
   }
 
