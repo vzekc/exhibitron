@@ -1,6 +1,8 @@
 import { FastifyInstance } from 'fastify'
 import { afterAll, beforeAll, expect, test } from 'vitest'
 import { deleteDatabase, initTestApp, login } from '../../test/utils.js'
+import { graphql, TadaDocumentNode } from 'gql.tada'
+import { request } from 'graphql-request'
 
 let app: FastifyInstance
 let dbName: string
@@ -15,12 +17,15 @@ afterAll(async () => {
   deleteDatabase(dbName)
 })
 
-const graphqlRequest = async <T>(
+type GraphQLRequestVariables<T> = T extends { variables: infer V } ? V : never
+type GraphQLRequestResponse<T> = T extends { response: infer R } ? R : never
+
+const graphqlRequest = async <T extends TadaDocumentNode>(
   app: FastifyInstance,
-  query: string,
-  variables: Record<string, unknown>,
+  query: T,
+  variables: GraphQLRequestVariables<T>,
   token?: string,
-): Promise<T> => {
+): Promise<GraphQLRequestResponse<T>> => {
   const res = await app.inject({
     method: 'POST',
     url: '/graphql',
@@ -34,7 +39,7 @@ const graphqlRequest = async <T>(
   })
 
   expect(res).toHaveStatus(200)
-  return res.json().data as T
+  return res.json().data as GraphQLRequestResponse<T>
 }
 
 test('claim and release', async () => {
@@ -45,7 +50,7 @@ test('claim and release', async () => {
   // verify table can be claimed
   let res = await graphqlRequest(
     app,
-    gql`
+    graphql(`
       mutation ClaimTable($number: Int!) {
         claimTable(number: $number) {
           id
@@ -57,7 +62,7 @@ test('claim and release', async () => {
           }
         }
       }
-    `,
+    `),
     { number: 1 },
     donald.token,
   )

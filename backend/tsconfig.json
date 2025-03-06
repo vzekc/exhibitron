@@ -8,7 +8,14 @@
     "declaration": true,
     "experimentalDecorators": true,
     "jsx": "react",
-    "types": ["vitest/globals", "./src/types/customMatchers"]
+    "types": ["vitest/globals", "./src/types/customMatchers"],
+    "plugins": [
+      {
+        "name": "gql.tada/ts-plugin",
+        "schema": "./src/schema.graphql",
+        "tadaOutputLocation": "./src/generated/graphql-env.d.ts"
+      }
+    ]
   },
   "include": ["./src/**/*.ts"],
   "exclude": ["./src/sdk"],

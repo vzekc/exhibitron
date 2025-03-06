@@ -4,7 +4,6 @@ import * as swagger from './app/swagger.js'
 import * as staticFiles from './app/static.js'
 import * as oidc from './app/oidc.js'
 import * as orm from './app/orm.js'
-import * as exhibition from './app/exhibition.js'
 import * as jwt from './app/jwt.js'
 import * as session from './app/session.js'
 import * as graphql from './app/graphql.js'
@@ -56,7 +55,6 @@ export async function createApp({
   await orm.register(app, !!migrate)
   await jwt.register(app)
   await session.register(app)
-  await exhibition.register(app)
   await graphql.register(app)
 
   registerErrorHandler(app)

@@ -15,7 +15,7 @@ export class TableRepository extends EntityRepository<Table> {
     return table
   }
 
-  async release(tableNumber: number, exhibitor?: Exhibitor) {
+  async release(tableNumber: number, exhibitor: Exhibitor | null) {
     const table = await this.findOneOrFail({ id: tableNumber })
     if (exhibitor && table.exhibitor !== exhibitor) {
       throw new PermissionDeniedError(
