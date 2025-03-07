@@ -1,5 +1,4 @@
 import { getExhibit } from '../api'
-import { Exhibit } from '../types.ts'
 
 export const fetchExhibitionData = async () => {
   const response = await getExhibit({
@@ -8,17 +7,8 @@ export const fetchExhibitionData = async () => {
   if (response.status === 200 && response.data && response.data.items) {
     const { freeTables, items: exhibits } = response.data
     return {
-      tables: exhibits.reduce((acc, exhibit) => {
-        if (exhibit.table) {
-          acc[exhibit.table] = {
-            exhibits: [...(acc[exhibit.table]?.exhibits || []), exhibit],
-          }
-        }
-        return acc
-      }, {} as Record<number, { exhibits: Exhibit[] }>),
+      exhibits,
       freeTables,
-      exhibitors: User[]
-      exhibits: Exhibit[]
     }
   }
 }

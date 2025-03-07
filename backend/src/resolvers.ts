@@ -1,6 +1,5 @@
 import { GraphQLJSON } from 'graphql-type-json'
 import { RegistrationStatus } from './generated/graphql.js'
-import * as DB from './entities.js'
 
 import {
   QueryResolvers,
@@ -10,82 +9,31 @@ import {
   ExhibitorResolvers,
   ExhibitResolvers,
   RegistrationResolvers,
-  Exhibit,
-  User,
-  Exhibitor,
-  Table,
 } from './generated/graphql.js'
-import { wrap } from '@mikro-orm/core'
 import { Context } from './app/context.js'
-
-const transformTable = (table: DB.Table): Table => ({
-  id: table.id,
-  number: table.number,
-  exhibitor: table.exhibitor ? transformExhibitor(table.exhibitor) : null,
-})
-
-const transformExhibitor = (exhibitor: DB.Exhibitor): Exhibitor => ({
-  id: exhibitor.id,
-  user: transformUser(exhibitor.user),
-  tables: exhibitor.tables.map(transformTable),
-})
-
-const transformExhibit = (exhibit: DB.Exhibit): Exhibit => ({
-  id: exhibit.id,
-  title: exhibit.title,
-  text: exhibit.text,
-  table: exhibit.table ? transformTable(exhibit.table) : null,
-  exhibitor: transformExhibitor(exhibit.exhibitor),
-})
-
-const transformExhibition = (exhibition: DB.Exhibition) =>
-  wrap(exhibition).toJSON()
-
-const transformUser = (user: DB.User): User => wrap(user).toJSON()
-
-const transformRegistration = (registration: DB.Registration) =>
-  wrap(registration).toJSON()
+import { wrap } from '@mikro-orm/core'
 
 const queryResolvers: QueryResolvers<Context> = {
   getUser: async (_, { id }, { db }) => db.user.findOneOrFail({ id }),
   getUsers: async (_, _args, { db }) => db.user.findAll(),
-  getTable: async (_, { number }, { db }) =>
-    transformTable(await db.table.findOneOrFail({ number })),
-  getTables: async (_, _args, { db }) => {
-    const tables = await db.table.findAll()
-    return tables.map(transformTable)
-  },
+  getTable: async (_, { number }, { db }) => db.table.findOneOrFail({ number }),
+  getTables: async (_, _args, { db }) => db.table.findAll(),
   getExhibitor: async (_, { id }, { db }) =>
-    transformExhibitor(await db.exhibitor.findOneOrFail({ id })),
-  getExhibitors: async (_, _args, { db }) => {
-    const exhibitors = await db.exhibitor.findAll()
-    return exhibitors.map(transformExhibitor)
-  },
-  getExhibit: async (_, { id }, { db }) =>
-    transformExhibit(await db.exhibit.findOneOrFail({ id })),
-  getExhibits: async (_, _args, { db }) => {
-    const exhibits = await db.exhibit.findAll()
-    return exhibits.map(transformExhibit)
-  },
+    await db.exhibitor.findOneOrFail({ id }),
+  getExhibitors: async (_, _args, { db }) => db.exhibitor.findAll(),
+  getExhibit: async (_, { id }, { db }) => db.exhibit.findOneOrFail({ id }),
+  getExhibits: async (_, _args, { db }) => db.exhibit.findAll(),
   getExhibition: async (_, { id }, { db }) =>
-    transformExhibition(await db.exhibition.findOneOrFail({ id })),
-  getExhibitions: async (_, _args, { db }) => {
-    const exhibitions = await db.exhibition.findAll()
-    return exhibitions.map(transformExhibition)
-  },
+    db.exhibition.findOneOrFail({ id }),
+  getExhibitions: async (_, _args, { db }) => db.exhibition.findAll(),
   getRegistration: async (_, { id }, { db }) =>
-    transformRegistration(await db.registration.findOneOrFail({ id })),
-  getRegistrations: async (_, _args, { db }) => {
-    const registrations = await db.registration.findAll()
-    return registrations.map((registration) => wrap(registration).toJSON())
-  },
+    db.registration.findOneOrFail({ id }),
+  getRegistrations: async (_, _args, { db }) => db.registration.findAll(),
 }
 
 const mutationResolvers: MutationResolvers<Context> = {
-  login: async (_, { email, password }, { db }) => {
-    const user = await db.user.login(email, password)
-    return wrap(user).toJSON()
-  },
+  login: async (_, { email, password }, { db }) =>
+    db.user.login(email, password),
   requestPasswordReset: async (_, { email, resetUrl }, { db }) => {
     await db.user.requestPasswordReset(email, resetUrl)
     return true
@@ -98,18 +46,15 @@ const mutationResolvers: MutationResolvers<Context> = {
     if (!exhibitor) {
       throw new Error('You must be logged in to claim a table')
     }
-    const table = await db.table.claim(number, exhibitor)
-    return transformTable(table)
+    return await db.table.claim(number, exhibitor)
   },
-  releaseTable: async (_, { number }, { db, exhibitor }) => {
-    const table = await db.table.release(number, exhibitor)
-    return transformTable(table)
-  },
+  releaseTable: async (_, { number }, { db, exhibitor }) =>
+    db.table.release(number, exhibitor),
   assignTable: async (_, { number, exhibitorId }, { db, exhibition }) => {
     const exhibitor = await db.exhibitor.findOneOrFail({ id: exhibitorId })
     const table = await db.table.findOneOrFail({ exhibition, number })
     table.exhibitor = exhibitor
-    return transformTable(table)
+    return table
   },
   createExhibit: async (
     _,
@@ -119,26 +64,24 @@ const mutationResolvers: MutationResolvers<Context> = {
     if (!exhibitor) {
       throw new Error('You must be logged in to create an exhibit')
     }
-    const exhibit = db.exhibit.create({
+    return db.exhibit.create({
       exhibition,
       title,
       text,
       table,
       exhibitor,
     })
-    return transformExhibit(exhibit)
   },
   updateExhibit: async (_, { id, title, text, table }, { db }) => {
     const exhibit = await db.exhibit.findOneOrFail({ id })
-    wrap(exhibit).assign({ title, text, table })
-    return transformExhibit(exhibit)
+    return wrap(exhibit).assign({ title, text, table })
   },
   createRegistration: async (
     _,
     { name, email, nickname, topic, message, data },
     { exhibition, db },
-  ) => {
-    const registration = db.registration.create({
+  ) =>
+    db.registration.create({
       status: RegistrationStatus.New,
       exhibition,
       name,
@@ -147,13 +90,11 @@ const mutationResolvers: MutationResolvers<Context> = {
       topic,
       message,
       data,
-    })
-    return wrap(registration).toJSON()
-  },
+    }),
   updateRegistration: async (_, { id, status, notes }, { db }) => {
     const registration = await db.registration.findOneOrFail({ id })
     wrap(registration).assign({ status, notes })
-    return wrap(registration).toJSON()
+    return registration
   },
   approveRegistration: async (_, { id, siteUrl }, { db }) => {
     const registration = await db.registration.findOneOrFail({ id })
@@ -177,20 +118,23 @@ const userResolvers: UserResolvers = {
 }
 
 const tableResolvers: TableResolvers = {
-  exhibitor: async (table) =>
-    table.exhibitor ? wrap(table.exhibitor).toJSON() : null,
+  exhibitor: async (table, _, { db }) =>
+    table.exhibitor
+      ? db.exhibitor.findOneOrFail({ id: table.exhibitor.id })
+      : null,
 }
 
 const exhibitorResolvers: ExhibitorResolvers = {
-  user: async (exhibitor) => wrap(exhibitor.user).toJSON(),
+  user: async (exhibitor, _, { db }) =>
+    db.user.findOneOrFail({ id: exhibitor.user.id }),
   exhibits: async (exhibitor) => exhibitor.exhibits || [],
   tables: async (exhibitor) => exhibitor.tables || [],
 }
 
 const exhibitResolvers: ExhibitResolvers = {
-  table: async (exhibit) =>
-    exhibit.table ? wrap(exhibit.table).toJSON() : null,
-  exhibitor: async (exhibit) => wrap(exhibit.exhibitor).toJSON(),
+  exhibitor: async (exhibit) => {
+    return exhibit.exhibitor
+  },
 }
 
 const registrationResolvers: RegistrationResolvers = {

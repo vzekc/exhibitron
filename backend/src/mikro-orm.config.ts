@@ -39,5 +39,8 @@ export default defineConfig({
   // for vitest to get around `TypeError: Unknown file extension ".ts"` (ERR_UNKNOWN_FILE_EXTENSION)
   dynamicImportProvider: (id) => import(id),
   highlighter: new SqlHighlighter(),
+  serialization: {
+    forceObject: true,
+  },
   ...options,
 })

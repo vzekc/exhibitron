@@ -26,8 +26,8 @@ type Table {
 type Exhibitor {
   id: Int!
   user: User!
-  exhibits: [Exhibit!]
-  tables: [Table!]
+  exhibits: [Exhibit]
+  tables: [Table]
 }
 
 type Exhibit {
