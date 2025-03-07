@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify'
 import { afterAll, beforeAll, expect, test } from 'vitest'
 import { deleteDatabase, initTestApp, login } from '../../test/utils.js'
 import { graphql, TadaDocumentNode } from 'gql.tada'
-import { request } from 'graphql-request'
+import { gql } from 'graphql-tag'
 
 let app: FastifyInstance
 let dbName: string
@@ -50,7 +50,7 @@ test('claim and release', async () => {
   // verify table can be claimed
   let res = await graphqlRequest(
     app,
-    graphql(`
+    gql`
       mutation ClaimTable($number: Int!) {
         claimTable(number: $number) {
           id
@@ -62,7 +62,7 @@ test('claim and release', async () => {
           }
         }
       }
-    `),
+    `,
     { number: 1 },
     donald.token,
   )
