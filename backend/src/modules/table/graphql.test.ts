@@ -38,8 +38,6 @@ test('test graphql', async () => {
               exhibitor {
                 user {
                   id
-                  email
-                  fullName
                 }
               }
             }
