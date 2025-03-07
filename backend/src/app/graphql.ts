@@ -28,7 +28,9 @@ export const register = async (app: FastifyInstance) => {
 
   await server.start()
 
-  app.register(fastifyApollo(server))
+  app.register(fastifyApollo(server), {
+    context: async (request) => request.apolloContext,
+  })
 
   app.addHook('onRequest', (_request, _reply, done) => {
     console.log('RequestContext.create middleware')

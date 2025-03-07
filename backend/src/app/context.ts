@@ -88,5 +88,4 @@ export const destroyContext = async (context: Context) => {
   logger.debug('destroyContext', context)
   const { db } = context
   await db.em.flush()
-  await db.orm.close()
 }

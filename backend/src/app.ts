@@ -4,12 +4,7 @@ import * as oidc from './app/oidc.js'
 import * as orm from './app/orm.js'
 import * as session from './app/session.js'
 import * as graphql from './app/graphql.js'
-import { registerUserRoutes } from './modules/user/routes.js'
-import { registerExhibitRoutes } from './modules/exhibit/routes.js'
-import { registerTableRoutes } from './modules/table/routes.js'
 import { errorHandler } from './modules/common/errors.js'
-import { registerRegistrationRoutes } from './modules/registration/routes.js'
-import { registerExhibitorRoutes } from './modules/exhibitor/routes.js'
 
 const registerErrorHandler = (app: FastifyInstance) => {
   // register global error handler to process 404 errors from `findOneOrFail` calls
@@ -48,13 +43,6 @@ export async function createApp({
   await graphql.register(app)
 
   registerErrorHandler(app)
-
-  // register routes here
-  app.register(registerUserRoutes, { prefix: '/api/user' })
-  app.register(registerRegistrationRoutes, { prefix: '/api/registration' })
-  app.register(registerExhibitorRoutes, { prefix: '/api/exhibitor' })
-  app.register(registerExhibitRoutes, { prefix: '/api/exhibit' })
-  app.register(registerTableRoutes, { prefix: '/api/table' })
 
   staticFiles.register(app)
 
