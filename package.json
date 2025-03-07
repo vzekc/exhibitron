@@ -14,11 +14,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "pnpm": {
-    "patchedDependencies": {
-      "@mikro-orm/core@6.4.6": "patches/@mikro-orm__core@6.4.6.patch"
-    }
-  },
   "devDependencies": {
     "husky": "^9.1.7",
     "prettier": "^3.5.1"

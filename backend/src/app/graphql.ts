@@ -6,7 +6,11 @@ import fastifyApollo from '@as-integrations/fastify'
 import * as path from 'node:path'
 import { createContext, destroyContext } from './context.js'
 import { RequestContext } from '@mikro-orm/core'
+import { fileURLToPath } from 'node:url'
 import { initORM } from '../db.js'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 const typeDefs = readFileSync(path.join(__dirname, '../schema.graphql'), {
   encoding: 'utf-8',
@@ -21,6 +25,8 @@ const createServer = async () =>
 export const register = async (app: FastifyInstance) => {
   const server = await createServer()
   const db = await initORM()
+
+  await server.start()
 
   app.register(fastifyApollo(server))
 
@@ -44,8 +50,6 @@ export const register = async (app: FastifyInstance) => {
     console.log('onClose hook')
     await db.orm.close()
   })
-
-  await server.start()
 }
 
 export const createTestServer = async () => {
