@@ -1,6 +1,5 @@
 export { createTestServer } from '../app/graphql.js'
 
-// backend/src/test/graphqlTestUtil.ts
 import { createTestServer } from '../app/graphql.js'
 import { ApolloServer } from '@apollo/server'
 import { afterAll, beforeAll, expect, test } from 'vitest'
@@ -10,8 +9,8 @@ import { createContext } from '../app/context.js'
 import { FastifyRequest } from 'fastify'
 import { FastifyReply } from 'fastify/types/reply.js'
 import { RequestContext } from '@mikro-orm/core'
-import { DocumentNode } from 'graphql/language/index.js'
 import { createTestDatabase, deleteDatabase } from './utils.js'
+import { TadaDocumentNode } from 'gql.tada'
 
 let db: Services
 let server: ApolloServer<Context>
@@ -31,11 +30,16 @@ type Session = {
   userId?: number
 }
 
-export type ExecuteOperationFunction = (
-  query: DocumentNode,
-  variables?: Record<string, unknown>,
+type GqlFetchResult<TData> = {
+  data?: TData
+  errors?: Error[]
+}
+
+export type ExecuteOperationFunction = <TData, TVariables>(
+  query: TadaDocumentNode<TData, TVariables>,
+  variables?: TVariables,
   session?: Session,
-) => Promise<Record<string, unknown>>
+) => Promise<GqlFetchResult<TData>>
 
 export const graphqlTest = (
   name: string,
@@ -43,15 +47,15 @@ export const graphqlTest = (
 ) => {
   test(name, async () => {
     await RequestContext.create(db.em, async () => {
-      const executeOperation = async (
-        query: DocumentNode,
-        variables?: Record<string, unknown>,
+      const executeOperation = async <TData, TVariables>(
+        query: TadaDocumentNode<TData, TVariables>,
+        variables?: TVariables,
         session = {},
       ) => {
         const result = await server.executeOperation(
           {
             query,
-            variables,
+            variables: variables || {},
           },
           {
             contextValue: await createContext(

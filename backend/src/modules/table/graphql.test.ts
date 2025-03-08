@@ -1,14 +1,13 @@
 import { graphqlTest } from '../../test/apollo.js'
 import { expect } from 'vitest'
-import { gql } from 'graphql-tag'
+import { graphql } from 'gql.tada'
 
 graphqlTest('test graphql', async (executeOperation) => {
   const response = await executeOperation(
-    gql`
+    graphql(`
       query GetTable($number: Int!) {
         getTable(number: $number) {
           id
-          number
           exhibitor {
             user {
               id
@@ -16,7 +15,7 @@ graphqlTest('test graphql', async (executeOperation) => {
           }
         }
       }
-    `,
+    `),
     { number: 1 },
   )
   expect(response.errors).toBeUndefined()
@@ -24,11 +23,8 @@ graphqlTest('test graphql', async (executeOperation) => {
     getTable: {
       id: 1,
       number: 1,
-      exhibitor: {
-        user: {
-          id: 1,
-        },
-      },
+      exhibitor: null,
     },
   })
+  expect(response.data?.getTable?.exhibitor).toBeNull()
 })
