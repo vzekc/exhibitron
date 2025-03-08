@@ -75,3 +75,23 @@ export const graphqlTest = (
     })
   })
 }
+
+export const login = async (
+  graphqlRequest: ExecuteOperationFunction,
+  email: string,
+  password: string = 'geheim',
+) => {
+  const result = await graphqlRequest(
+    graphql(`
+      mutation Login($email: String!, $password: String!) {
+        login(email: $email, password: $password) {
+          id
+          email
+        }
+      }
+    `),
+    { email, password: password },
+  )
+  expect(result.errors).toBeUndefined()
+  return { userId: result.data?.login?.id as number }
+}

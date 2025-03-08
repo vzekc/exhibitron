@@ -1,0 +1,17 @@
+type Exhibit {
+  exhibitor: Exhibitor!
+  id: Int!
+  table: Table
+  text: String
+  title: String!
+}
+
+type Mutation {
+  createExhibit(table: Int, text: String, title: String!): Exhibit
+  updateExhibit(id: Int!, table: Int, text: String, title: String): Exhibit
+}
+
+type Query {
+  getExhibit(id: Int!): Exhibit
+  getExhibits: [Exhibit!]
+}

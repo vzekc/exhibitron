@@ -1,0 +1,11 @@
+type Exhibition {
+  hostMatch: String!
+  id: Int!
+  key: String!
+  title: String!
+}
+
+type Query {
+  getExhibition(id: Int!): Exhibition
+  getExhibitions: [Exhibition!]
+}

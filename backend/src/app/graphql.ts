@@ -1,20 +1,24 @@
 import { FastifyInstance } from 'fastify'
 import { ApolloServer } from '@apollo/server'
 import resolvers from '../resolvers.js'
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import fastifyApollo from '@as-integrations/fastify'
 import * as path from 'node:path'
 import { createContext, destroyContext } from './context.js'
 import { RequestContext } from '@mikro-orm/core'
 import { fileURLToPath } from 'node:url'
 import { initORM } from '../db.js'
+import { mergeTypeDefs } from '@graphql-tools/merge'
+import { glob } from 'glob'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-const typeDefs = readFileSync(path.join(__dirname, '../schema.graphql'), {
-  encoding: 'utf-8',
-})
+// Read and merge all schema files
+const schemaFiles = glob.sync(path.join(__dirname, '../**/*.graphql'))
+const typeDefs = mergeTypeDefs(
+  schemaFiles.map((file) => readFileSync(file, { encoding: 'utf-8' })),
+)
 
 const createServer = async () =>
   new ApolloServer({

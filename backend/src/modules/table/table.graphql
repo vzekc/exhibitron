@@ -1,0 +1,16 @@
+type Table {
+  exhibitor: Exhibitor
+  id: Int!
+  number: Int!
+}
+
+type Mutation {
+  assignTable(exhibitorId: Int!, number: Int!): Table
+  claimTable(number: Int!): Table
+  releaseTable(number: Int!): Table
+}
+
+type Query {
+  getTable(number: Int!): Table
+  getTables: [Table!]
+}

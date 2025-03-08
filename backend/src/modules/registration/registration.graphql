@@ -1,0 +1,42 @@
+type Registration {
+  data: JSON
+  email: String!
+  id: Int!
+  message: String
+  name: String!
+  nickname: String
+  notes: String
+  status: RegistrationStatus!
+  topic: String!
+}
+
+type Mutation {
+  approveRegistration(id: Int!, siteUrl: String!): Boolean
+  createRegistration(
+    data: JSON
+    email: String!
+    message: String
+    name: String!
+    nickname: String!
+    topic: String!
+  ): Registration
+  deleteRegistration(id: Int!): Boolean
+  rejectRegistration(id: Int!): Boolean
+  updateRegistration(
+    id: Int!
+    notes: String
+    status: RegistrationStatus
+  ): Registration
+}
+
+type Query {
+  getRegistration(id: Int!): Registration
+  getRegistrations: [Registration!]
+}
+
+enum RegistrationStatus {
+  approved
+  inProgress
+  new
+  rejected
+}

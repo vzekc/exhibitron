@@ -1,0 +1,43 @@
+type Contacts {
+  email: String
+  mastodon: String
+  phone: String
+  website: String
+}
+
+input ContactsInput {
+  email: String
+  mastodon: String
+  phone: String
+  website: String
+}
+
+type User {
+  bio: String
+  contacts: Contacts
+  email: String!
+  fullName: String
+  id: Int!
+  isAdministrator: Boolean
+  nickname: String
+}
+
+input UpdateUserProfileInput {
+  bio: String
+  contacts: ContactsInput
+  nickname: String
+}
+
+type Mutation {
+  login(email: String!, password: String!): User
+  requestPasswordReset(email: String!, resetUrl: String!): Boolean
+  resetPassword(password: String!, token: String!): Boolean
+  updateUserProfile(input: UpdateUserProfileInput!): User
+}
+
+type Query {
+  getUser(id: Int!): User
+  getUserByEmail(email: String!): User
+  getCurrentUser: User
+  getUsers: [User!]
+}

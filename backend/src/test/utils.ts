@@ -4,6 +4,8 @@ import { initORM } from '../db.js'
 import config from '../mikro-orm.config.js'
 import { TestSeeder } from '../seeders/TestSeeder.js'
 import { execSync } from 'child_process'
+import { ExecuteOperationFunction } from './apollo.js'
+import { graphql } from 'gql.tada'
 
 const generateRandomString = (length: number): string => {
   const characters = 'abcdefghijklmnopqrstuvwxyz0123456789'

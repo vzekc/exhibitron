@@ -17,6 +17,9 @@ import { GraphQLError } from 'graphql/error/index.js'
 const queryResolvers: QueryResolvers<Context> = {
   getUser: async (_, { id }, { db }) => db.user.findOneOrFail({ id }),
   getUsers: async (_, _args, { db }) => db.user.findAll(),
+  getCurrentUser: async (_, _args, { user }) => user,
+  getUserByEmail: async (_, { email }, { db }) =>
+    db.user.findOneOrFail({ email }),
   getTable: async (_, { number }, { db }) => db.table.findOneOrFail({ number }),
   getTables: async (_, _args, { db }) => db.table.findAll(),
   getExhibitor: async (_, { id }, { db }) =>
@@ -37,7 +40,10 @@ const mutationResolvers: MutationResolvers<Context> = {
     const user = await db.user.login(email, password)
     if (!user) {
       throw new GraphQLError('Invalid email address or password', {
-        extensions: { code: 'INVALID_INPUT' },
+        extensions: {
+          code: 'UNAUTHENTICATED',
+          http: { status: 401 },
+        },
       })
     }
     session.userId = user.id
@@ -50,6 +56,13 @@ const mutationResolvers: MutationResolvers<Context> = {
   resetPassword: async (_, { token, password }, { db }) => {
     await db.user.resetPassword(token, password)
     return true
+  },
+  updateUserProfile: async (_, { input }, { user, db }) => {
+    if (!user) {
+      throw new Error('You must be logged in to update your profile')
+    }
+    wrap(user).assign(input)
+    return user
   },
   claimTable: async (_, { number }, { db, exhibitor, user }) => {
     if (!exhibitor) {

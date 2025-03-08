@@ -1,0 +1,11 @@
+type Exhibitor {
+  exhibits: [Exhibit]
+  id: Int!
+  tables: [Table]
+  user: User!
+}
+
+type Query {
+  getExhibitor(id: Int!): Exhibitor
+  getExhibitors: [Exhibitor!]
+}
