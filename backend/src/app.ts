@@ -5,6 +5,7 @@ import * as orm from './app/orm.js'
 import * as session from './app/session.js'
 import * as graphql from './app/graphql.js'
 import { errorHandler } from './modules/common/errors.js'
+import { registerUserRoutes } from './modules/user/routes.js'
 
 const registerErrorHandler = (app: FastifyInstance) => {
   // register global error handler to process 404 errors from `findOneOrFail` calls
@@ -45,6 +46,8 @@ export async function createApp({
   registerErrorHandler(app)
 
   staticFiles.register(app)
+
+  await registerUserRoutes(app)
 
   return app
 }

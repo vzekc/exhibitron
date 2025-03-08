@@ -1,55 +1,56 @@
-import { FastifyInstance } from 'fastify'
-import { afterAll, beforeAll, expect, test } from 'vitest'
-import { deleteDatabase, initTestApp, login } from '../../test/utils.js'
-import { graphql, TadaDocumentNode } from 'gql.tada'
+import { expect, test } from 'vitest'
 import { gql } from 'graphql-tag'
+import { ExecuteOperationFunction, graphqlTest } from '../../test/apollo.js'
 
-let app: FastifyInstance
-let dbName: string
-
-beforeAll(async () => {
-  ;({ app, dbName } = await initTestApp())
-})
-
-afterAll(async () => {
-  // we close only the fastify app - it will close the database connection via onClose hook automatically
-  await app.close()
-  deleteDatabase(dbName)
-})
-
-type GraphQLRequestVariables<T> = T extends { variables: infer V } ? V : never
-type GraphQLRequestResponse<T> = T extends { response: infer R } ? R : never
-
-const graphqlRequest = async <T extends TadaDocumentNode>(
-  app: FastifyInstance,
-  query: T,
-  variables: GraphQLRequestVariables<T>,
-  token?: string,
-): Promise<GraphQLRequestResponse<T>> => {
-  const res = await app.inject({
-    method: 'POST',
-    url: '/graphql',
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    payload: {
-      query,
-      variables,
-    },
-  })
-
-  expect(res).toHaveStatus(200)
-  return res.json().data as GraphQLRequestResponse<T>
+const login = async (
+  graphqlRequest: ExecuteOperationFunction,
+  email: string,
+  password: string = 'geheim',
+) => {
+  const result = await graphqlRequest(
+    gql`
+      mutation Login($email: String!, $password: String!) {
+        login(email: $email, password: $password) {
+          id
+          email
+        }
+      }
+    `,
+    { email, password: password },
+  )
+  expect(result.errors).toBeUndefined()
+  return { userId: result.data.login.id as number }
 }
 
-test('claim and release', async () => {
-  const donald = await login(app, 'donald@example.com')
-  const daffy = await login(app, 'daffy@example.com')
-  const admin = await login(app, 'admin@example.com')
+const getUserToExhibitorMap = async (
+  graphqlRequest: ExecuteOperationFunction,
+) => {
+  const result = await graphqlRequest(gql`
+    query GetExhibitors {
+      getExhibitors {
+        id
+        user {
+          id
+        }
+      }
+    }
+  `)
+  return new Map<number, number>(
+    result.data.getExhibitors.map(({ id, user: { id: userId } }) => [
+      userId,
+      id,
+    ]),
+  )
+}
+
+graphqlTest('claim and release', async (graphqlRequest) => {
+  const userToExhibitorMap = await getUserToExhibitorMap(graphqlRequest)
+  const donald = await login(graphqlRequest, 'donald@example.com')
+  const daffy = await login(graphqlRequest, 'daffy@example.com')
+  const admin = await login(graphqlRequest, 'admin@example.com')
 
   // verify table can be claimed
-  let res = await graphqlRequest(
-    app,
+  let result = await graphqlRequest(
     gql`
       mutation ClaimTable($number: Int!) {
         claimTable(number: $number) {
@@ -64,12 +65,11 @@ test('claim and release', async () => {
       }
     `,
     { number: 1 },
-    donald.token,
+    donald,
   )
-  expect(res).toHaveStatus(200)
-
+  expect(result.errors).toBeUndefined()
   // verify that it can be claimed again
-  res = await graphqlRequest(
+  result = await graphqlRequest(
     gql`
       mutation ClaimTable($number: Int!) {
         claimTable(number: $number) {
@@ -84,12 +84,12 @@ test('claim and release', async () => {
       }
     `,
     { number: 1 },
-    donald.token,
+    donald,
   )
-  expect(res).toHaveStatus(200)
+  expect(result.errors).toBeUndefined()
 
   // verify that daffy cannot claim donald's table
-  res = await graphqlRequest(
+  result = await graphqlRequest(
     gql`
       mutation ClaimTable($number: Int!) {
         claimTable(number: $number) {
@@ -104,12 +104,14 @@ test('claim and release', async () => {
       }
     `,
     { number: 1 },
-    daffy.token,
+    daffy,
   )
-  expect(res).toHaveStatus(403)
+  expect(result.errors[0].message).toBe(
+    'The requested table is assigned to another exhibitor',
+  )
 
   // verify that daffy cannot release donald's table
-  res = await graphqlRequest(
+  result = await graphqlRequest(
     gql`
       mutation ReleaseTable($number: Int!) {
         releaseTable(number: $number) {
@@ -124,12 +126,14 @@ test('claim and release', async () => {
       }
     `,
     { number: 1 },
-    daffy.token,
+    daffy,
   )
-  expect(res).toHaveStatus(403)
+  expect(result.errors[0].message).toBe(
+    'Cannot release table claimed by another exhibitor',
+  )
 
   // verify that table can be released
-  res = await graphqlRequest(
+  result = await graphqlRequest(
     gql`
       mutation ReleaseTable($number: Int!) {
         releaseTable(number: $number) {
@@ -144,12 +148,12 @@ test('claim and release', async () => {
       }
     `,
     { number: 1 },
-    donald.token,
+    donald,
   )
-  expect(res).toHaveStatus(200)
+  expect(result.errors).toBeUndefined()
 
   // expect that daffy can claim the table now
-  res = await graphqlRequest(
+  result = await graphqlRequest(
     gql`
       mutation ClaimTable($number: Int!) {
         claimTable(number: $number) {
@@ -164,12 +168,12 @@ test('claim and release', async () => {
       }
     `,
     { number: 1 },
-    daffy.token,
+    daffy,
   )
-  expect(res).toHaveStatus(200)
+  expect(result.errors).toBeUndefined()
 
   // verify that admin can release daffy's table
-  res = await graphqlRequest(
+  result = await graphqlRequest(
     gql`
       mutation ReleaseTable($number: Int!) {
         releaseTable(number: $number) {
@@ -184,12 +188,12 @@ test('claim and release', async () => {
       }
     `,
     { number: 1 },
-    admin.token,
+    admin,
   )
-  expect(res).toHaveStatus(200)
+  expect(result.errors).toBeUndefined()
 
   // expect that donald can claim the table now
-  res = await graphqlRequest(
+  result = await graphqlRequest(
     gql`
       mutation ClaimTable($number: Int!) {
         claimTable(number: $number) {
@@ -204,12 +208,12 @@ test('claim and release', async () => {
       }
     `,
     { number: 1 },
-    donald.token,
+    donald,
   )
-  expect(res).toHaveStatus(200)
+  expect(result.errors).toBeUndefined()
 
   // Have administrator assign table 2 to donald
-  res = await graphqlRequest(
+  result = await graphqlRequest(
     gql`
       mutation AssignTable($number: Int!, $exhibitorId: Int!) {
         assignTable(number: $number, exhibitorId: $exhibitorId) {
@@ -223,13 +227,13 @@ test('claim and release', async () => {
         }
       }
     `,
-    { number: 2, exhibitorId: donald.id },
-    admin.token,
+    { number: 2, exhibitorId: userToExhibitorMap.get(donald.userId) },
+    admin,
   )
-  expect(res).toHaveStatus(200)
+  expect(result.errors).toBeUndefined()
 
   // expect that daffy cannot claim the table now
-  res = await graphqlRequest(
+  result = await graphqlRequest(
     gql`
       mutation ClaimTable($number: Int!) {
         claimTable(number: $number) {
@@ -244,12 +248,14 @@ test('claim and release', async () => {
       }
     `,
     { number: 2 },
-    daffy.token,
+    daffy,
   )
-  expect(res).toHaveStatus(403)
+  expect(result.errors[0].message).toBe(
+    'The requested table is assigned to another exhibitor',
+  )
 
   // expect that donald can claim the table now (already owns it)
-  res = await graphqlRequest(
+  result = await graphqlRequest(
     gql`
       mutation ClaimTable($number: Int!) {
         claimTable(number: $number) {
@@ -264,12 +270,12 @@ test('claim and release', async () => {
       }
     `,
     { number: 2 },
-    donald.token,
+    donald,
   )
-  expect(res).toHaveStatus(200)
+  expect(result.errors).toBeUndefined()
 
   // expect that the table is reported as free
-  res = await graphqlRequest(
+  result = await graphqlRequest(
     gql`
       query GetTable($number: Int!) {
         getTable(number: $number) {
@@ -284,13 +290,12 @@ test('claim and release', async () => {
       }
     `,
     { number: 7 },
-    '',
   )
-  expect(res).toHaveStatus(200)
-  expect(res.json().data.getTable).toMatchObject({ exhibitor: null })
+  expect(result.errors).toBeUndefined()
+  expect(result.data.getTable.exhibitor).toBeNull()
 
   // expect that donald can claim the table
-  res = await graphqlRequest(
+  result = await graphqlRequest(
     gql`
       mutation ClaimTable($number: Int!) {
         claimTable(number: $number) {
@@ -305,12 +310,12 @@ test('claim and release', async () => {
       }
     `,
     { number: 7 },
-    donald.token,
+    donald,
   )
-  expect(res).toHaveStatus(200)
+  expect(result.errors).toBeUndefined()
 
   // check that donald is now the owner of the table
-  res = await graphqlRequest(
+  result = await graphqlRequest(
     gql`
       query GetTable($number: Int!) {
         getTable(number: $number) {
@@ -325,13 +330,12 @@ test('claim and release', async () => {
       }
     `,
     { number: 7 },
-    '',
   )
-  expect(res).toHaveStatus(200)
-  expect(res.json().data.getTable.exhibitor.user.id).toBe(donald.id)
+  expect(result.errors).toBeUndefined()
+  expect(result.data.getTable.exhibitor.user.id).toBe(donald.userId)
 
   // check that a nonexistent table is correctly reported
-  res = await graphqlRequest(
+  result = await graphqlRequest(
     gql`
       query GetTable($number: Int!) {
         getTable(number: $number) {
@@ -346,12 +350,11 @@ test('claim and release', async () => {
       }
     `,
     { number: 2000 },
-    '',
   )
-  expect(res).toHaveStatus(404)
+  expect(result.errors[0].message).toMatch(/Table not found/)
 
   const getFreeTables = async () => {
-    const res = await graphqlRequest(
+    const result = await graphqlRequest(
       gql`
         query GetTables {
           getTables {
@@ -366,12 +369,10 @@ test('claim and release', async () => {
         }
       `,
       {},
-      '',
     )
-    expect(res).toHaveStatus(200)
-    return res
-      .json()
-      .data.getTables.filter(({ exhibitor }) => !exhibitor)
+    expect(result.errors).toBeUndefined()
+    return result.data.getTables
+      .filter(({ exhibitor }) => !exhibitor)
       .map(({ number }) => number)
       .sort()
   }
@@ -380,7 +381,7 @@ test('claim and release', async () => {
   const [firstFreeTable, ...remainingFreeTables] = await getFreeTables()
 
   // claim first free table
-  res = await graphqlRequest(
+  result = await graphqlRequest(
     gql`
       mutation ClaimTable($number: Int!) {
         claimTable(number: $number) {
@@ -395,9 +396,9 @@ test('claim and release', async () => {
       }
     `,
     { number: firstFreeTable },
-    daffy.token,
+    donald,
   )
-  expect(res).toHaveStatus(200)
+  expect(result.errors).toBeUndefined()
 
   expect(await getFreeTables()).toEqual(remainingFreeTables)
 })

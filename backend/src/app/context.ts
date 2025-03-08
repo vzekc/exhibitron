@@ -5,7 +5,8 @@ import { Services } from '../db.js'
 import { Exhibition } from '../modules/exhibition/exhibition.entity.js'
 import { Exhibitor } from '../modules/exhibitor/exhibitor.entity.js'
 import pino from 'pino'
-import { CreateRequestContext } from '@mikro-orm/core'
+import { User } from '../modules/user/user.entity.js'
+import { FastifySessionObject } from '@fastify/session'
 
 // @ts-expect-error ts2349
 const logger = pino()
@@ -44,6 +45,8 @@ const hostToExhibitionId = memoize(
 
 export type Context = {
   db: Services
+  user: User | null
+  session: FastifySessionObject
   exhibition: Exhibition
   exhibitor: Exhibitor | null
 }
@@ -70,15 +73,18 @@ export const createContext: ApolloFastifyContextFunction<Context> = async (
   const exhibition = await db.exhibition.findOneOrFail({
     id: hostToExhibitionId(await getHostMatchers(), request.hostname),
   })
+  const exhibitor =
+    request.user &&
+    (await db.exhibitor.findOne({
+      exhibition: exhibition,
+      user: request.user,
+    }))
   const context = {
     db,
+    session: request.session,
+    user: request.user,
     exhibition,
-    exhibitor:
-      request.user &&
-      (await db.exhibitor.findOne({
-        exhibition: request.exhibition,
-        user: request.user,
-      })),
+    exhibitor,
   }
   logger.debug('createContext', context)
   return context

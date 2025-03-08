@@ -4,7 +4,6 @@ import { initORM } from '../db.js'
 import config from '../mikro-orm.config.js'
 import { TestSeeder } from '../seeders/TestSeeder.js'
 import { execSync } from 'child_process'
-import { FastifyInstance } from 'fastify'
 
 const generateRandomString = (length: number): string => {
   const characters = 'abcdefghijklmnopqrstuvwxyz0123456789'
@@ -16,30 +15,31 @@ const generateRandomString = (length: number): string => {
   return result
 }
 
-export async function initTestApp() {
-  // this will create all the ORM services and cache them
+export const createTestDatabase = async () => {
   const dbName = `exhibitron-test-${generateRandomString(8)}`
   createDatabase(dbName)
 
-  const { orm } = await initORM({
-    // first, include the main config
+  const db = await initORM({
     ...config,
-    // no need for debug information, it would only pollute the logs
     debug: process.env.TEST_LOG_LEVEL === 'debug',
     dbName,
-    // this will ensure the ORM discovers TS entities, with ts-node, ts-jest and vitest
-    // it will be inferred automatically, but we are using vitest here
-    // preferTs: true,
   })
 
-  await orm.schema.refreshDatabase() // Drops & re-creates schema
-  await orm.seeder.seed(TestSeeder)
+  await db.orm.schema.refreshDatabase() // Drops & re-creates schema
+  await db.orm.seeder.seed(TestSeeder)
+
+  return db
+}
+
+export async function initTestApp() {
+  // this will create all the ORM services and cache them
+  const db = await createTestDatabase()
 
   const { app } = await bootstrap({
     logLevel: process.env.TEST_LOG_LEVEL || 'fatal',
   })
 
-  return { app, dbName }
+  return { app, db }
 }
 
 export const runCommand = (command: string): void => {
@@ -59,24 +59,6 @@ export const deleteDatabase = (dbName: string) => {
   } else {
     runCommand(`dropdb ${dbName}`)
   }
-}
-
-export const login = async (
-  app: FastifyInstance,
-  email: string,
-  password: string = 'geheim',
-) => {
-  const res = await app.inject({
-    method: 'post',
-    url: '/api/user/login',
-    payload: {
-      email,
-      password,
-    },
-  })
-
-  expect(res).toHaveStatus(200)
-  return res.json()
 }
 
 expect.extend({

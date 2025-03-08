@@ -33,23 +33,19 @@ export const register = async (app: FastifyInstance) => {
   })
 
   app.addHook('onRequest', (_request, _reply, done) => {
-    console.log('RequestContext.create middleware')
     RequestContext.create(db.em, done)
   })
 
   app.addHook('onRequest', async (request, reply) => {
-    console.log('request.apolloContext middleware')
     request.apolloContext = await createContext(request, reply)
   })
 
   app.addHook('onResponse', async (request) => {
-    console.log('destroyContext middleware')
     await destroyContext(request.apolloContext)
   })
 
   // shut down the connection when closing the app
   app.addHook('onClose', async () => {
-    console.log('onClose hook')
     await db.orm.close()
   })
 }

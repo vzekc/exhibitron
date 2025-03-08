@@ -24,19 +24,24 @@ export class UserRepository extends EntityRepository<User> {
     const err = new AuthError(
       'Invalid combination of email address and password',
     )
-    const user = await this.findOneOrFail(
+
+    const user = await this.findOne(
       { email },
       {
         populate: ['password'],
-        failHandler: () => err,
       },
     )
+
+    if (!user) {
+      logger.info(`User not found: ${email}`)
+      return null
+    }
 
     if (await user.verifyPassword(password)) {
       return user
     }
 
-    throw err
+    return null
   }
 
   async lookup(id: string) {

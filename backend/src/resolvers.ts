@@ -12,6 +12,7 @@ import {
 } from './generated/graphql.js'
 import { Context } from './app/context.js'
 import { wrap } from '@mikro-orm/core'
+import { GraphQLError } from 'graphql/error/index.js'
 
 const queryResolvers: QueryResolvers<Context> = {
   getUser: async (_, { id }, { db }) => db.user.findOneOrFail({ id }),
@@ -32,8 +33,16 @@ const queryResolvers: QueryResolvers<Context> = {
 }
 
 const mutationResolvers: MutationResolvers<Context> = {
-  login: async (_, { email, password }, { db }) =>
-    db.user.login(email, password),
+  login: async (_, { email, password }, { db, session }) => {
+    const user = await db.user.login(email, password)
+    if (!user) {
+      throw new GraphQLError('Invalid email address or password', {
+        extensions: { code: 'INVALID_INPUT' },
+      })
+    }
+    session.userId = user.id
+    return user
+  },
   requestPasswordReset: async (_, { email, resetUrl }, { db }) => {
     await db.user.requestPasswordReset(email, resetUrl)
     return true
@@ -42,14 +51,15 @@ const mutationResolvers: MutationResolvers<Context> = {
     await db.user.resetPassword(token, password)
     return true
   },
-  claimTable: async (_, { number }, { db, exhibitor }) => {
+  claimTable: async (_, { number }, { db, exhibitor, user }) => {
     if (!exhibitor) {
       throw new Error('You must be logged in to claim a table')
     }
     return await db.table.claim(number, exhibitor)
   },
-  releaseTable: async (_, { number }, { db, exhibitor }) =>
-    db.table.release(number, exhibitor),
+  releaseTable: async (_, { number }, { db, exhibitor, user }) => {
+    await db.table.release(number, user?.isAdministrator ? null : exhibitor)
+  },
   assignTable: async (_, { number, exhibitorId }, { db, exhibition }) => {
     const exhibitor = await db.exhibitor.findOneOrFail({ id: exhibitorId })
     const table = await db.table.findOneOrFail({ exhibition, number })

@@ -18,6 +18,7 @@ import { ExhibitionRepository } from './modules/exhibition/exhibition.repository
 import { Exhibition } from './modules/exhibition/exhibition.entity.js'
 
 export interface Services {
+  dbName?: string
   orm: MikroORM
   em: EntityManager
   user: UserRepository
@@ -35,6 +36,9 @@ export async function initORM(options?: Options): Promise<Services> {
     return cache
   }
 
+  if (!options?.dbName && !process.env.DATABASE_URL) {
+    throw new Error('Missing dbName and no DATABASE_URL in environment')
+  }
   const orm = await MikroORM.init({
     ...config,
     ...options,
@@ -42,6 +46,7 @@ export async function initORM(options?: Options): Promise<Services> {
 
   // save to cache before returning
   return (cache = {
+    dbName: options?.dbName || undefined,
     orm,
     em: orm.em,
     user: orm.em.getRepository(User),
