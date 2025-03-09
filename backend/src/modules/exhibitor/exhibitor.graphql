@@ -1,7 +1,7 @@
 type Exhibitor {
-  exhibits: [Exhibit]
+  exhibits: [Exhibit!]
   id: Int!
-  tables: [Table]
+  tables: [Table!]
   user: User!
 }
 

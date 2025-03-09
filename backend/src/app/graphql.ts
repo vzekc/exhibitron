@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify'
 import { ApolloServer } from '@apollo/server'
 import resolvers from '../resolvers.js'
-import { readdirSync, readFileSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import fastifyApollo from '@as-integrations/fastify'
 import * as path from 'node:path'
 import { createContext, destroyContext } from './context.js'
@@ -40,8 +40,8 @@ export const register = async (app: FastifyInstance) => {
     RequestContext.create(db.em, done)
   })
 
-  app.addHook('onRequest', async (request, reply) => {
-    request.apolloContext = await createContext(request, reply)
+  app.addHook('onRequest', async (request) => {
+    request.apolloContext = await createContext(request)
   })
 
   app.addHook('onResponse', async (request) => {

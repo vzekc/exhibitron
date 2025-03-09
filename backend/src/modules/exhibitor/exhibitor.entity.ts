@@ -1,4 +1,4 @@
-import { Collection, Entity, ManyToOne, OneToMany, wrap } from '@mikro-orm/core'
+import { Collection, Entity, ManyToOne, OneToMany } from '@mikro-orm/core'
 import { User } from '../user/user.entity.js'
 import { Exhibition } from '../exhibition/exhibition.entity.js'
 import { BaseEntity } from '../common/base.entity.js'

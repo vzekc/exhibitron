@@ -1,10 +1,6 @@
 import { expect, MockedFunction, vi, beforeAll } from 'vitest'
 import { graphql } from 'gql.tada'
-import {
-  ExecuteOperationFunction,
-  graphqlTest,
-  login,
-} from '../../test/apollo.js'
+import { graphqlTest, login } from '../../test/apollo.js'
 import { sendEmail } from '../common/sendEmail.js'
 
 vi.mock('../common/sendEmail')
@@ -94,6 +90,27 @@ graphqlTest('lookups', async (graphqlRequest) => {
       `),
       { id: 1002 },
     )
+    expect(result.errors![0].message).toBe(
+      'You must be an administrator to perform this operation',
+    )
+  }
+
+  const admin = await login(graphqlRequest, 'admin@example.com')
+
+  {
+    const result = await graphqlRequest(
+      graphql(`
+        query GetUserById($id: Int!) {
+          getUser(id: $id) {
+            id
+            email
+            fullName
+          }
+        }
+      `),
+      { id: 1002 },
+      admin,
+    )
     expect(result.errors).toBeUndefined()
     expect(result.data?.getUser).toMatchObject({
       email: 'daffy@example.com',
@@ -175,6 +192,7 @@ graphqlTest('user list', async (graphqlRequest) => {
         }
       `),
       {},
+      admin,
     )
     expect(result.errors).toBeUndefined()
     expect(result.data?.getUsers).toBeInstanceOf(Array)

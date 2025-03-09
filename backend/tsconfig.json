@@ -12,7 +12,7 @@
     "plugins": [
       {
         "name": "gql.tada/ts-plugin",
-        "schema": "./src/**/*.graphql",
+        "schema": "./src/generated/merged-schema.txt",
         "tadaOutputLocation": "./src/generated/graphql-env.d.ts"
       }
     ]
@@ -21,7 +21,6 @@
     "./src/**/*.ts",
     "../node_modules/.pnpm/vitest@2.1.9_@types+node@22.13.9/node_modules/vitest/globals.d.ts"
   ],
-  "exclude": ["./src/sdk"],
   "ts-node": {
     "esm": true,
     "transpileOnly": true

@@ -12,7 +12,7 @@ import { User } from '../user/user.entity.js'
 import { Exhibit } from '../exhibit/exhibit.entity.js'
 import { Exhibitor } from '../exhibitor/exhibitor.entity.js'
 
-export type RegistrationData = Omit<Registration, keyof BaseEntity>
+export type RegistrationData = Omit<Registration, keyof BaseEntity | 'notes'>
 
 // extending the EntityRepository exported from driver package, so we can access things like the QB factory
 export class RegistrationRepository extends EntityRepository<Registration> {

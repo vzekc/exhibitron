@@ -12,7 +12,7 @@ type Registration {
   data: JSON
 }
 
-input CreateRegistrationInput {
+input RegisterInput {
   email: String!
   message: String
   name: String!
@@ -21,17 +21,13 @@ input CreateRegistrationInput {
   data: JSON!
 }
 
-input UpdateRegistrationInput {
-  status: RegistrationStatus
-  notes: String
-}
-
 extend type Mutation {
+  register(input: RegisterInput!): Registration
+  setRegistrationInProgress(id: Int!): Boolean
+  updateRegistrationNotes(id: Int!, notes: String!): Registration
   approveRegistration(id: Int!, siteUrl: String!): Boolean
-  createRegistration(input: CreateRegistrationInput!): Registration
-  deleteRegistration(id: Int!): Boolean
   rejectRegistration(id: Int!): Boolean
-  updateRegistration(input: UpdateRegistrationInput!): Registration
+  deleteRegistration(id: Int!): Boolean
 }
 
 extend type Query {

@@ -57,3 +57,9 @@ export async function initORM(options?: Options): Promise<Services> {
     registration: orm.em.getRepository(Registration),
   })
 }
+
+export const requireAdmin = (user: User | null) => {
+  if (!user?.isAdministrator) {
+    throw new Error('You must be an administrator to perform this operation')
+  }
+}

@@ -1,5 +1,6 @@
 type Table {
   exhibitor: Exhibitor
+  exhibits: [Exhibit!]
   id: Int!
   number: Int!
 }

@@ -68,5 +68,6 @@ export async function sendEmail({
     attachments,
   }
 
-  await transporter.sendMail(mailOptions)
+  // need to guard against null transporter for testing
+  await transporter?.sendMail(mailOptions)
 }

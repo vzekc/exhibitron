@@ -1,63 +1,57 @@
 import { describe, expect } from 'vitest'
 import { graphql } from 'gql.tada'
-import { ExecuteOperationFunction, graphqlTest } from '../../test/apollo.js'
-import { CreateRegistrationInput } from '../../generated/graphql.js'
+import {
+  ExecuteOperationFunction,
+  graphqlTest,
+  login,
+} from '../../test/apollo.js'
+import { RegisterInput } from '../../generated/graphql.js'
 
 describe('registration', () => {
+  const registrationDefaults = {
+    name: 'John Doe',
+    email: 'john@doe.com',
+    nickname: 'johnny',
+    topic: 'ZX Spectrum',
+    message: 'Hello!',
+    data: { key: 'value' },
+  }
+  let emailCount = 0
   const createRegistration = async (
     graphqlRequest: ExecuteOperationFunction,
-    input: CreateRegistrationInput,
+    input: Partial<RegisterInput> = {},
   ) => {
+    const email = registrationDefaults.email.replace('@', `+${emailCount++}@`)
     const result = await graphqlRequest(
       graphql(`
-        mutation CreateRegistration($input: CreateRegistrationInput!) {
-          createRegistration(input: $input) {
+        mutation Register($input: RegisterInput!) {
+          register(input: $input) {
             id
-            name
-            email
-            nickname
-            topic
-            message
-            data
           }
         }
       `),
-      { input },
+      { input: { ...registrationDefaults, email, ...input } },
     )
     expect(result.errors).toBeUndefined()
-    return result.data!.createRegistration?.id
+    return result.data!.register!.id
   }
 
   graphqlTest('create', async (graphqlRequest) => {
-    const payload = {
-      name: 'John Doe',
-      email: 'john@doe.com',
-      nickname: 'johnny',
-      topic: 'ZX Spectrum',
-      message: 'Hello!',
-      data: { key: 'value' },
-    }
-    const result = await createRegistration(graphqlRequest, payload)
+    const result = await createRegistration(graphqlRequest)
     expect(result).toBeDefined()
   })
 
   graphqlTest('create duplicate', async (graphqlRequest) => {
-    const payload = {
-      name: 'John Doe',
-      email: 'john@doe.com',
-      nickname: 'johnny',
-      topic: 'ZX Spectrum',
-      message: 'Hello!',
-      data: { key: 'value' },
-    }
-    await createRegistration(graphqlRequest, payload)
+    await createRegistration(graphqlRequest, { email: 'blub@bla.com' })
     const result = await graphqlRequest(
       graphql(`
-        mutation CreateRegistration($input: CreateRegistrationInput!) {
-          createRegistration(input: $input)
+        mutation CreateRegistration($input: RegisterInput!) {
+          register(input: $input) {
+            id
+          }
         }
       `),
-      { input: payload },
+      { input: { ...registrationDefaults, email: 'blub@bla.com' } },
     )
     expect(result.errors![0].message).toBe(
       'The email address is already registered',
@@ -65,15 +59,12 @@ describe('registration', () => {
   })
 
   graphqlTest('retrieve all', async (graphqlRequest) => {
-    const admin = await login(app, 'admin@example.com')
+    const admin = await login(graphqlRequest, 'admin@example.com')
     const result = await graphqlRequest(
       graphql(`
         query GetRegistrations {
           getRegistrations {
-            items {
-              id
-            }
-            total
+            id
           }
         }
       `),
@@ -81,20 +72,17 @@ describe('registration', () => {
       admin,
     )
     expect(result.errors).toBeUndefined()
-    expect(result.data!.getRegistrations.items).toBeInstanceOf(Array)
-    expect(result.data!.getRegistrations.total).toBeGreaterThan(0)
+    expect(result.data!.getRegistrations).not.toBeNull()
+    expect(result.data!.getRegistrations!.length).toBeGreaterThan(0)
   })
 
   graphqlTest('retrieve all without admin rights', async (graphqlRequest) => {
-    const user = await login(app, 'donald@example.com')
+    const user = await login(graphqlRequest, 'donald@example.com')
     const result = await graphqlRequest(
       graphql(`
         query GetRegistrations {
           getRegistrations {
-            items {
-              id
-            }
-            total
+            id
           }
         }
       `),
@@ -102,118 +90,66 @@ describe('registration', () => {
       user,
     )
     expect(result.errors![0].message).toBe(
-      'Must be logged as administrator to retrieve registrations',
+      'You must be an administrator to perform this operation',
     )
   })
 
   graphqlTest('update', async (graphqlRequest) => {
-    const admin = await login(app, 'admin@example.com')
-    const payload = {
-      name: 'John Doe',
-      email: 'john@doe.com',
-      nickname: 'johnny',
-      topic: 'ZX Spectrum',
-      message: 'Hello!',
-      data: { key: 'value' },
-    }
-    const registrationId = await createRegistration(graphqlRequest, payload)
+    const admin = await login(graphqlRequest, 'admin@example.com')
+    const registrationId = await createRegistration(graphqlRequest)
 
     const result = await graphqlRequest(
       graphql(`
-        mutation UpdateRegistration(
-          $id: ID!
-          $input: UpdateRegistrationInput!
-        ) {
-          updateRegistration(id: $id, input: $input) {
-            name
-            message
+        mutation UpdateRegistrationNotes($id: Int!, $notes: String!) {
+          updateRegistrationNotes(id: $id, notes: $notes) {
+            notes
           }
         }
       `),
       {
         id: registrationId,
-        input: { name: 'Jane Doe', message: 'Updated message' },
+        notes: 'Updated notes',
       },
       admin,
     )
     expect(result.errors).toBeUndefined()
-    expect(result.data!.updateRegistration.name).toBe('Jane Doe')
-    expect(result.data!.updateRegistration.message).toBe('Updated message')
-  })
-
-  graphqlTest('deny update of status field', async (graphqlRequest) => {
-    const admin = await login(app, 'admin@example.com')
-    const payload = {
-      name: 'John Doe',
-      email: 'john@doe.com',
-      nickname: 'johnny',
-      topic: 'ZX Spectrum',
-      message: 'Hello!',
-      data: { key: 'value' },
-    }
-    const registrationId = await createRegistration(graphqlRequest, payload)
-
-    const result = await graphqlRequest(
-      graphql(`
-        mutation UpdateRegistration(
-          $id: ID!
-          $input: UpdateRegistrationInput!
-        ) {
-          updateRegistration(id: $id, input: $input)
-        }
-      `),
-      { id: registrationId, input: { status: 'approved' } },
-      admin,
-    )
-    expect(result.errors![0].message).toBe(
-      'Field "status" is not defined by type "UpdateRegistrationInput"',
-    )
+    expect(result.data!.updateRegistrationNotes!.notes).toBe('Updated notes')
   })
 
   graphqlTest('update without admin rights', async (graphqlRequest) => {
-    const user = await login(app, 'donald@example.com')
-    const payload = {
-      name: 'John Doe',
-      email: 'john@doe.com',
-      nickname: 'johnny',
-      topic: 'ZX Spectrum',
-      message: 'Hello!',
-      data: { key: 'value' },
-    }
-    const registrationId = await createRegistration(graphqlRequest, payload)
+    const user = await login(graphqlRequest, 'donald@example.com')
+    const registrationId = await createRegistration(graphqlRequest)
 
     const result = await graphqlRequest(
       graphql(`
-        mutation UpdateRegistration(
-          $id: ID!
-          $input: UpdateRegistrationInput!
-        ) {
-          updateRegistration(id: $id, input: $input)
+        mutation UpdateRegistrationNotes($id: Int!, $notes: String!) {
+          updateRegistrationNotes(id: $id, notes: $notes) {
+            notes
+          }
         }
       `),
       {
         id: registrationId,
-        input: { name: 'Jane Doe', message: 'Updated message' },
+        notes: 'Updated notes',
       },
       user,
     )
     expect(result.errors![0].message).toBe(
-      'Must be logged as administrator to update registrations',
+      'You must be an administrator to perform this operation',
     )
   })
 
   graphqlTest('update nonexistent', async (graphqlRequest) => {
-    const admin = await login(app, 'admin@example.com')
+    const admin = await login(graphqlRequest, 'admin@example.com')
     const result = await graphqlRequest(
       graphql(`
-        mutation UpdateRegistration(
-          $id: ID!
-          $input: UpdateRegistrationInput!
-        ) {
-          updateRegistration(id: $id, input: $input)
+        mutation UpdateRegistrationNotes($id: Int!, $notes: String!) {
+          updateRegistrationNotes(id: $id, notes: $notes) {
+            notes
+          }
         }
       `),
-      { id: '9999', input: { name: 'Jane Doe', message: 'Updated message' } },
+      { id: 9999, notes: 'Updated notes' },
       admin,
     )
     expect(result.errors![0].message).toBe(
@@ -224,123 +160,122 @@ describe('registration', () => {
   graphqlTest(
     'approve, reject and delete registration',
     async (graphqlRequest) => {
-      const admin = await login(app, 'admin@example.com')
-      const payload = {
-        name: 'Hinz Kunz',
-        email: 'hinz@kunz.com',
-        nickname: 'hinz',
-        topic: 'ZX Spectrum',
-        message: 'Hello!',
-        data: { key: 'value' },
+      const admin = await login(graphqlRequest, 'admin@example.com')
+      const registrationId = await createRegistration(graphqlRequest)
+
+      {
+        const result = await graphqlRequest(
+          graphql(`
+            mutation SetRegistrationInProgress($id: Int!) {
+              setRegistrationInProgress(id: $id)
+            }
+          `),
+          { id: registrationId },
+          admin,
+        )
+        expect(result.errors).toBeUndefined()
       }
-      const registrationId = await createRegistration(graphqlRequest, payload)
 
-      let result = await graphqlRequest(
-        graphql(`
-          mutation SetRegistrationStatus(
-            $id: ID!
-            $status: RegistrationStatus!
-          ) {
-            setRegistrationStatus(id: $id, status: $status)
-          }
-        `),
-        { id: registrationId, status: 'inProgress' },
-        admin,
-      )
-      expect(result.errors).toBeUndefined()
-
-      result = await graphqlRequest(
-        graphql(`
-          query GetRegistration($id: ID!) {
-            getRegistration(id: $id) {
-              status
+      {
+        const result = await graphqlRequest(
+          graphql(`
+            query GetRegistration($id: Int!) {
+              getRegistration(id: $id) {
+                status
+              }
             }
-          }
-        `),
-        { id: registrationId },
-        admin,
-      )
-      expect(result.errors).toBeUndefined()
-      expect(result.data!.getRegistration.status).toBe('inProgress')
+          `),
+          { id: registrationId },
+          admin,
+        )
+        expect(result.errors).toBeUndefined()
+        expect(result.data!.getRegistration!.status).toBe('inProgress')
+      }
 
-      result = await graphqlRequest(
-        graphql(`
-          mutation SetRegistrationStatus(
-            $id: ID!
-            $status: RegistrationStatus!
-          ) {
-            setRegistrationStatus(id: $id, status: $status)
-          }
-        `),
-        { id: registrationId, status: 'approved' },
-        admin,
-      )
-      expect(result.errors).toBeUndefined()
-
-      result = await graphqlRequest(
-        graphql(`
-          query GetRegistration($id: ID!) {
-            getRegistration(id: $id) {
-              status
+      {
+        const result = await graphqlRequest(
+          graphql(`
+            mutation ApproveRegistration($id: Int!, $siteUrl: String!) {
+              approveRegistration(id: $id, siteUrl: $siteUrl)
             }
-          }
-        `),
-        { id: registrationId },
-        admin,
-      )
-      expect(result.errors).toBeUndefined()
-      expect(result.data!.getRegistration.status).toBe('approved')
+          `),
+          { id: registrationId, siteUrl: 'https://example.com/' },
+          admin,
+        )
+        expect(result.errors).toBeUndefined()
+      }
 
-      result = await graphqlRequest(
-        graphql(`
-          mutation DeleteRegistration($id: ID!) {
-            deleteRegistration(id: $id)
-          }
-        `),
-        { id: registrationId },
-        admin,
-      )
-      expect(result.errors![0].message).toBe(
-        'Cannot delete approved registration',
-      )
-
-      result = await graphqlRequest(
-        graphql(`
-          mutation SetRegistrationStatus(
-            $id: ID!
-            $status: RegistrationStatus!
-          ) {
-            setRegistrationStatus(id: $id, status: $status)
-          }
-        `),
-        { id: registrationId, status: 'rejected' },
-        admin,
-      )
-      expect(result.errors).toBeUndefined()
-
-      result = await graphqlRequest(
-        graphql(`
-          mutation DeleteRegistration($id: ID!) {
-            deleteRegistration(id: $id)
-          }
-        `),
-        { id: registrationId },
-        admin,
-      )
-      expect(result.errors).toBeUndefined()
-
-      result = await graphqlRequest(
-        graphql(`
-          query GetRegistration($id: ID!) {
-            getRegistration(id: $id) {
-              id
+      {
+        const result = await graphqlRequest(
+          graphql(`
+            query GetRegistration($id: Int!) {
+              getRegistration(id: $id) {
+                status
+              }
             }
-          }
-        `),
-        { id: registrationId },
-        admin,
-      )
-      expect(result.errors![0].message).toBe('Registration not found')
+          `),
+          { id: registrationId },
+          admin,
+        )
+        expect(result.errors).toBeUndefined()
+        expect(result.data!.getRegistration!.status).toBe('approved')
+      }
+
+      {
+        const result = await graphqlRequest(
+          graphql(`
+            mutation DeleteRegistration($id: Int!) {
+              deleteRegistration(id: $id)
+            }
+          `),
+          { id: registrationId },
+          admin,
+        )
+        expect(result.errors![0].message).toBe(
+          'Cannot delete approved registration',
+        )
+      }
+
+      {
+        const result = await graphqlRequest(
+          graphql(`
+            mutation RejectRegistration($id: Int!) {
+              rejectRegistration(id: $id)
+            }
+          `),
+          { id: registrationId },
+          admin,
+        )
+        expect(result.errors).toBeUndefined()
+      }
+
+      {
+        const result = await graphqlRequest(
+          graphql(`
+            mutation DeleteRegistration($id: Int!) {
+              deleteRegistration(id: $id)
+            }
+          `),
+          { id: registrationId },
+          admin,
+        )
+        expect(result.errors).toBeUndefined()
+      }
+
+      {
+        const result = await graphqlRequest(
+          graphql(`
+            query GetRegistration($id: Int!) {
+              getRegistration(id: $id) {
+                id
+              }
+            }
+          `),
+          { id: registrationId },
+          admin,
+        )
+        expect(result.errors![0].message).toMatch(/^Registration not found/)
+      }
     },
   )
 })

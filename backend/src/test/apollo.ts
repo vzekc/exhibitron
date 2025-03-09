@@ -7,7 +7,6 @@ import { Services } from '../db.js'
 import { Context } from '../app/context.js'
 import { createContext } from '../app/context.js'
 import { FastifyRequest } from 'fastify'
-import { FastifyReply } from 'fastify/types/reply.js'
 import { RequestContext } from '@mikro-orm/core'
 import { createTestDatabase, deleteDatabase } from './utils.js'
 import { graphql, TadaDocumentNode } from 'gql.tada'
@@ -58,10 +57,10 @@ export const graphqlTest = (
             variables: variables || {},
           },
           {
-            contextValue: await createContext(
-              { session, hostname: 'localhost' } as FastifyRequest,
-              {} as FastifyReply,
-            ),
+            contextValue: await createContext({
+              session,
+              hostname: 'localhost',
+            } as FastifyRequest),
           },
         )
         expect(result.body.kind).toBe('single')

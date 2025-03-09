@@ -2,7 +2,7 @@
 import { EntityRepository } from '@mikro-orm/postgresql'
 import { NotFoundError } from '@mikro-orm/core'
 import { User } from './user.entity.js'
-import { AuthError, PermissionDeniedError } from '../common/errors.js'
+import { PermissionDeniedError } from '../common/errors.js'
 import { match, P } from 'ts-pattern'
 
 import pino from 'pino'
@@ -21,10 +21,6 @@ export class UserRepository extends EntityRepository<User> {
 
   async login(email: string, password: string) {
     logger.info(`Attempting login for user: ${email}`)
-    const err = new AuthError(
-      'Invalid combination of email address and password',
-    )
-
     const user = await this.findOne(
       { email },
       {
