@@ -5,7 +5,7 @@ type Exhibition {
   title: String!
 }
 
-type Query {
+extend type Query {
   getExhibition(id: Int!): Exhibition
   getExhibitions: [Exhibition!]
 }

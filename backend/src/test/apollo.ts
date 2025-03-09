@@ -10,7 +10,7 @@ import { FastifyRequest } from 'fastify'
 import { FastifyReply } from 'fastify/types/reply.js'
 import { RequestContext } from '@mikro-orm/core'
 import { createTestDatabase, deleteDatabase } from './utils.js'
-import { TadaDocumentNode } from 'gql.tada'
+import { graphql, TadaDocumentNode } from 'gql.tada'
 
 let db: Services
 let server: ApolloServer<Context>
@@ -90,8 +90,8 @@ export const login = async (
         }
       }
     `),
-    { email, password: password },
+    { email, password },
   )
   expect(result.errors).toBeUndefined()
-  return { userId: result.data?.login?.id as number }
+  return { userId: result.data!.login!.id }
 }

@@ -1,6 +1,10 @@
 import { expect, MockedFunction, vi, beforeAll } from 'vitest'
 import { graphql } from 'gql.tada'
-import { ExecuteOperationFunction, graphqlTest } from '../../test/apollo.js'
+import {
+  ExecuteOperationFunction,
+  graphqlTest,
+  login,
+} from '../../test/apollo.js'
 import { sendEmail } from '../common/sendEmail.js'
 
 vi.mock('../common/sendEmail')
@@ -9,26 +13,6 @@ let mockedSendEmail: MockedFunction<typeof sendEmail>
 beforeAll(async () => {
   mockedSendEmail = sendEmail as MockedFunction<typeof sendEmail>
 })
-
-const login = async (
-  graphqlRequest: ExecuteOperationFunction,
-  email: string,
-  password: string = 'geheim',
-) => {
-  const result = await graphqlRequest(
-    graphql(`
-      mutation Login($email: String!, $password: String!) {
-        login(email: $email, password: $password) {
-          id
-          email
-        }
-      }
-    `),
-    { email, password },
-  )
-  expect(result.errors).toBeUndefined()
-  return { userId: result.data!.login!.id }
-}
 
 graphqlTest('login', async (graphqlRequest) => {
   {

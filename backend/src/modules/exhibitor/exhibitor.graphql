@@ -5,7 +5,7 @@ type Exhibitor {
   user: User!
 }
 
-type Query {
+extend type Query {
   getExhibitor(id: Int!): Exhibitor
   getExhibitors: [Exhibitor!]
 }

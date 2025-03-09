@@ -6,12 +6,12 @@ type Exhibit {
   title: String!
 }
 
-type Mutation {
+extend type Mutation {
   createExhibit(table: Int, text: String, title: String!): Exhibit
   updateExhibit(id: Int!, table: Int, text: String, title: String): Exhibit
 }
 
-type Query {
+extend type Query {
   getExhibit(id: Int!): Exhibit
   getExhibits: [Exhibit!]
 }

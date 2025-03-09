@@ -1,5 +1,6 @@
-schema: schema.graphql
-documents: '**/*.graphql'
+schema:
+  - schema.graphql
+  - '**/*.graphql'
 extensions:
   endpoints:
     default:

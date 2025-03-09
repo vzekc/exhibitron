@@ -1,5 +1,6 @@
+scalar JSON
+
 type Registration {
-  data: JSON
   email: String!
   id: Int!
   message: String
@@ -8,28 +9,32 @@ type Registration {
   notes: String
   status: RegistrationStatus!
   topic: String!
+  data: JSON
 }
 
-type Mutation {
+input CreateRegistrationInput {
+  email: String!
+  message: String
+  name: String!
+  nickname: String!
+  topic: String!
+  data: JSON!
+}
+
+input UpdateRegistrationInput {
+  status: RegistrationStatus
+  notes: String
+}
+
+extend type Mutation {
   approveRegistration(id: Int!, siteUrl: String!): Boolean
-  createRegistration(
-    data: JSON
-    email: String!
-    message: String
-    name: String!
-    nickname: String!
-    topic: String!
-  ): Registration
+  createRegistration(input: CreateRegistrationInput!): Registration
   deleteRegistration(id: Int!): Boolean
   rejectRegistration(id: Int!): Boolean
-  updateRegistration(
-    id: Int!
-    notes: String
-    status: RegistrationStatus
-  ): Registration
+  updateRegistration(input: UpdateRegistrationInput!): Registration
 }
 
-type Query {
+extend type Query {
   getRegistration(id: Int!): Registration
   getRegistrations: [Registration!]
 }

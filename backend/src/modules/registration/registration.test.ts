@@ -1,24 +1,31 @@
 import { describe, expect } from 'vitest'
 import { graphql } from 'gql.tada'
 import { ExecuteOperationFunction, graphqlTest } from '../../test/apollo.js'
+import { CreateRegistrationInput } from '../../generated/graphql.js'
 
 describe('registration', () => {
   const createRegistration = async (
     graphqlRequest: ExecuteOperationFunction,
-    payload: Record<string, unknown>,
+    input: CreateRegistrationInput,
   ) => {
     const result = await graphqlRequest(
       graphql(`
         mutation CreateRegistration($input: CreateRegistrationInput!) {
           createRegistration(input: $input) {
             id
+            name
+            email
+            nickname
+            topic
+            message
+            data
           }
         }
       `),
-      { input: payload },
+      { input },
     )
     expect(result.errors).toBeUndefined()
-    return result.data!.createRegistration.id
+    return result.data!.createRegistration?.id
   }
 
   graphqlTest('create', async (graphqlRequest) => {

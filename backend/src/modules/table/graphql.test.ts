@@ -8,6 +8,7 @@ graphqlTest('test graphql', async (executeOperation) => {
       query GetTable($number: Int!) {
         getTable(number: $number) {
           id
+          number
           exhibitor {
             user {
               id
