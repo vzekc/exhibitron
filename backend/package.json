@@ -19,7 +19,7 @@
   "dependencies": {
     "@apollo/server": "^4.11.3",
     "@as-integrations/fastify": "^2.1.1",
-    "@fastify/cookie": "^11.0.2",
+    "@fastify/cookie": "^7.4.0",
     "@fastify/jwt": "^9.0.4",
     "@fastify/oauth2": "^7.9.0",
     "@fastify/session": "^10.9.0",

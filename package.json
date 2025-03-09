@@ -20,7 +20,7 @@
   },
   "pnpm": {
     "overrides": {
-      "@fastify/cookie": "11.0.2"
+      "@fastify/cookie": "7.4.0"
     }
   }
 }

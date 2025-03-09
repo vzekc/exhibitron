@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@fastify/cookie': 11.0.2
+  '@fastify/cookie': 7.4.0
 
 importers:
 
@@ -27,8 +27,8 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1(@apollo/server@4.11.3)(fastify@4.29.0)
       '@fastify/cookie':
-        specifier: 11.0.2
-        version: 11.0.2
+        specifier: 7.4.0
+        version: 7.4.0
       '@fastify/jwt':
         specifier: ^9.0.4
         version: 9.0.4
@@ -1894,11 +1894,11 @@ packages:
       fast-uri: 2.4.0
     dev: false
 
-  /@fastify/cookie@11.0.2:
-    resolution: {integrity: sha512-GWdwdGlgJxyvNv+QcKiGNevSspMQXncjMZ1J8IvuDQk0jvkzgWWZFNC2En3s+nHndZBGV8IbLwOI/sxCZw/mzA==}
+  /@fastify/cookie@7.4.0:
+    resolution: {integrity: sha512-82MUHsZJY/Wl+rG2E+bnYxSifOtNRChm2M+8xnZHnKtYmyNfLvy/37ElCtqD3KzUyTycR+GE7v7uiDD/tY4TkA==}
     dependencies:
-      cookie: 1.0.2
-      fastify-plugin: 5.0.1
+      cookie: 0.5.0
+      fastify-plugin: 4.5.1
     dev: false
 
   /@fastify/error@3.4.1:
@@ -1934,7 +1934,7 @@ packages:
   /@fastify/oauth2@7.9.0:
     resolution: {integrity: sha512-OsMr+M2FI7ib/UKZ8hC4SRnUBQqgJ0EsvAhn1qrdYJ9K/U5OwaM2sQM8fLEYbKYQRlH0oxC7lvdTm8Ncd5+ukA==}
     dependencies:
-      '@fastify/cookie': 11.0.2
+      '@fastify/cookie': 7.4.0
       fastify-plugin: 4.5.1
       simple-oauth2: 5.1.0
     transitivePeerDependencies:
@@ -5662,6 +5662,11 @@ packages:
 
   /cookie-signature@1.0.6:
     resolution: {integrity: sha512-QADzlaHc8icV8I7vbaJXJwod9HWYp8uCqf1xa4OfNu1T7JVxQIrUgOWtHdNDtPiywmFbiS12VjotIXLrKM3orQ==}
+    dev: false
+
+  /cookie@0.5.0:
+    resolution: {integrity: sha512-YZ3GUyn/o8gfKJlnlX7g7xq4gyO6OSuhGPKaaGssGB2qgDUS0gPgtTvoyZLTt9Ab6dC4hfc9dV5arkvc/OCmrw==}
+    engines: {node: '>= 0.6'}
     dev: false
 
   /cookie@0.7.1:
