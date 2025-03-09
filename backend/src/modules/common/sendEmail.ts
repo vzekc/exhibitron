@@ -1,5 +1,9 @@
 import 'dotenv/config'
 import nodemailer from 'nodemailer'
+import pino from 'pino'
+
+// @ts-expect-error ts2349
+const logger = pino({ level: process.env.TEST_LOG_LEVEL || 'fatal' })
 
 interface EmailOptions {
   from?: string
@@ -26,11 +30,11 @@ export async function sendEmail({
     DEBUG_EMAIL,
   } = process.env
   if (!SMTP_HOST) {
-    console.error('SMTP_HOST is not set, email will not be sent')
+    logger.warn('SMTP_HOST is not set, email will not be sent')
     return
   }
   if (!from && !ADMIN_EMAIL) {
-    console.error(
+    logger.error(
       'ADMIN_EMAIL is not set, from address is required to send email',
     )
     return

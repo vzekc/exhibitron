@@ -10,7 +10,7 @@ import { sendEmail } from '../common/sendEmail.js'
 import { makePasswordResetEmail } from '../registration/emails.js'
 
 // @ts-expect-error ts2349
-const logger = pino()
+const logger = pino({ level: process.env.TEST_LOG_LEVEL || 'fatal' })
 
 export class UserRepository extends EntityRepository<User> {
   async exists(email: string) {
@@ -20,7 +20,7 @@ export class UserRepository extends EntityRepository<User> {
   }
 
   async login(email: string, password: string) {
-    logger.info(`Attempting login for user: ${email}`)
+    logger.debug(`Attempting login for user: ${email}`)
     const user = await this.findOne(
       { email },
       {
@@ -41,7 +41,7 @@ export class UserRepository extends EntityRepository<User> {
   }
 
   async lookup(id: string) {
-    logger.info(`Looking up user by id: ${id}`)
+    logger.debug(`Looking up user by id: ${id}`)
     return await this.findOne(
       match(id)
         .with(P.string.regex(/^\d+$/), () => ({ id: +id }))
