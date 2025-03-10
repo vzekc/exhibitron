@@ -9,7 +9,13 @@ const Exhibits = () => {
     return (
       <article>
         <h2>Liste der Ausstellungen</h2>
-        <ExhibitList exhibits={exhibitionData.exhibits} />
+        <ExhibitList exhibits={
+          exhibitionData.exhibits.map(data => ({
+            ...data,
+            exhibitorName: 'foo',
+            table: data.table?.number})
+          )}
+        />
       </article>
     )
   }

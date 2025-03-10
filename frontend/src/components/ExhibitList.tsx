@@ -1,12 +1,10 @@
 import { useNavigate } from 'react-router-dom'
-import { ExhibitListItem } from '../types'
 
-type ExhibitDisplayListItem = Omit<
-  ExhibitListItem,
-  'exhibitorName' | 'exhibitorId'
-> & {
-  exhibitorName?: string
-  exhibitorId?: number
+type ExhibitDisplayListItem = {
+  id: number
+  title: string
+  exhibitorName: string
+  table?: number
 }
 
 interface ExhibitListProps {
