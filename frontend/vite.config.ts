@@ -12,8 +12,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/api': backend,
-      '/auth': backend,
+      '/graphql': backend,
     },
   },
 })

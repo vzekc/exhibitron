@@ -1,19 +1,50 @@
-// src/utils/fetchExhibitionData.ts
-import { gql } from '@apollo/client'
 import client from '../apolloClient'
+import { graphql } from 'gql.tada'
 
 export const fetchExhibitionData = async () => {
   const { data } = await client.query({
-    query: gql`
-        query GetExhibition {
-    }
-    `
+    query: graphql(`
+        query GetAllData {
+            getTables {
+                id
+                number
+                exhibitor {
+                    id
+                }
+                exhibits {
+                    id
+                    title
+                }
+            }
+            getExhibitors {
+                id
+                user {
+                    fullName
+                }
+                exhibits {
+                    id
+                    title
+                }
+            }
+            getExhibits {
+                id
+                title
+                exhibitor {
+                    id
+                }
+                table {
+                    number
+                }
+            }
+        }
+    `)
   })
-  if (data && data.exhibitionData) {
-    const { freeTables, items: exhibits } = data.exhibitionData
-    return {
-      exhibits,
-      freeTables
-    }
+  const { getTables, getExhibitors, getExhibits } = data
+  return {
+      tables: getTables || [],
+      exhibitors: getExhibitors || [],
+      exhibits: getExhibits || []
   }
 }
+
+export type ExhibitionData = Awaited<ReturnType<typeof fetchExhibitionData>>

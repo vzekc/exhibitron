@@ -1,24 +1,6 @@
 import client from '../apolloClient'
 import { createContext, useContext } from 'react'
-import { graphql, TadaDocumentNode } from 'gql.tada'
-import { GraphQLFormattedError } from 'graphql'
-import { OperationVariables } from '@apollo/client'
-
-type GqlFetchResult<TData> = {
-  data?: TData
-  errors?: readonly GraphQLFormattedError[]
-}
-
-const doQuery = async <TData, TVariables extends OperationVariables>(
-  query: TadaDocumentNode<TData, TVariables>,
-  variables?: TVariables
-): Promise<GqlFetchResult<TData>> => {
-  const result = await client.query<TData, TVariables>({
-    query,
-    variables
-  })
-  return result as GqlFetchResult<TData>
-}
+import { graphql } from 'gql.tada'
 
 export const fetchCurrentUser = async () => {
   const result = await client.query({
@@ -43,6 +25,8 @@ export const fetchCurrentUser = async () => {
   })
   return result.data?.getCurrentUser
 }
+
+export type User = Awaited<ReturnType<typeof fetchCurrentUser>>
 
 export interface UserContextType {
   user: User | undefined

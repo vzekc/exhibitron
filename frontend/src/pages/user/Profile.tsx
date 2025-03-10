@@ -1,10 +1,10 @@
 import { useForm, SubmitHandler } from 'react-hook-form'
-import { useUser } from '../../contexts/UserContext.ts'
-import ExhibitList from '../../components/ExhibitList.tsx'
-import * as backend from '../../api'
+import { User, useUser } from '../../contexts/UserContext.ts'
 import { useExhibitionData } from '../../contexts/ExhibitionDataContext.ts'
+import ExhibitList from '../../components/ExhibitList.tsx'
 import { useEffect, useState } from 'react'
-import { User } from '../../types.ts'
+import { graphql } from 'gql.tada'
+import { useMutation, useQuery } from '@apollo/client'
 
 type Inputs = {
   fullName: string
@@ -15,30 +15,59 @@ type Inputs = {
   website: string
 }
 
+const GET_USER_PROFILE = graphql(`
+    query GetUserProfile {
+        getCurrentUser {
+            id
+            fullName
+            bio
+            contacts {
+                email
+                mastodon
+                phone
+                website
+            }
+        }
+    }
+`)
+
+const UPDATE_USER_PROFILE = graphql(`
+    mutation UpdateUserProfile($input: UpdateUserProfileInput!) {
+        updateUserProfile(input: $input) {
+            id
+            fullName
+            bio
+            contacts {
+                email
+                mastodon
+                phone
+                website
+            }
+        }
+    }
+`)
+
 const Profile = () => {
   const { reloadUser } = useUser()
-  const { reloadExhibitList } = useExhibitionData()
+  const { reloadExhibitionData } = useExhibitionData()
   const [user, setUser] = useState<User | undefined>()
-  const {
-    register,
-    handleSubmit,
-    formState: { isDirty },
-    reset,
-  } = useForm<Inputs>()
+  const { register, handleSubmit, formState: { isDirty }, reset } = useForm<Inputs>()
+
+  const { data, refetch } = useQuery(GET_USER_PROFILE)
+  const [updateUserProfile] = useMutation(UPDATE_USER_PROFILE)
 
   const updateProfile: SubmitHandler<Inputs> = async (inputs) => {
-    console.log('Update profile', inputs)
     const { fullName, bio, ...contacts } = inputs
-    await backend.patchUserProfile({ body: { fullName, bio, contacts } })
+    await updateUserProfile({ variables: { input: { fullName, bio, contacts } } })
     await reloadUser()
-    await reloadExhibitList()
+    await reloadExhibitionData()
     reset(inputs)
+    await refetch()
   }
 
   useEffect(() => {
-    const load = async () => {
-      const response = await backend.getUserProfile()
-      const newUser = response.data
+    if (data) {
+      const newUser = data.getCurrentUser
       setUser(newUser)
       reset({
         fullName: newUser?.fullName || '',
@@ -46,11 +75,10 @@ const Profile = () => {
         email: newUser?.contacts?.email || '',
         mastodon: newUser?.contacts?.mastodon || '',
         phone: newUser?.contacts?.phone || '',
-        website: newUser?.contacts?.website || '',
+        website: newUser?.contacts?.website || ''
       })
     }
-    void load()
-  }, [setUser, reset])
+  }, [data, reset])
 
   return (
     user && (

@@ -1,8 +1,7 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 
-import { ExhibitListItem } from '../types.ts'
 import { ExhibitionDataContext } from './ExhibitionDataContext.ts'
-import { fetchExhibitionData } from '../services/exhibitionData.ts'
+import { fetchExhibitionData, type ExhibitionData } from '../services/exhibitionData.ts'
 
 interface ExhibitionDataProviderProps {
   children: ReactNode
@@ -11,33 +10,25 @@ interface ExhibitionDataProviderProps {
 export const ExhibitionDataProvider = ({
   children,
 }: ExhibitionDataProviderProps) => {
-  const [exhibitList, setExhibitList] = useState<ExhibitListItem[]>([])
+  const [exhibitionData, setExhibitionData] = useState<ExhibitionData | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const reloadExhibitList = useCallback(async () => {
-    const result = await fetchExhibitionData()
-    const { items } = result || {}
-    if (items) {
-      setExhibitList(items)
-    }
-  }, [setExhibitList])
+  const reloadExhibitionData = useCallback(async () => {
+    setExhibitionData(await fetchExhibitionData())
+  }, [setExhibitionData])
 
   useEffect(() => {
     const load = async () => {
-      const result = await fetchExhibitionData()
-      const { items } = result || {}
-      if (items) {
-        setExhibitList(items)
-      }
+      setExhibitionData(await fetchExhibitionData())
       setLoading(false)
     }
     void load()
-  }, [setLoading, setExhibitList])
+  }, [setLoading, setExhibitionData])
 
   if (loading) return null // Prevents context usage before it's ready
 
   return (
-    <ExhibitionDataContext.Provider value={{ exhibitList, reloadExhibitList }}>
+    <ExhibitionDataContext.Provider value={{ exhibitionData, reloadExhibitionData }}>
       {children}
     </ExhibitionDataContext.Provider>
   )

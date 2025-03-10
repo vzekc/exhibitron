@@ -1,9 +1,9 @@
 import { createContext, useContext } from 'react'
-import { ExhibitListItem } from '../types.ts'
+import { ExhibitionData } from '@services/exhibitionData.ts'
 
 export interface ExhibitionDataContextType {
-  exhibitList: ExhibitListItem[] | undefined
-  reloadExhibitList: () => Promise<void>
+  exhibitionData: ExhibitionData | null
+  reloadExhibitionData: () => Promise<void>
 }
 
 export const ExhibitionDataContext = createContext<

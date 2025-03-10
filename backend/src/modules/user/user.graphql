@@ -23,6 +23,7 @@ type User {
 }
 
 input UpdateUserProfileInput {
+  fullName: String
   bio: String
   contacts: ContactsInput
   nickname: String
