@@ -57,7 +57,7 @@ const Register = () => {
     const { name, email, nickname, message, topic, topicExtras, ...data } = inputs
     setState('sending')
     try {
-      const { data: result } = await registerMutation({
+      await registerMutation({
         variables: {
           input: {
             name,
