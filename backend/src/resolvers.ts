@@ -137,7 +137,9 @@ const mutationResolvers: MutationResolvers<Context> = {
       exhibition,
     })
     if (existing) {
-      throw new GraphQLError('The email address is already registered')
+      throw new GraphQLError('The email address is already registered', {
+        extensions: { code: 'EMAIL_ADDRESS_IS_ALREADY_REGISTERED' },
+      })
     }
     return await db.registration.register({
       exhibition,
@@ -200,8 +202,7 @@ const exhibitorResolvers: ExhibitorResolvers = {
     db.exhibit.find({
       exhibitor,
     }),
-  tables: async (exhibitor, _, { db }) =>
-    db.table.find({ exhibitor }),
+  tables: async (exhibitor, _, { db }) => db.table.find({ exhibitor }),
 }
 
 const exhibitResolvers: ExhibitResolvers = {

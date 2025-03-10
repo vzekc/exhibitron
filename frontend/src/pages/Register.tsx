@@ -1,6 +1,6 @@
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { useState } from 'react'
-import { useMutation } from '@apollo/client'
+import { ApolloError, useMutation } from '@apollo/client'
 import { graphql} from 'gql.tada'
 
 import './Register.css'
@@ -69,14 +69,23 @@ const Register = () => {
           }
         }
       })
-      if (result?.register?.status === 'new') {
-        setState('done')
-      } else {
-        alert('Die Email-Adresse ist bereits angemeldet! Nimm mit uns Kontakt auf, falls Du bisher keine Antwort auf Deine Anmeldung bekommen hast. Die Bearbeitung von Anmeldungen kann einige Zeit dauern')
-        setState('entering')
-      }
+      setState('done')
     } catch (error) {
-      console.error('Error registering:', error)
+      if (error instanceof ApolloError) {
+        console.log('apollo error', error.graphQLErrors)
+        const emailAlreadyRegistered = error.graphQLErrors.some(
+          (e) => e.extensions?.code === 'EMAIL_ADDRESS_IS_ALREADY_REGISTERED'
+        )
+        if (emailAlreadyRegistered) {
+          alert('Die Email-Adresse ist bereits angemeldet! Nimm mit uns Kontakt auf, falls Du bisher keine Antwort auf Deine Anmeldung bekommen hast. Die Bearbeitung von Anmeldungen kann einige Zeit dauern')
+        } else {
+          console.error('Error registering:', error.graphQLErrors)
+          alert('Ein Fehler ist aufgetreten. Bitte versuche es später erneut.')
+        }
+      } else {
+        console.error('Unexpected error:', error)
+        alert('Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es später erneut.')
+      }
       setState('entering')
     }
   }
