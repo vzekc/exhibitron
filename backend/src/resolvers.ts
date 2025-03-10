@@ -67,6 +67,10 @@ const mutationResolvers: MutationResolvers<Context> = {
     session.userId = user.id
     return user
   },
+  logout: async (_, _args, { session }) => {
+    session.userId = undefined
+    return true
+  },
   requestPasswordReset: async (_, { email, resetUrl }, { db }) => {
     await db.user.requestPasswordReset(email, resetUrl)
     return true

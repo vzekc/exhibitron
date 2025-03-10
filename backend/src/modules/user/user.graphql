@@ -31,6 +31,7 @@ input UpdateUserProfileInput {
 
 extend type Mutation {
   login(email: String!, password: String!): User
+  logout: Boolean
   requestPasswordReset(email: String!, resetUrl: String!): Boolean
   resetPassword(password: String!, token: String!): Boolean
   updateUserProfile(input: UpdateUserProfileInput!): User

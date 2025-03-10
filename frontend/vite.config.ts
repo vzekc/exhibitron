@@ -13,6 +13,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/graphql': backend,
+      '/auth': backend,
     },
   },
 })
