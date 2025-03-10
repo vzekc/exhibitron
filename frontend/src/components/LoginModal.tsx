@@ -1,8 +1,8 @@
 import Modal from './Modal.tsx'
 import { useState } from 'react'
-import * as backend from '../api/index'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
+import { gql, useMutation } from '@apollo/client'
 
 type Inputs = {
   email: string
@@ -18,22 +18,34 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const [loginFailed, setLoginFailed] = useState(false)
   const { register, handleSubmit } = useForm<Inputs>()
   const navigate = useNavigate()
+  const [login] = useMutation(gql`
+      mutation Login($email: String!, $password: String!) {
+          login(email: $email, password: $password) {
+              id
+              email
+              fullName
+          }
+      }
+  `, {
+    onCompleted: (data) => {
+      if (data.login) {
+        window.location.reload()
+      } else {
+        setLoginFailed(true)
+      }
+    },
+    onError: () => {
+      setLoginFailed(true)
+    }
+  })
 
   const forumLogin = () => {
     window.location.href = '/auth/forum'
   }
 
-  const login: SubmitHandler<Inputs> = async (inputs) => {
+  const loginHandler: SubmitHandler<Inputs> = async (inputs) => {
     const { email, password } = inputs
-    const response = await backend.postUserLogin({
-      body: { email, password },
-      validateStatus: (status) => status == 200 || status == 401,
-    })
-    if (response.status == 401) {
-      setLoginFailed(true)
-    } else {
-      window.location.reload()
-    }
+    await login({ variables: { email, password } })
   }
 
   const forgotPassword = async () => {
@@ -44,7 +56,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   return (
     <Modal title="Login" isOpen={isOpen} onClose={onClose}>
       <form
-        onSubmit={handleSubmit(login)}
+        onSubmit={handleSubmit(loginHandler)}
         onChange={() => setLoginFailed(false)}>
         <label>
           Email-Adresse:{' '}

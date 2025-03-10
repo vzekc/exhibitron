@@ -198,10 +198,10 @@ const exhibitorResolvers: ExhibitorResolvers = {
     db.user.findOneOrFail({ id: exhibitor.user.id }),
   exhibits: async (exhibitor, _, { db }) =>
     db.exhibit.find({
-      id: { $in: exhibitor.exhibits?.map((e) => e.id) || [] },
+      exhibitor,
     }),
   tables: async (exhibitor, _, { db }) =>
-    db.table.find({ id: { $in: exhibitor.tables?.map((t) => t.id) || [] } }),
+    db.table.find({ exhibitor }),
 }
 
 const exhibitResolvers: ExhibitResolvers = {

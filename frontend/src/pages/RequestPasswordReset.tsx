@@ -1,5 +1,4 @@
 import { useForm } from 'react-hook-form'
-import * as backend from '../api/index'
 import { useState } from 'react'
 
 type Inputs = {

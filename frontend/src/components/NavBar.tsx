@@ -1,24 +1,36 @@
 import { Link } from 'react-router-dom'
-import { useEffect, useState } from 'react'
-import * as backend from '../api/index'
+import React, { useEffect, useState } from 'react'
 import { useUser } from '../contexts/UserContext.ts'
 import DropdownMenu from './DropdownMenu.tsx'
 import SearchTableNumber from './SearchTableNumber.tsx'
 import { getBookmarks } from '../utils/bookmarks.ts'
 import LoginModal from './LoginModal.tsx'
 import Breadcrumbs from './Breadcrumbs.tsx'
+import { gql, useMutation } from '@apollo/client'
 
 const NavBar = () => {
   const { user } = useUser()
   const [hasBookmarks, setHasBookmarks] = useState(getBookmarks().length > 0)
   const [showLoginModal, setShowLoginModal] = useState(false)
+  const [logout] = useMutation(gql`
+      mutation Logout {
+          logout
+      }
+  `, {
+    onCompleted: () => {
+      if (window.location.pathname === '/') {
+        window.location.reload()
+      }
+      window.location.pathname = '/'
+    },
+    onError: (error) => {
+      console.error('Logout failed:', error)
+    },
+  })
 
-  const handleLogout = async () => {
-    await backend.postAuthLogout()
-    if (window.location.pathname === '/') {
-      window.location.reload()
-    }
-    window.location.pathname = '/'
+  const handleLogout = async (event: React.MouseEvent) => {
+    event.preventDefault()
+    await logout()
   }
 
   const handleShowLoginModal = () => {

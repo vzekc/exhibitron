@@ -1,5 +1,4 @@
 import { useForm, SubmitHandler } from 'react-hook-form'
-import * as backend from '../api/index'
 
 import './Register.css'
 import { useState } from 'react'

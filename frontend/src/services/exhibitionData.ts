@@ -1,14 +1,19 @@
-import { getExhibit } from '../api'
+// src/utils/fetchExhibitionData.ts
+import { gql } from '@apollo/client'
+import client from '../apolloClient'
 
 export const fetchExhibitionData = async () => {
-  const response = await getExhibit({
-    validateStatus: (status) => status == 200,
+  const { data } = await client.query({
+    query: gql`
+        query GetExhibition {
+    }
+    `
   })
-  if (response.status === 200 && response.data && response.data.items) {
-    const { freeTables, items: exhibits } = response.data
+  if (data && data.exhibitionData) {
+    const { freeTables, items: exhibits } = data.exhibitionData
     return {
       exhibits,
-      freeTables,
+      freeTables
     }
   }
 }

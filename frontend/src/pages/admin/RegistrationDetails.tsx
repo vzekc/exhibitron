@@ -1,6 +1,5 @@
 import { formatValue } from './utils.ts'
 import { useEffect, useState } from 'react'
-import * as backend from '../../api/index'
 import { Registration } from './RegistrationList.tsx'
 import useMandatoryParams from '../../utils/useMandatoryParams.ts'
 import { useNavigate } from 'react-router-dom'

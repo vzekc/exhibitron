@@ -10,12 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@apollo/client": "^3.13.3",
     "@hey-api/client-axios": "^0.6.1",
     "@milkdown/crepe": "^7.6.3",
     "@milkdown/kit": "^7.6.3",
     "@milkdown/react": "^7.6.3",
     "@picocss/pico": "^2.0.6",
     "axios": "^1.7.9",
+    "gql.tada": "^1.8.10",
+    "graphql": "^16.10.0",
     "papaparse": "^5.5.2",
     "react": "^19.0.0",
     "react-contenteditable": "^3.3.7",

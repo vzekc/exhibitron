@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import * as backend from '../../api/index'
 import Papa from 'papaparse'
 import './RegistrationList.css'
 import { downloadCSV, formatValue } from './utils.ts'

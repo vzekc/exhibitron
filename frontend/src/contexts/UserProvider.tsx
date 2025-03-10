@@ -1,6 +1,5 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react'
-import { fetchCurrentUser, UserContext } from './UserContext.ts'
-import { User } from '../types.ts'
+import { fetchCurrentUser, UserContext, User } from './UserContext.ts'
 
 interface UserProviderProps {
   children: ReactNode

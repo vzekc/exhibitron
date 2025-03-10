@@ -1,14 +1,47 @@
-import { getUserCurrent } from '../api'
+import client from '../apolloClient'
 import { createContext, useContext } from 'react'
-import { User } from '../types.ts'
+import { graphql, TadaDocumentNode } from 'gql.tada'
+import { GraphQLFormattedError } from 'graphql'
+import { OperationVariables } from '@apollo/client'
 
-export const fetchCurrentUser = async (): Promise<User | undefined> => {
-  const response = await getUserCurrent({
-    validateStatus: (status) => status == 200 || status == 204,
+type GqlFetchResult<TData> = {
+  data?: TData
+  errors?: readonly GraphQLFormattedError[]
+}
+
+const doQuery = async <TData, TVariables extends OperationVariables>(
+  query: TadaDocumentNode<TData, TVariables>,
+  variables?: TVariables
+): Promise<GqlFetchResult<TData>> => {
+  const result = await client.query<TData, TVariables>({
+    query,
+    variables
   })
-  if (response.status === 200 && response.data) {
-    return response.data
-  }
+  return result as GqlFetchResult<TData>
+}
+
+export const fetchCurrentUser = async () => {
+  const result = await client.query({
+    query: graphql(`
+        query GetCurrentUser {
+            getCurrentUser {
+                id
+                email
+                fullName
+                isAdministrator
+                nickname
+                contacts {
+                    email
+                    mastodon
+                    phone
+                    website
+                }
+            }
+        }
+    `),
+    variables: {}
+  })
+  return result.data?.getCurrentUser
 }
 
 export interface UserContextType {

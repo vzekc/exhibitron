@@ -1,6 +1,5 @@
 import { useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import * as backend from '../api/index'
 import './ExhibitList.css'
 import { addBookmark, isBookmarked, removeBookmark } from '../utils/bookmarks'
 import { useUser } from '../contexts/UserContext.ts'
