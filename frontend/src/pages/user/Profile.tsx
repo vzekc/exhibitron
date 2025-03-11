@@ -1,6 +1,5 @@
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { User, useUser } from '../../contexts/UserContext.ts'
-import { useExhibitionData } from '../../contexts/ExhibitionDataContext.ts'
 import ExhibitList from '../../components/ExhibitList.tsx'
 import { useEffect, useState } from 'react'
 import { graphql } from 'gql.tada'
@@ -49,7 +48,6 @@ const UPDATE_USER_PROFILE = graphql(`
 
 const Profile = () => {
   const { reloadUser } = useUser()
-  const { reloadExhibitionData } = useExhibitionData()
   const [user, setUser] = useState<User | undefined>()
   const { register, handleSubmit, formState: { isDirty }, reset } = useForm<Inputs>()
 
@@ -60,7 +58,6 @@ const Profile = () => {
     const { fullName, bio, ...contacts } = inputs
     await updateUserProfile({ variables: { input: { fullName, bio, contacts } } })
     await reloadUser()
-    await reloadExhibitionData()
     reset(inputs)
     await refetch()
   }
@@ -127,7 +124,7 @@ const Profile = () => {
         </form>
         <h2>Ausstellungen</h2>
         {!user.exhibits ? (
-          'Du hast noch keine Ausstellungen eingetragen.'
+          <p>Du hast noch keine Ausstellungen eingetragen.</p>
         ) : (
           <ExhibitList exhibits={user.exhibits} />
         )}

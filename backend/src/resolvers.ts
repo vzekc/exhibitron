@@ -1,5 +1,6 @@
 import { GraphQLJSON } from 'graphql-type-json'
 import {
+  ExhibitionResolvers,
   ExhibitorResolvers,
   ExhibitResolvers,
   MutationResolvers,
@@ -7,7 +8,7 @@ import {
   RegistrationResolvers,
   RegistrationStatus,
   TableResolvers,
-  UserResolvers,
+  UserResolvers
 } from './generated/graphql.js'
 import { Context } from './app/context.js'
 import { wrap } from '@mikro-orm/core'
@@ -40,8 +41,13 @@ const queryResolvers: QueryResolvers<Context> = {
   getExhibit: async (_, { id }, { db }) => db.exhibit.findOneOrFail({ id }),
   // @ts-expect-error ts2345
   getExhibits: async (_, _args, { db }) => db.exhibit.findAll(),
+  // @ts-expect-error ts2345
   getExhibition: async (_, { id }, { db }) =>
-    db.exhibition.findOneOrFail({ id }),
+    db.exhibition.findOneOrFail({ id }, { populate: ['exhibits', 'exhibitors', 'tables'] }),
+  // @ts-expect-error ts2345
+  getCurrentExhibition: async (_, _args, { exhibition }) =>
+    exhibition,
+  // @ts-expect-error ts2345
   getExhibitions: async (_, _args, { db }) => db.exhibition.findAll(),
   getRegistration: async (_, { id }, { db, user }) => {
     requireAdmin(user)
@@ -216,6 +222,15 @@ const exhibitResolvers: ExhibitResolvers = {
     exhibit.table ? db.table.findOneOrFail({ id: exhibit.table.id }) : null,
 }
 
+const exhibitionResolvers: ExhibitionResolvers = {
+  exhibitors: async (exhibition, _, { db }) =>
+    db.exhibitor.find({ exhibition }),
+  exhibits: async (exhibition, _, { db }) =>
+    db.exhibit.find({ exhibition }),
+  tables: async (exhibition, _, { db }) =>
+    db.table.find({ exhibition }),
+}
+
 const registrationResolvers: RegistrationResolvers = {
   status: (registration) => {
     return registration.status
@@ -230,6 +245,7 @@ const resolvers = {
   Table: tableResolvers,
   Exhibitor: exhibitorResolvers,
   Exhibit: exhibitResolvers,
+  Exhibition: exhibitionResolvers,
   Registration: registrationResolvers,
 }
 

@@ -3,9 +3,13 @@ type Exhibition {
   id: Int!
   key: String!
   title: String!
+  tables: [Table!]
+  exhibitors: [Exhibitor!]
+  exhibits: [Exhibit!]
 }
 
 extend type Query {
   getExhibition(id: Int!): Exhibition
+  getCurrentExhibition: Exhibition
   getExhibitions: [Exhibition!]
 }
