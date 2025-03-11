@@ -1,6 +1,5 @@
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { useUser } from '../../contexts/UserContext.ts'
-import ExhibitList from '../../components/ExhibitList.tsx'
 import { useEffect } from 'react'
 import { graphql } from 'gql.tada'
 import { useMutation, useQuery } from '@apollo/client'
