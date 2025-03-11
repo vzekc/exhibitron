@@ -1,7 +1,7 @@
 import { useForm, SubmitHandler } from 'react-hook-form'
-import { User, useUser } from '../../contexts/UserContext.ts'
+import { useUser } from '../../contexts/UserContext.ts'
 import ExhibitList from '../../components/ExhibitList.tsx'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { graphql } from 'gql.tada'
 import { useMutation, useQuery } from '@apollo/client'
 
@@ -48,7 +48,6 @@ const UPDATE_USER_PROFILE = graphql(`
 
 const Profile = () => {
   const { reloadUser } = useUser()
-  const [user, setUser] = useState<User | undefined>()
   const { register, handleSubmit, formState: { isDirty }, reset } = useForm<Inputs>()
 
   const { data, refetch } = useQuery(GET_USER_PROFILE)
@@ -65,7 +64,6 @@ const Profile = () => {
   useEffect(() => {
     if (data) {
       const newUser = data.getCurrentUser
-      setUser(newUser)
       reset({
         fullName: newUser?.fullName || '',
         bio: newUser?.bio || '',
@@ -78,7 +76,7 @@ const Profile = () => {
   }, [data, reset])
 
   return (
-    user && (
+    data && (
       <article>
         <h2>Aussteller-Profil</h2>
         <p>
@@ -122,15 +120,6 @@ const Profile = () => {
             Profil aktualisieren
           </button>
         </form>
-        <h2>Ausstellungen</h2>
-        {!user.exhibits ? (
-          <p>Du hast noch keine Ausstellungen eingetragen.</p>
-        ) : (
-          <ExhibitList exhibits={user.exhibits} />
-        )}
-        <button onClick={() => console.log('Add exhibit')}>
-          Ausstellung hinzufügen
-        </button>
       </article>
     )
   )

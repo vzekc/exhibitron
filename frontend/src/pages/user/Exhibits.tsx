@@ -1,19 +1,30 @@
 import ExhibitList from '../../components/ExhibitList.tsx'
 import '../../components/ExhibitList.css'
-import { useUser } from '../../contexts/UserContext.ts'
+import { graphql } from 'gql.tada'
+import { useQuery } from '@apollo/client'
+
+const GET_MY_EXHIBITS = graphql(`
+    query GetMyExhibits {
+        getCurrentExhibitor {
+            exhibits {
+                id
+                title
+                table {
+                    number
+                }
+            }
+        }
+    }
+`)
 
 const UserExhibits = () => {
-  const { user } = useUser()
+  const { data } = useQuery(GET_MY_EXHIBITS)
 
-  if (exhibitionData && user) {
+  if (data?.getCurrentExhibitor?.exhibits) {
     return (
       <article>
-        <h2>Liste der Ausstellungen</h2>
-        <ExhibitList
-          exhibits={exhibitionData.exhibits.filter(
-            (exhibit) => exhibit.exhibitor.user.id === user.id,
-          )}
-        />
+        <h2>Liste Deiner Ausstellungen</h2>
+        <ExhibitList exhibits={data.getCurrentExhibitor.exhibits} />
       </article>
     )
   }

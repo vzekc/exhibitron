@@ -8,7 +8,7 @@ import {
   RegistrationResolvers,
   RegistrationStatus,
   TableResolvers,
-  UserResolvers
+  UserResolvers,
 } from './generated/graphql.js'
 import { Context } from './app/context.js'
 import { wrap } from '@mikro-orm/core'
@@ -33,20 +33,19 @@ const queryResolvers: QueryResolvers<Context> = {
   // @ts-expect-error ts2345
   getTables: async (_, _args, { db }) => db.table.findAll(),
   // @ts-expect-error ts2345
-  getExhibitor: async (_, { id }, { db }) =>
-    await db.exhibitor.findOneOrFail({ id }),
-  // @ts-expect-error ts2345
-  getExhibitors: async (_, _args, { db }) => db.exhibitor.findAll(),
+  getCurrentExhibitor: async (_, _args, { exhibitor }) => exhibitor,
   // @ts-expect-error ts2345
   getExhibit: async (_, { id }, { db }) => db.exhibit.findOneOrFail({ id }),
   // @ts-expect-error ts2345
   getExhibits: async (_, _args, { db }) => db.exhibit.findAll(),
   // @ts-expect-error ts2345
   getExhibition: async (_, { id }, { db }) =>
-    db.exhibition.findOneOrFail({ id }, { populate: ['exhibits', 'exhibitors', 'tables'] }),
+    db.exhibition.findOneOrFail(
+      { id },
+      { populate: ['exhibits', 'exhibitors', 'tables'] },
+    ),
   // @ts-expect-error ts2345
-  getCurrentExhibition: async (_, _args, { exhibition }) =>
-    exhibition,
+  getCurrentExhibition: async (_, _args, { exhibition }) => exhibition,
   // @ts-expect-error ts2345
   getExhibitions: async (_, _args, { db }) => db.exhibition.findAll(),
   getRegistration: async (_, { id }, { db, user }) => {
@@ -225,10 +224,8 @@ const exhibitResolvers: ExhibitResolvers = {
 const exhibitionResolvers: ExhibitionResolvers = {
   exhibitors: async (exhibition, _, { db }) =>
     db.exhibitor.find({ exhibition }),
-  exhibits: async (exhibition, _, { db }) =>
-    db.exhibit.find({ exhibition }),
-  tables: async (exhibition, _, { db }) =>
-    db.table.find({ exhibition }),
+  exhibits: async (exhibition, _, { db }) => db.exhibit.find({ exhibition }),
+  tables: async (exhibition, _, { db }) => db.table.find({ exhibition }),
 }
 
 const registrationResolvers: RegistrationResolvers = {

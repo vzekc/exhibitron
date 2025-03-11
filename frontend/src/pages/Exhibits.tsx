@@ -26,14 +26,7 @@ const Exhibits = () => {
     return (
       <article>
         <h2>Liste der Ausstellungen</h2>
-        <ExhibitList exhibits={
-          data.getExhibits.map(data => ({
-            id: data.id,
-            title: data.title,
-            exhibitorName: data.exhibitor.user.fullName || 'unknown',
-            table: data.table?.number})
-          )}
-        />
+        <ExhibitList exhibits={data.getExhibits} />
       </article>
     )
   }

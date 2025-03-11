@@ -23,7 +23,7 @@ export const fetchCurrentUser = async () => {
     `),
     variables: {}
   })
-  return result.data?.getCurrentUser
+  return result.data!.getCurrentUser
 }
 
 export type User = Awaited<ReturnType<typeof fetchCurrentUser>>

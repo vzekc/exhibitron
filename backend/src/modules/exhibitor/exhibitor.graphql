@@ -6,6 +6,5 @@ type Exhibitor {
 }
 
 extend type Query {
-  getExhibitor(id: Int!): Exhibitor
-  getExhibitors: [Exhibitor!]
+  getCurrentExhibitor: Exhibitor
 }
