@@ -5,15 +5,15 @@ import { useUser } from '../../contexts/UserContext.ts'
 
 const UserExhibits = () => {
   const { user } = useUser()
-  const { exhibitList } = useExhibitionData()
+  const { exhibitionData } = useExhibitionData()
 
-  if (exhibitList && user) {
+  if (exhibitionData && user) {
     return (
       <article>
         <h2>Liste der Ausstellungen</h2>
         <ExhibitList
-          exhibits={exhibitList.filter(
-            (exhibit) => exhibit.exhibitorId === user.id,
+          exhibits={exhibitionData.exhibits.filter(
+            (exhibit) => exhibit.exhibitor.user.id === user.id,
           )}
         />
       </article>
