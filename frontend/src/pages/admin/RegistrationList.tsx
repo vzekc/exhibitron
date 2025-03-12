@@ -40,7 +40,9 @@ const RegistrationList = () => {
     key: TableColumn
     direction: 'ascending' | 'descending'
   }>({ key: 'createdAt', direction: 'descending' })
-  const [sortedRegistrations, setSortedRegistrations] = useState<Registrations>([])
+  const [sortedRegistrations, setSortedRegistrations] = useState<Registrations>(
+    [],
+  )
   const navigate = useNavigate()
 
   useEffect(() => {

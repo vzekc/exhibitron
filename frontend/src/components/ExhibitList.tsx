@@ -41,23 +41,23 @@ const ExhibitList = ({ exhibits, notFoundLabel }: ExhibitListProps) => {
   return (
     <table>
       <thead>
-      <tr>
-        <th>Titel</th>
-        {someNames && <th>Aussteller</th>}
-        <th>Tisch</th>
-      </tr>
+        <tr>
+          <th>Titel</th>
+          {someNames && <th>Aussteller</th>}
+          <th>Tisch</th>
+        </tr>
       </thead>
       <tbody>
-      {sortedExhibits.map((exhibit, index: number) => (
-        <tr
-          key={index}
-          onClick={() => handleRowClick(exhibit.id)}
-          className="clickable-row">
-          <td>{exhibit.title}</td>
-          {someNames && <td>{getExhibitorName(exhibit)}</td>}
-          <td>{exhibit.table?.number || ''}</td>
-        </tr>
-      ))}
+        {sortedExhibits.map((exhibit, index: number) => (
+          <tr
+            key={index}
+            onClick={() => handleRowClick(exhibit.id)}
+            className="clickable-row">
+            <td>{exhibit.title}</td>
+            {someNames && <td>{getExhibitorName(exhibit)}</td>}
+            <td>{exhibit.table?.number || ''}</td>
+          </tr>
+        ))}
       </tbody>
     </table>
   )

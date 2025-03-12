@@ -18,26 +18,29 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const [loginFailed, setLoginFailed] = useState(false)
   const { register, handleSubmit } = useForm<Inputs>()
   const navigate = useNavigate()
-  const [login] = useMutation(gql`
+  const [login] = useMutation(
+    gql`
       mutation Login($email: String!, $password: String!) {
-          login(email: $email, password: $password) {
-              id
-              email
-              fullName
-          }
+        login(email: $email, password: $password) {
+          id
+          email
+          fullName
+        }
       }
-  `, {
-    onCompleted: (data) => {
-      if (data.login) {
-        window.location.reload()
-      } else {
+    `,
+    {
+      onCompleted: (data) => {
+        if (data.login) {
+          window.location.reload()
+        } else {
+          setLoginFailed(true)
+        }
+      },
+      onError: () => {
         setLoginFailed(true)
-      }
+      },
     },
-    onError: () => {
-      setLoginFailed(true)
-    }
-  })
+  )
 
   const forumLogin = () => {
     window.location.href = '/auth/forum'

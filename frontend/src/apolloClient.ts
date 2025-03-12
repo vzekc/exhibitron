@@ -8,7 +8,7 @@ const httpLink = createHttpLink({
 const authLink = setContext((_, { headers }) => {
   // we may not need this
   return {
-    headers
+    headers,
   }
 })
 

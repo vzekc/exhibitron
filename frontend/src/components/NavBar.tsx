@@ -12,21 +12,24 @@ const NavBar = () => {
   const { user } = useUser()
   const [hasBookmarks, setHasBookmarks] = useState(getBookmarks().length > 0)
   const [showLoginModal, setShowLoginModal] = useState(false)
-  const [logout] = useMutation(gql`
+  const [logout] = useMutation(
+    gql`
       mutation Logout {
-          logout
+        logout
       }
-  `, {
-    onCompleted: () => {
-      if (window.location.pathname === '/') {
-        window.location.reload()
-      }
-      window.location.pathname = '/'
+    `,
+    {
+      onCompleted: () => {
+        if (window.location.pathname === '/') {
+          window.location.reload()
+        }
+        window.location.pathname = '/'
+      },
+      onError: (error) => {
+        console.error('Logout failed:', error)
+      },
     },
-    onError: (error) => {
-      console.error('Logout failed:', error)
-    },
-  })
+  )
 
   const handleLogout = async (event: React.MouseEvent) => {
     event.preventDefault()

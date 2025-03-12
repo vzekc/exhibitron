@@ -1,4 +1,10 @@
-import { Collection, Entity, EntityRepositoryType, OneToMany, Property } from '@mikro-orm/core'
+import {
+  Collection,
+  Entity,
+  EntityRepositoryType,
+  OneToMany,
+  Property,
+} from '@mikro-orm/core'
 import { BaseEntity } from '../common/base.entity.js'
 import { ExhibitionRepository } from './exhibition.repository.js'
 import { Exhibit, Exhibitor, Table } from '../../entities.js'

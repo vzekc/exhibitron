@@ -1,7 +1,7 @@
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { useState } from 'react'
 import { ApolloError, useMutation } from '@apollo/client'
-import { graphql} from 'gql.tada'
+import { graphql } from 'gql.tada'
 
 import './Register.css'
 
@@ -26,12 +26,12 @@ type Inputs = {
 }
 
 const REGISTER_MUTATION = graphql(`
-    mutation Register($input: RegisterInput!) {
-        register(input: $input) {
-            id
-            status
-        }
+  mutation Register($input: RegisterInput!) {
+    register(input: $input) {
+      id
+      status
     }
+  }
 `)
 
 const Register = () => {
@@ -39,22 +39,25 @@ const Register = () => {
     register,
     handleSubmit,
     formState: { errors },
-    watch
+    watch,
   } = useForm<Inputs>({
     defaultValues: {
       friday: true,
       saturday: true,
-      sunday: true
-    }
+      sunday: true,
+    },
   })
 
-  const [state, setState] = useState<'entering' | 'sending' | 'done'>('entering')
+  const [state, setState] = useState<'entering' | 'sending' | 'done'>(
+    'entering',
+  )
   const [registerMutation] = useMutation(REGISTER_MUTATION)
 
   const topic = watch('topic')
 
   const onSubmit: SubmitHandler<Inputs> = async (inputs) => {
-    const { name, email, nickname, message, topic, topicExtras, ...data } = inputs
+    const { name, email, nickname, message, topic, topicExtras, ...data } =
+      inputs
     setState('sending')
     try {
       await registerMutation({
@@ -65,26 +68,30 @@ const Register = () => {
             nickname,
             topic: topicExtras ? topic.replace('*', topicExtras) : topic,
             message,
-            data
-          }
-        }
+            data,
+          },
+        },
       })
       setState('done')
     } catch (error) {
       if (error instanceof ApolloError) {
         console.log('apollo error', error.graphQLErrors)
         const emailAlreadyRegistered = error.graphQLErrors.some(
-          (e) => e.extensions?.code === 'EMAIL_ADDRESS_IS_ALREADY_REGISTERED'
+          (e) => e.extensions?.code === 'EMAIL_ADDRESS_IS_ALREADY_REGISTERED',
         )
         if (emailAlreadyRegistered) {
-          alert('Die Email-Adresse ist bereits angemeldet! Nimm mit uns Kontakt auf, falls Du bisher keine Antwort auf Deine Anmeldung bekommen hast. Die Bearbeitung von Anmeldungen kann einige Zeit dauern')
+          alert(
+            'Die Email-Adresse ist bereits angemeldet! Nimm mit uns Kontakt auf, falls Du bisher keine Antwort auf Deine Anmeldung bekommen hast. Die Bearbeitung von Anmeldungen kann einige Zeit dauern',
+          )
         } else {
           console.error('Error registering:', error.graphQLErrors)
           alert('Ein Fehler ist aufgetreten. Bitte versuche es später erneut.')
         }
       } else {
         console.error('Unexpected error:', error)
-        alert('Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es später erneut.')
+        alert(
+          'Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es später erneut.',
+        )
       }
       setState('entering')
     }
@@ -103,12 +110,22 @@ const Register = () => {
         )
       default:
         return (
-          <form className="exhibitor-registration" onSubmit={handleSubmit(onSubmit)}>
+          <form
+            className="exhibitor-registration"
+            onSubmit={handleSubmit(onSubmit)}>
             <fieldset>
               <label>
                 Nachname, Vorname
-                <input type="text" autoComplete="name" {...register('name', { required: true })} />
-                {errors.name && <div className="validation-message">Ein Name wird benötigt</div>}
+                <input
+                  type="text"
+                  autoComplete="name"
+                  {...register('name', { required: true })}
+                />
+                {errors.name && (
+                  <div className="validation-message">
+                    Ein Name wird benötigt
+                  </div>
+                )}
               </label>
               <label>
                 <input type="checkbox" {...register('vzekcMember')} />
@@ -117,14 +134,25 @@ const Register = () => {
               <p />
               <label>
                 E-Mail Adresse
-                <input type="email" autoComplete="email" {...register('email', { required: true })} />
-                {errors.email &&
-                  <div className="validation-message">Eine Email-Adresse wird benötigt, damit wir Kontakt aufnehmen
-                    können</div>}
+                <input
+                  type="email"
+                  autoComplete="email"
+                  {...register('email', { required: true })}
+                />
+                {errors.email && (
+                  <div className="validation-message">
+                    Eine Email-Adresse wird benötigt, damit wir Kontakt
+                    aufnehmen können
+                  </div>
+                )}
               </label>
               <label>
                 Nickname (Benutzername) im Forum
-                <input type="text" autoComplete="nickname" {...register('nickname')} />
+                <input
+                  type="text"
+                  autoComplete="nickname"
+                  {...register('nickname')}
+                />
               </label>
               <label>
                 Registriert im Forum
@@ -157,14 +185,24 @@ const Register = () => {
                   <option>Etwas anderes (*)</option>
                 </select>
               </label>
-              {errors.topic && <div className="validation-message">Bitte wähle aus, was du ausstellen möchtest</div>}
+              {errors.topic && (
+                <div className="validation-message">
+                  Bitte wähle aus, was du ausstellen möchtest
+                </div>
+              )}
               {topic?.includes('*') && (
                 <label>
                   Weitere Angaben
-                  <input type="text" {...register('topicExtras', { required: true })}
-                         disabled={!topic?.includes('*')} />
-                  {errors.topicExtras &&
-                    <div className="validation-message">Bitte erläutere, was du ausstellen möchtest</div>}
+                  <input
+                    type="text"
+                    {...register('topicExtras', { required: true })}
+                    disabled={!topic?.includes('*')}
+                  />
+                  {errors.topicExtras && (
+                    <div className="validation-message">
+                      Bitte erläutere, was du ausstellen möchtest
+                    </div>
+                  )}
                 </label>
               )}
             </fieldset>
@@ -197,7 +235,8 @@ const Register = () => {
               </label>
               <label>
                 <input type="checkbox" {...register('dailyLunch')} />
-                Ich wünsche mir ein tägliches Mittagessen in der Halle (Möglichkeiten werden noch geprüft)
+                Ich wünsche mir ein tägliches Mittagessen in der Halle
+                (Möglichkeiten werden noch geprüft)
               </label>
               <label>
                 <input type="checkbox" {...register('talk')} />
@@ -213,9 +252,12 @@ const Register = () => {
                   <option value={1}>1</option>
                   <option value={2}>2 (wenn verfügbar)</option>
                 </select>
-                {errors.name &&
-                  <div className="validation-message">Bitte wähle aus, wie viele Tische Deine Ausstellung belegen
-                    wird</div>}
+                {errors.name && (
+                  <div className="validation-message">
+                    Bitte wähle aus, wie viele Tische Deine Ausstellung belegen
+                    wird
+                  </div>
+                )}
               </label>
               <label>
                 Ich wünsche mir einen Tisch neben:

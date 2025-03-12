@@ -4,20 +4,20 @@ import { graphql } from 'gql.tada'
 import { useQuery } from '@apollo/client'
 
 const GET_EXHIBITION = graphql(`
-    query GetExhibits {
-        getExhibits {
-            id
-            title
-            exhibitor {
-                user {
-                    fullName
-                }
-            }
-            table {
-                number
-            }
+  query GetExhibits {
+    getExhibits {
+      id
+      title
+      exhibitor {
+        user {
+          fullName
         }
+      }
+      table {
+        number
+      }
     }
+  }
 `)
 
 const Exhibits = () => {

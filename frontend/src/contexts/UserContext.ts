@@ -5,23 +5,23 @@ import { graphql } from 'gql.tada'
 export const fetchCurrentUser = async () => {
   const result = await client.query({
     query: graphql(`
-        query GetCurrentUser {
-            getCurrentUser {
-                id
-                email
-                fullName
-                isAdministrator
-                nickname
-                contacts {
-                    email
-                    mastodon
-                    phone
-                    website
-                }
-            }
+      query GetCurrentUser {
+        getCurrentUser {
+          id
+          email
+          fullName
+          isAdministrator
+          nickname
+          contacts {
+            email
+            mastodon
+            phone
+            website
+          }
         }
+      }
     `),
-    variables: {}
+    variables: {},
   })
   return result.data!.getCurrentUser
 }

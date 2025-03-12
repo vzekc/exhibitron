@@ -14,47 +14,54 @@ type Inputs = {
 }
 
 const GET_USER_PROFILE = graphql(`
-    query GetUserProfile {
-        getCurrentUser {
-            id
-            fullName
-            bio
-            contacts {
-                email
-                mastodon
-                phone
-                website
-            }
-        }
+  query GetUserProfile {
+    getCurrentUser {
+      id
+      fullName
+      bio
+      contacts {
+        email
+        mastodon
+        phone
+        website
+      }
     }
+  }
 `)
 
 const UPDATE_USER_PROFILE = graphql(`
-    mutation UpdateUserProfile($input: UpdateUserProfileInput!) {
-        updateUserProfile(input: $input) {
-            id
-            fullName
-            bio
-            contacts {
-                email
-                mastodon
-                phone
-                website
-            }
-        }
+  mutation UpdateUserProfile($input: UpdateUserProfileInput!) {
+    updateUserProfile(input: $input) {
+      id
+      fullName
+      bio
+      contacts {
+        email
+        mastodon
+        phone
+        website
+      }
     }
+  }
 `)
 
 const Profile = () => {
   const { reloadUser } = useUser()
-  const { register, handleSubmit, formState: { isDirty }, reset } = useForm<Inputs>()
+  const {
+    register,
+    handleSubmit,
+    formState: { isDirty },
+    reset,
+  } = useForm<Inputs>()
 
   const { data, refetch } = useQuery(GET_USER_PROFILE)
   const [updateUserProfile] = useMutation(UPDATE_USER_PROFILE)
 
   const updateProfile: SubmitHandler<Inputs> = async (inputs) => {
     const { fullName, bio, ...contacts } = inputs
-    await updateUserProfile({ variables: { input: { fullName, bio, contacts } } })
+    await updateUserProfile({
+      variables: { input: { fullName, bio, contacts } },
+    })
     await reloadUser()
     reset(inputs)
     await refetch()
@@ -69,7 +76,7 @@ const Profile = () => {
         email: newUser?.contacts?.email || '',
         mastodon: newUser?.contacts?.mastodon || '',
         phone: newUser?.contacts?.phone || '',
-        website: newUser?.contacts?.website || ''
+        website: newUser?.contacts?.website || '',
       })
     }
   }, [data, reset])

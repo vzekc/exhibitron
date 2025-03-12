@@ -47,10 +47,15 @@ export class RegistrationRepository extends EntityRepository<Registration> {
       })
       completeProfileUrl = `${siteUrl}/profile?token=${user.passwordResetToken}`
     } else {
-      let exhibitor: Exhibitor | null = await this.em.getRepository(Exhibitor).findOne({
-        user,
-        exhibition: registration.exhibition,
-      }, { populate: ['exhibits'] })
+      let exhibitor: Exhibitor | null = await this.em
+        .getRepository(Exhibitor)
+        .findOne(
+          {
+            user,
+            exhibition: registration.exhibition,
+          },
+          { populate: ['exhibits'] },
+        )
       if (!exhibitor) {
         exhibitor = this.em.getRepository(Exhibitor).create({
           exhibition: registration.exhibition,

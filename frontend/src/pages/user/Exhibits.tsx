@@ -4,17 +4,17 @@ import { graphql } from 'gql.tada'
 import { useQuery } from '@apollo/client'
 
 const GET_MY_EXHIBITS = graphql(`
-    query GetMyExhibits {
-        getCurrentExhibitor {
-            exhibits {
-                id
-                title
-                table {
-                    number
-                }
-            }
+  query GetMyExhibits {
+    getCurrentExhibitor {
+      exhibits {
+        id
+        title
+        table {
+          number
         }
+      }
     }
+  }
 `)
 
 const UserExhibits = () => {

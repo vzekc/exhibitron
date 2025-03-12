@@ -11,22 +11,22 @@ import { graphql } from 'gql.tada'
 import { useQuery } from '@apollo/client'
 
 const GET_EXHIBIT = graphql(`
-    query GetExhibit($id: Int!) {
-        getExhibit(id: $id) {
-            id
-            title
-            text
-            table {
-                number
-            }
-            exhibitor {
-                id
-                user {
-                    fullName
-                }
-            }
+  query GetExhibit($id: Int!) {
+    getExhibit(id: $id) {
+      id
+      title
+      text
+      table {
+        number
+      }
+      exhibitor {
+        id
+        user {
+          fullName
         }
+      }
     }
+  }
 `)
 
 const Exhibit = () => {
@@ -35,7 +35,7 @@ const Exhibit = () => {
   const { setDetailName } = useBreadcrumb()
   const [bookmarked, setBookmarked] = useState(isBookmarked(Number(id)))
   const { data, loading, error } = useQuery(GET_EXHIBIT, {
-    variables: { id: Number(id) }
+    variables: { id: Number(id) },
   })
   const [title, setTitle] = useState('')
 
