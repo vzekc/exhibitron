@@ -11,7 +11,7 @@ const formatDate = (value: string | number) =>
 
 export const formatValue = (key: string, value: string | number | boolean) => {
   if (key === 'createdAt' || key === 'updatedAt') {
-    return formatDate(String(value))
+    return value ? formatDate(String(value)) : ''
   } else if (key === 'status') {
     switch (String(value)) {
       case 'new':

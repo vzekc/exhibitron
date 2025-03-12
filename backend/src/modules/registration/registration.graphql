@@ -1,6 +1,9 @@
 scalar JSON
+scalar Date
 
 type Registration {
+  createdAt: Date!
+  updatedAt: Date
   email: String!
   id: Int!
   message: String

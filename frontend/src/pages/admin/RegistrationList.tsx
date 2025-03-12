@@ -3,6 +3,23 @@ import Papa from 'papaparse'
 import './RegistrationList.css'
 import { downloadCSV, formatValue } from './utils.ts'
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@apollo/client'
+import { graphql } from 'gql.tada'
+
+const GET_REGISTRATIONS = graphql(`
+  query GetRegistrations {
+    getRegistrations {
+      id
+      status
+      name
+      email
+      nickname
+      createdAt
+      updatedAt
+      data
+    }
+  }
+`)
 
 const tableColumns = [
   'id',
@@ -16,56 +33,38 @@ const tableColumns = [
 
 type TableColumn = (typeof tableColumns)[number]
 
-export type Registration = NonNullable<
-  NonNullable<
-    Awaited<ReturnType<typeof backend.getRegistrationByEventId>>['data']
-  >['items']
->[number]
-
 const RegistrationList = () => {
-  const [registrations, setRegistrations] = useState<Registration[]>([])
+  const { data } = useQuery(GET_REGISTRATIONS)
+  type Registrations = NonNullable<typeof data>['getRegistrations']
   const [sortConfig, setSortConfig] = useState<{
     key: TableColumn
     direction: 'ascending' | 'descending'
   }>({ key: 'createdAt', direction: 'descending' })
-  const [sortedRegistrations, setSortedRegistrations] = useState<
-    Registration[]
-  >([])
+  const [sortedRegistrations, setSortedRegistrations] = useState<Registrations>([])
   const navigate = useNavigate()
 
   useEffect(() => {
-    const getRegistrations = async () => {
-      const result = await backend.getRegistrationByEventId({
-        path: { eventId: 'cc2025' },
-        validateStatus: (status) => status == 200,
-      })
-      setRegistrations(result.data?.items || [])
+    if (data?.getRegistrations) {
+      setSortedRegistrations(
+        [...data.getRegistrations].sort((a, b) => {
+          if (String(a[sortConfig.key]) < String(b[sortConfig.key])) {
+            return sortConfig.direction === 'ascending' ? -1 : 1
+          }
+          if (String(a[sortConfig.key]) > String(b[sortConfig.key])) {
+            return sortConfig.direction === 'ascending' ? 1 : -1
+          }
+          return 0
+        }),
+      )
     }
+  }, [sortConfig, data])
 
-    void getRegistrations()
-  }, [])
-
-  useEffect(() => {
-    setSortedRegistrations(
-      [...registrations].sort((a, b) => {
-        if (String(a[sortConfig.key]) < String(b[sortConfig.key])) {
-          return sortConfig.direction === 'ascending' ? -1 : 1
-        }
-        if (String(a[sortConfig.key]) > String(b[sortConfig.key])) {
-          return sortConfig.direction === 'ascending' ? 1 : -1
-        }
-        return 0
-      }),
-    )
-  }, [sortConfig, registrations])
-
-  const generateCSV = (registrations: Registration[]) => {
-    const flattenedRegistrations = registrations?.map(({ data, ...rest }) => ({
-      ...data,
-      ...rest,
-    }))
+  const generateCSV = (registrations: Registrations) => {
+    if (!registrations) {
+      return ''
+    }
     const keys = registrations
-      ?.map(({ data }) => new Set(Object.keys(data)))
+      ?.map((data) => new Set(Object.keys(data)))
       .reduce((acc, set) => new Set([...acc, ...set]), new Set<string>())
     const columns = [
       'id',
@@ -77,7 +76,7 @@ const RegistrationList = () => {
       'updatedAt',
       ...Array.from(keys).sort(),
     ]
-    return Papa.unparse(flattenedRegistrations, { columns })
+    return Papa.unparse(registrations, { columns })
   }
 
   const requestSort = (key: TableColumn) => {
@@ -93,8 +92,12 @@ const RegistrationList = () => {
   }
 
   const handleDownload = () => {
-    const csv = generateCSV(registrations)
+    const csv = generateCSV(data?.getRegistrations || [])
     downloadCSV(csv, 'registrations.csv')
+  }
+
+  if (!data?.getRegistrations) {
+    return <p>Loading...</p>
   }
 
   return (
@@ -113,7 +116,7 @@ const RegistrationList = () => {
           </tr>
         </thead>
         <tbody>
-          {sortedRegistrations.map((registration, index) => (
+          {sortedRegistrations?.map((registration, index) => (
             <tr
               key={index}
               onClick={() => navigate('/admin/registration/' + registration.id)}

@@ -15,6 +15,7 @@ import { wrap } from '@mikro-orm/core'
 import { GraphQLError } from 'graphql/error/index.js'
 import { requireAdmin } from './db.js'
 import { Exhibit } from './entities.js'
+import GraphQLDate from './modules/common/GraphQLDate.js'
 
 const queryResolvers: QueryResolvers<Context> = {
   getUser: async (_, { id }, { db, user }) => {
@@ -236,6 +237,7 @@ const registrationResolvers: RegistrationResolvers = {
 
 const resolvers = {
   JSON: GraphQLJSON,
+  Date: GraphQLDate,
   Query: queryResolvers,
   Mutation: mutationResolvers,
   User: userResolvers,
