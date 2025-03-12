@@ -7,6 +7,7 @@ import { useBreadcrumb } from '../../contexts/BreadcrumbContext.ts'
 import { graphql } from 'gql.tada'
 import { useQuery } from '@apollo/client'
 import { useMutation } from '@apollo/client'
+import { set } from 'react-hook-form'
 
 const GET_DATA = graphql(`
   query GetExhibit($id: Int!) {
@@ -52,6 +53,7 @@ const ExhibitEditor = () => {
     variables: { id: Number(id) },
   })
   const [title, setTitle] = useState('')
+  const [text, setText] = useState('')
   const [selectedTable, setSelectedTable] = useState<number | undefined>(
     undefined,
   )
@@ -59,9 +61,10 @@ const ExhibitEditor = () => {
 
   useEffect(() => {
     if (data?.getExhibit) {
-      const { title, table } = data.getExhibit
+      const { title, table, text } = data.getExhibit
       setDetailName(title)
       setTitle(title)
+      setText(text || '')
       setSelectedTable(table?.number || undefined)
     }
   }, [data, setDetailName])
@@ -74,7 +77,7 @@ const ExhibitEditor = () => {
 
   const handleSave = async () => {
     await updateExhibit({
-      variables: { id: Number(id), title, table: selectedTable },
+      variables: { id: Number(id), title, text, table: selectedTable || null },
     })
   }
 
@@ -113,7 +116,7 @@ const ExhibitEditor = () => {
             ))}
           </select>
         </label>
-        <TextEditor markdown={exhibit.text || ''} />
+        <TextEditor markdown={text} onChange={setText} />
         <button onClick={handleSave}>Speichern</button>
       </article>
     </MilkdownProvider>
