@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "pnpm generate-graphql-types && tsc -b && vite build",
     "lint": "eslint . && tsc -b",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "generate-graphql-types": "gql.tada generate-output --tsconfig tsconfig.app.json"
   },
   "dependencies": {
     "@apollo/client": "^3.13.3",
