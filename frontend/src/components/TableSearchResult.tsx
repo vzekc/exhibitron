@@ -1,69 +1,85 @@
 import { useNavigate, useParams } from 'react-router-dom'
-import React, { useEffect, useState } from 'react'
-import { ExhibitListItem } from '../types'
+import React from 'react'
 import ExhibitList from './ExhibitList.tsx'
 import { useUser } from '../contexts/UserContext.ts'
+import { graphql } from 'gql.tada'
+import { useQuery } from '@apollo/client'
+
+const GET_TABLE = graphql(`
+query GetTable($number: Int!) {
+  getTable(number: $number) {
+    exhibitor {
+      user {
+        fullName
+      }
+      exhibits {
+        id
+        title
+        table {
+          number
+        }
+      }
+    }
+    exhibits {
+      id
+      title
+      text
+      table {
+        number
+      }
+    }
+  }
+}`)
 
 const TableSearchResult = () => {
-  const { id } = useParams<{ id: string }>()
-  const { user } = useUser()
-  const [exhibits, setExhibits] = useState<ExhibitListItem[]>([])
+  const { number } = useParams<{ number: string }>()
+  const { data } = useQuery(GET_TABLE, { variables: { number: +number! } })
   const navigate = useNavigate()
-
-  useEffect(() => {
-    const load = async () => {
-      const res = await backend.getExhibit()
-      setExhibits(res.data?.items || [])
-    }
-    void load()
-  }, [])
+  const user = useUser()
 
   const handleClaimTable = async (
     tableId: number,
     e: React.MouseEvent<HTMLButtonElement>,
   ) => {
     e.preventDefault()
-    await backend.postTableByNumberClaim({ path: { number: tableId } })
+    // fixme implement claim and release table
     navigate(`/table/${tableId}`)
   }
 
-  const tableId = Number(id)
+  const tableNumber = Number(number)
+  const exhibits = data?.getTable?.exhibits
+  const exhibitor = data?.getTable?.exhibitor
+  const otherExhibits =
+    data?.getTable?.exhibitor?.exhibits?.filter((exhibit) => exhibit.table?.number !== tableNumber)
 
-  const tableExhibits = exhibits.filter((exhibit) => exhibit.table === tableId)
-  const userExhibits = exhibits.filter(
-    (exhibit) =>
-      exhibit.exhibitorName === tableExhibits[0]?.exhibitorName &&
-      exhibit.table !== tableId,
-  )
-
-  if (!tableExhibits.length) {
+  if (!exhibitor) {
     if (user) {
       return (
         <p>
-          Der Tisch {tableId} ist nicht belegt
-          <button onClick={handleClaimTable.bind(null, tableId)} type="submit">
-            Tisch {tableId} belegen
+          Der Tisch {tableNumber} ist nicht belegt
+          <button onClick={handleClaimTable.bind(null, tableNumber)} type="submit">
+            Tisch {tableNumber} belegen
           </button>
         </p>
       )
     } else {
-      return <p>Keine Ausstellung für diesen Tisch gefunden</p>
+      return <p>Dieser Tisch ist nicht belegt.</p>
     }
   }
 
   return (
     <article>
-      <h2>Benutzer: {tableExhibits[0].exhibitorName}</h2>
-      {tableExhibits.length && (
+      <h2>Benutzer: {exhibitor.user.fullName}</h2>
+      {exhibits && exhibits.length > 0 && (
         <section>
-          <h3>Ausstellungen auf Tisch {tableId}</h3>
-          <ExhibitList exhibits={tableExhibits} />
+          <h3>Ausstellungen auf Tisch {tableNumber}</h3>
+          <ExhibitList exhibits={exhibits} />
         </section>
       )}
-      {userExhibits.length && (
+      {otherExhibits && otherExhibits.length > 0 && (
         <section>
           <h3>Andere Ausstellungen des Benutzers</h3>
-          <ExhibitList exhibits={userExhibits} />
+          <ExhibitList exhibits={otherExhibits} />
         </section>
       )}
     </article>

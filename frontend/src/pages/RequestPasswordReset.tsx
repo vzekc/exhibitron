@@ -1,19 +1,28 @@
 import { useForm } from 'react-hook-form'
 import { useState } from 'react'
+import { useMutation } from '@apollo/client'
+import { graphql } from 'gql.tada'
+
+const REQUEST_PASSWORD_RESET = graphql(`
+  mutation RequestPasswordReset($email: String!, $resetUrl: String!) {
+    requestPasswordReset(email: $email, resetUrl: $resetUrl)
+  }
+`)
 
 type Inputs = {
   email: string
 }
 
+const makeResetUrl = () =>
+  `${window.location.protocol}//${window.location.host}/resetPassword?token=`
+
 const RequestPasswordReset = () => {
   const { register, handleSubmit } = useForm<Inputs>()
   const [requestSent, setRequestSent] = useState(false)
+  const [requestPasswordReset] = useMutation(REQUEST_PASSWORD_RESET)
 
-  const requestPasswordReset = async ({ email }: Inputs) => {
-    await backend.postUserRequestPasswordReset({
-      body: { email, resetUrl: '/resetPassword?token=' },
-      validateStatus: (status) => status == 204,
-    })
+  const onSubmit = async ({ email }: Inputs) => {
+    await requestPasswordReset({ variables: { email, resetUrl: makeResetUrl() } })
     setRequestSent(true)
   }
 
@@ -32,7 +41,7 @@ const RequestPasswordReset = () => {
             ein. Du erhältst dann eine E-Mail mit einem Link, um Dein Passwort
             zurückzusetzen.
           </p>
-          <form onSubmit={handleSubmit(requestPasswordReset)}>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <label>
               E-Mail Adresse
               <input type="email" {...register('email', { required: true })} />

@@ -16,7 +16,7 @@ type User {
   bio: String
   contacts: Contacts
   email: String!
-  fullName: String
+  fullName: String!
   id: Int!
   isAdministrator: Boolean
   nickname: String

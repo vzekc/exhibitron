@@ -1,6 +1,14 @@
 import { useForm } from 'react-hook-form'
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useMutation } from '@apollo/client'
+import { graphql } from 'gql.tada'
+
+const RESET_PASSWORD = graphql(`
+  mutation ResetPassword($token: String!, $password: String!) {
+    resetPassword(token: $token, password: $password)
+  }
+`)
 
 type Inputs = {
   password: string
@@ -11,6 +19,7 @@ const ResetPassword = () => {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const [token, setToken] = useState<string | undefined>()
+  const [resetPassword] = useMutation(RESET_PASSWORD)
 
   const {
     register,
@@ -31,17 +40,12 @@ const ResetPassword = () => {
     }
   }, [token, navigate, searchParams])
 
-  const resetPassword = async ({ password }: Inputs) => {
+  const onSubmit = async ({ password }: Inputs) => {
     if (token) {
-      const result = await backend.postUserResetPassword({
-        body: { token, password },
-        validateStatus: (status) => status === 204 || status == 403,
+      await resetPassword({
+        variables: { token, password },
       })
-      setMessage(
-        result.status === 204
-          ? 'Dein Kennwort wurde zurückgesetzt.'
-          : 'Ungültige Anfrage, bitte fordere einen neuen Link an.',
-      )
+      setMessage('Dein Kennwort wurde zurückgesetzt.')
     }
   }
 
@@ -52,7 +56,7 @@ const ResetPassword = () => {
         <p>{message}</p>
       ) : (
         <>
-          <form onSubmit={handleSubmit(resetPassword)}>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <label>
               Neues Kennwort
               <input

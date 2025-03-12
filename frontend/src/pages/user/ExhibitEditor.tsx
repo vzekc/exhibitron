@@ -7,7 +7,6 @@ import { useBreadcrumb } from '../../contexts/BreadcrumbContext.ts'
 import { graphql } from 'gql.tada'
 import { useQuery } from '@apollo/client'
 import { useMutation } from '@apollo/client'
-import { set } from 'react-hook-form'
 
 const GET_DATA = graphql(`
   query GetExhibit($id: Int!) {
