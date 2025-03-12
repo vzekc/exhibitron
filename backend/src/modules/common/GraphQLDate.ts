@@ -5,6 +5,7 @@ const GraphQLDate = new GraphQLScalarType({
   description: 'Custom Date scalar type',
   parseValue(value) {
     if (typeof value !== 'string') {
+      return null
     }
     return new Date(value as string)
   },

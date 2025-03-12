@@ -14,10 +14,15 @@ type ExhibitDisplayListItem = {
 
 interface ExhibitListProps {
   exhibits: ExhibitDisplayListItem[]
+  onClick?: (id: number) => void
   notFoundLabel?: string
 }
 
-const ExhibitList = ({ exhibits, notFoundLabel }: ExhibitListProps) => {
+const ExhibitList = ({
+  exhibits,
+  notFoundLabel,
+  onClick,
+}: ExhibitListProps) => {
   const navigate = useNavigate()
   const sortedExhibits = [...exhibits].sort((a, b) => {
     const titleA = a.title?.toLowerCase() || ''
@@ -25,9 +30,7 @@ const ExhibitList = ({ exhibits, notFoundLabel }: ExhibitListProps) => {
     return titleA.localeCompare(titleB)
   })
 
-  const handleRowClick = (id: number) => {
-    navigate(`/exhibit/${id}`)
-  }
+  const handleRowClick = onClick || ((id: number) => navigate(`/exhibit/${id}`))
 
   if (!exhibits.length) {
     return <p>{notFoundLabel || 'Keine Ausstellungen gefunden'}</p>

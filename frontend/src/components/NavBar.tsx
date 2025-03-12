@@ -94,7 +94,7 @@ const NavBar = () => {
                   <Link to="/user/profile">Profil</Link>
                 </li>
                 <li>
-                  <Link to="/user/exhibits">Meine Ausstellungen</Link>
+                  <Link to="/user/exhibit">Meine Ausstellungen</Link>
                 </li>
                 <li>
                   <Link to="/user/exhibitorInfo">Aussteller-Infos</Link>

@@ -5,7 +5,7 @@ import Exhibits from './pages/Exhibits.tsx'
 import ErrorBoundary from './components/ErrorBoundary.tsx'
 import Home from './pages/Home.tsx'
 import Schedule from './pages/Schedule.tsx'
-import Exhibit from './components/Exhibit.tsx'
+import Exhibit from './pages/Exhibit.tsx'
 import Bookmarks from './pages/Bookmarks.tsx'
 import TableSearchResult from './components/TableSearchResult.tsx'
 import Profile from './pages/user/Profile.tsx'
@@ -20,6 +20,7 @@ import ResetPassword from './pages/ResetPassword.tsx'
 import Account from './pages/user/Account.tsx'
 import ExhibitorInfo from './pages/user/ExhibitorInfo.tsx'
 import UserExhibits from './pages/user/Exhibits.tsx'
+import UserExhibit from './pages/user/ExhibitEditor.tsx'
 
 const App = () => {
   return (
@@ -42,7 +43,8 @@ const App = () => {
             <Route path="/user/profile" element={<Profile />} />
             <Route path="/user/account" element={<Account />} />
             <Route path="/user/exhibitorInfo" element={<ExhibitorInfo />} />
-            <Route path="/user/exhibits" element={<UserExhibits />} />
+            <Route path="/user/exhibit" element={<UserExhibits />} />
+            <Route path="/user/exhibit/:id" element={<UserExhibit />} />
             <Route
               path="/requestPasswordReset"
               element={<RequestPasswordReset />}

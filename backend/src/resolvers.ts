@@ -138,7 +138,16 @@ const mutationResolvers: MutationResolvers<Context> = {
     if (exhibitor !== exhibit.exhibitor && !user?.isAdministrator) {
       throw new Error('You do not have permission to update this exhibit')
     }
-    return wrap(exhibit).assign(rest)
+    let table = exhibit.table || null
+    if ('table' in rest) {
+      table = rest.table
+        ? await db.table.findOneOrFail({
+            exhibition: exhibit.exhibition,
+            number: rest.table,
+          })
+        : null
+    }
+    return wrap(exhibit).assign({ table, ...rest })
   },
   register: async (_, { input }, { exhibition, db }) => {
     const { email, message, ...rest } = input
