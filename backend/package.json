@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "tsc && npx mikro-orm-esm cache:generate --combined && pnpm make-sdk",
+    "build": "tsc && npx mikro-orm-esm cache:generate --combined && pnpm generate",
     "start": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/server.ts",
     "start:watch": "nodemon --watch src --ext ts --exec 'node --no-warnings=ExperimentalWarning --loader ts-node/esm src/server.ts'",
     "start:prod": "NODE_ENV=production node dist/server.js",
@@ -11,7 +11,6 @@
     "test:watch": "vitest",
     "lint": "eslint src && tsc -b",
     "make-demo-db": "npx mikro-orm-esm migration:fresh --drop-db --seed DemoSeeder",
-    "make-sdk": "pnpm generate-openapi && openapi-ts -i dist/openapi.json -o src/sdk -c @hey-api/client-axios && pnpm prettier -w src/sdk",
     "migration:up": "mikro-orm-esm migration:up",
     "generate": "graphql-codegen",
     "generate:watch": "graphql-codegen --watch"

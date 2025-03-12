@@ -7,7 +7,7 @@
   "scripts": {
     "test": "pnpm -r test",
     "lint": "pnpm -r lint",
-    "build": "pnpm --filter backend run make-sdk && pnpm --filter frontend run build && pnpm --filter backend run build",
+    "build": "pnpm --filter backend run generate && pnpm --filter frontend run build && pnpm --filter backend run build",
     "prettier": "prettier -w frontend/src backend/src",
     "prepare": "husky"
   },
