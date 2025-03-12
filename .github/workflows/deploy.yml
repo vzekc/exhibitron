@@ -45,6 +45,7 @@ jobs:
 
       - name: Run GraphQL code generation
         run: |
+          cd backend
           pnpm generate
 
       - name: Run tests
