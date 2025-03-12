@@ -1,6 +1,6 @@
 schema:
   - schema.graphql
-  - '**/*.graphql'
+  - 'modules/**/*.graphql'
 extensions:
   endpoints:
     default:

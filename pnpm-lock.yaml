@@ -219,9 +219,6 @@ importers:
       '@apollo/client':
         specifier: ^3.13.3
         version: 3.13.3(@types/react@19.0.10)(graphql@16.10.0)(react-dom@19.0.0)(react@19.0.0)
-      '@hey-api/client-axios':
-        specifier: ^0.6.1
-        version: 0.6.1(axios@1.8.2)
       '@milkdown/crepe':
         specifier: ^7.6.3
         version: 7.6.3(element-internals-polyfill@0.1.55)
