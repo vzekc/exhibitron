@@ -11,23 +11,22 @@ const getUserToExhibitorMap = async (
 ) => {
   const result = await graphqlRequest(
     graphql(`
-        query GetExhibitors {
-            getCurrentExhibition {
-                exhibitors {
-                    id
-                    user {
-                        id
-                    }
-                }
+      query GetExhibitors {
+        getCurrentExhibition {
+          exhibitors {
+            id
+            user {
+              id
             }
+          }
         }
+      }
     `),
   )
   return new Map<number, number>(
-    result.data?.getCurrentExhibition?.exhibitors?.map(({ id, user: { id: userId } }) => [
-      userId,
-      id,
-    ]),
+    result.data?.getCurrentExhibition?.exhibitors?.map(
+      ({ id, user: { id: userId } }) => [userId, id],
+    ),
   )
 }
 

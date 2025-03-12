@@ -129,6 +129,44 @@ const RegistrationDetails = () => {
       <form onSubmit={(e) => e.preventDefault()}>
         <fieldset>
           <label>
+            Name:
+            <p>{registration.name}</p>
+          </label>
+          <label>
+            Email:
+            <p>
+              <a href={`mailto:${registration.email}`}>{registration.email}</a>
+            </p>
+          </label>
+          {registration.nickname && (
+            <label>
+              Nickname:
+              <p>{registration.nickname}</p>
+            </label>
+          )}
+          <label>
+            Thema:
+            <p>{registration.topic}</p>
+          </label>
+          {registration.message && (
+            <label>
+              Nachricht:
+              <p>{registration.message}</p>
+            </label>
+          )}
+          <div className="grid">
+            <label>
+              Eingegangen:{' '}
+              {formatValue('createdAt', registration.createdAt as string)}
+            </label>
+            {registration.updatedAt ? (
+              <label>
+                Geändert:{' '}
+                {formatValue('updatedAt', registration.updatedAt as string)}
+              </label>
+            ) : undefined}
+          </div>
+          <label>
             Status:
             <div className="grid">
               <input
@@ -188,38 +226,13 @@ const RegistrationDetails = () => {
               onChange={(e) => setNotes(e.target.value)}
             />
           </label>
-          {notes !== registration.notes && (
+          {notes !== (registration.notes || '') && (
             <button type="button" onClick={handleSaveNotes}>
               Speichern
             </button>
           )}
-          <label>
-            Name:
-            <p>{registration.name}</p>
-          </label>
-          <label>
-            Email:
-            <p>
-              <a href={`mailto:${registration.email}`}>{registration.email}</a>
-            </p>
-          </label>
-          {registration.nickname && (
-            <label>
-              Nickname:
-              <p>{registration.nickname}</p>
-            </label>
-          )}
-          <label>
-            Thema:
-            <p>{registration.topic}</p>
-          </label>
-          {registration.message && (
-            <label>
-              Nachricht:
-              <p>{registration.message}</p>
-            </label>
-          )}
         </fieldset>
+        <h2>Zusätzliche Daten</h2>
         <table>
           <tbody>
             {Object.entries(registration.data || {})
