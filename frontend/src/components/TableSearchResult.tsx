@@ -6,30 +6,31 @@ import { graphql } from 'gql.tada'
 import { useQuery } from '@apollo/client'
 
 const GET_TABLE = graphql(`
-query GetTable($number: Int!) {
-  getTable(number: $number) {
-    exhibitor {
-      user {
-        fullName
+  query GetTable($number: Int!) {
+    getTable(number: $number) {
+      exhibitor {
+        user {
+          fullName
+        }
+        exhibits {
+          id
+          title
+          table {
+            number
+          }
+        }
       }
       exhibits {
         id
         title
+        text
         table {
           number
         }
       }
     }
-    exhibits {
-      id
-      title
-      text
-      table {
-        number
-      }
-    }
   }
-}`)
+`)
 
 const TableSearchResult = () => {
   const { number } = useParams<{ number: string }>()
@@ -49,15 +50,18 @@ const TableSearchResult = () => {
   const tableNumber = Number(number)
   const exhibits = data?.getTable?.exhibits
   const exhibitor = data?.getTable?.exhibitor
-  const otherExhibits =
-    data?.getTable?.exhibitor?.exhibits?.filter((exhibit) => exhibit.table?.number !== tableNumber)
+  const otherExhibits = data?.getTable?.exhibitor?.exhibits?.filter(
+    (exhibit) => exhibit.table?.number !== tableNumber,
+  )
 
   if (!exhibitor) {
     if (user) {
       return (
         <p>
           Der Tisch {tableNumber} ist nicht belegt
-          <button onClick={handleClaimTable.bind(null, tableNumber)} type="submit">
+          <button
+            onClick={handleClaimTable.bind(null, tableNumber)}
+            type="submit">
             Tisch {tableNumber} belegen
           </button>
         </p>

@@ -22,7 +22,9 @@ const RequestPasswordReset = () => {
   const [requestPasswordReset] = useMutation(REQUEST_PASSWORD_RESET)
 
   const onSubmit = async ({ email }: Inputs) => {
-    await requestPasswordReset({ variables: { email, resetUrl: makeResetUrl() } })
+    await requestPasswordReset({
+      variables: { email, resetUrl: makeResetUrl() },
+    })
     setRequestSent(true)
   }
 

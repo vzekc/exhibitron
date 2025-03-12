@@ -1,27 +1,51 @@
-import type { Exhibit } from '../types.ts'
-
-export const getBookmarks = (): Exhibit[] => {
-  const bookmarks = localStorage.getItem('bookmarks')
-  return bookmarks ? JSON.parse(bookmarks) : []
+type Item = {
+  id: number
 }
 
-export const addBookmark = (exhibit: Exhibit) => {
-  const bookmarks = getBookmarks()
-  if (!bookmarks.some((b) => b.id === exhibit.id)) {
-    bookmarks.push(exhibit)
-    localStorage.setItem('bookmarks', JSON.stringify(bookmarks))
-    window.dispatchEvent(new Event('bookmarksUpdated'))
+type Bookmarks = {
+  exhibits: Item[]
+  exhibitors: Item[]
+}
+
+export const getBookmarks = (): Bookmarks => {
+  const bookmarksString = localStorage.getItem('bookmarks')
+  if (bookmarksString) {
+    const bookmarks = JSON.parse(bookmarksString)
+    if (bookmarks.exhibits && bookmarks.exhibitors) {
+      return bookmarks
+    }
+  }
+  return {
+    exhibits: [],
+    exhibitors: [],
   }
 }
 
-export const removeBookmark = (id: number) => {
-  let bookmarks = getBookmarks()
-  bookmarks = bookmarks.filter((bookmark) => bookmark.id !== id)
+type BookmarkType = 'exhibits' | 'exhibitors'
+
+export const addBookmark = (type: BookmarkType, item: Item) => {
+  const bookmarks = getBookmarks()
+  const old = bookmarks[type]
+
+  const newBookmarks = old.filter((b) => b.id !== item.id)
+  bookmarks[type] = [item, ...newBookmarks]
   localStorage.setItem('bookmarks', JSON.stringify(bookmarks))
   window.dispatchEvent(new Event('bookmarksUpdated'))
 }
 
-export const isBookmarked = (id: number): boolean => {
+export const removeBookmark = (type: BookmarkType, item: { id: number }) => {
   const bookmarks = getBookmarks()
-  return bookmarks.some((bookmark) => bookmark.id === id)
+  const old = bookmarks[type]
+
+  bookmarks[type] = old.filter((b) => b.id !== item.id)
+  localStorage.setItem('bookmarks', JSON.stringify(bookmarks))
+  window.dispatchEvent(new Event('bookmarksUpdated'))
+}
+
+export const isBookmarked = (
+  type: BookmarkType,
+  item: { id: number },
+): boolean => {
+  const bookmarks = getBookmarks()
+  return bookmarks[type].some((bookmark) => bookmark.id === item.id)
 }

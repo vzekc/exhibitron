@@ -10,7 +10,9 @@ import { gql, useMutation } from '@apollo/client'
 
 const NavBar = () => {
   const { user } = useUser()
-  const [hasBookmarks, setHasBookmarks] = useState(getBookmarks().length > 0)
+  const [hasBookmarks, setHasBookmarks] = useState(
+    getBookmarks().exhibits.length > 0,
+  )
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [logout] = useMutation(
     gql`
@@ -42,7 +44,7 @@ const NavBar = () => {
 
   useEffect(() => {
     const updateBookmarks = () => {
-      setHasBookmarks(getBookmarks().length > 0)
+      setHasBookmarks(getBookmarks().exhibits.length > 0)
     }
 
     window.addEventListener('storage', updateBookmarks)

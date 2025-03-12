@@ -75,6 +75,7 @@ const ExhibitEditor = () => {
     setSelectedTable(e.target.value ? Number(e.target.value) : undefined)
 
   const handleSave = async () => {
+    console.log(text)
     await updateExhibit({
       variables: { id: Number(id), title, text, table: selectedTable || null },
     })

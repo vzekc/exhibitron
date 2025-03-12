@@ -37,16 +37,21 @@ const GET_DATA = graphql(`
 const Exhibit = () => {
   const { id } = useParams<{ id: string }>()
   const { setDetailName } = useBreadcrumb()
-  const [bookmarked, setBookmarked] = useState(isBookmarked(Number(id)))
+  const [bookmarked, setBookmarked] = useState(
+    isBookmarked('exhibits', { id: Number(id) }),
+  )
   const { data, loading, error } = useQuery(GET_DATA, {
     variables: { id: Number(id) },
   })
 
   const handleBookmark = () => {
+    if (!data!.getExhibit) {
+      return
+    }
     if (bookmarked) {
-      removeBookmark(Number(id))
+      removeBookmark('exhibits', { id: Number(id) })
     } else {
-      addBookmark(data!.getExhibit)
+      addBookmark('exhibits', data!.getExhibit)
     }
     setBookmarked(!bookmarked)
   }

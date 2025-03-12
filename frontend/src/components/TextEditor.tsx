@@ -8,11 +8,13 @@ import '@milkdown/crepe/theme/common/style.css'
 interface TextEditorProps {
   markdown: string
   readonly?: boolean
+  onChange?: (markdown: string, prevMarkdown: string) => void
 }
 
 export const TextEditor: FC<TextEditorProps> = ({
   markdown,
   readonly = false,
+  onChange,
 }) => {
   useEditor(
     (root) => {
@@ -26,6 +28,13 @@ export const TextEditor: FC<TextEditorProps> = ({
           },
         },
       })
+      if (onChange) {
+        crepe.on((listener) => {
+          listener.markdownUpdated((_, markdown, prevMarkdown) =>
+            onChange(markdown, prevMarkdown),
+          )
+        })
+      }
       crepe.setReadonly(readonly)
       return crepe
     },
