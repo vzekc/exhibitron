@@ -21,14 +21,14 @@ interface PageProps {
 const Page: React.FC<PageProps> = ({ pageKey }) => {
   const { loading, error, data } = useQuery(GET_CURRENT_EXHIBITION)
 
-  if (loading) return <div>Loading...</div>
-  if (error) return <div>Error: {error.message}</div>
+  if (loading) return <div>Lade...</div>
+  if (error) return <div>Fehler: {error.message}</div>
 
   const page = data.getCurrentExhibition.pages.find(
     (page: { key: string }) => page.key === pageKey,
   )
 
-  if (!page) return <div>Page not found</div>
+  if (!page) return <div>Seite nicht in der Datenbank gefunden</div>
 
   return (
     <article>
