@@ -5,7 +5,7 @@ import routes from '../routes.tsx'
 
 const breadcrumbMap: { [key: string]: string } = {
   registration: 'Anmeldungen',
-  exhibit: 'Ausstellungen',
+  exhibit: 'Exponate',
   admin: 'Verwaltung',
   schedule: 'Zeitplan',
   profile: 'Profil',

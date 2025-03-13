@@ -33,7 +33,7 @@ const ExhibitList = ({
   const handleRowClick = onClick || ((id: number) => navigate(`/exhibit/${id}`))
 
   if (!exhibits.length) {
-    return <p>{notFoundLabel || 'Keine Ausstellungen gefunden'}</p>
+    return <p>{notFoundLabel || 'Keine Exponate gefunden'}</p>
   }
 
   const getExhibitorName = (exhibitor: ExhibitDisplayListItem) =>

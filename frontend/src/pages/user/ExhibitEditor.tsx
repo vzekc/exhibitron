@@ -82,15 +82,15 @@ const ExhibitEditor = () => {
   }
 
   if (loading) {
-    return <p>Lade Ausstellung...</p>
+    return <p>Lade Exponat...</p>
   }
 
   if (error) {
-    return <p>Fehler beim Laden der Ausstellung: {error.message}</p>
+    return <p>Fehler beim Laden des Exponats: {error.message}</p>
   }
 
   if (!data?.getExhibit) {
-    return <p>Ausstellung nicht gefunden</p>
+    return <p>Exponat nicht gefunden</p>
   }
 
   const exhibit = data?.getExhibit
@@ -98,7 +98,7 @@ const ExhibitEditor = () => {
 
   return (
     <MilkdownProvider>
-      <h1>Ausstellung bearbeiten</h1>
+      <h1>Exponat bearbeiten</h1>
       <article>
         <ContentEditable
           html={title}

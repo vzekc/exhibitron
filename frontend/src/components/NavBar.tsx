@@ -66,7 +66,7 @@ const NavBar = () => {
             <Link to="/">Start</Link>
           </li>
           <li>
-            <Link to="/exhibit">Ausstellungen</Link>
+            <Link to="/exhibit">Exponate</Link>
           </li>
           <li>
             <Link to="/schedule">Zeitplan</Link>
@@ -96,7 +96,7 @@ const NavBar = () => {
                   <Link to="/user/profile">Profil</Link>
                 </li>
                 <li>
-                  <Link to="/user/exhibit">Meine Ausstellungen</Link>
+                  <Link to="/user/exhibit">Meine Exponate</Link>
                 </li>
                 <li>
                   <Link to="/user/exhibitorInfo">Aussteller-Infos</Link>

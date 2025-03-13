@@ -76,13 +76,13 @@ const TableSearchResult = () => {
       <h2>Benutzer: {exhibitor.user.fullName}</h2>
       {exhibits && exhibits.length > 0 && (
         <section>
-          <h3>Ausstellungen auf Tisch {tableNumber}</h3>
+          <h3>Exponate auf Tisch {tableNumber}</h3>
           <ExhibitList exhibits={exhibits} />
         </section>
       )}
       {otherExhibits && otherExhibits.length > 0 && (
         <section>
-          <h3>Andere Ausstellungen des Benutzers</h3>
+          <h3>Andere Exponate des Benutzers</h3>
           <ExhibitList exhibits={otherExhibits} />
         </section>
       )}

@@ -25,7 +25,7 @@ const Exhibits = () => {
   if (data?.getExhibits) {
     return (
       <article>
-        <h2>Liste der Ausstellungen</h2>
+        <h2>Liste der Exponate</h2>
         <ExhibitList exhibits={data.getExhibits} />
       </article>
     )

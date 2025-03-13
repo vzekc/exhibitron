@@ -23,7 +23,7 @@ const Bookmarks = () => {
         />
       ) : (
         <p>
-          Hier findest Du eine Liste der Ausstellungen, die Du mit einem
+          Hier findest Du eine Liste der Exponate, die Du mit einem
           Lesezeichen versehen hast.
         </p>
       )}

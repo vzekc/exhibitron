@@ -65,15 +65,15 @@ const Exhibit = () => {
   }, [data, setDetailName, location])
 
   if (loading) {
-    return <p>Lade Ausstellung...</p>
+    return <p>Lade Exponat...</p>
   }
 
   if (error) {
-    return <p>Fehler beim Laden der Ausstellung: {error.message}</p>
+    return <p>Fehler beim Laden des Exponats: {error.message}</p>
   }
 
   if (!data?.getExhibit) {
-    return <p>Ausstellung nicht gefunden</p>
+    return <p>Exponat nicht gefunden</p>
   }
 
   const exhibit = data?.getExhibit
