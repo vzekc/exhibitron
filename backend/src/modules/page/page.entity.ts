@@ -14,6 +14,6 @@ export class Page extends BaseEntity {
   @Property()
   title!: string
 
-  @Property()
+  @Property({ columnType: 'text' })
   text!: string
 }

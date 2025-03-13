@@ -6,8 +6,7 @@ import {
   isBookmarked,
   removeBookmark,
 } from '../utils/bookmarks.ts'
-import { TextEditor } from '../components/TextEditor.tsx'
-import { MilkdownProvider } from '@milkdown/react'
+import TextEditor from '../components/TextEditor.tsx'
 import { useBreadcrumb } from '../contexts/BreadcrumbContext.ts'
 import { graphql } from 'gql.tada'
 import { useQuery } from '@apollo/client'
@@ -79,7 +78,7 @@ const Exhibit = () => {
   const exhibit = data?.getExhibit
 
   return (
-    <MilkdownProvider>
+    <div>
       <article>
         <h2>{exhibit.title}</h2>
         <p>Aussteller: {exhibit.exhibitor.user.fullName}</p>
@@ -92,14 +91,14 @@ const Exhibit = () => {
                 .sort()
                 .join(', ')}
         </p>
-        <TextEditor markdown={exhibit.text || ''} readonly />
+        <TextEditor defaultValue={exhibit.text || ''} readOnly />
         <button onClick={handleBookmark} className="button image-only-button">
           <img
             src={bookmarked ? '/bookmarked.svg' : '/bookmark.svg'}
             className="button-image inverted-image"></img>
         </button>
       </article>
-    </MilkdownProvider>
+    </div>
   )
 }
 

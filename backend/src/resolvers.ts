@@ -57,6 +57,8 @@ const queryResolvers: QueryResolvers<Context> = {
     requireAdmin(user)
     return db.registration.findAll()
   },
+  getPage: async (_, { key }, { db, exhibition }) =>
+    db.page.findOne({ exhibition, key }),
 }
 
 const mutationResolvers: MutationResolvers<Context> = {
@@ -207,10 +209,10 @@ const mutationResolvers: MutationResolvers<Context> = {
     await db.em.persistAndFlush(page)
     return page
   },
-  updatePage: async (_, { id, key, text }, { db, user }) => {
+  updatePage: async (_, { id, key, title, text }, { db, user }) => {
     requireAdmin(user)
     const page = await db.page.findOneOrFail({ id })
-    wrap(page).assign({ key, text })
+    wrap(page).assign({ key, title, text })
     await db.em.persistAndFlush(page)
     return page
   },

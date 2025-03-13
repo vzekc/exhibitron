@@ -15,7 +15,9 @@ import ResetPassword from './pages/ResetPassword.tsx'
 import Account from './pages/user/Account.tsx'
 import UserExhibits from './pages/user/Exhibits.tsx'
 import UserExhibit from './pages/user/ExhibitEditor.tsx'
+import PageEditor from './pages/admin/PageEditor.tsx'
 import Page from './components/Page.tsx'
+import PageList from './pages/admin/PageList.tsx'
 
 const routes: RouteObject[] = [
   { path: '/register', element: <Register /> },
@@ -40,6 +42,8 @@ const routes: RouteObject[] = [
       { path: '/resetPassword', element: <ResetPassword /> },
       { path: '/admin/registration', element: <RegistrationList /> },
       { path: '/admin/registration/:id', element: <RegistrationDetails /> },
+      { path: '/admin/page/', element: <PageList /> },
+      { path: '/admin/page/:key', element: <PageEditor /> },
       { path: '/*', element: <NotFound /> },
     ],
   },

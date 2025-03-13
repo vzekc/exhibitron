@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import Papa from 'papaparse'
 import './RegistrationList.css'
-import { downloadCSV, formatValue } from './utils.ts'
+import { downloadCSV, formatValue } from './utils'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
 import { graphql } from 'gql.tada'

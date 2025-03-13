@@ -77,6 +77,9 @@ const NavBar = () => {
                 <li>
                   <Link to="/admin/registration">Anmeldungen</Link>
                 </li>
+                <li>
+                  <Link to="/admin/page">Seiten</Link>
+                </li>
               </DropdownMenu>
             </li>
           )}

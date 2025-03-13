@@ -1,12 +1,12 @@
 import { useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { TextEditor } from '../../components/TextEditor.tsx'
-import { MilkdownProvider } from '@milkdown/react'
+import TextEditor from '../../components/TextEditor.tsx'
 import ContentEditable, { ContentEditableEvent } from 'react-contenteditable'
 import { useBreadcrumb } from '../../contexts/BreadcrumbContext.ts'
 import { graphql } from 'gql.tada'
 import { useQuery } from '@apollo/client'
 import { useMutation } from '@apollo/client'
+import { useUnsavedChangesWarning } from '../../hooks/useUnsavedChangesWarning'
 
 const GET_DATA = graphql(`
   query GetExhibit($id: Int!) {
@@ -56,15 +56,27 @@ const ExhibitEditor = () => {
   const [selectedTable, setSelectedTable] = useState<number | undefined>(
     undefined,
   )
+  const [originalTitle, setOriginalTitle] = useState('')
+  const [originalText, setOriginalText] = useState('')
+  const [originalTable, setOriginalTable] = useState<number | undefined>(
+    undefined,
+  )
   const [updateExhibit] = useMutation(UPDATE_EXHIBIT)
 
   useEffect(() => {
     if (data?.getExhibit) {
       const { title, table, text } = data.getExhibit
-      setDetailName(location.pathname, title)
-      setTitle(title)
-      setText(text || '')
-      setSelectedTable(table?.number || undefined)
+      const newTitle = title || ''
+      const newText = text || ''
+      const newTable = table?.number || undefined
+
+      setDetailName(location.pathname, newTitle)
+      setTitle(newTitle)
+      setText(newText)
+      setSelectedTable(newTable)
+      setOriginalTitle(newTitle)
+      setOriginalText(newText)
+      setOriginalTable(newTable)
     }
   }, [data, setDetailName])
 
@@ -74,11 +86,20 @@ const ExhibitEditor = () => {
   const handleTableChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
     setSelectedTable(e.target.value ? Number(e.target.value) : undefined)
 
+  const hasChanges =
+    (title || '') !== (originalTitle || '') ||
+    (text || '') !== (originalText || '') ||
+    selectedTable !== originalTable
+
+  useUnsavedChangesWarning(hasChanges)
+
   const handleSave = async () => {
-    console.log(text)
     await updateExhibit({
       variables: { id: Number(id), title, text, table: selectedTable || null },
     })
+    setOriginalTitle(title)
+    setOriginalText(text)
+    setOriginalTable(selectedTable)
   }
 
   if (loading) {
@@ -97,7 +118,7 @@ const ExhibitEditor = () => {
   const tables = exhibit.exhibitor.tables?.map((table) => table.number)
 
   return (
-    <MilkdownProvider>
+    <div>
       <h1>Exponat bearbeiten</h1>
       <article>
         <ContentEditable
@@ -116,10 +137,17 @@ const ExhibitEditor = () => {
             ))}
           </select>
         </label>
-        <TextEditor markdown={text} onChange={setText} />
-        <button onClick={handleSave}>Speichern</button>
+        <TextEditor
+          defaultValue={text}
+          onChange={(html) => {
+            setText(html)
+          }}
+        />
+        <button onClick={handleSave} disabled={!hasChanges}>
+          Speichern
+        </button>
       </article>
-    </MilkdownProvider>
+    </div>
   )
 }
 

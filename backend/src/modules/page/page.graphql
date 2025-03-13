@@ -5,6 +5,10 @@ type Page {
   text: String!
 }
 
+extend type Query {
+  getPage(key: String!): Page
+}
+
 extend type Mutation {
   createPage(key: String!, title: String!, text: String!): Page!
   updatePage(id: Int!, key: String!, title: String, text: String): Page!

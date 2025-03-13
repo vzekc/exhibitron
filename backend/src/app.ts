@@ -20,6 +20,7 @@ export async function createApp({
   logLevel?: string
 } = {}) {
   const app = fastify({
+    bodyLimit: 20 * 1024 * 1024, // 20 MB
     trustProxy: true,
     logger: {
       level: logLevel,

@@ -59,8 +59,13 @@ describe('page', () => {
     {
       const result = await graphqlRequest(
         graphql(`
-          mutation UpdatePage($id: Int!, $key: String!, $text: String!) {
-            updatePage(id: $id, key: $key, text: $text) {
+          mutation UpdatePage(
+            $id: Int!
+            $key: String!
+            $title: String!
+            $text: String!
+          ) {
+            updatePage(id: $id, key: $key, title: $title, text: $text) {
               id
               key
               title
@@ -68,11 +73,17 @@ describe('page', () => {
             }
           }
         `),
-        { id: pageId, key: 'about', text: 'Updated about text' },
+        {
+          id: pageId,
+          key: 'about',
+          title: 'The updated title',
+          text: 'Updated about text',
+        },
         admin,
       )
       expect(result.errors).toBeUndefined()
       expect(result.data!.updatePage!.text).toBe('Updated about text')
+      expect(result.data!.updatePage!.title).toBe('The updated title')
     }
   })
 
