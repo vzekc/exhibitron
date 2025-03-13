@@ -61,7 +61,7 @@ const ExhibitEditor = () => {
   useEffect(() => {
     if (data?.getExhibit) {
       const { title, table, text } = data.getExhibit
-      setDetailName(title)
+      setDetailName(location.pathname, title)
       setTitle(title)
       setText(text || '')
       setSelectedTable(table?.number || undefined)

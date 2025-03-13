@@ -1,8 +1,8 @@
 import { createContext, useContext } from 'react'
 
 interface BreadcrumbContextType {
-  detailName: string
-  setDetailName: (name: string) => void
+  detailNames: { [path: string]: string }
+  setDetailName: (path: string, name: string) => void
 }
 
 export const BreadcrumbContext = createContext<
@@ -11,7 +11,8 @@ export const BreadcrumbContext = createContext<
 
 export const useBreadcrumb = () => {
   const context = useContext(BreadcrumbContext)
-  if (!context)
-    throw new Error('useBreadcrumb must be used within BreadcrumbProvider')
+  if (!context) {
+    throw new Error('useBreadcrumb must be used within a BreadcrumbProvider')
+  }
   return context
 }

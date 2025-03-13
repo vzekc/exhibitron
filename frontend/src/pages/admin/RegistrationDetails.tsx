@@ -84,7 +84,7 @@ const RegistrationDetails = () => {
   useEffect(() => {
     if (data?.getRegistration) {
       setNotes(data.getRegistration.notes || '')
-      setDetailName(data.getRegistration.name || '')
+      setDetailName(location.pathname, data.getRegistration.name || '')
     }
   }, [data, setDetailName])
 

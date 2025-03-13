@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom'
+import { useLocation, useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import '../components/ExhibitList.css'
 import {
@@ -43,6 +43,7 @@ const Exhibit = () => {
   const { data, loading, error } = useQuery(GET_DATA, {
     variables: { id: Number(id) },
   })
+  const location = useLocation()
 
   const handleBookmark = () => {
     if (!data!.getExhibit) {
@@ -59,9 +60,9 @@ const Exhibit = () => {
   useEffect(() => {
     if (data?.getExhibit) {
       const { title, exhibitor } = data.getExhibit
-      setDetailName(`${title} (${exhibitor.user.fullName})`)
+      setDetailName(location.pathname, `${title} (${exhibitor.user.fullName})`)
     }
-  }, [data, setDetailName])
+  }, [data, setDetailName, location])
 
   if (loading) {
     return <p>Lade Ausstellung...</p>
