@@ -6,7 +6,6 @@ import {
   isBookmarked,
   removeBookmark,
 } from '../utils/bookmarks.ts'
-import TextEditor from '../components/TextEditor.tsx'
 import { useBreadcrumb } from '../contexts/BreadcrumbContext.ts'
 import { graphql } from 'gql.tada'
 import { useQuery } from '@apollo/client'
@@ -91,7 +90,7 @@ const Exhibit = () => {
                 .sort()
                 .join(', ')}
         </p>
-        <TextEditor defaultValue={exhibit.text || ''} readOnly />
+        <div dangerouslySetInnerHTML={{ __html: exhibit.text || '' }}></div>
         <button onClick={handleBookmark} className="button image-only-button">
           <img
             src={bookmarked ? '/bookmarked.svg' : '/bookmark.svg'}

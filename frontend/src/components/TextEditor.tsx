@@ -1,6 +1,7 @@
 import Quill, { Range, Delta, EmitterSource } from 'quill'
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import 'quill/dist/quill.snow.css'
+import './TextEditor.css'
 
 interface TextEditorProps {
   readOnly?: boolean
@@ -116,7 +117,7 @@ const TextEditor = ({
     isUserInputRef.current = false
   }, [defaultValue])
 
-  return <div style={{ background: 'lightgreen' }} ref={containerRef}></div>
+  return <div ref={containerRef} className="editor-container"></div>
 }
 
 export default TextEditor

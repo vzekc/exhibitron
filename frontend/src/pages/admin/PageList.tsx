@@ -28,7 +28,7 @@ const PageList = () => {
 
   return (
     <article>
-      <h2>Pages in Exhibition</h2>
+      <h2>Editierbare Seiten</h2>
       <table>
         <thead>
           <tr>

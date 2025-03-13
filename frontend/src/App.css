@@ -35,10 +35,25 @@ nav form {
   min-height: 1.5em;
 }
 
+th {
+  font-weight: bold;
+  background: #eee;
+}
+
 fieldset {
   margin-bottom: 3em;
 }
 
 legend {
   font-size: 1.5em;
+}
+
+.editable-title {
+  border: 1px solid #ccc;
+}
+
+[contenteditable='true']:empty:before {
+  content: attr(placeholder);
+  display: block;
+  color: #aaa;
 }

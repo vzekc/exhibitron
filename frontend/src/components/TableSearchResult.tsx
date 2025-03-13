@@ -73,7 +73,7 @@ const TableSearchResult = () => {
 
   return (
     <article>
-      <h2>Benutzer: {exhibitor.user.fullName}</h2>
+      <h2>Aussteller: {exhibitor.user.fullName}</h2>
       {exhibits && exhibits.length > 0 && (
         <section>
           <h3>Exponate auf Tisch {tableNumber}</h3>
@@ -82,7 +82,10 @@ const TableSearchResult = () => {
       )}
       {otherExhibits && otherExhibits.length > 0 && (
         <section>
-          <h3>Andere Exponate des Benutzers</h3>
+          <h3>
+            {exhibits && exhibits.length > 0 && <span>Andere</span>}Exponate von{' '}
+            {exhibitor.user.fullName}
+          </h3>
           <ExhibitList exhibits={otherExhibits} />
         </section>
       )}

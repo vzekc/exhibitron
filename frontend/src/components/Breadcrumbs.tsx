@@ -13,6 +13,7 @@ const breadcrumbMap: { [key: string]: string } = {
   exhibitorInfo: 'Aussteller-Infos',
   user: 'Aussteller',
   page: 'Seiten',
+  table: 'Tische',
 }
 
 const Breadcrumbs = () => {

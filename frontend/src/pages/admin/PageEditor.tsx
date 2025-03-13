@@ -92,7 +92,9 @@ const PageEditor = () => {
     <div>
       <ContentEditable
         html={title}
+        placeholder="Titel der Seite"
         onChange={(e) => setTitle(e.target.value)}
+        className="editable-title"
         tagName="h2"
       />
       <TextEditor defaultValue={text} onChange={(html) => setText(html)} />
