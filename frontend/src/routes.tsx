@@ -13,7 +13,6 @@ import NotFound from './pages/NotFound.tsx'
 import RequestPasswordReset from './pages/RequestPasswordReset.tsx'
 import ResetPassword from './pages/ResetPassword.tsx'
 import Account from './pages/user/Account.tsx'
-import ExhibitorInfo from './pages/user/ExhibitorInfo.tsx'
 import UserExhibits from './pages/user/Exhibits.tsx'
 import UserExhibit from './pages/user/ExhibitEditor.tsx'
 import Page from './components/Page.tsx'
@@ -31,7 +30,10 @@ const routes: RouteObject[] = [
       { path: '/table/:number', element: <TableSearchResult /> },
       { path: '/user/profile', element: <Profile /> },
       { path: '/user/account', element: <Account /> },
-      { path: '/user/exhibitorInfo', element: <ExhibitorInfo /> },
+      {
+        path: '/user/exhibitorInfo',
+        element: <Page pageKey="exhibitorInfo" />,
+      },
       { path: '/user/exhibit', element: <UserExhibits /> },
       { path: '/user/exhibit/:id', element: <UserExhibit /> },
       { path: '/requestPasswordReset', element: <RequestPasswordReset /> },
