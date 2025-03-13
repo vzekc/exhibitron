@@ -1,0 +1,12 @@
+type Page {
+  id: Int!
+  key: String!
+  title: String!
+  text: String!
+}
+
+extend type Mutation {
+  createPage(key: String!, title: String!, text: String!): Page!
+  updatePage(id: Int!, key: String!, title: String, text: String): Page!
+  deletePage(id: Int!): Boolean!
+}

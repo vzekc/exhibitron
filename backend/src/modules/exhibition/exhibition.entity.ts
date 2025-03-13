@@ -8,6 +8,7 @@ import {
 import { BaseEntity } from '../common/base.entity.js'
 import { ExhibitionRepository } from './exhibition.repository.js'
 import { Exhibit, Exhibitor, Table } from '../../entities.js'
+import { Page } from '../page/page.entity.js'
 
 @Entity({ repository: () => ExhibitionRepository })
 export class Exhibition extends BaseEntity {
@@ -29,4 +30,7 @@ export class Exhibition extends BaseEntity {
 
   @OneToMany(() => Exhibitor, (exhibitor) => exhibitor.exhibition)
   exhibitors: Collection<Exhibitor> = new Collection<Exhibitor>(this)
+
+  @OneToMany(() => Page, (page) => page.exhibition)
+  pages: Collection<Page> = new Collection<Page>(this)
 }

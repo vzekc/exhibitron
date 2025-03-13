@@ -200,6 +200,26 @@ const mutationResolvers: MutationResolvers<Context> = {
     await db.registration.inProgress(registration)
     return true
   },
+  // page resolvers
+  createPage: async (_, { key, title, text }, { db, user, exhibition }) => {
+    requireAdmin(user)
+    const page = db.page.create({ exhibition, key, title, text })
+    await db.em.persistAndFlush(page)
+    return page
+  },
+  updatePage: async (_, { id, key, text }, { db, user }) => {
+    requireAdmin(user)
+    const page = await db.page.findOneOrFail({ id })
+    wrap(page).assign({ key, text })
+    await db.em.persistAndFlush(page)
+    return page
+  },
+  deletePage: async (_, { id }, { db, user }) => {
+    requireAdmin(user)
+    const page = await db.page.findOneOrFail({ id })
+    await db.em.removeAndFlush(page)
+    return true
+  },
 }
 
 const userResolvers: UserResolvers = {
@@ -236,6 +256,7 @@ const exhibitionResolvers: ExhibitionResolvers = {
     db.exhibitor.find({ exhibition }),
   exhibits: async (exhibition, _, { db }) => db.exhibit.find({ exhibition }),
   tables: async (exhibition, _, { db }) => db.table.find({ exhibition }),
+  pages: async (exhibition, _, { db }) => db.page.find({ exhibition }),
 }
 
 const registrationResolvers: RegistrationResolvers = {

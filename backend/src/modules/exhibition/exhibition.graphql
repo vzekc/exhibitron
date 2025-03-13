@@ -6,6 +6,7 @@ type Exhibition {
   tables: [Table!]
   exhibitors: [Exhibitor!]
   exhibits: [Exhibit!]
+  pages: [Page!]
 }
 
 extend type Query {

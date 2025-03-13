@@ -5,6 +5,7 @@ import { Table } from '../modules/table/table.entity.js'
 import { Exhibition } from '../modules/exhibition/exhibition.entity.js'
 import { Exhibitor } from '../modules/exhibitor/exhibitor.entity.js'
 import { Exhibit } from '../modules/exhibit/exhibit.entity.js'
+import { Page } from '../modules/page/page.entity.js'
 
 export class TestSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {
@@ -12,6 +13,20 @@ export class TestSeeder extends Seeder {
       key: 'cc2025',
       title: 'Classic Computing 2025',
       hostMatch: 'localhost|2025\\.classic-computing\\.de',
+    })
+
+    em.create(Page, {
+      key: 'home',
+      exhibition,
+      title: 'Home',
+      text: 'Welcome to the Classic Computing 2025 exhibition!',
+    })
+
+    em.create(Page, {
+      key: 'schedule',
+      exhibition,
+      title: 'Schedule',
+      text: 'The schedule for the exhibition will be available soon.',
     })
 
     em.create(User, {

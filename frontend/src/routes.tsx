@@ -1,8 +1,6 @@
 // src/routes.tsx
 import { RouteObject } from 'react-router-dom'
 import Exhibits from './pages/Exhibits.tsx'
-import Home from './pages/Home.tsx'
-import Schedule from './pages/Schedule.tsx'
 import Exhibit from './pages/Exhibit.tsx'
 import Bookmarks from './pages/Bookmarks.tsx'
 import TableSearchResult from './components/TableSearchResult.tsx'
@@ -18,16 +16,17 @@ import Account from './pages/user/Account.tsx'
 import ExhibitorInfo from './pages/user/ExhibitorInfo.tsx'
 import UserExhibits from './pages/user/Exhibits.tsx'
 import UserExhibit from './pages/user/ExhibitEditor.tsx'
+import Page from './components/Page.tsx'
 
 const routes: RouteObject[] = [
   { path: '/register', element: <Register /> },
   {
     element: <MainLayout />,
     children: [
-      { path: '/', element: <Home /> },
+      { path: '/', element: <Page pageKey="home" /> },
       { path: '/exhibit', element: <Exhibits /> },
       { path: '/exhibit/:id', element: <Exhibit /> },
-      { path: '/schedule', element: <Schedule /> },
+      { path: '/schedule', element: <Page pageKey="schedule" /> },
       { path: '/bookmarks', element: <Bookmarks /> },
       { path: '/table/:number', element: <TableSearchResult /> },
       { path: '/user/profile', element: <Profile /> },
