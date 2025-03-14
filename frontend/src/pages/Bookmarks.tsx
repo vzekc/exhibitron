@@ -4,14 +4,17 @@ import ExhibitList from '../components/ExhibitList.tsx'
 const Bookmarks = () => {
   // fixme bookmark types?!
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const bookmarks = (getBookmarks().exhibits as any).map(
+  const bookmarks = (getBookmarks().exhibits as any)
+    .map(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ({ exhibitor, ...e }: { exhibitor: any }) => ({
+        ...e,
+        exhibitorId: exhibitor.id!,
+        exhibitorName: exhibitor.fullName!,
+      }),
+    )
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ({ exhibitor, ...e }: { exhibitor: any }) => ({
-      ...e,
-      exhibitorId: exhibitor.id!,
-      exhibitorName: exhibitor.fullName!,
-    }),
-  )
+    .sort((a: any, b: any) => a.title.localeCompare(b.title))
 
   return (
     <article>
