@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import './Card.css'
 
-type ExhibitDisplayListItem = {
+export type ExhibitDisplayListItem = {
   id: number
   title: string
   exhibitorName?: string

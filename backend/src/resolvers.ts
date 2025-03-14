@@ -98,15 +98,16 @@ const mutationResolvers: MutationResolvers<Context> = {
     return user
   },
   // @ts-expect-error ts2345
-  claimTable: async (_, { number }, { db, exhibitor }) => {
+  claimTable: async (_, { number }, { db, exhibition, exhibitor }) => {
     if (!exhibitor) {
       throw new Error('You must be logged in to claim a table')
     }
-    return await db.table.claim(number, exhibitor)
+    return await db.table.claim(exhibition, number, exhibitor)
   },
   // @ts-expect-error ts2345
-  releaseTable: async (_, { number }, { db, exhibitor, user }) => {
+  releaseTable: async (_, { number }, { db, exhibition, exhibitor, user }) => {
     return await db.table.release(
+      exhibition,
       number,
       user?.isAdministrator ? null : exhibitor,
     )
