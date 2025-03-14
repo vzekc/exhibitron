@@ -29,24 +29,25 @@ const mastodonUrl = (mastodon: string) => {
   }
 }
 
-const ExhibitorDetails = (props: {
+const ExhibitorDetails = ({
+  id,
+  onLoaded,
+}: {
   id: number
   onLoaded?: (exhibitor: { fullName: string }) => void
 }) => {
   const { data } = useQuery(GET_EXHIBITOR, {
-    variables: { id: props.id },
+    variables: { id },
   })
   const { user } = data?.getExhibitor || {}
   const { fullName, bio, contacts } = user || {}
   const { email, phone, mastodon, website } = contacts || {}
 
   useEffect(() => {
-    if (data) {
-      props.onLoaded?.({
-        fullName: fullName || '',
-      })
+    if (onLoaded && fullName) {
+      onLoaded({ fullName })
     }
-  }, [data, fullName])
+  }, [onLoaded, fullName])
 
   return (
     <section className="exhibitor-details">
