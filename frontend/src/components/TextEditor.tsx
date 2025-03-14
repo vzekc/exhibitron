@@ -1,5 +1,6 @@
 import Quill, { Range, Delta, EmitterSource } from 'quill'
 import { useEffect, useLayoutEffect, useRef } from 'react'
+import DOMPurify from 'dompurify'
 import 'quill/dist/quill.snow.css'
 import './TextEditor.css'
 
@@ -18,6 +19,9 @@ interface TextEditorProps {
     source: EmitterSource,
   ) => void
 }
+
+const cleanHtmlContent = (html: string): string =>
+  DOMPurify.sanitize(html.replace(/&nbsp;/g, ' '))
 
 const TextEditor = ({
   readOnly,
@@ -75,7 +79,7 @@ const TextEditor = ({
     // Set initial content if we have it
     if (defaultValueRef.current) {
       const convertedContent = quill.clipboard.convert({
-        html: defaultValueRef.current,
+        html: cleanHtmlContent(defaultValueRef.current),
       })
       quill.setContents(convertedContent)
     }
@@ -83,7 +87,8 @@ const TextEditor = ({
     quill.on(Quill.events.TEXT_CHANGE, (...args) => {
       isUserInputRef.current = true
       onTextChangeRef.current?.(...args)
-      onChangeRef.current?.(quill.getSemanticHTML())
+      const html = quill.getSemanticHTML()
+      onChangeRef.current?.(cleanHtmlContent(html))
     })
 
     quill.on(Quill.events.SELECTION_CHANGE, (...args) => {
@@ -105,7 +110,9 @@ const TextEditor = ({
     ) {
       const quill = quillRef.current
       const currentContent = quill.getContents()
-      const newContent = quill.clipboard.convert({ html: defaultValue })
+      const newContent = quill.clipboard.convert({
+        html: defaultValue ? cleanHtmlContent(defaultValue) : '',
+      })
 
       if (
         defaultValue &&

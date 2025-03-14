@@ -15,6 +15,7 @@ import { wrap } from '@mikro-orm/core'
 import { GraphQLError } from 'graphql/error/index.js'
 import { requireAdmin } from './db.js'
 import { Exhibit } from './entities.js'
+import DOMPurify from 'isomorphic-dompurify'
 import GraphQLDate from './modules/common/GraphQLDate.js'
 
 const queryResolvers: QueryResolvers<Context> = {
@@ -129,7 +130,7 @@ const mutationResolvers: MutationResolvers<Context> = {
     const exhibit = db.em.getRepository(Exhibit).create({
       exhibition,
       title,
-      text,
+      text: DOMPurify.sanitize(text || ''),
       table,
       exhibitor,
     })
@@ -137,7 +138,7 @@ const mutationResolvers: MutationResolvers<Context> = {
     return exhibit
   },
   // @ts-expect-error ts2345
-  updateExhibit: async (_, { id, ...rest }, { db, exhibitor, user }) => {
+  updateExhibit: async (_, { id, text, ...rest }, { db, exhibitor, user }) => {
     const exhibit = await db.exhibit.findOneOrFail({ id })
     if (exhibitor !== exhibit.exhibitor && !user?.isAdministrator) {
       throw new Error('You do not have permission to update this exhibit')
@@ -151,7 +152,10 @@ const mutationResolvers: MutationResolvers<Context> = {
           })
         : null
     }
-    return wrap(exhibit).assign({ table, ...rest })
+    if (text) {
+      text = DOMPurify.sanitize(text)
+    }
+    return wrap(exhibit).assign({ table, text, ...rest })
   },
   register: async (_, { input }, { exhibition, db }) => {
     const { email, message, ...rest } = input
@@ -207,13 +211,21 @@ const mutationResolvers: MutationResolvers<Context> = {
   // page resolvers
   createPage: async (_, { key, title, text }, { db, user, exhibition }) => {
     requireAdmin(user)
-    const page = db.page.create({ exhibition, key, title, text })
+    const page = db.page.create({
+      exhibition,
+      key,
+      title,
+      text: DOMPurify.sanitize(text),
+    })
     await db.em.persistAndFlush(page)
     return page
   },
   updatePage: async (_, { id, key, title, text }, { db, user }) => {
     requireAdmin(user)
     const page = await db.page.findOneOrFail({ id })
+    if (text) {
+      text = DOMPurify.sanitize(text)
+    }
     wrap(page).assign({ key, title, text })
     await db.em.persistAndFlush(page)
     return page

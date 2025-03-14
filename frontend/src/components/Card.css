@@ -34,6 +34,13 @@
 .card-content {
   flex: 1;
   margin-bottom: 1rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: none;
+}
+
+.card-content p {
+  margin: 0.5rem 0;
 }
 
 .card-content h3 {

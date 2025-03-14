@@ -11,13 +11,6 @@ const GET_EXHIBIT = graphql(`
       table {
         number
       }
-      exhibitor {
-        id
-        user {
-          id
-          fullName
-        }
-      }
     }
   }
 `)
@@ -34,7 +27,8 @@ const ExhibitDetails = ({ id }: { id: number }) => {
       <h1 className="card-title">{exhibit.title}</h1>
       <div
         className="card-content"
-        dangerouslySetInnerHTML={{ __html: exhibit.text || '' }}></div>
+        dangerouslySetInnerHTML={{ __html: exhibit.text || '' }}
+      />
       {exhibit.table && (
         <div className="card-footer">Tisch {exhibit.table.number}</div>
       )}
