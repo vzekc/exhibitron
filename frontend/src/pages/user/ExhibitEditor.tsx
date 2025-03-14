@@ -28,12 +28,7 @@ const GET_DATA = graphql(`
 `)
 
 const UPDATE_EXHIBIT = graphql(`
-  mutation UpdateExhibit(
-    $id: Int!
-    $title: String
-    $text: String
-    $table: Int
-  ) {
+  mutation UpdateExhibit($id: Int!, $title: String, $text: String, $table: Int) {
     updateExhibit(id: $id, title: $title, text: $text, table: $table) {
       id
       title
@@ -53,14 +48,10 @@ const ExhibitEditor = () => {
   })
   const [title, setTitle] = useState('')
   const [text, setText] = useState('')
-  const [selectedTable, setSelectedTable] = useState<number | undefined>(
-    undefined,
-  )
+  const [selectedTable, setSelectedTable] = useState<number | undefined>(undefined)
   const [originalTitle, setOriginalTitle] = useState('')
   const [originalText, setOriginalText] = useState('')
-  const [originalTable, setOriginalTable] = useState<number | undefined>(
-    undefined,
-  )
+  const [originalTable, setOriginalTable] = useState<number | undefined>(undefined)
   const [updateExhibit] = useMutation(UPDATE_EXHIBIT)
 
   useEffect(() => {
@@ -80,8 +71,7 @@ const ExhibitEditor = () => {
     }
   }, [data, setDetailName])
 
-  const handleTitleChange = (e: ContentEditableEvent) =>
-    setTitle(e.target.value)
+  const handleTitleChange = (e: ContentEditableEvent) => setTitle(e.target.value)
 
   const handleTableChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
     setSelectedTable(e.target.value ? Number(e.target.value) : undefined)
@@ -121,11 +111,7 @@ const ExhibitEditor = () => {
     <div>
       <h1>Exponat bearbeiten</h1>
       <article>
-        <ContentEditable
-          html={title}
-          onChange={handleTitleChange}
-          tagName="h2"
-        />
+        <ContentEditable html={title} onChange={handleTitleChange} tagName="h2" />
         <label>
           Tisch
           <select value={selectedTable} onChange={handleTableChange}>

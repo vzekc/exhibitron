@@ -81,18 +81,14 @@ export const register = async (app: FastifyInstance) => {
     '/auth/forum',
     async (request: FastifyRequest<{ Querystring: AuthForumQuery }>, reply) => {
       const redirectUrl = request.headers.referer || '/'
-      const authUrl = await app.forumOAuth2.generateAuthorizationUri(
-        request,
-        reply,
-      )
+      const authUrl = await app.forumOAuth2.generateAuthorizationUri(request, reply)
       request.session.redirectUrl = redirectUrl
       return reply.redirect(authUrl)
     },
   )
 
   app.get('/auth/callback', async function (request, reply) {
-    const { token } =
-      await this.forumOAuth2.getAccessTokenFromAuthorizationCodeFlow(request)
+    const { token } = await this.forumOAuth2.getAccessTokenFromAuthorizationCodeFlow(request)
 
     // Retrieve user info from IdP
     const userInfo = await getUserInfo(token.access_token)
@@ -103,11 +99,7 @@ export const register = async (app: FastifyInstance) => {
       throw new AuthError(`Dein Benutzerstatus ${rank} ist nicht ausreichend`)
     }
 
-    const user = await db.user.ensureVzEkCUser(
-      nickname,
-      email,
-      administratorRanks.includes(rank),
-    )
+    const user = await db.user.ensureVzEkCUser(nickname, email, administratorRanks.includes(rank))
 
     request.session.userId = user.id
 

@@ -19,11 +19,7 @@ interface ExhibitListProps {
   notFoundLabel?: string
 }
 
-const ExhibitList = ({
-  exhibits,
-  notFoundLabel,
-  onClick,
-}: ExhibitListProps) => {
+const ExhibitList = ({ exhibits, notFoundLabel, onClick }: ExhibitListProps) => {
   const navigate = useNavigate()
   const sortedExhibits = [...exhibits].sort((a, b) => {
     const titleA = a.title?.toLowerCase() || ''
@@ -45,16 +41,11 @@ const ExhibitList = ({
   return (
     <div className="cards-grid">
       {sortedExhibits.map((exhibit, index: number) => (
-        <div
-          key={index}
-          onClick={() => handleClick(exhibit.id)}
-          className="card clickable">
+        <div key={index} onClick={() => handleClick(exhibit.id)} className="card clickable">
           <div className="card-title">{exhibit.title}</div>
           <div className="card-content"></div>
           <div className="card-footer">
-            {someNames && (
-              <div className="card-subtitle">{getExhibitorName(exhibit)}</div>
-            )}
+            {someNames && <div className="card-subtitle">{getExhibitorName(exhibit)}</div>}
             {exhibit.table && <div>Tisch {exhibit.table.number}</div>}
           </div>
         </div>

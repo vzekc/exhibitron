@@ -8,20 +8,11 @@ interface TextEditorProps {
   readOnly?: boolean
   defaultValue?: string
   onChange?: (html: string) => void
-  onTextChange?: (
-    delta: Delta,
-    oldContent: Delta,
-    source: EmitterSource,
-  ) => void
-  onSelectionChange?: (
-    range: Range,
-    oldRange: Range,
-    source: EmitterSource,
-  ) => void
+  onTextChange?: (delta: Delta, oldContent: Delta, source: EmitterSource) => void
+  onSelectionChange?: (range: Range, oldRange: Range, source: EmitterSource) => void
 }
 
-const cleanHtmlContent = (html: string): string =>
-  DOMPurify.sanitize(html.replace(/&nbsp;/g, ' '))
+const cleanHtmlContent = (html: string): string => DOMPurify.sanitize(html.replace(/&nbsp;/g, ' '))
 
 const TextEditor = ({
   readOnly,
@@ -57,9 +48,7 @@ const TextEditor = ({
     const container = containerRef.current
     if (!container) return
 
-    const editorContainer = container.appendChild(
-      container.ownerDocument.createElement('div'),
-    )
+    const editorContainer = container.appendChild(container.ownerDocument.createElement('div'))
     const quill = new Quill(editorContainer, {
       theme: 'snow',
       modules: {
@@ -103,21 +92,14 @@ const TextEditor = ({
 
   // Separate effect to handle content updates
   useEffect(() => {
-    if (
-      quillRef.current &&
-      defaultValue !== undefined &&
-      !isUserInputRef.current
-    ) {
+    if (quillRef.current && defaultValue !== undefined && !isUserInputRef.current) {
       const quill = quillRef.current
       const currentContent = quill.getContents()
       const newContent = quill.clipboard.convert({
         html: defaultValue ? cleanHtmlContent(defaultValue) : '',
       })
 
-      if (
-        defaultValue &&
-        JSON.stringify(currentContent) !== JSON.stringify(newContent)
-      ) {
+      if (defaultValue && JSON.stringify(currentContent) !== JSON.stringify(newContent)) {
         quill.setContents(newContent)
       }
     }

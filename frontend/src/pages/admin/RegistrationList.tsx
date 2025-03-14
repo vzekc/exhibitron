@@ -40,9 +40,7 @@ const RegistrationList = () => {
     key: TableColumn
     direction: 'ascending' | 'descending'
   }>({ key: 'createdAt', direction: 'descending' })
-  const [sortedRegistrations, setSortedRegistrations] = useState<Registrations>(
-    [],
-  )
+  const [sortedRegistrations, setSortedRegistrations] = useState<Registrations>([])
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -83,11 +81,7 @@ const RegistrationList = () => {
 
   const requestSort = (key: TableColumn) => {
     let direction: 'ascending' | 'descending' = 'ascending'
-    if (
-      sortConfig &&
-      sortConfig.key === key &&
-      sortConfig.direction === 'ascending'
-    ) {
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
       direction = 'descending'
     }
     setSortConfig({ key, direction })
@@ -125,10 +119,7 @@ const RegistrationList = () => {
               className="clickable-row">
               {tableColumns.map((column) => (
                 <td key={column}>
-                  {formatValue(
-                    column,
-                    registration[column] as string | number | boolean,
-                  )}
+                  {formatValue(column, registration[column] as string | number | boolean)}
                 </td>
               ))}
             </tr>

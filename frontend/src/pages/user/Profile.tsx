@@ -88,17 +88,14 @@ const Profile = () => {
       <article>
         <h2>Aussteller-Profil</h2>
         <p>
-          Hier kannst du dein Profil bearbeiten. Alle Informationen, die Du hier
-          eingibst, sind öffentlich sichtbar.
+          Hier kannst du dein Profil bearbeiten. Alle Informationen, die Du hier eingibst, sind
+          öffentlich sichtbar.
         </p>
         <form onSubmit={handleSubmit(updateProfile)}>
           <fieldset>
             <label>
               Angezeigter Name:
-              <input
-                type="string"
-                {...register('fullName', { required: true })}
-              />
+              <input type="string" {...register('fullName', { required: true })} />
             </label>
             <label>
               Über mich:

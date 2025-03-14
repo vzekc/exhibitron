@@ -27,17 +27,14 @@ const Page: React.FC<PageProps> = ({ pageKey }) => {
   if (loading) return <div>Lade...</div>
   if (error) return <div>Fehler: {error.message}</div>
 
-  const page = data.getCurrentExhibition.pages.find(
-    (page: { key: string }) => page.key === pageKey,
-  )
+  const page = data.getCurrentExhibition.pages.find((page: { key: string }) => page.key === pageKey)
 
   if (!page) {
     if (user?.isAdministrator) {
       return (
         <div>
           <p>
-            Seite <strong>"{pageKey}"</strong> nicht in der Datenbank
-            gefunden.{' '}
+            Seite <strong>"{pageKey}"</strong> nicht in der Datenbank gefunden.{' '}
           </p>
           <a href={`/admin/page/${pageKey}`}>Seite anlegen</a>
         </div>

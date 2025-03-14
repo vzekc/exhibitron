@@ -21,9 +21,7 @@ export class Migration20250226052115_passwort_reset_token_and_topic extends Migr
     this.addSql(`alter table "registration" drop column "topic";`)
 
     this.addSql(`drop index "user_password_reset_token_index";`)
-    this.addSql(
-      `alter table "user" drop constraint "user_password_reset_token_unique";`,
-    )
+    this.addSql(`alter table "user" drop constraint "user_password_reset_token_unique";`)
     this.addSql(
       `alter table "user" drop column "password_reset_token", drop column "pasword_reset_token_expires";`,
     )

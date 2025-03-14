@@ -1,14 +1,8 @@
 import { expect } from 'vitest'
 import { graphql } from 'gql.tada'
-import {
-  ExecuteOperationFunction,
-  graphqlTest,
-  login,
-} from '../../test/apollo.js'
+import { ExecuteOperationFunction, graphqlTest, login } from '../../test/apollo.js'
 
-const getUserToExhibitorMap = async (
-  graphqlRequest: ExecuteOperationFunction,
-) => {
+const getUserToExhibitorMap = async (graphqlRequest: ExecuteOperationFunction) => {
   const result = await graphqlRequest(
     graphql(`
       query GetExhibitors {
@@ -24,9 +18,10 @@ const getUserToExhibitorMap = async (
     `),
   )
   return new Map<number, number>(
-    result.data?.getCurrentExhibition?.exhibitors?.map(
-      ({ id, user: { id: userId } }) => [userId, id],
-    ),
+    result.data?.getCurrentExhibition?.exhibitors?.map(({ id, user: { id: userId } }) => [
+      userId,
+      id,
+    ]),
   )
 }
 
@@ -99,9 +94,7 @@ graphqlTest('claim and release', async (graphqlRequest) => {
       { number: 1 },
       daffy,
     )
-    expect(result.errors![0].message).toBe(
-      'The requested table is assigned to another exhibitor',
-    )
+    expect(result.errors![0].message).toBe('The requested table is assigned to another exhibitor')
   }
 
   // verify that daffy cannot release donald's table
@@ -123,9 +116,7 @@ graphqlTest('claim and release', async (graphqlRequest) => {
       { number: 1 },
       daffy,
     )
-    expect(result.errors![0].message).toBe(
-      'Cannot release table claimed by another exhibitor',
-    )
+    expect(result.errors![0].message).toBe('Cannot release table claimed by another exhibitor')
   }
 
   // verify that table can be released
@@ -257,9 +248,7 @@ graphqlTest('claim and release', async (graphqlRequest) => {
       { number: 2 },
       daffy,
     )
-    expect(result.errors![0].message).toBe(
-      'The requested table is assigned to another exhibitor',
-    )
+    expect(result.errors![0].message).toBe('The requested table is assigned to another exhibitor')
   }
 
   // expect that donald can claim the table now (already owns it)

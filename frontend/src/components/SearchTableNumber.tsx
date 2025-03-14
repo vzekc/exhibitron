@@ -36,9 +36,7 @@ const SearchTableNumber = () => {
       <fieldset role="group">
         {isMobileDevice() && (
           <button className="button image-only-button" onClick={scanQrCode}>
-            <img
-              src="/scan-qr-code.svg"
-              className="inverted-image button-image"></img>
+            <img src="/scan-qr-code.svg" className="inverted-image button-image"></img>
           </button>
         )}
         <input
@@ -48,9 +46,7 @@ const SearchTableNumber = () => {
           style={{ width: '4em' }}
         />
         <button className="butto image-only-button" type="submit">
-          <img
-            src="/search-table.svg"
-            className="inverted-image button-image"></img>
+          <img src="/search-table.svg" className="inverted-image button-image"></img>
         </button>
       </fieldset>
     </form>

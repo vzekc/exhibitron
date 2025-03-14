@@ -77,9 +77,7 @@ export class TestSeeder extends Seeder {
         exhibition,
         user,
       })
-      exhibits?.forEach((props) =>
-        em.create(Exhibit, { ...props, exhibitor, exhibition }),
-      )
+      exhibits?.forEach((props) => em.create(Exhibit, { ...props, exhibitor, exhibition }))
     })
   }
 }

@@ -44,9 +44,14 @@
   transition: background-color 0.2s;
   padding: 0;
   line-height: 1;
+  transform-origin: center center;
 }
 
 .table-number:hover {
   background-color: rgba(0, 123, 255, 1);
   z-index: 1;
+}
+
+.table-rotated {
+  transform: rotate(90deg);
 }

@@ -1,9 +1,4 @@
-import {
-  Entity,
-  EntityRepositoryType,
-  ManyToOne,
-  Property,
-} from '@mikro-orm/core'
+import { Entity, EntityRepositoryType, ManyToOne, Property } from '@mikro-orm/core'
 import { BaseEntity } from '../common/base.entity.js'
 import { Table } from '../table/table.entity.js'
 import { ExhibitRepository } from './exhibit.repository.js'

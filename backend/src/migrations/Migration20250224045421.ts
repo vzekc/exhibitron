@@ -13,13 +13,9 @@ export class Migration20250224045421 extends Migration {
 
     this.addSql(`alter table "user" rename column "username" to "nickname";`)
     this.addSql(`create index "user_email_index" on "user" ("email");`)
-    this.addSql(
-      `alter table "user" add constraint "user_email_unique" unique ("email");`,
-    )
+    this.addSql(`alter table "user" add constraint "user_email_unique" unique ("email");`)
     this.addSql(`create index "user_nickname_index" on "user" ("nickname");`)
-    this.addSql(
-      `alter table "user" add constraint "user_nickname_unique" unique ("nickname");`,
-    )
+    this.addSql(`alter table "user" add constraint "user_nickname_unique" unique ("nickname");`)
 
     // Remove email from contacts
     this.addSql(`update "user" set "contacts" = "contacts" - 'email';`)
@@ -40,8 +36,6 @@ export class Migration20250224045421 extends Migration {
 
     this.addSql(`alter table "user" rename column "email" to "username";`)
     this.addSql(`create index "user_username_index" on "user" ("username");`)
-    this.addSql(
-      `alter table "user" add constraint "user_username_unique" unique ("username");`,
-    )
+    this.addSql(`alter table "user" add constraint "user_username_unique" unique ("username");`)
   }
 }

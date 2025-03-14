@@ -58,19 +58,12 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
 
   return (
     <Modal title="Login" isOpen={isOpen} onClose={onClose}>
-      <form
-        onSubmit={handleSubmit(loginHandler)}
-        onChange={() => setLoginFailed(false)}>
+      <form onSubmit={handleSubmit(loginHandler)} onChange={() => setLoginFailed(false)}>
         <label>
-          Email-Adresse:{' '}
-          <input type="email" {...register('email', { required: true })} />
+          Email-Adresse: <input type="email" {...register('email', { required: true })} />
         </label>
         <label>
-          Passwort:{' '}
-          <input
-            type="password"
-            {...register('password', { required: true })}
-          />
+          Passwort: <input type="password" {...register('password', { required: true })} />
         </label>
         <p className="login-failed">
           {loginFailed && 'Unbekannte Email-Adresse oder falsches Passwort'}

@@ -1,8 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import React from 'react'
-import ExhibitList, {
-  ExhibitDisplayListItem,
-} from '../components/ExhibitList.tsx'
+import ExhibitList, { ExhibitDisplayListItem } from '../components/ExhibitList.tsx'
 import { useUser } from '../contexts/UserContext.ts'
 import { graphql } from 'gql.tada'
 import { useApolloClient, useMutation, useQuery } from '@apollo/client'
@@ -64,20 +62,14 @@ const TableSearchResult = () => {
 
   if (!data) return null
 
-  const handleClaimTable = async (
-    tableId: number,
-    e: React.MouseEvent<HTMLButtonElement>,
-  ) => {
+  const handleClaimTable = async (tableId: number, e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
     await claimTable({ variables: { number: tableId } })
     await apolloClient.resetStore()
     navigate(`/table/${tableId}`)
   }
 
-  const handleReleaseTable = async (
-    tableId: number,
-    e: React.MouseEvent<HTMLButtonElement>,
-  ) => {
+  const handleReleaseTable = async (tableId: number, e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
     await releaseTable({ variables: { number: tableId } })
     await apolloClient.resetStore()
@@ -91,15 +83,9 @@ const TableSearchResult = () => {
     (exhibit) => exhibit.table?.number !== tableNumber,
   )
   const noTableExhibits = exhibitorExhibits?.filter((exhibit) => !exhibit.table)
-  const onAnyTableExhibits = exhibitorExhibits?.filter(
-    (exhibit) => exhibit.table,
-  )
+  const onAnyTableExhibits = exhibitorExhibits?.filter((exhibit) => exhibit.table)
 
-  const OneOrMoreExhibits = ({
-    exhibits,
-  }: {
-    exhibits: ExhibitDisplayListItem[] | undefined
-  }) => {
+  const OneOrMoreExhibits = ({ exhibits }: { exhibits: ExhibitDisplayListItem[] | undefined }) => {
     switch (exhibits?.length) {
       case undefined:
       case 0:
@@ -141,9 +127,7 @@ const TableSearchResult = () => {
       return <></>
     } else if (!exhibitor) {
       return (
-        <button
-          onClick={handleClaimTable.bind(null, tableNumber)}
-          type="submit">
+        <button onClick={handleClaimTable.bind(null, tableNumber)} type="submit">
           Tisch {tableNumber} belegen
         </button>
       )
@@ -152,9 +136,7 @@ const TableSearchResult = () => {
       (currentUser.id === exhibitor.user.id || currentUser.isAdministrator)
     ) {
       return (
-        <button
-          onClick={handleReleaseTable.bind(null, tableNumber)}
-          type="submit">
+        <button onClick={handleReleaseTable.bind(null, tableNumber)} type="submit">
           Tisch {tableNumber} freigeben
         </button>
       )

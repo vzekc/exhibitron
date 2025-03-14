@@ -92,67 +92,41 @@ ALTER TABLE "exhibit"
   }
 
   override async down(): Promise<void> {
-    this.addSql(
-      `alter table "registration" drop constraint "registration_exhibition_id_foreign";`,
-    )
+    this.addSql(`alter table "registration" drop constraint "registration_exhibition_id_foreign";`)
 
-    this.addSql(
-      `alter table "exhibitor" drop constraint "exhibitor_exhibition_id_foreign";`,
-    )
+    this.addSql(`alter table "exhibitor" drop constraint "exhibitor_exhibition_id_foreign";`)
 
-    this.addSql(
-      `alter table "table" drop constraint "table_exhibition_id_foreign";`,
-    )
+    this.addSql(`alter table "table" drop constraint "table_exhibition_id_foreign";`)
 
-    this.addSql(
-      `alter table "exhibit" drop constraint "exhibit_exhibition_id_foreign";`,
-    )
+    this.addSql(`alter table "exhibit" drop constraint "exhibit_exhibition_id_foreign";`)
 
-    this.addSql(
-      `alter table "table" drop constraint "table_exhibitor_id_foreign";`,
-    )
+    this.addSql(`alter table "table" drop constraint "table_exhibitor_id_foreign";`)
 
-    this.addSql(
-      `alter table "exhibit" drop constraint "exhibit_exhibitor_id_foreign";`,
-    )
+    this.addSql(`alter table "exhibit" drop constraint "exhibit_exhibitor_id_foreign";`)
 
     this.addSql(`drop table if exists "exhibition" cascade;`)
 
     this.addSql(`drop table if exists "exhibitor" cascade;`)
 
-    this.addSql(
-      `alter table "table" drop constraint "table_exhibitor_id_foreign";`,
-    )
+    this.addSql(`alter table "table" drop constraint "table_exhibitor_id_foreign";`)
 
-    this.addSql(
-      `alter table "exhibit" drop constraint "exhibit_exhibitor_id_foreign";`,
-    )
+    this.addSql(`alter table "exhibit" drop constraint "exhibit_exhibitor_id_foreign";`)
 
     this.addSql(
       `alter table "registration" drop constraint "registration_exhibition_id_email_unique";`,
     )
     this.addSql(`alter table "registration" drop column "exhibition_id";`)
 
-    this.addSql(
-      `alter table "registration" add column "event_id" varchar(255) null;`,
-    )
+    this.addSql(`alter table "registration" add column "event_id" varchar(255) null;`)
     this.addSql(`update registration set event_id = 'cc2025';`)
-    this.addSql(
-      `alter table "registration" alter column "event_id" set not null;`,
-    )
-    this.addSql(
-      `create index "registration_event_id_index" on "registration" ("event_id");`,
-    )
+    this.addSql(`alter table "registration" alter column "event_id" set not null;`)
+    this.addSql(`create index "registration_event_id_index" on "registration" ("event_id");`)
     this.addSql(
       `alter table "registration" add constraint "registration_event_id_email_unique" unique ("event_id", "email");`,
     )
 
-    this.addSql(
-      `alter table "table" drop constraint "table_exhibition_id_number_unique";`,
-    )
-    this.addSql(
-      `alter table "table" drop column "exhibition_id", drop column "number";`,
-    )
+    this.addSql(`alter table "table" drop constraint "table_exhibition_id_number_unique";`)
+    this.addSql(`alter table "table" drop column "exhibition_id", drop column "number";`)
 
     this.addSql(
       `alter table "table" add constraint "table_exhibitor_id_foreign" foreign key ("exhibitor_id") references "user" ("id") on update cascade on delete set null;`,

@@ -44,14 +44,8 @@ const Breadcrumbs = () => {
             ? detailNames[path] || breadcrumbMap[segment] || segment
             : breadcrumbMap[segment] || segment
           return (
-            <li
-              key={path}
-              className={`breadcrumb-item ${isLast ? 'active' : ''}`}>
-              {isLast || !routeExists(path, routes) ? (
-                label
-              ) : (
-                <Link to={path}>{label}</Link>
-              )}
+            <li key={path} className={`breadcrumb-item ${isLast ? 'active' : ''}`}>
+              {isLast || !routeExists(path, routes) ? label : <Link to={path}>{label}</Link>}
             </li>
           )
         })}

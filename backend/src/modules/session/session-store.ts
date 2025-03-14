@@ -12,10 +12,7 @@ export class SessionStore implements fastifySession.SessionStore {
 
   async get(
     sid: string,
-    callback: (
-      err: Error | null,
-      session?: FastifySessionObject | null,
-    ) => void,
+    callback: (err: Error | null, session?: FastifySessionObject | null) => void,
   ) {
     try {
       const session = await this.em.findOne(Session, { sid })
@@ -29,11 +26,7 @@ export class SessionStore implements fastifySession.SessionStore {
     }
   }
 
-  async set(
-    sid: string,
-    sess: FastifySessionObject,
-    callback?: (err?: Error) => void,
-  ) {
+  async set(sid: string, sess: FastifySessionObject, callback?: (err?: Error) => void) {
     try {
       let session = await this.em.findOne(Session, { sid })
       const expire = sess.cookie.expires

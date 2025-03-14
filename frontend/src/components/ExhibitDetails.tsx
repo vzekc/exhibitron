@@ -25,13 +25,8 @@ const ExhibitDetails = ({ id }: { id: number }) => {
   return (
     <section className="card">
       <h1 className="card-title">{exhibit.title}</h1>
-      <div
-        className="card-content"
-        dangerouslySetInnerHTML={{ __html: exhibit.text || '' }}
-      />
-      {exhibit.table && (
-        <div className="card-footer">Tisch {exhibit.table.number}</div>
-      )}
+      <div className="card-content" dangerouslySetInnerHTML={{ __html: exhibit.text || '' }} />
+      {exhibit.table && <div className="card-footer">Tisch {exhibit.table.number}</div>}
     </section>
   )
 }

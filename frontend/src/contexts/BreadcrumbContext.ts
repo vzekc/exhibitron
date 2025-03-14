@@ -5,9 +5,7 @@ interface BreadcrumbContextType {
   setDetailName: (path: string, name: string) => void
 }
 
-export const BreadcrumbContext = createContext<
-  BreadcrumbContextType | undefined
->(undefined)
+export const BreadcrumbContext = createContext<BreadcrumbContextType | undefined>(undefined)
 
 export const useBreadcrumb = () => {
   const context = useContext(BreadcrumbContext)

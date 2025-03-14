@@ -28,12 +28,7 @@ const CREATE_PAGE = gql`
 `
 
 const UPDATE_PAGE = gql`
-  mutation UpdatePage(
-    $id: Int!
-    $key: String!
-    $title: String!
-    $text: String!
-  ) {
+  mutation UpdatePage($id: Int!, $key: String!, $title: String!, $text: String!) {
     updatePage(id: $id, key: $key, title: $title, text: $text) {
       id
       key
@@ -67,8 +62,7 @@ const PageEditor = () => {
   }, [data])
 
   const hasChanges =
-    (title || '') !== (originalTitle || '') ||
-    (text || '') !== (originalText || '')
+    (title || '') !== (originalTitle || '') || (text || '') !== (originalText || '')
 
   useUnsavedChangesWarning(hasChanges)
 

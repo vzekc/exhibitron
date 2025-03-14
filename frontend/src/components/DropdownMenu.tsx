@@ -1,12 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 
-const DropdownMenu = ({
-  label,
-  children,
-}: {
-  label: string
-  children: React.ReactNode
-}) => {
+const DropdownMenu = ({ label, children }: { label: string; children: React.ReactNode }) => {
   const detailsRef = useRef<HTMLDetailsElement>(null)
 
   useEffect(() => {

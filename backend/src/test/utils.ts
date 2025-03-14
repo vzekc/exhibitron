@@ -50,8 +50,7 @@ export const runCommand = (command: string): void => {
   }
 }
 
-export const createDatabase = (dbName: string) =>
-  runCommand(`createdb ${dbName}`)
+export const createDatabase = (dbName: string) => runCommand(`createdb ${dbName}`)
 
 export const deleteDatabase = (dbName: string) => {
   if (process.env.TEST_KEEP_DB) {

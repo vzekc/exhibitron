@@ -58,16 +58,10 @@ export class UserRepository extends EntityRepository<User> {
     return user
   }
 
-  async ensureVzEkCUser(
-    nickname: string,
-    email: string,
-    isAdministrator: boolean,
-  ) {
+  async ensureVzEkCUser(nickname: string, email: string, isAdministrator: boolean) {
     let user = await this.findOne({ nickname })
     if (user) {
-      logger.debug(
-        `ensureUser found existing user: @{user.nickname} (${user.email})`,
-      )
+      logger.debug(`ensureUser found existing user: @{user.nickname} (${user.email})`)
       if (isAdministrator) {
         // Administrator rights are only granted, but never revoked from the forum
         user.isAdministrator = true
@@ -88,9 +82,7 @@ export class UserRepository extends EntityRepository<User> {
       user.passwordResetToken = Math.random().toString(36).slice(2)
       user.passwordResetTokenExpires = new Date(Date.now() + 3600000)
       await this.getEntityManager().flush()
-      await sendEmail(
-        makePasswordResetEmail(user.email, resetUrl + user.passwordResetToken),
-      )
+      await sendEmail(makePasswordResetEmail(user.email, resetUrl + user.passwordResetToken))
     } else {
       logger.warn(`Password reset requested for unknown user: ${email}`)
     }

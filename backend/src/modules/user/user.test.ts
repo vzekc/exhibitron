@@ -24,11 +24,7 @@ graphqlTest('login', async (graphqlRequest) => {
     expect(result.data?.getCurrentUser).toBeNull()
   }
 
-  const session = await login(
-    graphqlRequest,
-    'meistereder@example.com',
-    'password123',
-  )
+  const session = await login(graphqlRequest, 'meistereder@example.com', 'password123')
 
   {
     const result = await graphqlRequest(
@@ -51,11 +47,7 @@ graphqlTest('login', async (graphqlRequest) => {
 })
 
 graphqlTest('update', async (graphqlRequest) => {
-  const session = await login(
-    graphqlRequest,
-    'meistereder@example.com',
-    'password123',
-  )
+  const session = await login(graphqlRequest, 'meistereder@example.com', 'password123')
 
   {
     const result = await graphqlRequest(
@@ -90,9 +82,7 @@ graphqlTest('lookups', async (graphqlRequest) => {
       `),
       { id: 1002 },
     )
-    expect(result.errors![0].message).toBe(
-      'You must be an administrator to perform this operation',
-    )
+    expect(result.errors![0].message).toBe('You must be an administrator to perform this operation')
   }
 
   const admin = await login(graphqlRequest, 'admin@example.com')
@@ -215,8 +205,7 @@ graphqlTest('password reset', async (graphqlRequest) => {
     const emailArgs = mockedSendEmail.mock.calls[0][0]
     expect(emailArgs.to).toStrictEqual(['donald@example.com'])
     expect(emailArgs.body?.html).toMatch(/resetPassword\?token=[a-z0-9]+/)
-    ;[, token] =
-      emailArgs.body?.html.match(/resetPassword\?token=([a-z0-9]+)/) ?? []
+    ;[, token] = emailArgs.body?.html.match(/resetPassword\?token=([a-z0-9]+)/) ?? []
   }
 
   {
@@ -231,11 +220,7 @@ graphqlTest('password reset', async (graphqlRequest) => {
     expect(result.errors).toBeUndefined()
   }
 
-  const donald = await login(
-    graphqlRequest,
-    'donald@example.com',
-    'newpassword',
-  )
+  const donald = await login(graphqlRequest, 'donald@example.com', 'newpassword')
   {
     const result = await graphqlRequest(
       graphql(`

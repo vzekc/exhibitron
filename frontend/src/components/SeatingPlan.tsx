@@ -14,496 +14,114 @@ const table_coordinates = {
 
     { number: 8, topLeft: { x: 190, y: 192 }, bottomRight: { x: 217, y: 205 } },
     { number: 9, topLeft: { x: 221, y: 192 }, bottomRight: { x: 252, y: 205 } },
-    {
-      number: 10,
-      topLeft: { x: 254, y: 192 },
-      bottomRight: { x: 285, y: 205 },
-    },
-    {
-      number: 11,
-      topLeft: { x: 287, y: 192 },
-      bottomRight: { x: 319, y: 205 },
-    },
-    {
-      number: 12,
-      topLeft: { x: 321, y: 192 },
-      bottomRight: { x: 351, y: 205 },
-    },
-    {
-      number: 13,
-      topLeft: { x: 354, y: 192 },
-      bottomRight: { x: 385, y: 205 },
-    },
-    {
-      number: 14,
-      topLeft: { x: 387, y: 192 },
-      bottomRight: { x: 418, y: 205 },
-    },
-    {
-      number: 15,
-      topLeft: { x: 422, y: 192 },
-      bottomRight: { x: 452, y: 205 },
-    },
-    {
-      number: 16,
-      topLeft: { x: 454, y: 192 },
-      bottomRight: { x: 485, y: 205 },
-    },
-    {
-      number: 17,
-      topLeft: { x: 487, y: 192 },
-      bottomRight: { x: 518, y: 205 },
-    },
-    {
-      number: 18,
-      topLeft: { x: 202, y: 233 },
-      bottomRight: { x: 217, y: 248 },
-    },
-    {
-      number: 19,
-      topLeft: { x: 237, y: 233 },
-      bottomRight: { x: 252, y: 248 },
-    },
-    {
-      number: 20,
-      topLeft: { x: 272, y: 233 },
-      bottomRight: { x: 287, y: 248 },
-    },
-    {
-      number: 21,
-      topLeft: { x: 307, y: 233 },
-      bottomRight: { x: 322, y: 248 },
-    },
-    {
-      number: 22,
-      topLeft: { x: 342, y: 233 },
-      bottomRight: { x: 357, y: 248 },
-    },
-    {
-      number: 23,
-      topLeft: { x: 377, y: 233 },
-      bottomRight: { x: 392, y: 248 },
-    },
-    {
-      number: 24,
-      topLeft: { x: 412, y: 233 },
-      bottomRight: { x: 427, y: 248 },
-    },
-    {
-      number: 25,
-      topLeft: { x: 447, y: 233 },
-      bottomRight: { x: 462, y: 248 },
-    },
-    {
-      number: 26,
-      topLeft: { x: 482, y: 233 },
-      bottomRight: { x: 497, y: 248 },
-    },
-    {
-      number: 27,
-      topLeft: { x: 517, y: 233 },
-      bottomRight: { x: 532, y: 248 },
-    },
-    {
-      number: 28,
-      topLeft: { x: 202, y: 399 },
-      bottomRight: { x: 217, y: 414 },
-    },
-    {
-      number: 29,
-      topLeft: { x: 237, y: 399 },
-      bottomRight: { x: 252, y: 414 },
-    },
-    {
-      number: 30,
-      topLeft: { x: 272, y: 399 },
-      bottomRight: { x: 287, y: 414 },
-    },
-    {
-      number: 31,
-      topLeft: { x: 307, y: 399 },
-      bottomRight: { x: 322, y: 414 },
-    },
-    {
-      number: 32,
-      topLeft: { x: 342, y: 399 },
-      bottomRight: { x: 357, y: 414 },
-    },
-    {
-      number: 33,
-      topLeft: { x: 377, y: 399 },
-      bottomRight: { x: 392, y: 414 },
-    },
-    {
-      number: 34,
-      topLeft: { x: 412, y: 399 },
-      bottomRight: { x: 427, y: 414 },
-    },
-    {
-      number: 35,
-      topLeft: { x: 447, y: 399 },
-      bottomRight: { x: 462, y: 414 },
-    },
-    {
-      number: 36,
-      topLeft: { x: 482, y: 399 },
-      bottomRight: { x: 497, y: 414 },
-    },
-    {
-      number: 37,
-      topLeft: { x: 517, y: 399 },
-      bottomRight: { x: 532, y: 414 },
-    },
-    {
-      number: 38,
-      topLeft: { x: 552, y: 399 },
-      bottomRight: { x: 567, y: 414 },
-    },
-    {
-      number: 39,
-      topLeft: { x: 587, y: 399 },
-      bottomRight: { x: 602, y: 414 },
-    },
-    {
-      number: 40,
-      topLeft: { x: 202, y: 434 },
-      bottomRight: { x: 217, y: 449 },
-    },
-    {
-      number: 41,
-      topLeft: { x: 237, y: 434 },
-      bottomRight: { x: 252, y: 449 },
-    },
-    {
-      number: 42,
-      topLeft: { x: 272, y: 434 },
-      bottomRight: { x: 287, y: 449 },
-    },
-    {
-      number: 43,
-      topLeft: { x: 307, y: 434 },
-      bottomRight: { x: 322, y: 449 },
-    },
-    {
-      number: 44,
-      topLeft: { x: 342, y: 434 },
-      bottomRight: { x: 357, y: 449 },
-    },
-    {
-      number: 45,
-      topLeft: { x: 377, y: 434 },
-      bottomRight: { x: 392, y: 449 },
-    },
-    {
-      number: 46,
-      topLeft: { x: 412, y: 434 },
-      bottomRight: { x: 427, y: 449 },
-    },
-    {
-      number: 47,
-      topLeft: { x: 447, y: 434 },
-      bottomRight: { x: 462, y: 449 },
-    },
-    {
-      number: 48,
-      topLeft: { x: 482, y: 434 },
-      bottomRight: { x: 497, y: 449 },
-    },
-    {
-      number: 49,
-      topLeft: { x: 517, y: 434 },
-      bottomRight: { x: 532, y: 449 },
-    },
-    {
-      number: 50,
-      topLeft: { x: 552, y: 434 },
-      bottomRight: { x: 567, y: 449 },
-    },
-    {
-      number: 51,
-      topLeft: { x: 587, y: 434 },
-      bottomRight: { x: 602, y: 449 },
-    },
-    {
-      number: 52,
-      topLeft: { x: 202, y: 649 },
-      bottomRight: { x: 217, y: 664 },
-    },
-    {
-      number: 53,
-      topLeft: { x: 237, y: 649 },
-      bottomRight: { x: 252, y: 664 },
-    },
-    {
-      number: 54,
-      topLeft: { x: 272, y: 649 },
-      bottomRight: { x: 287, y: 664 },
-    },
-    {
-      number: 55,
-      topLeft: { x: 307, y: 649 },
-      bottomRight: { x: 322, y: 664 },
-    },
-    {
-      number: 56,
-      topLeft: { x: 342, y: 649 },
-      bottomRight: { x: 357, y: 664 },
-    },
-    {
-      number: 57,
-      topLeft: { x: 377, y: 649 },
-      bottomRight: { x: 392, y: 664 },
-    },
-    {
-      number: 58,
-      topLeft: { x: 412, y: 649 },
-      bottomRight: { x: 427, y: 664 },
-    },
-    {
-      number: 59,
-      topLeft: { x: 447, y: 649 },
-      bottomRight: { x: 462, y: 664 },
-    },
-    {
-      number: 60,
-      topLeft: { x: 482, y: 649 },
-      bottomRight: { x: 497, y: 664 },
-    },
-    {
-      number: 61,
-      topLeft: { x: 517, y: 649 },
-      bottomRight: { x: 532, y: 664 },
-    },
-    {
-      number: 62,
-      topLeft: { x: 552, y: 649 },
-      bottomRight: { x: 567, y: 664 },
-    },
-    {
-      number: 63,
-      topLeft: { x: 587, y: 649 },
-      bottomRight: { x: 602, y: 664 },
-    },
-    {
-      number: 64,
-      topLeft: { x: 202, y: 684 },
-      bottomRight: { x: 217, y: 699 },
-    },
-    {
-      number: 65,
-      topLeft: { x: 237, y: 684 },
-      bottomRight: { x: 252, y: 699 },
-    },
-    {
-      number: 66,
-      topLeft: { x: 272, y: 684 },
-      bottomRight: { x: 287, y: 699 },
-    },
-    {
-      number: 67,
-      topLeft: { x: 307, y: 684 },
-      bottomRight: { x: 322, y: 699 },
-    },
-    {
-      number: 68,
-      topLeft: { x: 342, y: 684 },
-      bottomRight: { x: 357, y: 699 },
-    },
-    {
-      number: 69,
-      topLeft: { x: 377, y: 684 },
-      bottomRight: { x: 392, y: 699 },
-    },
-    {
-      number: 70,
-      topLeft: { x: 412, y: 684 },
-      bottomRight: { x: 427, y: 699 },
-    },
-    {
-      number: 71,
-      topLeft: { x: 447, y: 684 },
-      bottomRight: { x: 462, y: 699 },
-    },
-    {
-      number: 72,
-      topLeft: { x: 482, y: 684 },
-      bottomRight: { x: 497, y: 699 },
-    },
-    {
-      number: 73,
-      topLeft: { x: 517, y: 684 },
-      bottomRight: { x: 532, y: 699 },
-    },
-    {
-      number: 74,
-      topLeft: { x: 552, y: 684 },
-      bottomRight: { x: 567, y: 699 },
-    },
-    {
-      number: 75,
-      topLeft: { x: 587, y: 684 },
-      bottomRight: { x: 602, y: 699 },
-    },
-    {
-      number: 76,
-      topLeft: { x: 307, y: 819 },
-      bottomRight: { x: 322, y: 834 },
-    },
-    {
-      number: 77,
-      topLeft: { x: 342, y: 819 },
-      bottomRight: { x: 357, y: 834 },
-    },
-    {
-      number: 78,
-      topLeft: { x: 377, y: 819 },
-      bottomRight: { x: 392, y: 834 },
-    },
-    {
-      number: 79,
-      topLeft: { x: 412, y: 819 },
-      bottomRight: { x: 427, y: 834 },
-    },
-    {
-      number: 80,
-      topLeft: { x: 447, y: 819 },
-      bottomRight: { x: 462, y: 834 },
-    },
-    {
-      number: 81,
-      topLeft: { x: 482, y: 819 },
-      bottomRight: { x: 497, y: 834 },
-    },
-    {
-      number: 82,
-      topLeft: { x: 517, y: 819 },
-      bottomRight: { x: 532, y: 834 },
-    },
-    {
-      number: 83,
-      topLeft: { x: 552, y: 819 },
-      bottomRight: { x: 567, y: 834 },
-    },
-    {
-      number: 84,
-      topLeft: { x: 587, y: 819 },
-      bottomRight: { x: 602, y: 834 },
-    },
-    {
-      number: 85,
-      topLeft: { x: 622, y: 819 },
-      bottomRight: { x: 637, y: 834 },
-    },
-    {
-      number: 86,
-      topLeft: { x: 657, y: 819 },
-      bottomRight: { x: 672, y: 834 },
-    },
-    {
-      number: 87,
-      topLeft: { x: 692, y: 819 },
-      bottomRight: { x: 707, y: 834 },
-    },
-    {
-      number: 88,
-      topLeft: { x: 727, y: 128 },
-      bottomRight: { x: 742, y: 143 },
-    },
-    {
-      number: 89,
-      topLeft: { x: 727, y: 163 },
-      bottomRight: { x: 742, y: 178 },
-    },
-    {
-      number: 90,
-      topLeft: { x: 727, y: 198 },
-      bottomRight: { x: 742, y: 213 },
-    },
-    {
-      number: 91,
-      topLeft: { x: 727, y: 233 },
-      bottomRight: { x: 742, y: 248 },
-    },
-    {
-      number: 92,
-      topLeft: { x: 727, y: 268 },
-      bottomRight: { x: 742, y: 283 },
-    },
-    {
-      number: 93,
-      topLeft: { x: 727, y: 303 },
-      bottomRight: { x: 742, y: 318 },
-    },
-    {
-      number: 94,
-      topLeft: { x: 727, y: 338 },
-      bottomRight: { x: 742, y: 353 },
-    },
-    {
-      number: 95,
-      topLeft: { x: 727, y: 373 },
-      bottomRight: { x: 742, y: 388 },
-    },
-    {
-      number: 96,
-      topLeft: { x: 727, y: 408 },
-      bottomRight: { x: 742, y: 423 },
-    },
-    {
-      number: 97,
-      topLeft: { x: 727, y: 443 },
-      bottomRight: { x: 742, y: 458 },
-    },
-    {
-      number: 98,
-      topLeft: { x: 727, y: 478 },
-      bottomRight: { x: 742, y: 493 },
-    },
-    {
-      number: 99,
-      topLeft: { x: 727, y: 513 },
-      bottomRight: { x: 742, y: 528 },
-    },
-    {
-      number: 100,
-      topLeft: { x: 727, y: 548 },
-      bottomRight: { x: 742, y: 563 },
-    },
-    {
-      number: 101,
-      topLeft: { x: 727, y: 583 },
-      bottomRight: { x: 742, y: 598 },
-    },
-    {
-      number: 102,
-      topLeft: { x: 727, y: 618 },
-      bottomRight: { x: 742, y: 633 },
-    },
-    {
-      number: 103,
-      topLeft: { x: 727, y: 653 },
-      bottomRight: { x: 742, y: 668 },
-    },
-    {
-      number: 104,
-      topLeft: { x: 727, y: 688 },
-      bottomRight: { x: 742, y: 703 },
-    },
-    {
-      number: 105,
-      topLeft: { x: 727, y: 723 },
-      bottomRight: { x: 742, y: 738 },
-    },
-    {
-      number: 106,
-      topLeft: { x: 727, y: 758 },
-      bottomRight: { x: 742, y: 773 },
-    },
-    {
-      number: 107,
-      topLeft: { x: 727, y: 793 },
-      bottomRight: { x: 742, y: 808 },
-    },
+    { number: 10, topLeft: { x: 254, y: 192 }, bottomRight: { x: 285, y: 205 } },
+    { number: 11, topLeft: { x: 287, y: 192 }, bottomRight: { x: 319, y: 205 } },
+    { number: 12, topLeft: { x: 321, y: 192 }, bottomRight: { x: 351, y: 205 } },
+    { number: 13, topLeft: { x: 354, y: 192 }, bottomRight: { x: 385, y: 205 } },
+    { number: 14, topLeft: { x: 387, y: 192 }, bottomRight: { x: 418, y: 205 } },
+    { number: 15, topLeft: { x: 422, y: 192 }, bottomRight: { x: 452, y: 205 } },
+    { number: 16, topLeft: { x: 454, y: 192 }, bottomRight: { x: 485, y: 205 } },
+    { number: 17, topLeft: { x: 487, y: 192 }, bottomRight: { x: 518, y: 205 } },
+
+    { number: 18, topLeft: { x: 190, y: 223 }, bottomRight: { x: 217, y: 237 } },
+    { number: 19, topLeft: { x: 221, y: 223 }, bottomRight: { x: 252, y: 237 } },
+    { number: 20, topLeft: { x: 254, y: 223 }, bottomRight: { x: 285, y: 237 } },
+    { number: 21, topLeft: { x: 287, y: 223 }, bottomRight: { x: 319, y: 237 } },
+    { number: 22, topLeft: { x: 321, y: 223 }, bottomRight: { x: 351, y: 237 } },
+    { number: 23, topLeft: { x: 354, y: 223 }, bottomRight: { x: 385, y: 237 } },
+    { number: 24, topLeft: { x: 387, y: 223 }, bottomRight: { x: 418, y: 237 } },
+    { number: 25, topLeft: { x: 422, y: 223 }, bottomRight: { x: 452, y: 237 } },
+    { number: 26, topLeft: { x: 454, y: 223 }, bottomRight: { x: 485, y: 237 } },
+    { number: 27, topLeft: { x: 487, y: 223 }, bottomRight: { x: 518, y: 237 } },
+
+    { number: 28, topLeft: { x: 191, y: 396 }, bottomRight: { x: 222, y: 410 } },
+    { number: 29, topLeft: { x: 224, y: 396 }, bottomRight: { x: 255, y: 410 } },
+    { number: 30, topLeft: { x: 257, y: 396 }, bottomRight: { x: 287, y: 410 } },
+    { number: 31, topLeft: { x: 290, y: 396 }, bottomRight: { x: 322, y: 410 } },
+    { number: 32, topLeft: { x: 325, y: 396 }, bottomRight: { x: 355, y: 410 } },
+    { number: 33, topLeft: { x: 358, y: 396 }, bottomRight: { x: 388, y: 410 } },
+    { number: 34, topLeft: { x: 390, y: 396 }, bottomRight: { x: 422, y: 410 } },
+    { number: 35, topLeft: { x: 424, y: 396 }, bottomRight: { x: 455, y: 410 } },
+    { number: 36, topLeft: { x: 457, y: 396 }, bottomRight: { x: 488, y: 410 } },
+    { number: 37, topLeft: { x: 490, y: 396 }, bottomRight: { x: 521, y: 410 } },
+    { number: 38, topLeft: { x: 523, y: 396 }, bottomRight: { x: 555, y: 410 } },
+    { number: 39, topLeft: { x: 557, y: 396 }, bottomRight: { x: 588, y: 410 } },
+
+    { number: 40, topLeft: { x: 191, y: 428 }, bottomRight: { x: 222, y: 442 } },
+    { number: 41, topLeft: { x: 224, y: 428 }, bottomRight: { x: 255, y: 442 } },
+    { number: 42, topLeft: { x: 257, y: 428 }, bottomRight: { x: 287, y: 442 } },
+    { number: 43, topLeft: { x: 290, y: 428 }, bottomRight: { x: 322, y: 442 } },
+    { number: 44, topLeft: { x: 325, y: 428 }, bottomRight: { x: 355, y: 442 } },
+    { number: 45, topLeft: { x: 358, y: 428 }, bottomRight: { x: 388, y: 442 } },
+    { number: 46, topLeft: { x: 390, y: 428 }, bottomRight: { x: 422, y: 442 } },
+    { number: 47, topLeft: { x: 424, y: 428 }, bottomRight: { x: 455, y: 442 } },
+    { number: 48, topLeft: { x: 457, y: 428 }, bottomRight: { x: 488, y: 442 } },
+    { number: 49, topLeft: { x: 490, y: 428 }, bottomRight: { x: 521, y: 442 } },
+    { number: 50, topLeft: { x: 523, y: 428 }, bottomRight: { x: 555, y: 442 } },
+    { number: 51, topLeft: { x: 557, y: 428 }, bottomRight: { x: 588, y: 442 } },
+
+    { number: 52, topLeft: { x: 191, y: 644 }, bottomRight: { x: 222, y: 658 } },
+    { number: 53, topLeft: { x: 224, y: 644 }, bottomRight: { x: 255, y: 658 } },
+    { number: 54, topLeft: { x: 257, y: 644 }, bottomRight: { x: 287, y: 658 } },
+    { number: 55, topLeft: { x: 290, y: 644 }, bottomRight: { x: 322, y: 658 } },
+    { number: 56, topLeft: { x: 325, y: 644 }, bottomRight: { x: 355, y: 658 } },
+    { number: 57, topLeft: { x: 358, y: 644 }, bottomRight: { x: 388, y: 658 } },
+    { number: 58, topLeft: { x: 390, y: 644 }, bottomRight: { x: 422, y: 658 } },
+    { number: 59, topLeft: { x: 424, y: 644 }, bottomRight: { x: 455, y: 658 } },
+    { number: 60, topLeft: { x: 457, y: 644 }, bottomRight: { x: 488, y: 658 } },
+    { number: 61, topLeft: { x: 490, y: 644 }, bottomRight: { x: 521, y: 658 } },
+    { number: 62, topLeft: { x: 523, y: 644 }, bottomRight: { x: 555, y: 658 } },
+    { number: 63, topLeft: { x: 557, y: 644 }, bottomRight: { x: 588, y: 658 } },
+
+    { number: 64, topLeft: { x: 191, y: 676 }, bottomRight: { x: 222, y: 691 } },
+    { number: 65, topLeft: { x: 224, y: 676 }, bottomRight: { x: 255, y: 691 } },
+    { number: 66, topLeft: { x: 257, y: 676 }, bottomRight: { x: 287, y: 691 } },
+    { number: 67, topLeft: { x: 290, y: 676 }, bottomRight: { x: 322, y: 691 } },
+    { number: 68, topLeft: { x: 325, y: 676 }, bottomRight: { x: 355, y: 691 } },
+    { number: 69, topLeft: { x: 358, y: 676 }, bottomRight: { x: 388, y: 691 } },
+    { number: 70, topLeft: { x: 390, y: 676 }, bottomRight: { x: 422, y: 691 } },
+    { number: 71, topLeft: { x: 424, y: 676 }, bottomRight: { x: 455, y: 691 } },
+    { number: 72, topLeft: { x: 457, y: 676 }, bottomRight: { x: 488, y: 691 } },
+    { number: 73, topLeft: { x: 490, y: 676 }, bottomRight: { x: 521, y: 691 } },
+    { number: 74, topLeft: { x: 523, y: 676 }, bottomRight: { x: 555, y: 691 } },
+    { number: 75, topLeft: { x: 557, y: 676 }, bottomRight: { x: 588, y: 691 } },
+
+    { number: 76, topLeft: { x: 290, y: 817 }, bottomRight: { x: 320, y: 831 } },
+    { number: 77, topLeft: { x: 322, y: 817 }, bottomRight: { x: 353, y: 831 } },
+    { number: 78, topLeft: { x: 356, y: 817 }, bottomRight: { x: 387, y: 831 } },
+    { number: 79, topLeft: { x: 390, y: 817 }, bottomRight: { x: 421, y: 831 } },
+    { number: 80, topLeft: { x: 424, y: 817 }, bottomRight: { x: 454, y: 831 } },
+    { number: 81, topLeft: { x: 457, y: 817 }, bottomRight: { x: 487, y: 831 } },
+    { number: 82, topLeft: { x: 490, y: 817 }, bottomRight: { x: 520, y: 831 } },
+    { number: 83, topLeft: { x: 523, y: 817 }, bottomRight: { x: 553, y: 831 } },
+    { number: 84, topLeft: { x: 555, y: 817 }, bottomRight: { x: 587, y: 831 } },
+    { number: 85, topLeft: { x: 590, y: 817 }, bottomRight: { x: 620, y: 831 } },
+    { number: 86, topLeft: { x: 622, y: 817 }, bottomRight: { x: 653, y: 831 } },
+    { number: 87, topLeft: { x: 656, y: 817 }, bottomRight: { x: 687, y: 831 } },
+
+    { number: 88, topLeft: { x: 720, y: 120 }, bottomRight: { x: 733, y: 150 } },
+    { number: 89, topLeft: { x: 720, y: 153 }, bottomRight: { x: 733, y: 184 } },
+    { number: 90, topLeft: { x: 720, y: 187 }, bottomRight: { x: 733, y: 217 } },
+    { number: 91, topLeft: { x: 720, y: 220 }, bottomRight: { x: 733, y: 250 } },
+    { number: 92, topLeft: { x: 720, y: 252 }, bottomRight: { x: 733, y: 283 } },
+
+    { number: 93, topLeft: { x: 720, y: 298 }, bottomRight: { x: 733, y: 329 } },
+    { number: 94, topLeft: { x: 720, y: 331 }, bottomRight: { x: 733, y: 362 } },
+    { number: 95, topLeft: { x: 720, y: 364 }, bottomRight: { x: 733, y: 395 } },
+    { number: 96, topLeft: { x: 720, y: 397 }, bottomRight: { x: 733, y: 428 } },
+    { number: 97, topLeft: { x: 720, y: 431 }, bottomRight: { x: 733, y: 462 } },
+
+    { number: 98, topLeft: { x: 720, y: 474 }, bottomRight: { x: 733, y: 505 } },
+    { number: 99, topLeft: { x: 720, y: 507 }, bottomRight: { x: 733, y: 538 } },
+    { number: 100, topLeft: { x: 720, y: 540 }, bottomRight: { x: 733, y: 572 } },
+    { number: 101, topLeft: { x: 720, y: 574 }, bottomRight: { x: 733, y: 605 } },
+    { number: 102, topLeft: { x: 720, y: 607 }, bottomRight: { x: 733, y: 638 } },
+
+    { number: 103, topLeft: { x: 720, y: 650 }, bottomRight: { x: 733, y: 682 } },
+    { number: 104, topLeft: { x: 720, y: 684 }, bottomRight: { x: 733, y: 715 } },
+    { number: 105, topLeft: { x: 720, y: 717 }, bottomRight: { x: 733, y: 748 } },
+    { number: 106, topLeft: { x: 720, y: 750 }, bottomRight: { x: 733, y: 781 } },
+    { number: 107, topLeft: { x: 720, y: 783 }, bottomRight: { x: 733, y: 815 } },
   ],
 }
 
@@ -514,12 +132,7 @@ interface TableArea {
 
 const tables: TableArea[] = table_coordinates.tables.map((table) => ({
   id: table.number,
-  coords: [
-    table.topLeft.x,
-    table.topLeft.y,
-    table.bottomRight.x,
-    table.bottomRight.y,
-  ],
+  coords: [table.topLeft.x, table.topLeft.y, table.bottomRight.x, table.bottomRight.y],
 }))
 
 export const SeatingPlan: React.FC = () => {
@@ -586,15 +199,31 @@ export const SeatingPlan: React.FC = () => {
         <div className="table-overlays">
           {tables.map((table) => {
             const scaledCoords = getScaledCoords(table.coords)
+            const isRotated = table.id > 87
+
+            // Calculate dimensions
+            const width = scaledCoords[2] - scaledCoords[0]
+            const height = scaledCoords[3] - scaledCoords[1]
+
+            // For rotated tables, we need to adjust the position to account for the rotation
+            let left = scaledCoords[0]
+            let top = scaledCoords[1]
+
+            if (isRotated) {
+              // Adjust position to maintain the same visual center after rotation
+              left = left + (width - height) / 2
+              top = top + (height - width) / 2
+            }
+
             return (
               <div
                 key={table.id}
-                className="table-number"
+                className={`table-number ${isRotated ? 'table-rotated' : ''}`}
                 style={{
-                  left: scaledCoords[0] + 'px',
-                  top: scaledCoords[1] + 'px',
-                  width: scaledCoords[2] - scaledCoords[0] + 'px',
-                  height: scaledCoords[3] - scaledCoords[1] + 'px',
+                  left: left + 'px',
+                  top: top + 'px',
+                  width: isRotated ? height : width + 'px',
+                  height: isRotated ? width : height + 'px',
                 }}
                 onClick={() => handleTableClick(table.id)}>
                 {table.id}

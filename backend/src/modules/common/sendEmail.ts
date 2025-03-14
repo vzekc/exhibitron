@@ -34,23 +34,12 @@ export async function sendEmail({
     return
   }
   if (!from && !ADMIN_EMAIL) {
-    logger.error(
-      'ADMIN_EMAIL is not set, from address is required to send email',
-    )
+    logger.error('ADMIN_EMAIL is not set, from address is required to send email')
     return
   }
-  console.info(
-    'Sending email to',
-    to,
-    'with subject',
-    subject,
-    ' via ',
-    SMTP_HOST,
-  )
+  console.info('Sending email to', to, 'with subject', subject, ' via ', SMTP_HOST)
   const auth =
-    (SMTP_USERNAME &&
-      SMTP_PASSWORD && { user: SMTP_USERNAME, pass: SMTP_PASSWORD }) ||
-    {}
+    (SMTP_USERNAME && SMTP_PASSWORD && { user: SMTP_USERNAME, pass: SMTP_PASSWORD }) || {}
   const transporter = nodemailer.createTransport({
     host: SMTP_HOST,
     port: parseInt(SMTP_PORT || '587', 10),
@@ -62,9 +51,7 @@ export async function sendEmail({
   const { html, text } = body
 
   const mailOptions = {
-    from:
-      from ||
-      (ADMIN_EMAIL_NAME ? `${ADMIN_EMAIL_NAME} <${ADMIN_EMAIL}>` : ADMIN_EMAIL),
+    from: from || (ADMIN_EMAIL_NAME ? `${ADMIN_EMAIL_NAME} <${ADMIN_EMAIL}>` : ADMIN_EMAIL),
     to,
     subject,
     text,

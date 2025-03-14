@@ -12,9 +12,7 @@ export const register = async (app: FastifyInstance) => {
     if (secret) {
       return secret
     }
-    app.log.warn(
-      'SESSION_SECRET environment variable not set, returning preconfigured secret',
-    )
+    app.log.warn('SESSION_SECRET environment variable not set, returning preconfigured secret')
     return 'oi31p2oi312po3i12p3n21be jn)@!(#d432bhjdbhbehbHJKHJG'
   }
 
@@ -37,8 +35,7 @@ export const register = async (app: FastifyInstance) => {
         description: 'Log out the current user and destroy the session',
         response: {
           204: {
-            description:
-              'The user was logged out and the session was destroyed',
+            description: 'The user was logged out and the session was destroyed',
             type: 'null',
           },
         },

@@ -20,9 +20,7 @@ export class RegistrationRepository extends EntityRepository<Registration> {
     const registration = this.create(data)
     await this.em.persist(registration).flush()
     if (process.env.ADMIN_EMAIL) {
-      await sendEmail(
-        makeNewRegistrationEmail([process.env.ADMIN_EMAIL], registration),
-      )
+      await sendEmail(makeNewRegistrationEmail([process.env.ADMIN_EMAIL], registration))
       await sendEmail(makeNewRegistrationReceivedEmail(registration.email))
     } else {
       console.log('ADMIN_EMAIL not set, skipping email notification')
@@ -47,24 +45,20 @@ export class RegistrationRepository extends EntityRepository<Registration> {
       })
       completeProfileUrl = `${siteUrl}/profile?token=${user.passwordResetToken}`
     } else {
-      let exhibitor: Exhibitor | null = await this.em
-        .getRepository(Exhibitor)
-        .findOne(
-          {
-            user,
-            exhibition: registration.exhibition,
-          },
-          { populate: ['exhibits'] },
-        )
+      let exhibitor: Exhibitor | null = await this.em.getRepository(Exhibitor).findOne(
+        {
+          user,
+          exhibition: registration.exhibition,
+        },
+        { populate: ['exhibits'] },
+      )
       if (!exhibitor) {
         exhibitor = this.em.getRepository(Exhibitor).create({
           exhibition: registration.exhibition,
           user,
         })
         this.em.persist(exhibitor)
-      } else if (
-        !exhibitor.exhibits.find((e) => e.title === registration.topic)
-      ) {
+      } else if (!exhibitor.exhibits.find((e) => e.title === registration.topic)) {
         const exhibit = this.em.getRepository(Exhibit).create({
           exhibition: registration.exhibition,
           title: registration.topic,
@@ -76,13 +70,7 @@ export class RegistrationRepository extends EntityRepository<Registration> {
     }
     this.em.persist(user)
     await this.em.flush()
-    await sendEmail(
-      makeWelcomeEmail(
-        registration.name,
-        registration.email,
-        completeProfileUrl,
-      ),
-    )
+    await sendEmail(makeWelcomeEmail(registration.name, registration.email, completeProfileUrl))
   }
 
   async reject(registration: Registration) {

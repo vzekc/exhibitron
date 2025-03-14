@@ -1,9 +1,4 @@
-import {
-  EntityManager,
-  EntityRepository,
-  MikroORM,
-  Options,
-} from '@mikro-orm/postgresql'
+import { EntityManager, EntityRepository, MikroORM, Options } from '@mikro-orm/postgresql'
 import config from './mikro-orm.config.js'
 import { UserRepository } from './modules/user/user.repository.js'
 import { ExhibitRepository } from './modules/exhibit/exhibit.repository.js'

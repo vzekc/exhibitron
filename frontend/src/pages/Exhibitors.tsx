@@ -28,9 +28,7 @@ const Exhibitors = () => {
       .map(({ id, user, exhibits }) => ({
         id,
         fullName: user.fullName,
-        exhibits: ((exhibits as Array<{ title: string }>) || []).map(
-          (e) => e.title,
-        ),
+        exhibits: ((exhibits as Array<{ title: string }>) || []).map((e) => e.title),
       }))
       .sort(({ fullName: a }, { fullName: b }) => a.localeCompare(b))
     return (
@@ -38,14 +36,9 @@ const Exhibitors = () => {
         <div className="container">
           <div className="cards-grid">
             {exhibitors.map((exhibitor) => (
-              <Link
-                to={`/exhibitor/${exhibitor.id}`}
-                className="card clickable"
-                key={exhibitor.id}>
+              <Link to={`/exhibitor/${exhibitor.id}`} className="card clickable" key={exhibitor.id}>
                 <div className="card-title">{exhibitor.fullName}</div>
-                <div className="card-content">
-                  {exhibitor.exhibits.join(', ')}
-                </div>
+                <div className="card-content">{exhibitor.exhibits.join(', ')}</div>
               </Link>
             ))}
           </div>

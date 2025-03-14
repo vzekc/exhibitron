@@ -48,16 +48,13 @@ const Register = () => {
     },
   })
 
-  const [state, setState] = useState<'entering' | 'sending' | 'done'>(
-    'entering',
-  )
+  const [state, setState] = useState<'entering' | 'sending' | 'done'>('entering')
   const [registerMutation] = useMutation(REGISTER_MUTATION)
 
   const topic = watch('topic')
 
   const onSubmit: SubmitHandler<Inputs> = async (inputs) => {
-    const { name, email, nickname, message, topic, topicExtras, ...data } =
-      inputs
+    const { name, email, nickname, message, topic, topicExtras, ...data } = inputs
     setState('sending')
     try {
       await registerMutation({
@@ -89,9 +86,7 @@ const Register = () => {
         }
       } else {
         console.error('Unexpected error:', error)
-        alert(
-          'Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es später erneut.',
-        )
+        alert('Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es später erneut.')
       }
       setState('entering')
     }
@@ -110,22 +105,12 @@ const Register = () => {
         )
       default:
         return (
-          <form
-            className="exhibitor-registration"
-            onSubmit={handleSubmit(onSubmit)}>
+          <form className="exhibitor-registration" onSubmit={handleSubmit(onSubmit)}>
             <fieldset>
               <label>
                 Nachname, Vorname
-                <input
-                  type="text"
-                  autoComplete="name"
-                  {...register('name', { required: true })}
-                />
-                {errors.name && (
-                  <div className="validation-message">
-                    Ein Name wird benötigt
-                  </div>
-                )}
+                <input type="text" autoComplete="name" {...register('name', { required: true })} />
+                {errors.name && <div className="validation-message">Ein Name wird benötigt</div>}
               </label>
               <label>
                 <input type="checkbox" {...register('vzekcMember')} />
@@ -141,18 +126,13 @@ const Register = () => {
                 />
                 {errors.email && (
                   <div className="validation-message">
-                    Eine Email-Adresse wird benötigt, damit wir Kontakt
-                    aufnehmen können
+                    Eine Email-Adresse wird benötigt, damit wir Kontakt aufnehmen können
                   </div>
                 )}
               </label>
               <label>
                 Nickname (Benutzername) im Forum
-                <input
-                  type="text"
-                  autoComplete="nickname"
-                  {...register('nickname')}
-                />
+                <input type="text" autoComplete="nickname" {...register('nickname')} />
               </label>
               <label>
                 Registriert im Forum
@@ -235,8 +215,8 @@ const Register = () => {
               </label>
               <label>
                 <input type="checkbox" {...register('dailyLunch')} />
-                Ich wünsche mir ein tägliches Mittagessen in der Halle
-                (Möglichkeiten werden noch geprüft)
+                Ich wünsche mir ein tägliches Mittagessen in der Halle (Möglichkeiten werden noch
+                geprüft)
               </label>
               <label>
                 <input type="checkbox" {...register('talk')} />
@@ -254,8 +234,7 @@ const Register = () => {
                 </select>
                 {errors.name && (
                   <div className="validation-message">
-                    Bitte wähle aus, wie viele Tische Deine Ausstellung belegen
-                    wird
+                    Bitte wähle aus, wie viele Tische Deine Ausstellung belegen wird
                   </div>
                 )}
               </label>

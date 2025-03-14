@@ -12,9 +12,7 @@ const App = () => {
     <main className="container">
       <ErrorBoundary
         fallback={
-          <p style={{ color: 'red' }}>
-            Irgendwas ist schief gegangen - Versuch's noch mal!
-          </p>
+          <p style={{ color: 'red' }}>Irgendwas ist schief gegangen - Versuch's noch mal!</p>
         }>
         {element}
       </ErrorBoundary>

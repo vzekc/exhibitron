@@ -42,10 +42,7 @@ export const removeBookmark = (type: BookmarkType, item: { id: number }) => {
   window.dispatchEvent(new Event('bookmarksUpdated'))
 }
 
-export const isBookmarked = (
-  type: BookmarkType,
-  item: { id: number },
-): boolean => {
+export const isBookmarked = (type: BookmarkType, item: { id: number }): boolean => {
   const bookmarks = getBookmarks()
   return bookmarks[type].some((bookmark) => bookmark.id === item.id)
 }

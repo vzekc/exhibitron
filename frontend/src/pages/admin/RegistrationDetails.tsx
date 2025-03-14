@@ -155,45 +155,29 @@ const RegistrationDetails = () => {
             </label>
           )}
           <div className="grid">
-            <label>
-              Eingegangen:{' '}
-              {formatValue('createdAt', registration.createdAt as string)}
-            </label>
+            <label>Eingegangen: {formatValue('createdAt', registration.createdAt as string)}</label>
             {registration.updatedAt ? (
-              <label>
-                Geändert:{' '}
-                {formatValue('updatedAt', registration.updatedAt as string)}
-              </label>
+              <label>Geändert: {formatValue('updatedAt', registration.updatedAt as string)}</label>
             ) : undefined}
           </div>
           <label>
             Status:
             <div className="grid">
-              <input
-                type="text"
-                value={formatValue('status', registration.status)}
-                readOnly
-              />
+              <input type="text" value={formatValue('status', registration.status)} readOnly />
               {registration.status !== 'approved' && (
                 <>
                   {registration.status !== 'inProgress' && (
-                    <button
-                      type="button"
-                      onClick={() => handleStatusChange('inProgress')}>
+                    <button type="button" onClick={() => handleStatusChange('inProgress')}>
                       In Bearbeitung
                     </button>
                   )}
-                  <button
-                    type="button"
-                    onClick={() => handleStatusChange('approved')}>
+                  <button type="button" onClick={() => handleStatusChange('approved')}>
                     Annehmen
                   </button>
                 </>
               )}
               {registration.status !== 'rejected' && (
-                <button
-                  type="button"
-                  onClick={() => handleStatusChange('rejected')}>
+                <button type="button" onClick={() => handleStatusChange('rejected')}>
                   Ablehnen
                 </button>
               )}
@@ -221,10 +205,7 @@ const RegistrationDetails = () => {
           </label>
           <label>
             Notizen:
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-            />
+            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} />
           </label>
           {notes !== (registration.notes || '') && (
             <button type="button" onClick={handleSaveNotes}>
@@ -240,9 +221,7 @@ const RegistrationDetails = () => {
               .map(([key, value]) => (
                 <tr key={key}>
                   <th>{key}</th>
-                  <td>
-                    {formatValue(key, value as string | number | boolean)}
-                  </td>
+                  <td>{formatValue(key, value as string | number | boolean)}</td>
                 </tr>
               ))}
           </tbody>

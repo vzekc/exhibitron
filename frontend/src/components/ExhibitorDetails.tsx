@@ -39,12 +39,7 @@ const ExhibitorDetails = ({ id }: { id: number }) => {
   return (
     <section className="card">
       <h2 className="card-title">Aussteller: {fullName}</h2>
-      {bio && (
-        <div
-          className="card-content"
-          dangerouslySetInnerHTML={{ __html: bio }}
-        />
-      )}
+      {bio && <div className="card-content" dangerouslySetInnerHTML={{ __html: bio }} />}
       {contacts && (email || phone || mastodon || website) && (
         <div className="card-content">
           <h3>Kontakt</h3>

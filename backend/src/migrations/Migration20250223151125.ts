@@ -5,17 +5,13 @@ export class Migration20250223151125 extends Migration {
     this.addSql(
       `alter table "registration" alter column "nickname" type varchar(255) using ("nickname"::varchar(255));`,
     )
-    this.addSql(
-      `alter table "registration" alter column "nickname" drop not null;`,
-    )
+    this.addSql(`alter table "registration" alter column "nickname" drop not null;`)
   }
 
   override async down(): Promise<void> {
     this.addSql(
       `alter table "registration" alter column "nickname" type varchar(255) using ("nickname"::varchar(255));`,
     )
-    this.addSql(
-      `alter table "registration" alter column "nickname" set not null;`,
-    )
+    this.addSql(`alter table "registration" alter column "nickname" set not null;`)
   }
 }

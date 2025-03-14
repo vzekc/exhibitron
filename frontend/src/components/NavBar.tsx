@@ -12,9 +12,7 @@ import './NavBar.css'
 const NavBar = () => {
   const { user } = useUser()
   const location = useLocation()
-  const [hasBookmarks, setHasBookmarks] = useState(
-    getBookmarks().exhibits.length > 0,
-  )
+  const [hasBookmarks, setHasBookmarks] = useState(getBookmarks().exhibits.length > 0)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [logout] = useMutation(
     gql`
@@ -65,13 +63,7 @@ const NavBar = () => {
     }
   }, [])
 
-  const ToplevelNavItem = ({
-    path,
-    label,
-  }: {
-    path: string
-    label: string
-  }) => (
+  const ToplevelNavItem = ({ path, label }: { path: string; label: string }) => (
     <li className={navClasses[path] || ''}>
       <Link to={path}>{label}</Link>
     </li>
@@ -103,10 +95,7 @@ const NavBar = () => {
           {user ? (
             <li>
               <DropdownMenu
-                label={
-                  (user.nickname ? `@${user.nickname}` : user.fullName) ||
-                  'Profil'
-                }>
+                label={(user.nickname ? `@${user.nickname}` : user.fullName) || 'Profil'}>
                 <li>
                   <Link to="/user/account">Konto</Link>
                 </li>
@@ -128,15 +117,10 @@ const NavBar = () => {
             </li>
           ) : (
             <li>
-              <button
-                className="button"
-                onClick={() => setShowLoginModal(true)}>
+              <button className="button" onClick={() => setShowLoginModal(true)}>
                 Login
               </button>
-              <LoginModal
-                isOpen={showLoginModal}
-                onClose={() => setShowLoginModal(false)}
-              />
+              <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
             </li>
           )}
           <li>

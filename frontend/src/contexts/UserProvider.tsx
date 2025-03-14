@@ -24,9 +24,5 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
   if (loading) return null // Prevents context usage before it's ready
 
-  return (
-    <UserContext.Provider value={{ user, reloadUser }}>
-      {children}
-    </UserContext.Provider>
-  )
+  return <UserContext.Provider value={{ user, reloadUser }}>{children}</UserContext.Provider>
 }

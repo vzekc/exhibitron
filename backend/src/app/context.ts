@@ -16,32 +16,27 @@ export const getHostMatchers = memoize(async () => {
 
   const exhibitions = await db.exhibition.findAll({ disableIdentityMap: true })
   return new Map<RegExp, number>(
-    exhibitions.map((exhibition) => [
-      new RegExp(exhibition.hostMatch),
-      exhibition.id,
-    ]),
+    exhibitions.map((exhibition) => [new RegExp(exhibition.hostMatch), exhibition.id]),
   )
 })
 
 type HostMatchers = Awaited<ReturnType<typeof getHostMatchers>>
 
-const hostToExhibitionId = memoize(
-  (hostMatchers: HostMatchers, host: string) => {
-    const ids: number[] = []
-    for (const [matcher, id] of hostMatchers) {
-      if (matcher.test(host)) {
-        ids.push(id)
-      }
+const hostToExhibitionId = memoize((hostMatchers: HostMatchers, host: string) => {
+  const ids: number[] = []
+  for (const [matcher, id] of hostMatchers) {
+    if (matcher.test(host)) {
+      ids.push(id)
     }
-    if (ids.length === 1) {
-      return ids[0]
-    } else if (ids.length > 1) {
-      throw new Error(`multiple exhibitions match ${host}`)
-    } else {
-      throw new Error(`cannot map ${host} to an exhibition, no match`)
-    }
-  },
-)
+  }
+  if (ids.length === 1) {
+    return ids[0]
+  } else if (ids.length > 1) {
+    throw new Error(`multiple exhibitions match ${host}`)
+  } else {
+    throw new Error(`cannot map ${host} to an exhibition, no match`)
+  }
+})
 
 export type Context = {
   db: Services
@@ -62,9 +57,7 @@ export const createContext = async (request: FastifyRequest) => {
       request.user = user
       logger.debug(`User: ${request.user.email} set from session`)
     } else {
-      logger.warn(
-        `User with ID ${request.session.userId} not found, invalid session ignored`,
-      )
+      logger.warn(`User with ID ${request.session.userId} not found, invalid session ignored`)
     }
   }
 

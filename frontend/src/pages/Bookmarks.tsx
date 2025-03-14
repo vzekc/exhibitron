@@ -17,15 +17,9 @@ const Bookmarks = () => {
     <article>
       <h2>Meine Lesezeichen</h2>
       {bookmarks.length ? (
-        <ExhibitList
-          notFoundLabel="Keine Lesezeichen gefunden"
-          exhibits={bookmarks}
-        />
+        <ExhibitList notFoundLabel="Keine Lesezeichen gefunden" exhibits={bookmarks} />
       ) : (
-        <p>
-          Hier findest Du die Exponate, die Du mit einem Lesezeichen versehen
-          hast.
-        </p>
+        <p>Hier findest Du die Exponate, die Du mit einem Lesezeichen versehen hast.</p>
       )}
     </article>
   )

@@ -1,10 +1,6 @@
 import { expect, describe } from 'vitest'
 import { graphql } from 'gql.tada'
-import {
-  ExecuteOperationFunction,
-  graphqlTest,
-  login,
-} from '../../test/apollo.js'
+import { ExecuteOperationFunction, graphqlTest, login } from '../../test/apollo.js'
 
 const createExhibit = async (
   graphqlRequest: ExecuteOperationFunction,
@@ -47,32 +43,23 @@ describe('exhibit', () => {
     expect(result.data!.getExhibits).toHaveLength(4)
   })
 
-  graphqlTest(
-    'try making updates without being logged in',
-    async (graphqlRequest) => {
-      const result = await graphqlRequest(
-        graphql(`
-          mutation UpdateExhibit($id: Int!, $table: Int) {
-            updateExhibit(id: $id, table: $table) {
-              id
-            }
+  graphqlTest('try making updates without being logged in', async (graphqlRequest) => {
+    const result = await graphqlRequest(
+      graphql(`
+        mutation UpdateExhibit($id: Int!, $table: Int) {
+          updateExhibit(id: $id, table: $table) {
+            id
           }
-        `),
-        { id: 1001, table: 1 },
-      )
-      expect(result.errors![0].message).toBe(
-        'You do not have permission to update this exhibit',
-      )
-    },
-  )
+        }
+      `),
+      { id: 1001, table: 1 },
+    )
+    expect(result.errors![0].message).toBe('You do not have permission to update this exhibit')
+  })
 
   graphqlTest('exhibit updates', async (graphqlRequest) => {
     const user = await login(graphqlRequest, 'daffy@example.com')
-    const exhibitId = await createExhibit(
-      graphqlRequest,
-      { title: 'New Exhibit' },
-      user,
-    )
+    const exhibitId = await createExhibit(graphqlRequest, { title: 'New Exhibit' }, user)
 
     // succeed
     {
@@ -108,9 +95,7 @@ describe('exhibit', () => {
         { id: exhibitId, table: 1 },
         user2,
       )
-      expect(result.errors![0].message).toBe(
-        'You do not have permission to update this exhibit',
-      )
+      expect(result.errors![0].message).toBe('You do not have permission to update this exhibit')
     }
 
     // succeed updating own exhibit to free table

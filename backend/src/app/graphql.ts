@@ -12,10 +12,9 @@ import { initORM } from '../db.js'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-const typeDefs = readFileSync(
-  path.join(__dirname, '../generated/combined-schema.graphql'),
-  { encoding: 'utf-8' },
-)
+const typeDefs = readFileSync(path.join(__dirname, '../generated/combined-schema.graphql'), {
+  encoding: 'utf-8',
+})
 
 const createServer = async () =>
   new ApolloServer({

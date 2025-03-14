@@ -46,9 +46,7 @@ export class DemoSeeder extends Seeder {
       }),
     ]
 
-    const exhibitors = users.map((user) =>
-      em.create(Exhibitor, { user, exhibition }),
-    )
+    const exhibitors = users.map((user) => em.create(Exhibitor, { user, exhibition }))
 
     const exhibits = [
       em.create(Exhibit, {

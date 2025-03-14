@@ -28,8 +28,7 @@ const queryResolvers: QueryResolvers<Context> = {
     return db.user.findAll()
   },
   getCurrentUser: async (_, _args, { user }) => user,
-  getUserByEmail: async (_, { email }, { db }) =>
-    db.user.findOneOrFail({ email }),
+  getUserByEmail: async (_, { email }, { db }) => db.user.findOneOrFail({ email }),
   // @ts-expect-error ts2345
   getTable: async (_, { number }, { db }) => db.table.findOneOrFail({ number }),
   // @ts-expect-error ts2345
@@ -44,10 +43,7 @@ const queryResolvers: QueryResolvers<Context> = {
   getExhibits: async (_, _args, { db }) => db.exhibit.findAll(),
   // @ts-expect-error ts2345
   getExhibition: async (_, { id }, { db }) =>
-    db.exhibition.findOneOrFail(
-      { id },
-      { populate: ['exhibits', 'exhibitors', 'tables'] },
-    ),
+    db.exhibition.findOneOrFail({ id }, { populate: ['exhibits', 'exhibitors', 'tables'] }),
   // @ts-expect-error ts2345
   getCurrentExhibition: async (_, _args, { exhibition }) => exhibition,
   // @ts-expect-error ts2345
@@ -60,8 +56,7 @@ const queryResolvers: QueryResolvers<Context> = {
     requireAdmin(user)
     return db.registration.findAll()
   },
-  getPage: async (_, { key }, { db, exhibition }) =>
-    db.page.findOne({ exhibition, key }),
+  getPage: async (_, { key }, { db, exhibition }) => db.page.findOne({ exhibition, key }),
 }
 
 const mutationResolvers: MutationResolvers<Context> = {
@@ -106,11 +101,7 @@ const mutationResolvers: MutationResolvers<Context> = {
   },
   // @ts-expect-error ts2345
   releaseTable: async (_, { number }, { db, exhibition, exhibitor, user }) => {
-    return await db.table.release(
-      exhibition,
-      number,
-      user?.isAdministrator ? null : exhibitor,
-    )
+    return await db.table.release(exhibition, number, user?.isAdministrator ? null : exhibitor)
   },
   // @ts-expect-error ts2345
   assignTable: async (_, { number, exhibitorId }, { db, exhibition }) => {
@@ -120,11 +111,7 @@ const mutationResolvers: MutationResolvers<Context> = {
     return table
   },
   // @ts-expect-error ts2345
-  createExhibit: async (
-    _,
-    { title, text, table },
-    { exhibition, exhibitor, db },
-  ) => {
+  createExhibit: async (_, { title, text, table }, { exhibition, exhibitor, db }) => {
     if (!exhibitor) {
       throw new Error('You must be logged in to create an exhibit')
     }
@@ -245,15 +232,12 @@ const userResolvers: UserResolvers = {
 
 const tableResolvers: TableResolvers = {
   exhibitor: async (table, _, { db }) =>
-    table.exhibitor
-      ? db.exhibitor.findOneOrFail({ id: table.exhibitor.id })
-      : null,
+    table.exhibitor ? db.exhibitor.findOneOrFail({ id: table.exhibitor.id }) : null,
   exhibits: async (table, _, { db }) => db.exhibit.find({ table: table }),
 }
 
 const exhibitorResolvers: ExhibitorResolvers = {
-  user: async (exhibitor, _, { db }) =>
-    db.user.findOneOrFail({ id: exhibitor.user.id }),
+  user: async (exhibitor, _, { db }) => db.user.findOneOrFail({ id: exhibitor.user.id }),
   exhibits: async (exhibitor, _, { db }) =>
     db.exhibit.find({
       exhibitor,
@@ -262,15 +246,13 @@ const exhibitorResolvers: ExhibitorResolvers = {
 }
 
 const exhibitResolvers: ExhibitResolvers = {
-  exhibitor: async (exhibit, _, { db }) =>
-    db.exhibitor.findOneOrFail({ id: exhibit.exhibitor.id }),
+  exhibitor: async (exhibit, _, { db }) => db.exhibitor.findOneOrFail({ id: exhibit.exhibitor.id }),
   table: async (exhibit, _, { db }) =>
     exhibit.table ? db.table.findOneOrFail({ id: exhibit.table.id }) : null,
 }
 
 const exhibitionResolvers: ExhibitionResolvers = {
-  exhibitors: async (exhibition, _, { db }) =>
-    db.exhibitor.find({ exhibition }),
+  exhibitors: async (exhibition, _, { db }) => db.exhibitor.find({ exhibition }),
   exhibits: async (exhibition, _, { db }) => db.exhibit.find({ exhibition }),
   tables: async (exhibition, _, { db }) => db.table.find({ exhibition }),
   pages: async (exhibition, _, { db }) => db.page.find({ exhibition }),

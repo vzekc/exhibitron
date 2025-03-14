@@ -1,10 +1,6 @@
 import { expect, describe } from 'vitest'
 import { graphql } from 'gql.tada'
-import {
-  ExecuteOperationFunction,
-  graphqlTest,
-  login,
-} from '../../test/apollo.js'
+import { ExecuteOperationFunction, graphqlTest, login } from '../../test/apollo.js'
 
 const createPage = async (
   graphqlRequest: ExecuteOperationFunction,
@@ -59,12 +55,7 @@ describe('page', () => {
     {
       const result = await graphqlRequest(
         graphql(`
-          mutation UpdatePage(
-            $id: Int!
-            $key: String!
-            $title: String!
-            $text: String!
-          ) {
+          mutation UpdatePage($id: Int!, $key: String!, $title: String!, $text: String!) {
             updatePage(id: $id, key: $key, title: $title, text: $text) {
               id
               key

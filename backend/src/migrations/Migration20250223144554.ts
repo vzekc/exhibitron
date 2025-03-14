@@ -5,9 +5,7 @@ export class Migration20250223144554 extends Migration {
     this.addSql(
       `create table "registration" ("id" serial primary key, "created_at" timestamptz not null, "updated_at" timestamptz null, "event_id" varchar(255) not null, "name" varchar(255) not null, "email" varchar(255) not null, "nickname" varchar(255) not null, "message" text null, "data" jsonb not null);`,
     )
-    this.addSql(
-      `create index "registration_event_id_index" on "registration" ("event_id");`,
-    )
+    this.addSql(`create index "registration_event_id_index" on "registration" ("event_id");`)
     this.addSql(
       `alter table "registration" add constraint "registration_event_id_email_unique" unique ("event_id", "email");`,
     )
@@ -20,9 +18,7 @@ export class Migration20250223144554 extends Migration {
       `create table "user" ("id" serial primary key, "created_at" timestamptz not null, "updated_at" timestamptz null, "full_name" varchar(255) not null default '', "username" varchar(255) not null, "password" varchar(255) null, "bio" text not null default '', "is_administrator" boolean not null default false, "contacts" jsonb not null);`,
     )
     this.addSql(`create index "user_username_index" on "user" ("username");`)
-    this.addSql(
-      `alter table "user" add constraint "user_username_unique" unique ("username");`,
-    )
+    this.addSql(`alter table "user" add constraint "user_username_unique" unique ("username");`)
 
     this.addSql(
       `create table "table" ("id" serial primary key, "created_at" timestamptz not null, "updated_at" timestamptz null, "exhibitor_id" int null);`,

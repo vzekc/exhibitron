@@ -66,9 +66,7 @@ const ResetPassword = () => {
                 })}
               />
               {errors.password && (
-                <div className="validation-message">
-                  {errors.password.message}
-                </div>
+                <div className="validation-message">{errors.password.message}</div>
               )}
             </label>
             <label>
@@ -77,15 +75,11 @@ const ResetPassword = () => {
                 type="password"
                 {...register('passwordRepeat', {
                   required: 'Kennwortwiederholung ist erforderlich',
-                  validate: (value) =>
-                    value === password ||
-                    'Die Kennwörter stimmen nicht überein',
+                  validate: (value) => value === password || 'Die Kennwörter stimmen nicht überein',
                 })}
               />
               {errors.passwordRepeat && (
-                <div className="validation-message">
-                  {errors.passwordRepeat.message}
-                </div>
+                <div className="validation-message">{errors.passwordRepeat.message}</div>
               )}
             </label>
             <button type="submit">Passwort zurücksetzen</button>

@@ -2,11 +2,7 @@ import { useLocation, useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import ExhibitorDetails from '../components/ExhibitorDetails.tsx'
 import ExhibitDetails from '../components/ExhibitDetails.tsx'
-import {
-  addBookmark,
-  isBookmarked,
-  removeBookmark,
-} from '../utils/bookmarks.ts'
+import { addBookmark, isBookmarked, removeBookmark } from '../utils/bookmarks.ts'
 import { useBreadcrumb } from '../contexts/BreadcrumbContext.ts'
 import { graphql } from 'gql.tada'
 import { useQuery } from '@apollo/client'
@@ -43,9 +39,7 @@ const GET_DATA = graphql(`
 const Exhibit = () => {
   const { id } = useParams<{ id: string }>()
   const { setDetailName } = useBreadcrumb()
-  const [bookmarked, setBookmarked] = useState(
-    isBookmarked('exhibits', { id: Number(id) }),
-  )
+  const [bookmarked, setBookmarked] = useState(isBookmarked('exhibits', { id: Number(id) }))
   const { data, loading, error } = useQuery(GET_DATA, {
     variables: { id: Number(id) },
   })
