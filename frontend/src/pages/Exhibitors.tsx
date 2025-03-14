@@ -35,7 +35,6 @@ const Exhibitors = () => {
       .sort(({ fullName: a }, { fullName: b }) => a.localeCompare(b))
     return (
       <article className="exhibitors-page">
-        <h2>Aussteller</h2>
         <div className="container">
           <div className="cards-grid">
             {exhibitors.map((exhibitor) => (

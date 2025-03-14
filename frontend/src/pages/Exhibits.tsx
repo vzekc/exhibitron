@@ -26,7 +26,6 @@ const Exhibits = () => {
   if (data?.getExhibits) {
     return (
       <article>
-        <h2>Exponate</h2>
         <ExhibitList exhibits={data.getExhibits} />
       </article>
     )
