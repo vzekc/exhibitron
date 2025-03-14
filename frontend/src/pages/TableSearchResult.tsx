@@ -5,6 +5,7 @@ import { useUser } from '../contexts/UserContext.ts'
 import { graphql } from 'gql.tada'
 import { useQuery } from '@apollo/client'
 import ExhibitorDetails from '../components/ExhibitorDetails.tsx'
+import ExhibitDetails from '../components/ExhibitDetails.tsx'
 
 const GET_TABLE = graphql(`
   query GetTable($number: Int!) {
@@ -17,7 +18,6 @@ const GET_TABLE = graphql(`
         exhibits {
           id
           title
-          text
           table {
             number
           }
@@ -26,7 +26,6 @@ const GET_TABLE = graphql(`
       exhibits {
         id
         title
-        text
         table {
           number
         }
@@ -74,22 +73,13 @@ const TableSearchResult = () => {
     )
   }
 
-  const ExhibitionDetails = (
-    exhibit: NonNullable<typeof exhibitorExhibits>[number],
-  ) => (
-    <section>
-      <h1>{exhibit.title}</h1>
-      <div dangerouslySetInnerHTML={{ __html: exhibit.text || '' }}></div>
-    </section>
-  )
-
   const OnTableExhibits = () => {
     switch (exhibitsOnTable?.length) {
       case undefined:
       case 0:
         return <></>
       case 1:
-        return <ExhibitionDetails {...exhibitsOnTable[0]} />
+        return <ExhibitDetails {...exhibitsOnTable[0]} />
       default:
         return (
           <section>
@@ -107,7 +97,7 @@ const TableSearchResult = () => {
       // @ts-expect-error ts(7029)
       case 1:
         if (!exhibitsOnTable?.length) {
-          return <ExhibitionDetails {...otherExhibits[0]} />
+          return <ExhibitDetails {...otherExhibits[0]} />
         }
       // fall through
       default:

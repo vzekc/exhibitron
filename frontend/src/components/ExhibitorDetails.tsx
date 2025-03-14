@@ -1,6 +1,6 @@
 import { graphql } from 'gql.tada'
 import { useQuery } from '@apollo/client'
-import './ExhibitorDetails.css'
+import './Card.css'
 import { useEffect } from 'react'
 
 const GET_EXHIBITOR = graphql(`
@@ -29,13 +29,7 @@ const mastodonUrl = (mastodon: string) => {
   }
 }
 
-const ExhibitorDetails = ({
-  id,
-  onLoaded,
-}: {
-  id: number
-  onLoaded?: (exhibitor: { fullName: string }) => void
-}) => {
+const ExhibitorDetails = ({ id }: { id: number }) => {
   const { data } = useQuery(GET_EXHIBITOR, {
     variables: { id },
   })
@@ -43,40 +37,41 @@ const ExhibitorDetails = ({
   const { fullName, bio, contacts } = user || {}
   const { email, phone, mastodon, website } = contacts || {}
 
-  useEffect(() => {
-    if (onLoaded && fullName) {
-      onLoaded({ fullName })
-    }
-  }, [onLoaded, fullName])
-
   return (
-    <section className="exhibitor-details">
-      <h2>Aussteller: {fullName}</h2>
-      {bio && <div dangerouslySetInnerHTML={{ __html: bio }} />}
+    <section className="card">
+      <h2 className="card-title">Aussteller: {fullName}</h2>
+      {bio && (
+        <div
+          className="card-content"
+          dangerouslySetInnerHTML={{ __html: bio }}
+        />
+      )}
       {contacts && (email || phone || mastodon || website) && (
-        <>
+        <div className="card-content">
           <h3>Kontakt</h3>
-          {email && (
-            <label>
-              Email: <a href={`mailto:${email}`}>{email}</a>
-            </label>
-          )}
-          {phone && (
-            <label>
-              Telefon: <a href={`tel:${phone}`}>{phone}</a>
-            </label>
-          )}
-          {mastodon && (
-            <label>
-              Mastodon: <a href={mastodonUrl(mastodon)}>{mastodon}</a>
-            </label>
-          )}
-          {website && (
-            <label>
-              Website: <a href={website}>{website}</a>
-            </label>
-          )}
-        </>
+          <div className="contact-details">
+            {email && (
+              <div>
+                Email: <a href={`mailto:${email}`}>{email}</a>
+              </div>
+            )}
+            {phone && (
+              <div>
+                Telefon: <a href={`tel:${phone}`}>{phone}</a>
+              </div>
+            )}
+            {mastodon && (
+              <div>
+                Mastodon: <a href={mastodonUrl(mastodon)}>{mastodon}</a>
+              </div>
+            )}
+            {website && (
+              <div>
+                Website: <a href={website}>{website}</a>
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </section>
   )

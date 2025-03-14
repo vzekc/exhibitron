@@ -1,6 +1,7 @@
 import { useLocation, useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import ExhibitorDetails from '../components/ExhibitorDetails.tsx'
+import ExhibitDetails from '../components/ExhibitDetails.tsx'
 import {
   addBookmark,
   isBookmarked,
@@ -9,7 +10,6 @@ import {
 import { useBreadcrumb } from '../contexts/BreadcrumbContext.ts'
 import { graphql } from 'gql.tada'
 import { useQuery } from '@apollo/client'
-import '../components/ExhibitList.css'
 
 const GET_DATA = graphql(`
   query GetExhibit($id: Int!) {
@@ -87,8 +87,7 @@ const Exhibit = () => {
   return (
     <div>
       <article>
-        <h2>{exhibit.title}</h2>
-        <div dangerouslySetInnerHTML={{ __html: exhibit.text || '' }}></div>
+        <ExhibitDetails id={exhibit.id} />
         <ExhibitorDetails id={exhibit.exhibitor.id} />
         <button onClick={handleBookmark} className="button image-only-button">
           <img

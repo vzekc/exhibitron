@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import './Card.css'
 
 type ExhibitDisplayListItem = {
   id: number
@@ -30,7 +31,7 @@ const ExhibitList = ({
     return titleA.localeCompare(titleB)
   })
 
-  const handleRowClick = onClick || ((id: number) => navigate(`/exhibit/${id}`))
+  const handleClick = onClick || ((id: number) => navigate(`/exhibit/${id}`))
 
   if (!exhibits.length) {
     return <p>{notFoundLabel || 'Keine Exponate gefunden'}</p>
@@ -42,27 +43,23 @@ const ExhibitList = ({
   const someNames = exhibits.some(getExhibitorName)
 
   return (
-    <table>
-      <thead>
-        <tr>
-          <th>Titel</th>
-          {someNames && <th>Aussteller</th>}
-          <th>Tisch</th>
-        </tr>
-      </thead>
-      <tbody>
-        {sortedExhibits.map((exhibit, index: number) => (
-          <tr
-            key={index}
-            onClick={() => handleRowClick(exhibit.id)}
-            className="clickable-row">
-            <td>{exhibit.title}</td>
-            {someNames && <td>{getExhibitorName(exhibit)}</td>}
-            <td>{exhibit.table?.number || ''}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <div className="cards-grid">
+      {sortedExhibits.map((exhibit, index: number) => (
+        <div
+          key={index}
+          onClick={() => handleClick(exhibit.id)}
+          className="card clickable">
+          <div className="card-title">{exhibit.title}</div>
+          <div className="card-content"></div>
+          <div className="card-footer">
+            {someNames && (
+              <div className="card-subtitle">{getExhibitorName(exhibit)}</div>
+            )}
+            {exhibit.table && <div>Tisch {exhibit.table.number}</div>}
+          </div>
+        </div>
+      ))}
+    </div>
   )
 }
 

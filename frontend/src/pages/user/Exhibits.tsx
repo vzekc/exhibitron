@@ -1,5 +1,4 @@
 import ExhibitList from '../../components/ExhibitList.tsx'
-import '../../components/ExhibitList.css'
 import { graphql } from 'gql.tada'
 import { useQuery } from '@apollo/client'
 import { useNavigate } from 'react-router-dom'
