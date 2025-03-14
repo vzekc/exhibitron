@@ -36,6 +36,8 @@ const queryResolvers: QueryResolvers<Context> = {
   // @ts-expect-error ts2345
   getCurrentExhibitor: async (_, _args, { exhibitor }) => exhibitor,
   // @ts-expect-error ts2345
+  getExhibitor: async (_, { id }, { db }) => db.exhibitor.findOneOrFail({ id }),
+  // @ts-expect-error ts2345
   getExhibit: async (_, { id }, { db }) => db.exhibit.findOneOrFail({ id }),
   // @ts-expect-error ts2345
   getExhibits: async (_, _args, { db }) => db.exhibit.findAll(),

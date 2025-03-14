@@ -2,7 +2,7 @@ import { useForm, SubmitHandler } from 'react-hook-form'
 import { useUser } from '../../contexts/UserContext.ts'
 import { useEffect } from 'react'
 import { graphql } from 'gql.tada'
-import { useMutation, useQuery } from '@apollo/client'
+import { useApolloClient, useMutation, useQuery } from '@apollo/client'
 
 type Inputs = {
   fullName: string
@@ -56,6 +56,7 @@ const Profile = () => {
 
   const { data, refetch } = useQuery(GET_USER_PROFILE)
   const [updateUserProfile] = useMutation(UPDATE_USER_PROFILE)
+  const apolloClient = useApolloClient()
 
   const updateProfile: SubmitHandler<Inputs> = async (inputs) => {
     const { fullName, bio, ...contacts } = inputs
@@ -64,6 +65,7 @@ const Profile = () => {
     })
     await reloadUser()
     reset(inputs)
+    await apolloClient.resetStore()
     await refetch()
   }
 

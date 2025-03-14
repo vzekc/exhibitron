@@ -1,10 +1,11 @@
 type Exhibitor {
-  exhibits: [Exhibit!]
   id: Int!
-  tables: [Table!]
   user: User!
+  exhibits: [Exhibit!]
+  tables: [Table!]
 }
 
 extend type Query {
   getCurrentExhibitor: Exhibitor
+  getExhibitor(id: Int!): Exhibitor
 }
