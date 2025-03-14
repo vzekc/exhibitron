@@ -128,12 +128,12 @@ const table_coordinates = {
 }
 
 interface TableArea {
-  id: number
+  number: number
   coords: number[]
 }
 
 const tables: TableArea[] = table_coordinates.tables.map((table) => ({
-  id: table.number,
+  number: table.number,
   coords: [table.topLeft.x, table.topLeft.y, table.bottomRight.x, table.bottomRight.y],
 }))
 
@@ -145,6 +145,14 @@ const GET_TABLES = graphql(`
         number
         exhibitor {
           id
+          user {
+            id
+            fullName
+          }
+          exhibits {
+            id
+            title
+          }
         }
       }
     }
@@ -197,35 +205,26 @@ export const SeatingPlan: React.FC = () => {
   }
 
   const { tables: fetchedTables } = data.getCurrentExhibition!
-  const occupiedTables = new Set(
-    fetchedTables?.filter((table) => table.exhibitor).map((table) => table.number),
+  const occupiedTablesMap = new Map(
+    fetchedTables
+      ?.filter((table) => table.exhibitor)
+      .map((table) => [
+        table.number,
+        {
+          exhibitorName: table.exhibitor?.user.fullName ?? 'Unknown',
+          exhibits: table.exhibitor?.exhibits?.map((exhibit) => exhibit.title) ?? [],
+        },
+      ]),
   )
 
   return (
     <div className="seating-plan">
       <div className="seating-plan-container">
-        <img
-          ref={imageRef}
-          src="cc2025-tischplan.png"
-          alt="Exhibition Floor Plan"
-          useMap="#seating-map"
-        />
-        <map name="seating-map">
-          {tables.map((table) => (
-            <area
-              key={table.id}
-              shape="rect"
-              coords={getScaledCoords(table.coords).join(',')}
-              alt={`Table ${table.id}`}
-              onClick={() => handleTableClick(table.id)}
-              style={{ cursor: 'pointer' }}
-            />
-          ))}
-        </map>
+        <img ref={imageRef} src="cc2025-tischplan.png" alt="Exhibition Floor Plan" />
         <div className="table-overlays">
           {tables.map((table) => {
             const scaledCoords = getScaledCoords(table.coords)
-            const isRotated = table.id > 87
+            const isRotated = table.number > 87
 
             // Calculate dimensions
             const width = scaledCoords[2] - scaledCoords[0]
@@ -241,18 +240,24 @@ export const SeatingPlan: React.FC = () => {
               top = top + (height - width) / 2
             }
 
+            const tableInfo = occupiedTablesMap.get(table.number)
+            const tooltip = tableInfo
+              ? `${tableInfo.exhibitorName} (${tableInfo.exhibits.join(', ')})`
+              : 'Nicht belegt'
+
             return (
               <div
-                key={table.id}
-                className={`table-number ${isRotated ? 'table-rotated' : ''} ${occupiedTables.has(table.id) ? 'occupied' : ''}`}
+                key={table.number}
+                className={`table-number ${isRotated ? 'table-rotated' : ''} ${tableInfo ? 'occupied' : ''}`}
                 style={{
                   left: left + 'px',
                   top: top + 'px',
                   width: isRotated ? height : width + 'px',
                   height: isRotated ? width : height + 'px',
                 }}
-                onClick={() => handleTableClick(table.id)}>
-                {table.id}
+                onClick={() => handleTableClick(table.number)}
+                title={tooltip}>
+                {table.number}
               </div>
             )
           })}

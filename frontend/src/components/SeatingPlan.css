@@ -54,8 +54,33 @@
 
 .table-number.occupied {
   background-color: #5cb85c;
+  color: white;
+}
+
+.table-number.occupied:hover {
+  background-color: #449d44;
 }
 
 .table-rotated {
   transform: rotate(90deg);
+}
+
+/* Custom tooltip styles */
+.table-number[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: pre-line;
+  z-index: 1000;
+  min-width: 200px;
+  text-align: left;
+  pointer-events: none;
+  line-height: 1.4;
 }
