@@ -30,6 +30,11 @@ nav form {
   top: 10px; /* Adjust this value as needed */
 }
 
+nav {
+  height: 2em;
+  margin-top: 1em;
+}
+
 .login-failed {
   color: #e57373;
   min-height: 1.5em;

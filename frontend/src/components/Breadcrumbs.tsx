@@ -37,6 +37,9 @@ const Breadcrumbs = () => {
   return (
     <nav aria-label="breadcrumb" className="breadcrumbs">
       <ol>
+        <li className="breadcrumb-item">
+          <Link to="/">CC2025</Link>
+        </li>
         {pathSegments.map((segment, index) => {
           const path = `/${pathSegments.slice(0, index + 1).join('/')}`
           const isLast = index === pathSegments.length - 1
