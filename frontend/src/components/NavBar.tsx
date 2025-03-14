@@ -85,6 +85,7 @@ const NavBar = () => {
           <ToplevelNavItem path="/exhibit" label="Exponate" />
           <ToplevelNavItem path="/exhibitor" label="Aussteller" />
           <ToplevelNavItem path="/schedule" label="Zeitplan" />
+          <ToplevelNavItem path="/table" label="Tische" />
           {user?.isAdministrator && (
             <li className={navClasses['/admin'] || ''}>
               <DropdownMenu label="Verwaltung">

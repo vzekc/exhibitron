@@ -20,6 +20,7 @@ import Page from './components/Page.tsx'
 import PageList from './pages/admin/PageList.tsx'
 import Exhibitors from './pages/Exhibitors.tsx'
 import Exhibitor from './pages/Exibitor.tsx'
+import Table from './pages/Table'
 
 const routes: RouteObject[] = [
   { path: '/register', element: <Register /> },
@@ -48,6 +49,7 @@ const routes: RouteObject[] = [
       { path: '/admin/registration/:id', element: <RegistrationDetails /> },
       { path: '/admin/page', element: <PageList /> },
       { path: '/admin/page/:key', element: <PageEditor /> },
+      { path: '/table', element: <Table /> },
       { path: '/*', element: <NotFound /> },
     ],
   },
