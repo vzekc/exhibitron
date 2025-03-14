@@ -1,7 +1,6 @@
 import { graphql } from 'gql.tada'
 import { useQuery } from '@apollo/client'
 import './Card.css'
-import { useEffect } from 'react'
 
 const GET_EXHIBITOR = graphql(`
   query GetExhibitor($id: Int!) {
