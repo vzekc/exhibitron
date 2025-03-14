@@ -190,7 +190,7 @@ export const SeatingPlan: React.FC = () => {
         image.removeEventListener('load', updateScale)
       }
     }
-  }, [])
+  }, [data])
 
   const handleTableClick = (tableId: number) => {
     navigate(`/table/${tableId}`)
