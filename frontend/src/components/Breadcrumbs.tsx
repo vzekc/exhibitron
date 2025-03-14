@@ -15,6 +15,7 @@ const breadcrumbMap: { [key: string]: string } = {
   page: 'Seiten',
   table: 'Tische',
   exhibitor: 'Aussteller',
+  bookmarks: 'Lesezeichen',
 }
 
 const Breadcrumbs = () => {

@@ -1,7 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import TextEditor from '../../components/TextEditor.tsx'
-import ContentEditable, { ContentEditableEvent } from 'react-contenteditable'
 import { useBreadcrumb } from '../../contexts/BreadcrumbContext.ts'
 import { graphql } from 'gql.tada'
 import { useQuery, useMutation, useApolloClient } from '@apollo/client'
@@ -117,8 +116,6 @@ const ExhibitEditor = () => {
     }
   }, [exhibitData, setDetailName, isNew])
 
-  const handleTitleChange = (e: ContentEditableEvent) => setTitle(e.target.value)
-
   const handleTableChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
     setSelectedTable(e.target.value ? Number(e.target.value) : undefined)
 
@@ -176,10 +173,10 @@ const ExhibitEditor = () => {
     <div>
       <h1>{isNew ? 'Neues Exponat erstellen' : 'Exponat bearbeiten'}</h1>
       <article>
-        <ContentEditable
-          html={title}
-          onChange={handleTitleChange}
-          tagName="h2"
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
           placeholder="Titel eingeben..."
         />
         <label>

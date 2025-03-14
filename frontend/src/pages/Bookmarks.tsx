@@ -18,7 +18,6 @@ const Bookmarks = () => {
 
   return (
     <article>
-      <h2>Meine Lesezeichen</h2>
       {bookmarks.length ? (
         <ExhibitList notFoundLabel="Keine Lesezeichen gefunden" exhibits={bookmarks} />
       ) : (
