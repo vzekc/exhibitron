@@ -1,7 +1,7 @@
 import ExhibitList from '../../components/ExhibitList.tsx'
 import { graphql } from 'gql.tada'
 import { useQuery } from '@apollo/client'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 const GET_MY_EXHIBITS = graphql(`
   query GetMyExhibits {
@@ -29,6 +29,9 @@ const UserExhibits = () => {
           exhibits={data.getCurrentExhibitor.exhibits}
           onClick={(id) => navigate(`/user/exhibit/${id}`)}
         />
+        <Link to="/user/exhibit/new">
+          <button>Neues Exponat</button>
+        </Link>
       </article>
     )
   }

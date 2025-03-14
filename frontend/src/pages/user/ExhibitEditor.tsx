@@ -1,11 +1,10 @@
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import TextEditor from '../../components/TextEditor.tsx'
 import ContentEditable, { ContentEditableEvent } from 'react-contenteditable'
 import { useBreadcrumb } from '../../contexts/BreadcrumbContext.ts'
 import { graphql } from 'gql.tada'
-import { useQuery } from '@apollo/client'
-import { useMutation } from '@apollo/client'
+import { useQuery, useMutation, useApolloClient } from '@apollo/client'
 import { useUnsavedChangesWarning } from '../../hooks/useUnsavedChangesWarning'
 
 const GET_DATA = graphql(`
@@ -40,23 +39,62 @@ const UPDATE_EXHIBIT = graphql(`
   }
 `)
 
+const CREATE_EXHIBIT = graphql(`
+  mutation CreateExhibit($title: String!, $text: String, $table: Int) {
+    createExhibit(title: $title, text: $text, table: $table) {
+      id
+      title
+      text
+      table {
+        number
+      }
+    }
+  }
+`)
+
+const GET_MY_TABLES = graphql(`
+  query GetMyTables {
+    getCurrentExhibitor {
+      tables {
+        number
+      }
+    }
+  }
+`)
+
 const ExhibitEditor = () => {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const { setDetailName } = useBreadcrumb()
-  const { data, loading, error } = useQuery(GET_DATA, {
+  const apolloClient = useApolloClient()
+  const isNew = id === 'new'
+
+  const {
+    data: exhibitData,
+    loading: exhibitLoading,
+    error: exhibitError,
+  } = useQuery(GET_DATA, {
     variables: { id: Number(id) },
+    skip: isNew,
   })
+
+  const { data: tablesData } = useQuery(GET_MY_TABLES, {
+    skip: !isNew,
+  })
+
   const [title, setTitle] = useState('')
   const [text, setText] = useState('')
   const [selectedTable, setSelectedTable] = useState<number | undefined>(undefined)
   const [originalTitle, setOriginalTitle] = useState('')
   const [originalText, setOriginalText] = useState('')
   const [originalTable, setOriginalTable] = useState<number | undefined>(undefined)
+
   const [updateExhibit] = useMutation(UPDATE_EXHIBIT)
+  const [createExhibit] = useMutation(CREATE_EXHIBIT)
 
   useEffect(() => {
-    if (data?.getExhibit) {
-      const { title, table, text } = data.getExhibit
+    if (exhibitData?.getExhibit) {
+      const { title, table, text } = exhibitData.getExhibit
       const newTitle = title || ''
       const newText = text || ''
       const newTable = table?.number || undefined
@@ -68,8 +106,16 @@ const ExhibitEditor = () => {
       setOriginalTitle(newTitle)
       setOriginalText(newText)
       setOriginalTable(newTable)
+    } else if (isNew) {
+      setDetailName(location.pathname, 'Neues Exponat')
+      setTitle('')
+      setText('')
+      setSelectedTable(undefined)
+      setOriginalTitle('')
+      setOriginalText('')
+      setOriginalTable(undefined)
     }
-  }, [data, setDetailName])
+  }, [exhibitData, setDetailName, isNew])
 
   const handleTitleChange = (e: ContentEditableEvent) => setTitle(e.target.value)
 
@@ -84,34 +130,58 @@ const ExhibitEditor = () => {
   useUnsavedChangesWarning(hasChanges)
 
   const handleSave = async () => {
-    await updateExhibit({
-      variables: { id: Number(id), title, text, table: selectedTable || null },
-    })
-    setOriginalTitle(title)
-    setOriginalText(text)
-    setOriginalTable(selectedTable)
+    if (!title.trim()) {
+      alert('Bitte gib einen Titel für das Exponat ein')
+      return
+    }
+
+    await apolloClient.resetStore()
+    if (isNew) {
+      const result = await createExhibit({
+        variables: { title, text, table: selectedTable || null },
+      })
+      const newId = result.data?.createExhibit?.id
+      if (newId) {
+        navigate(`/user/exhibit/${newId}`)
+      }
+    } else {
+      await updateExhibit({
+        variables: { id: Number(id), title, text, table: selectedTable || null },
+      })
+      setOriginalTitle(title)
+      setOriginalText(text)
+      setOriginalTable(selectedTable)
+    }
   }
 
-  if (loading) {
-    return <p>Lade Exponat...</p>
+  if (!isNew) {
+    if (exhibitLoading) {
+      return <p>Lade Exponat...</p>
+    }
+
+    if (exhibitError) {
+      return <p>Fehler beim Laden des Exponats: {exhibitError.message}</p>
+    }
+
+    if (!exhibitData?.getExhibit) {
+      return <p>Exponat nicht gefunden</p>
+    }
   }
 
-  if (error) {
-    return <p>Fehler beim Laden des Exponats: {error.message}</p>
-  }
-
-  if (!data?.getExhibit) {
-    return <p>Exponat nicht gefunden</p>
-  }
-
-  const exhibit = data?.getExhibit
-  const tables = exhibit.exhibitor.tables?.map((table) => table.number)
+  const tables = isNew
+    ? tablesData?.getCurrentExhibitor?.tables?.map((table) => table.number)
+    : exhibitData?.getExhibit?.exhibitor?.tables?.map((table) => table.number)
 
   return (
     <div>
-      <h1>Exponat bearbeiten</h1>
+      <h1>{isNew ? 'Neues Exponat erstellen' : 'Exponat bearbeiten'}</h1>
       <article>
-        <ContentEditable html={title} onChange={handleTitleChange} tagName="h2" />
+        <ContentEditable
+          html={title}
+          onChange={handleTitleChange}
+          tagName="h2"
+          placeholder="Titel eingeben..."
+        />
         <label>
           Tisch
           <select value={selectedTable} onChange={handleTableChange}>
@@ -129,8 +199,8 @@ const ExhibitEditor = () => {
             setText(html)
           }}
         />
-        <button onClick={handleSave} disabled={!hasChanges}>
-          Speichern
+        <button onClick={handleSave} disabled={!isNew && !hasChanges}>
+          {isNew ? 'Erstellen' : 'Speichern'}
         </button>
       </article>
     </div>

@@ -14,7 +14,7 @@ import RequestPasswordReset from './pages/RequestPasswordReset.tsx'
 import ResetPassword from './pages/ResetPassword.tsx'
 import Account from './pages/user/Account.tsx'
 import UserExhibits from './pages/user/Exhibits.tsx'
-import UserExhibit from './pages/user/ExhibitEditor.tsx'
+import ExhibitEditor from './pages/user/ExhibitEditor.tsx'
 import PageEditor from './pages/admin/PageEditor.tsx'
 import Page from './components/Page.tsx'
 import PageList from './pages/admin/PageList.tsx'
@@ -42,7 +42,7 @@ const routes: RouteObject[] = [
         element: <Page pageKey="exhibitorInfo" />,
       },
       { path: '/user/exhibit', element: <UserExhibits /> },
-      { path: '/user/exhibit/:id', element: <UserExhibit /> },
+      { path: '/user/exhibit/:id', element: <ExhibitEditor /> },
       { path: '/requestPasswordReset', element: <RequestPasswordReset /> },
       { path: '/resetPassword', element: <ResetPassword /> },
       { path: '/admin/registration', element: <RegistrationList /> },
