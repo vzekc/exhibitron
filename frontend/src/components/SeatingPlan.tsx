@@ -1,6 +1,8 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import './SeatingPlan.css'
+import { graphql } from 'gql.tada'
+import { useQuery } from '@apollo/client'
 
 const table_coordinates = {
   tables: [
@@ -135,10 +137,25 @@ const tables: TableArea[] = table_coordinates.tables.map((table) => ({
   coords: [table.topLeft.x, table.topLeft.y, table.bottomRight.x, table.bottomRight.y],
 }))
 
+const GET_TABLES = graphql(`
+  query GetTables {
+    getCurrentExhibition {
+      tables {
+        id
+        number
+        exhibitor {
+          id
+        }
+      }
+    }
+  }
+`)
+
 export const SeatingPlan: React.FC = () => {
   const navigate = useNavigate()
   const [scale, setScale] = React.useState(1)
   const imageRef = React.useRef<HTMLImageElement>(null)
+  const { data } = useQuery(GET_TABLES)
 
   React.useEffect(() => {
     const updateScale = () => {
@@ -174,6 +191,15 @@ export const SeatingPlan: React.FC = () => {
   const getScaledCoords = (coords: number[]): number[] => {
     return coords.map((coord) => Math.round(coord * scale))
   }
+
+  if (!data) {
+    return <div>Loading...</div>
+  }
+
+  const { tables: fetchedTables } = data.getCurrentExhibition!
+  const occupiedTables = new Set(
+    fetchedTables?.filter((table) => table.exhibitor).map((table) => table.number),
+  )
 
   return (
     <div className="seating-plan">
@@ -218,7 +244,7 @@ export const SeatingPlan: React.FC = () => {
             return (
               <div
                 key={table.id}
-                className={`table-number ${isRotated ? 'table-rotated' : ''}`}
+                className={`table-number ${isRotated ? 'table-rotated' : ''} ${occupiedTables.has(table.id) ? 'occupied' : ''}`}
                 style={{
                   left: left + 'px',
                   top: top + 'px',

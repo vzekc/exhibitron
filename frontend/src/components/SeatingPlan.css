@@ -48,8 +48,12 @@
 }
 
 .table-number:hover {
-  background-color: rgba(0, 123, 255, 1);
+  background-color: #5bc0de;
   z-index: 1;
+}
+
+.table-number.occupied {
+  background-color: #5cb85c;
 }
 
 .table-rotated {
