@@ -18,6 +18,8 @@ import UserExhibit from './pages/user/ExhibitEditor.tsx'
 import PageEditor from './pages/admin/PageEditor.tsx'
 import Page from './components/Page.tsx'
 import PageList from './pages/admin/PageList.tsx'
+import Exhibitors from './pages/Exhibitors.tsx'
+import Exhibitor from './pages/Exibitor.tsx'
 
 const routes: RouteObject[] = [
   { path: '/register', element: <Register /> },
@@ -27,6 +29,8 @@ const routes: RouteObject[] = [
       { path: '/', element: <Page pageKey="home" /> },
       { path: '/exhibit', element: <Exhibits /> },
       { path: '/exhibit/:id', element: <Exhibit /> },
+      { path: '/exhibitor', element: <Exhibitors /> },
+      { path: '/exhibitor/:id', element: <Exhibitor /> },
       { path: '/schedule', element: <Page pageKey="schedule" /> },
       { path: '/bookmarks', element: <Bookmarks /> },
       { path: '/table/:number', element: <TableSearchResult /> },
@@ -42,7 +46,7 @@ const routes: RouteObject[] = [
       { path: '/resetPassword', element: <ResetPassword /> },
       { path: '/admin/registration', element: <RegistrationList /> },
       { path: '/admin/registration/:id', element: <RegistrationDetails /> },
-      { path: '/admin/page/', element: <PageList /> },
+      { path: '/admin/page', element: <PageList /> },
       { path: '/admin/page/:key', element: <PageEditor /> },
       { path: '/*', element: <NotFound /> },
     ],

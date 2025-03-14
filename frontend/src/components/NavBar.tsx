@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import React, { useEffect, useState } from 'react'
 import { useUser } from '../contexts/UserContext.ts'
 import DropdownMenu from './DropdownMenu.tsx'
@@ -7,9 +7,11 @@ import { getBookmarks } from '../utils/bookmarks.ts'
 import LoginModal from './LoginModal.tsx'
 import Breadcrumbs from './Breadcrumbs.tsx'
 import { gql, useMutation } from '@apollo/client'
+import './NavBar.css'
 
 const NavBar = () => {
   const { user } = useUser()
+  const location = useLocation()
   const [hasBookmarks, setHasBookmarks] = useState(
     getBookmarks().exhibits.length > 0,
   )
@@ -32,6 +34,11 @@ const NavBar = () => {
       },
     },
   )
+
+  const currentPath = '/' + (location.pathname.split('/')[1] || '')
+  const navClasses: Partial<Record<string, string>> = {
+    [currentPath]: 'active',
+  }
 
   const handleLogout = async (event: React.MouseEvent) => {
     event.preventDefault()
@@ -58,21 +65,28 @@ const NavBar = () => {
     }
   }, [])
 
+  const ToplevelNavItem = ({
+    path,
+    label,
+  }: {
+    path: string
+    label: string
+  }) => (
+    <li className={navClasses[path] || ''}>
+      <Link to={path}>{label}</Link>
+    </li>
+  )
+
   return (
     <>
       <nav className="menu">
         <ul>
-          <li>
-            <Link to="/">Start</Link>
-          </li>
-          <li>
-            <Link to="/exhibit">Exponate</Link>
-          </li>
-          <li>
-            <Link to="/schedule">Zeitplan</Link>
-          </li>
+          <ToplevelNavItem path="/" label="Start" />
+          <ToplevelNavItem path="/exhibit" label="Exponate" />
+          <ToplevelNavItem path="/exhibitor" label="Aussteller" />
+          <ToplevelNavItem path="/schedule" label="Zeitplan" />
           {user?.isAdministrator && (
-            <li>
+            <li className={navClasses['/admin'] || ''}>
               <DropdownMenu label="Verwaltung">
                 <li>
                   <Link to="/admin/registration">Anmeldungen</Link>

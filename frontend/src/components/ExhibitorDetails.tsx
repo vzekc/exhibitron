@@ -1,11 +1,14 @@
 import { graphql } from 'gql.tada'
 import { useQuery } from '@apollo/client'
 import './ExhibitorDetails.css'
+import { useEffect } from 'react'
 
 const GET_EXHIBITOR = graphql(`
   query GetExhibitor($id: Int!) {
     getExhibitor(id: $id) {
+      id
       user {
+        id
         fullName
         bio
         contacts {
@@ -26,13 +29,25 @@ const mastodonUrl = (mastodon: string) => {
   }
 }
 
-const ExhibitorDetails = (props: { id: number }) => {
+const ExhibitorDetails = (props: {
+  id: number
+  onLoaded?: (exhibitor: { fullName: string }) => void
+}) => {
   const { data } = useQuery(GET_EXHIBITOR, {
     variables: { id: props.id },
   })
   const { user } = data?.getExhibitor || {}
   const { fullName, bio, contacts } = user || {}
   const { email, phone, mastodon, website } = contacts || {}
+
+  useEffect(() => {
+    if (data) {
+      props.onLoaded?.({
+        fullName: fullName || '',
+      })
+    }
+  }, [data, fullName])
+
   return (
     <section className="exhibitor-details">
       <h2>Aussteller: {fullName}</h2>

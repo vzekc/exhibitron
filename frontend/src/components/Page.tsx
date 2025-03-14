@@ -6,6 +6,7 @@ import { useUser } from '../contexts/UserContext.ts'
 const GET_CURRENT_EXHIBITION = gql`
   query GetCurrentExhibition {
     getCurrentExhibition {
+      id
       pages {
         key
         title

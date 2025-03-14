@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 const GET_CURRENT_EXHIBITION = gql`
   query GetCurrentExhibition {
     getCurrentExhibition {
+      id
       pages {
         key
         title

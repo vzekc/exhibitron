@@ -25,7 +25,7 @@ const UserExhibits = () => {
   if (data?.getCurrentExhibitor?.exhibits) {
     return (
       <article>
-        <h2>Liste Deiner Exponate</h2>
+        <h2>Deine Exponate</h2>
         <ExhibitList
           exhibits={data.getCurrentExhibitor.exhibits}
           onClick={(id) => navigate(`/user/exhibit/${id}`)}

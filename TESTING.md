@@ -1,4 +1,4 @@
-# Testplan für exhibitron (Ausstellerfunktionen)
+# Testplan für exhibitron
 
 ## Allgemeine Fragen
 
@@ -13,13 +13,20 @@
 - [ ] Findet man sich leicht zurecht?
 - [ ] Sind alle Funktionen intuitiv bedienbar?
 - [ ] Sind alle Funktionen selbsterklärend?
+- [ ] Sind alle Texte in deutscher Sprache?
 
-## Login
+# Übergreifende Funktionen
+
+## Login / Rechtevergabe
 
 - [ ] Login mit korrekten Daten
 - [ ] Login mit falschem Passwort
 - [ ] Login mit falschem Benutzernamen
 - [ ] Login mit falschem Benutzernamen und Passwort
+- [ ] Login über Forum
+- [ ] Administratorrechte werden bei Forum-Login übernommen
+- [ ] "Normale" Forumsbenutzer haben keine Administratorrechte
+- [ ] Forumsbenutzer ohne Registrierung können keine Ausstellungen erstellen
 
 ## Kennwort zurücksetzen
 
@@ -29,6 +36,8 @@
 - [ ] Rücksetzlink in Email funktioniert
 - [ ] Rücksetzlink in Email funktioniert nicht nach 24 Stunden
 - [ ] Anmeldung mit neuem Kennwort funktioniert
+
+# Aussteller-Funktionen
 
 ## Registrierung
 
@@ -54,6 +63,23 @@
 - [ ] Texteditor unterstützt Überschriften, Fettdruck, Links
 - [ ] Texteditor unterstützt Bilder per Drag & Drop
 - [ ] Texteditor unterstützt Bilder per Dateiauswahl
+- [ ] Texteditor unterstützt Bilder per Copy & Paste
+- [ ] HTML wird korrekt gefiltert (erfordert direkten GraphQL-Zugriff)
+
+# Administrator-Funktionen
+
+## Seiten bearbeiten
+
+- [ ] Seiten können bearbeitet werden
+- [ ] Änderungen werden sofort sichtbar
+
+# Besucher-Funktionen
+
+## Tischsuche
+
+- [ ] Tischsuche funktioniert
+- [ ] Aussteller kann freien Tisch beanspruchen
+- [ ] Aussteller kann Tisch freigeben
 
 ## Lesezeichen
 

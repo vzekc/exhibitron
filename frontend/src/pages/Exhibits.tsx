@@ -9,7 +9,9 @@ const GET_EXHIBITION = graphql(`
       id
       title
       exhibitor {
+        id
         user {
+          id
           fullName
         }
       }
@@ -25,7 +27,7 @@ const Exhibits = () => {
   if (data?.getExhibits) {
     return (
       <article>
-        <h2>Liste der Exponate</h2>
+        <h2>Exponate</h2>
         <ExhibitList exhibits={data.getExhibits} />
       </article>
     )

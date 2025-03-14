@@ -23,6 +23,7 @@ const GET_DATA = graphql(`
       exhibitor {
         id
         user {
+          id
           fullName
           contacts {
             email

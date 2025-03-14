@@ -23,8 +23,8 @@ const Bookmarks = () => {
         />
       ) : (
         <p>
-          Hier findest Du eine Liste der Exponate, die Du mit einem Lesezeichen
-          versehen hast.
+          Hier findest Du die Exponate, die Du mit einem Lesezeichen versehen
+          hast.
         </p>
       )}
     </article>
