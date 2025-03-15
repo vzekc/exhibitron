@@ -16,6 +16,8 @@ const breadcrumbMap: { [key: string]: string } = {
   table: 'Tische',
   exhibitor: 'Aussteller',
   bookmarks: 'Lesezeichen',
+  resetPassword: 'Passwort zurücksetzen',
+  setupExhibitor: 'Registrierung abschließen',
 }
 
 const Breadcrumbs = () => {

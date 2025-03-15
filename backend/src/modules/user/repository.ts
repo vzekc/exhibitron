@@ -78,12 +78,16 @@ export class UserRepository extends EntityRepository<User> {
     return user
   }
 
+  createPasswordResetToken(user: User, expires: number) {
+    logger.info(`Requested password reset for user: ${user.email}`)
+    user.passwordResetToken = Math.random().toString(36).slice(2)
+    user.passwordResetTokenExpires = new Date(expires)
+  }
+
   async requestPasswordReset(email: string, resetUrl: string) {
     const user = await this.findOne({ email })
     if (user) {
-      logger.info(`Requested password reset for user: ${email}`)
-      user.passwordResetToken = Math.random().toString(36).slice(2)
-      user.passwordResetTokenExpires = new Date(Date.now() + 3600000)
+      this.createPasswordResetToken(user, Date.now() + 3600000)
       await this.getEntityManager().flush()
       await sendEmail(makePasswordResetEmail(user.email, resetUrl + user.passwordResetToken))
     } else {

@@ -15,6 +15,10 @@ export const userQueries: QueryResolvers<Context> = {
   },
   getCurrentUser: async (_, _args, { user }) => user,
   getUserByEmail: async (_, { email }, { db }) => db.user.findOneOrFail({ email }),
+  getTokenEmail: async (_, { token }, { db }) => {
+    const userWithToken = await db.user.findOne({ passwordResetToken: token })
+    return userWithToken?.email || null
+  },
 }
 
 export const userMutations: MutationResolvers<Context> = {

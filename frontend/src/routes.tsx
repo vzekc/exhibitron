@@ -21,6 +21,7 @@ import PageList from './pages/admin/PageList.tsx'
 import Exhibitors from './pages/Exhibitors.tsx'
 import Exhibitor from './pages/Exibitor.tsx'
 import Table from './pages/Table'
+import SetupExhibitor from './pages/SetupExhibitor.tsx'
 
 const routes: RouteObject[] = [
   { path: '/register', element: <Register /> },
@@ -50,6 +51,7 @@ const routes: RouteObject[] = [
       { path: '/admin/page', element: <PageList /> },
       { path: '/admin/page/:key', element: <PageEditor /> },
       { path: '/table', element: <Table /> },
+      { path: '/setupExhibitor', element: <SetupExhibitor /> },
       { path: '/*', element: <NotFound /> },
     ],
   },

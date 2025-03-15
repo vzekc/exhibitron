@@ -5,7 +5,7 @@ import Confirm from '../../components/Confirm'
 import './RegistrationDetails.css'
 import { useBreadcrumb } from '../../contexts/BreadcrumbContext.ts'
 import { graphql } from 'gql.tada'
-import { useQuery, useMutation } from '@apollo/client'
+import { useQuery, useMutation, useApolloClient } from '@apollo/client'
 import useMandatoryParams from '../../utils/useMandatoryParams.ts'
 
 type ConfirmAction = {
@@ -80,6 +80,7 @@ const RegistrationDetails = () => {
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null)
   const navigate = useNavigate()
   const { setDetailName } = useBreadcrumb()
+  const apolloClient = useApolloClient()
 
   useEffect(() => {
     if (data?.getRegistration) {
@@ -194,6 +195,7 @@ const RegistrationDetails = () => {
                         await deleteRegistration({
                           variables: { id: parseInt(id) },
                         })
+                        await apolloClient.clearStore()
                         navigate('/admin/registration')
                       },
                     })

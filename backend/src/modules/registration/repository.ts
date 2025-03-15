@@ -32,7 +32,7 @@ export class RegistrationRepository extends EntityRepository<Registration> {
     registration.status = RegistrationStatus.Approved
     const userRepository = this.em.getRepository(User)
     let user = await userRepository.lookup(registration.email)
-    let completeProfileUrl = `${siteUrl}/user/profile`
+    let completeProfileUrl = `${siteUrl}/setupExhibitor`
     if (!user) {
       user = userRepository.create({
         email: registration.email,
@@ -43,6 +43,7 @@ export class RegistrationRepository extends EntityRepository<Registration> {
         exhibition: registration.exhibition,
         user,
       })
+      userRepository.createPasswordResetToken(user, Date.now() + 7 * 24 * 60 * 60 * 1000)
       completeProfileUrl += `?token=${user.passwordResetToken}`
     } else {
       let exhibitor: Exhibitor | null = await this.em.getRepository(Exhibitor).findOne(

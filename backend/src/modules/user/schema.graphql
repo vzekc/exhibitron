@@ -42,4 +42,5 @@ extend type Query {
   getUserByEmail(email: String!): User
   getCurrentUser: User
   getUsers: [User!]
+  getTokenEmail(token: String!): String
 }

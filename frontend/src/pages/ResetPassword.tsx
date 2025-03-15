@@ -51,7 +51,6 @@ const ResetPassword = () => {
 
   return (
     <article>
-      <h2>Passwort zurücksetzen</h2>
       {message ? (
         <p>{message}</p>
       ) : (
