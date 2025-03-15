@@ -8,6 +8,7 @@ import { Context, createContext, destroyContext } from './context.js'
 import { RequestContext } from '@mikro-orm/core'
 import { fileURLToPath } from 'node:url'
 import { initORM } from '../db.js'
+import { mutationLoggerPlugin } from '../plugins/mutationLogger.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -20,6 +21,7 @@ const createServer = async () =>
   new ApolloServer<Context>({
     typeDefs,
     resolvers,
+    plugins: [mutationLoggerPlugin()],
   })
 
 export const register = async (app: FastifyInstance) => {

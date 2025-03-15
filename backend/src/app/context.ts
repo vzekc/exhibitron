@@ -3,12 +3,11 @@ import memoize from 'memoizee'
 import { Services } from '../db.js'
 import { Exhibition } from '../modules/exhibition/entity.js'
 import { Exhibitor } from '../modules/exhibitor/entity.js'
-import pino from 'pino'
+import { pino } from 'pino'
 import { User } from '../modules/user/entity.js'
 import { FastifySessionObject } from '@fastify/session'
 import { FastifyRequest } from 'fastify'
 
-// @ts-expect-error ts2349
 const logger = pino()
 
 export const getHostMatchers = memoize(async () => {

@@ -1,8 +1,7 @@
 import 'dotenv/config'
 import nodemailer from 'nodemailer'
-import pino from 'pino'
+import { pino } from 'pino'
 
-// @ts-expect-error ts2349
 const logger = pino({ level: process.env.TEST_LOG_LEVEL || 'fatal' })
 
 interface EmailOptions {
