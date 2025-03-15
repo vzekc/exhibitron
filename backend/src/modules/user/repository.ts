@@ -59,7 +59,9 @@ export class UserRepository extends EntityRepository<User> {
   }
 
   async ensureVzEkCUser(nickname: string, email: string, isAdministrator: boolean) {
-    let user = await this.findOne({ nickname })
+    let user = await this.findOne({
+      $or: [{ nickname }, { email }],
+    })
     if (user) {
       logger.debug(`ensureUser found existing user: @{user.nickname} (${user.email})`)
       if (isAdministrator) {
