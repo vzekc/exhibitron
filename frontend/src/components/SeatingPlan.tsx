@@ -212,7 +212,10 @@ export const SeatingPlan: React.FC = () => {
         table.number,
         {
           exhibitorName: table.exhibitor?.user.fullName ?? 'Unknown',
-          exhibits: table.exhibitor?.exhibits?.map((exhibit) => exhibit.title) ?? [],
+          exhibits:
+            table.exhibitor?.exhibits
+              ?.map((exhibit) => exhibit.title)
+              .sort((a, b) => a.localeCompare(b)) ?? [],
         },
       ]),
   )

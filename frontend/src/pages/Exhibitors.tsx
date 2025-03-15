@@ -28,7 +28,9 @@ const Exhibitors = () => {
       .map(({ id, user, exhibits }) => ({
         id,
         fullName: user.fullName,
-        exhibits: ((exhibits as Array<{ title: string }>) || []).map((e) => e.title),
+        exhibits: ((exhibits as Array<{ title: string }>) || [])
+          .map((e) => e.title)
+          .sort((a, b) => a.localeCompare(b)),
       }))
       .sort(({ fullName: a }, { fullName: b }) => a.localeCompare(b))
     return (
