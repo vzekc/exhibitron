@@ -14,4 +14,4 @@ export class Migration20250315152959_user_exhibitor_cascade extends Migration {
       'ALTER TABLE "exhibitor" ADD CONSTRAINT "exhibitor_user_id_foreign" FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON UPDATE CASCADE;',
     )
   }
-} 
+}

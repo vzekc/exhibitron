@@ -1,13 +1,14 @@
 import { useLocation, useParams, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import ExhibitorDetails from '../components/ExhibitorDetails.tsx'
 import ExhibitDetails from '../components/ExhibitDetails.tsx'
+import ExhibitorLink from '../components/ExhibitorLink.tsx'
 import { addBookmark, isBookmarked, removeBookmark } from '../utils/bookmarks.ts'
 import { useBreadcrumb } from '../contexts/BreadcrumbContext.ts'
 import { graphql } from 'gql.tada'
 import { useQuery, useMutation, useApolloClient } from '@apollo/client'
 import { useUser } from '../contexts/UserContext.ts'
 import Confirm from '../components/Confirm.tsx'
+import '../components/Card.css'
 
 const GET_DATA = graphql(`
   query GetExhibit($id: Int!) {
@@ -109,8 +110,8 @@ const Exhibit = () => {
   return (
     <div>
       <article>
+        <ExhibitorLink id={exhibit.exhibitor.id} />
         <ExhibitDetails id={exhibit.id} />
-        <ExhibitorDetails id={exhibit.exhibitor.id} />
         <div className="button-group">
           <button onClick={handleBookmark} className="button image-only-button">
             <img
