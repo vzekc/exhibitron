@@ -68,6 +68,7 @@ export class UserRepository extends EntityRepository<User> {
         // Administrator rights are only granted, but never revoked from the forum
         user.isAdministrator = true
       }
+      user.nickname = nickname
     } else {
       logger.info(`ensureUser created user: @{nickname} (${email})`)
       user = this.create({ nickname, email, isAdministrator })
