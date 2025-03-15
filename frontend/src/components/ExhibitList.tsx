@@ -43,7 +43,6 @@ const ExhibitList = ({ exhibits, notFoundLabel, onClick }: ExhibitListProps) => 
       {sortedExhibits.map((exhibit, index: number) => (
         <div key={index} onClick={() => handleClick(exhibit.id)} className="card clickable">
           <div className="card-title">{exhibit.title}</div>
-          <div className="card-content"></div>
           <div className="card-footer">
             {someNames && <div className="card-subtitle">{getExhibitorName(exhibit)}</div>}
             {exhibit.table && <div>Tisch {exhibit.table.number}</div>}

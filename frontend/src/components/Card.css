@@ -1,12 +1,12 @@
 .card {
   display: flex;
   flex-direction: column;
-  padding: 1.5rem;
+  padding: 0.75rem;
   background-color: #ffffff;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin: 1rem 0;
-  min-height: 120px;
+  margin: 0.25rem 0;
+  min-height: 90px;
   position: relative;
   transition:
     transform 0.2s ease,
@@ -25,28 +25,29 @@
 }
 
 .card-title {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 600;
   text-align: left;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
+  flex: 1;
 }
 
 .card-content {
   flex: 1;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   word-wrap: break-word;
   overflow-wrap: break-word;
   hyphens: none;
 }
 
 .card-content p {
-  margin: 0.5rem 0;
+  margin: 0.25rem 0;
 }
 
 .card-content h3 {
-  font-size: 1.2rem;
-  margin-top: 1rem;
-  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
 }
 
 .contact-details {
@@ -65,26 +66,27 @@
 }
 
 .card-subtitle {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   color: #666;
-  margin-top: auto;
+  margin-right: auto;
 }
 
 .card-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   color: #666;
   margin-top: auto;
+  width: 100%;
 }
 
 /* Grid layout for card lists */
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 1.5rem;
-  padding: 1rem 0;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 0.5rem;
+  padding: 0.25rem 0;
 }
 
 /* Button styles */
