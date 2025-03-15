@@ -19,6 +19,7 @@ export function BuildInfo() {
             <>
               <span>{buildInfo.branchName}</span>
               <span>{buildInfo.commitSha.substring(0, 7)}</span>
+              <span>{new Date(buildInfo.deploymentDate).toLocaleString()}</span>
             </>
           )}
         </div>
