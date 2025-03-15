@@ -12,6 +12,8 @@ import { Exhibitor } from './modules/exhibitor/exhibitor.entity.js'
 import { ExhibitionRepository } from './modules/exhibition/exhibition.repository.js'
 import { Exhibition } from './modules/exhibition/exhibition.entity.js'
 import { Page } from './modules/page/page.entity.js'
+import { ImageRepository } from './modules/image/image.repository.js'
+import { Image } from './modules/image/image.entity.js'
 
 export interface Services {
   dbName?: string
@@ -24,6 +26,7 @@ export interface Services {
   table: TableRepository
   registration: RegistrationRepository
   page: EntityRepository<Page>
+  image: ImageRepository
 }
 
 let cache: Services
@@ -53,6 +56,7 @@ export async function initORM(options?: Options): Promise<Services> {
     table: orm.em.getRepository(Table),
     registration: orm.em.getRepository(Registration),
     page: orm.em.getRepository(Page),
+    image: orm.em.getRepository(Image),
   })
 }
 

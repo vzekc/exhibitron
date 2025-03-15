@@ -1,21 +1,16 @@
 import Quill, { Range, Delta, EmitterSource } from 'quill'
 import { useEffect, useLayoutEffect, useRef } from 'react'
-import DOMPurify from 'dompurify'
 import 'quill/dist/quill.snow.css'
 import './TextEditor.css'
 
 interface TextEditorProps {
-  readOnly?: boolean
   defaultValue?: string
   onChange?: (html: string) => void
   onTextChange?: (delta: Delta, oldContent: Delta, source: EmitterSource) => void
   onSelectionChange?: (range: Range, oldRange: Range, source: EmitterSource) => void
 }
 
-const cleanHtmlContent = (html: string): string => DOMPurify.sanitize(html.replace(/&nbsp;/g, ' '))
-
 const TextEditor = ({
-  readOnly,
   defaultValue,
   onChange,
   onTextChange,
@@ -33,12 +28,6 @@ const TextEditor = ({
     onTextChangeRef.current = onTextChange
     onSelectionChangeRef.current = onSelectionChange
   })
-
-  useEffect(() => {
-    if (quillRef.current) {
-      quillRef.current.enable(!readOnly)
-    }
-  }, [readOnly])
 
   useEffect(() => {
     defaultValueRef.current = defaultValue
@@ -67,8 +56,9 @@ const TextEditor = ({
 
     // Set initial content if we have it
     if (defaultValueRef.current) {
+      console.log('defaultValueRef.current', defaultValueRef.current)
       const convertedContent = quill.clipboard.convert({
-        html: cleanHtmlContent(defaultValueRef.current),
+        html: defaultValueRef.current,
       })
       quill.setContents(convertedContent)
     }
@@ -76,8 +66,9 @@ const TextEditor = ({
     quill.on(Quill.events.TEXT_CHANGE, (...args) => {
       isUserInputRef.current = true
       onTextChangeRef.current?.(...args)
-      const html = quill.getSemanticHTML()
-      onChangeRef.current?.(cleanHtmlContent(html))
+      const html = quill.getSemanticHTML().replaceAll(/&nbsp;/g, ' ')
+      console.log('changed', html)
+      onChangeRef.current?.(html)
     })
 
     quill.on(Quill.events.SELECTION_CHANGE, (...args) => {
@@ -95,8 +86,9 @@ const TextEditor = ({
     if (quillRef.current && defaultValue !== undefined && !isUserInputRef.current) {
       const quill = quillRef.current
       const currentContent = quill.getContents()
+      console.log('defaultValue', defaultValue)
       const newContent = quill.clipboard.convert({
-        html: defaultValue ? cleanHtmlContent(defaultValue) : '',
+        html: defaultValue || '',
       })
 
       if (defaultValue && JSON.stringify(currentContent) !== JSON.stringify(newContent)) {

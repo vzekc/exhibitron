@@ -67,11 +67,15 @@ const PageEditor = () => {
   useUnsavedChangesWarning(hasChanges)
 
   const handleSave = async () => {
+    let processedText: string
     if (data?.getPage?.id) {
-      await updatePage({ variables: { id: data.getPage.id, key, title, text } })
+      const result = await updatePage({ variables: { id: data.getPage.id, key, title, text } })
+      processedText = result!.data!.updatePage.text || ''
     } else {
-      await createPage({ variables: { key, title, text } })
+      const result = await createPage({ variables: { key, title, text } })
+      processedText = result!.data!.createPage.text || ''
     }
+    setText(processedText)
 
     // Reset the Apollo cache to force a fresh load of all data
     await apolloClient.resetStore()

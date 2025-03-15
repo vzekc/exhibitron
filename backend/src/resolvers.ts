@@ -15,8 +15,8 @@ import { wrap } from '@mikro-orm/core'
 import { GraphQLError } from 'graphql/error/index.js'
 import { requireAdmin } from './db.js'
 import { Exhibit } from './entities.js'
-import DOMPurify from 'isomorphic-dompurify'
 import GraphQLDate from './modules/common/GraphQLDate.js'
+import { processHtml } from './modules/common/htmlProcessor.js'
 
 const queryResolvers: QueryResolvers<Context> = {
   getUser: async (_, { id }, { db, user }) => {
@@ -118,10 +118,18 @@ const mutationResolvers: MutationResolvers<Context> = {
     const exhibit = db.em.getRepository(Exhibit).create({
       exhibition,
       title,
-      text: DOMPurify.sanitize(text || ''),
+      text: '', // Will be set after processing
       table,
       exhibitor,
     })
+
+    if (text) {
+      const { sanitizedHtml, images } = await processHtml(text, db.em, { exhibit })
+      exhibit.text = sanitizedHtml
+      // Images are already created and associated with the exhibit
+      await db.em.persist(images)
+    }
+
     await db.em.persist(exhibit).flush()
     return exhibit
   },
@@ -140,9 +148,13 @@ const mutationResolvers: MutationResolvers<Context> = {
           })
         : null
     }
+
     if (text) {
-      text = DOMPurify.sanitize(text)
+      const { sanitizedHtml, images } = await processHtml(text, db.em, { exhibit })
+      text = sanitizedHtml
+      await db.em.persist(images)
     }
+
     return wrap(exhibit).assign({ table, text, ...rest })
   },
   register: async (_, { input }, { exhibition, db }) => {
@@ -203,18 +215,30 @@ const mutationResolvers: MutationResolvers<Context> = {
       exhibition,
       key,
       title,
-      text: DOMPurify.sanitize(text),
+      text: '', // Will be set after processing
     })
+
+    if (text) {
+      const { sanitizedHtml, images } = await processHtml(text, db.em, { page })
+      page.text = sanitizedHtml
+      await db.em.persist(images)
+    }
+
     await db.em.persistAndFlush(page)
     return page
   },
   updatePage: async (_, { id, key, title, text }, { db, user }) => {
     requireAdmin(user)
     const page = await db.page.findOneOrFail({ id })
+
+    let processedText = text
     if (text) {
-      text = DOMPurify.sanitize(text)
+      const { sanitizedHtml, images } = await processHtml(text, db.em, { page })
+      processedText = sanitizedHtml
+      await db.em.persist(images)
     }
-    wrap(page).assign({ key, title, text })
+
+    wrap(page).assign({ key, title, text: processedText })
     await db.em.persistAndFlush(page)
     return page
   },

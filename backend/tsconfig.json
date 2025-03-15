@@ -18,8 +18,7 @@
     ]
   },
   "include": [
-    "./src/**/*.ts",
-    "../node_modules/.pnpm/vitest@2.1.9_@types+node@22.13.9/node_modules/vitest/globals.d.ts"
+    "./src/**/*.ts"
   ],
   "ts-node": {
     "esm": true,

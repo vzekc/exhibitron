@@ -133,21 +133,24 @@ const ExhibitEditor = () => {
     }
 
     await apolloClient.resetStore()
+    // When saving, we need to retrieve the text from the server as it will be
+    // processed to remove unwanted HTML and to externalize inline images.
     if (isNew) {
       const result = await createExhibit({
         variables: { title, text, table: selectedTable || null },
       })
-      const newId = result.data?.createExhibit?.id
-      if (newId) {
-        navigate(`/user/exhibit/${newId}`)
-      }
+      const { id: savedId, text: savedText } = result.data!.createExhibit!
+      navigate(`/user/exhibit/${savedId}`)
+      setText(savedText!)
     } else {
-      await updateExhibit({
+      const result = await updateExhibit({
         variables: { id: Number(id), title, text, table: selectedTable || null },
       })
+      const { text: savedText } = result.data!.updateExhibit!
       setOriginalTitle(title)
-      setOriginalText(text)
+      setOriginalText(savedText!)
       setOriginalTable(selectedTable)
+      setText(savedText!)
     }
   }
 
