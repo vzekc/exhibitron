@@ -1,8 +1,8 @@
 import { EntityRepository } from '@mikro-orm/postgresql'
-import { Table } from './table.entity.js'
+import { Table } from './entity.js'
 import { PermissionDeniedError } from '../common/errors.js'
-import { Exhibitor } from '../exhibitor/exhibitor.entity.js'
-import { Exhibition } from '../exhibition/exhibition.entity.js'
+import { Exhibitor } from '../exhibitor/entity.js'
+import { Exhibition } from '../exhibition/entity.js'
 
 export class TableRepository extends EntityRepository<Table> {
   async claim(exhibition: Exhibition, tableNumber: number, exhibitor: Exhibitor) {

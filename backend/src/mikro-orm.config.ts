@@ -20,8 +20,8 @@ if (process.env.NODE_ENV === 'production' && existsSync('./temp/metadata.json'))
 
 export default defineConfig({
   clientUrl: process.env.DATABASE_URL || 'postgresql://postgres@localhost/exhibitron',
-  entities: ['dist/**/*.entity.js'],
-  entitiesTs: ['src/**/*.entity.ts'],
+  entities: ['dist/**/entity.js'],
+  entitiesTs: ['src/**/entity.ts'],
   // enable debug mode to log SQL queries and discovery information
   //debug: true,
   //logger: console.log,

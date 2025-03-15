@@ -1,8 +1,8 @@
 import DOMPurify from 'isomorphic-dompurify'
 import { EntityManager } from '@mikro-orm/core'
-import { Image } from '../image/image.entity.js'
-import { Exhibit } from '../exhibit/exhibit.entity.js'
-import { Page } from '../page/page.entity.js'
+import { Image } from '../image/entity.js'
+import { Exhibit } from '../exhibit/entity.js'
+import { Page } from '../page/entity.js'
 import { JSDOM } from 'jsdom'
 
 interface ProcessedHtml {

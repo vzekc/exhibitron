@@ -1,5 +1,5 @@
 import { EntityRepository } from '@mikro-orm/postgresql'
-import { Registration } from './registration.entity.js'
+import { Registration } from './entity.js'
 import { RegistrationStatus } from '../../generated/graphql.js'
 import { BaseEntity } from '../common/base.entity.js'
 import {
@@ -8,9 +8,9 @@ import {
   makeWelcomeEmail,
 } from './emails.js'
 import { sendEmail } from '../common/sendEmail.js'
-import { User } from '../user/user.entity.js'
-import { Exhibit } from '../exhibit/exhibit.entity.js'
-import { Exhibitor } from '../exhibitor/exhibitor.entity.js'
+import { User } from '../user/entity.js'
+import { Exhibit } from '../exhibit/entity.js'
+import { Exhibitor } from '../exhibitor/entity.js'
 
 export type RegistrationData = Omit<Registration, keyof BaseEntity | 'notes'>
 

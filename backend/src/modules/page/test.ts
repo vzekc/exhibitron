@@ -1,7 +1,7 @@
-import { expect, describe } from 'vitest'
+import { describe, expect } from 'vitest'
 import { graphql } from 'gql.tada'
 import { ExecuteOperationFunction, graphqlTest, login } from '../../test/apollo.js'
-import { Image } from '../image/image.entity.js'
+import { Image } from '../image/entity.js'
 import { RequestContext } from '@mikro-orm/core'
 
 interface PageResult {

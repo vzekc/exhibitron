@@ -1,7 +1,7 @@
 // src/modules/user/user.repository.ts
 import { EntityRepository } from '@mikro-orm/postgresql'
 import { NotFoundError } from '@mikro-orm/core'
-import { User } from './user.entity.js'
+import { User } from './entity.js'
 import { PermissionDeniedError } from '../common/errors.js'
 import { match, P } from 'ts-pattern'
 

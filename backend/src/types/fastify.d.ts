@@ -1,8 +1,9 @@
 // src/types/fastify.d.ts
+import '@fastify/session'
 import { OAuth2Namespace } from '@fastify/oauth2'
-import { User } from '../modules/user/user.entity.js'
-import { Exhibition } from '../modules/exhibition/exhibition.entity.js'
-import { Exhibitor } from '../modules/exhibitor/exhibitor.entity.js'
+import { User } from '../modules/user/entity.js'
+import { Exhibition } from '../modules/exhibition/entity.js'
+import { Exhibitor } from '../modules/exhibitor/entity.js'
 import { Context } from '../app/context.js'
 
 declare module 'fastify' {

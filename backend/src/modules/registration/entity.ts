@@ -1,7 +1,7 @@
 import { Entity, EntityRepositoryType, Enum, ManyToOne, Property, Unique } from '@mikro-orm/core'
 import { BaseEntity } from '../common/base.entity.js'
-import { RegistrationRepository } from './registration.repository.js'
-import { Exhibition } from '../exhibition/exhibition.entity.js'
+import { RegistrationRepository } from './repository.js'
+import { Exhibition } from '../exhibition/entity.js'
 
 import { RegistrationStatus } from '../../generated/graphql.js'
 

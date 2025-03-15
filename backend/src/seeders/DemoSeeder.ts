@@ -1,10 +1,10 @@
-import type { EntityManager } from '@mikro-orm/core'
+import { EntityManager } from '@mikro-orm/core'
 import { Seeder } from '@mikro-orm/seeder'
-import { User } from '../modules/user/user.entity.js'
-import { Table } from '../modules/table/table.entity.js'
-import { Exhibit } from '../modules/exhibit/exhibit.entity.js'
-import { Exhibition } from '../modules/exhibition/exhibition.entity.js'
-import { Exhibitor } from '../modules/exhibitor/exhibitor.entity.js'
+import { User } from '../modules/user/entity.js'
+import { Table } from '../modules/table/entity.js'
+import { Exhibit } from '../modules/exhibit/entity.js'
+import { Exhibition } from '../modules/exhibition/entity.js'
+import { Exhibitor } from '../modules/exhibitor/entity.js'
 
 export class DemoSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {

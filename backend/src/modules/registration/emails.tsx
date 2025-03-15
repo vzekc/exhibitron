@@ -1,6 +1,6 @@
 import React from 'react'
 import { makeEmailBody } from '../common/emailUtils.js'
-import { Registration } from './registration.entity.js'
+import { Registration } from './entity.js'
 
 export const makeWelcomeEmail = (name: string, email: string, completeProfileUrl: string) => ({
   to: [email],

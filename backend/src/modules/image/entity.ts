@@ -1,7 +1,7 @@
 import { Entity, ManyToOne, Property } from '@mikro-orm/core'
 import { BaseEntity } from '../common/base.entity.js'
-import { Exhibit } from '../exhibit/exhibit.entity.js'
-import { Page } from '../page/page.entity.js'
+import { Exhibit } from '../exhibit/entity.js'
+import { Page } from '../page/entity.js'
 
 @Entity()
 export class Image extends BaseEntity {

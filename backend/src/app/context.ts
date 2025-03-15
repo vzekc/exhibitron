@@ -1,10 +1,10 @@
 import { initORM } from '../db.js'
 import memoize from 'memoizee'
 import { Services } from '../db.js'
-import { Exhibition } from '../modules/exhibition/exhibition.entity.js'
-import { Exhibitor } from '../modules/exhibitor/exhibitor.entity.js'
+import { Exhibition } from '../modules/exhibition/entity.js'
+import { Exhibitor } from '../modules/exhibitor/entity.js'
 import pino from 'pino'
-import { User } from '../modules/user/user.entity.js'
+import { User } from '../modules/user/entity.js'
 import { FastifySessionObject } from '@fastify/session'
 import { FastifyRequest } from 'fastify'
 

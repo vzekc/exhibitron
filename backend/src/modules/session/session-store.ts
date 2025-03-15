@@ -1,5 +1,5 @@
 import { EntityManager } from '@mikro-orm/core'
-import { Session } from './session.entity.js'
+import { Session } from './entity.js'
 import * as fastifySession from '@fastify/session'
 import { FastifySessionObject } from '@fastify/session'
 

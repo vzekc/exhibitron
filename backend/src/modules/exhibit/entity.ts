@@ -1,9 +1,9 @@
 import { Entity, EntityRepositoryType, ManyToOne, Property } from '@mikro-orm/core'
 import { BaseEntity } from '../common/base.entity.js'
-import { Table } from '../table/table.entity.js'
-import { ExhibitRepository } from './exhibit.repository.js'
-import { Exhibition } from '../exhibition/exhibition.entity.js'
-import { Exhibitor } from '../exhibitor/exhibitor.entity.js'
+import { Table } from '../table/entity.js'
+import { ExhibitRepository } from './repository.js'
+import { Exhibition } from '../exhibition/entity.js'
+import { Exhibitor } from '../exhibitor/entity.js'
 
 @Entity({ repository: () => ExhibitRepository })
 export class Exhibit extends BaseEntity<'text' | 'table'> {

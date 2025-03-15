@@ -10,7 +10,7 @@ import {
 } from '@mikro-orm/core'
 import { BaseEntity } from '../common/base.entity.js'
 import { hash, verify } from 'argon2'
-import { UserRepository } from './user.repository.js'
+import { UserRepository } from './repository.js'
 
 @Embeddable()
 export class Contacts {

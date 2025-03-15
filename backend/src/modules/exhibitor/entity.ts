@@ -1,9 +1,9 @@
 import { Collection, Entity, ManyToOne, OneToMany } from '@mikro-orm/core'
-import { User } from '../user/user.entity.js'
-import { Exhibition } from '../exhibition/exhibition.entity.js'
+import { User } from '../user/entity.js'
+import { Exhibition } from '../exhibition/entity.js'
 import { BaseEntity } from '../common/base.entity.js'
-import { Exhibit } from '../exhibit/exhibit.entity.js'
-import { Table } from '../table/table.entity.js'
+import { Exhibit } from '../exhibit/entity.js'
+import { Table } from '../table/entity.js'
 
 @Entity()
 export class Exhibitor extends BaseEntity {
