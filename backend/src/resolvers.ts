@@ -127,7 +127,7 @@ const mutationResolvers: MutationResolvers<Context> = {
       const { sanitizedHtml, images } = await processHtml(text, db.em, { exhibit })
       exhibit.text = sanitizedHtml
       // Images are already created and associated with the exhibit
-      await db.em.persist(images)
+      db.em.persist(images)
     }
 
     await db.em.persist(exhibit).flush()
@@ -152,10 +152,18 @@ const mutationResolvers: MutationResolvers<Context> = {
     if (text) {
       const { sanitizedHtml, images } = await processHtml(text, db.em, { exhibit })
       text = sanitizedHtml
-      await db.em.persist(images)
+      db.em.persist(images)
     }
 
     return wrap(exhibit).assign({ table, text, ...rest })
+  },
+  deleteExhibit: async (_, { id }, { db, exhibitor, user }) => {
+    const exhibit = await db.exhibit.findOneOrFail({ id })
+    if (exhibitor !== exhibit.exhibitor && !user?.isAdministrator) {
+      throw new Error('You do not have permission to delete this exhibit')
+    }
+    db.em.remove(exhibit)
+    return true
   },
   register: async (_, { input }, { exhibition, db }) => {
     const { email, message, ...rest } = input
@@ -221,7 +229,7 @@ const mutationResolvers: MutationResolvers<Context> = {
     if (text) {
       const { sanitizedHtml, images } = await processHtml(text, db.em, { page })
       page.text = sanitizedHtml
-      await db.em.persist(images)
+      db.em.persist(images)
     }
 
     await db.em.persistAndFlush(page)
@@ -235,7 +243,7 @@ const mutationResolvers: MutationResolvers<Context> = {
     if (text) {
       const { sanitizedHtml, images } = await processHtml(text, db.em, { page })
       processedText = sanitizedHtml
-      await db.em.persist(images)
+      db.em.persist(images)
     }
 
     wrap(page).assign({ key, title, text: processedText })

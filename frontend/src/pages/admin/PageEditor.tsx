@@ -3,7 +3,7 @@ import { useQuery, useMutation, gql, useApolloClient } from '@apollo/client'
 import useMandatoryParams from '../../utils/useMandatoryParams'
 import ContentEditable from 'react-contenteditable'
 import TextEditor, { TextEditorHandle } from '../../components/TextEditor.tsx'
-import { useUnsavedChangesWarning } from '../../hooks/useUnsavedChangesWarning'
+import { useUnsavedChangesWarning } from '../../hooks/useUnsavedChangesWarning.tsx'
 
 const GET_PAGE = gql`
   query GetPage($key: String!) {

@@ -86,3 +86,32 @@
   gap: 1.5rem;
   padding: 1rem 0;
 }
+
+/* Button styles */
+.button-group {
+  display: flex;
+  gap: 1rem;
+}
+
+.button-image {
+  width: 24px;
+  height: 24px;
+}
+
+.button-image[src='/edit.svg'],
+.button-image[src='/delete.svg'] {
+  width: 35px;
+  height: 35px;
+  padding: 2px;
+  margin-left: 3px;
+}
+
+/* Danger button */
+button.danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+button.danger:hover {
+  background-color: #c82333;
+}

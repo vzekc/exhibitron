@@ -1,11 +1,13 @@
-import { useLocation, useParams } from 'react-router-dom'
+import { useLocation, useParams, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import ExhibitorDetails from '../components/ExhibitorDetails.tsx'
 import ExhibitDetails from '../components/ExhibitDetails.tsx'
 import { addBookmark, isBookmarked, removeBookmark } from '../utils/bookmarks.ts'
 import { useBreadcrumb } from '../contexts/BreadcrumbContext.ts'
 import { graphql } from 'gql.tada'
-import { useQuery } from '@apollo/client'
+import { useQuery, useMutation, useApolloClient } from '@apollo/client'
+import { useUser } from '../contexts/UserContext.ts'
+import Confirm from '../components/Confirm.tsx'
 
 const GET_DATA = graphql(`
   query GetExhibit($id: Int!) {
@@ -36,13 +38,24 @@ const GET_DATA = graphql(`
   }
 `)
 
+const DELETE_EXHIBIT = graphql(`
+  mutation DeleteExhibit($id: Int!) {
+    deleteExhibit(id: $id)
+  }
+`)
+
 const Exhibit = () => {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+  const apolloClient = useApolloClient()
   const { setDetailName } = useBreadcrumb()
+  const { user: currentUser } = useUser()
   const [bookmarked, setBookmarked] = useState(isBookmarked('exhibits', { id: Number(id) }))
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const { data, loading, error } = useQuery(GET_DATA, {
     variables: { id: Number(id) },
   })
+  const [deleteExhibit] = useMutation(DELETE_EXHIBIT)
   const location = useLocation()
 
   const handleBookmark = () => {
@@ -77,17 +90,53 @@ const Exhibit = () => {
   }
 
   const exhibit = data?.getExhibit
+  const canEdit = currentUser?.isAdministrator || currentUser?.id === exhibit?.exhibitor.user.id
+
+  const handleEdit = () => {
+    navigate(`/user/exhibit/${exhibit.id}`)
+  }
+
+  const handleDelete = async () => {
+    setShowDeleteConfirm(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    await deleteExhibit({ variables: { id: exhibit.id } })
+    await apolloClient.clearStore()
+    navigate('/exhibit')
+  }
 
   return (
     <div>
       <article>
         <ExhibitDetails id={exhibit.id} />
         <ExhibitorDetails id={exhibit.exhibitor.id} />
-        <button onClick={handleBookmark} className="button image-only-button">
-          <img
-            src={bookmarked ? '/bookmarked.svg' : '/bookmark.svg'}
-            className="button-image inverted-image"></img>
-        </button>
+        <div className="button-group">
+          <button onClick={handleBookmark} className="button image-only-button">
+            <img
+              src={bookmarked ? '/bookmarked.svg' : '/bookmark.svg'}
+              className="button-image inverted-image"></img>
+          </button>
+          {canEdit && (
+            <>
+              <button onClick={handleEdit} className="button image-only-button">
+                <img src="/edit.svg" className="button-image inverted-image" />
+              </button>
+              <button onClick={handleDelete} className="button image-only-button">
+                <img src="/delete.svg" className="button-image inverted-image" />
+              </button>
+            </>
+          )}
+        </div>
+        <Confirm
+          isOpen={showDeleteConfirm}
+          title="Exponat löschen"
+          message={`Möchtest Du das Exponat "${exhibit.title}" wirklich löschen?`}
+          confirm="Löschen"
+          cancel="Abbrechen"
+          onConfirm={handleConfirmDelete}
+          onClose={() => setShowDeleteConfirm(false)}
+        />
       </article>
     </div>
   )

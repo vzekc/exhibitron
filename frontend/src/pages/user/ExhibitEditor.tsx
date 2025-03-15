@@ -4,7 +4,8 @@ import TextEditor, { TextEditorHandle } from '../../components/TextEditor.tsx'
 import { useBreadcrumb } from '../../contexts/BreadcrumbContext.ts'
 import { graphql } from 'gql.tada'
 import { useQuery, useMutation, useApolloClient } from '@apollo/client'
-import { useUnsavedChangesWarning } from '../../hooks/useUnsavedChangesWarning'
+import { useUnsavedChangesWarning } from '../../hooks/useUnsavedChangesWarning.tsx'
+import Confirm from '../../components/Confirm.tsx'
 
 const GET_DATA = graphql(`
   query GetExhibit($id: Int!) {
@@ -61,12 +62,19 @@ const GET_MY_TABLES = graphql(`
   }
 `)
 
+const DELETE_EXHIBIT = graphql(`
+  mutation DeleteExhibit($id: Int!) {
+    deleteExhibit(id: $id)
+  }
+`)
+
 const ExhibitEditor = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { setDetailName } = useBreadcrumb()
   const apolloClient = useApolloClient()
   const isNew = id === 'new'
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const {
     data: exhibitData,
@@ -90,6 +98,7 @@ const ExhibitEditor = () => {
 
   const [updateExhibit] = useMutation(UPDATE_EXHIBIT)
   const [createExhibit] = useMutation(CREATE_EXHIBIT)
+  const [deleteExhibit] = useMutation(DELETE_EXHIBIT)
 
   const editorRef = useRef<TextEditorHandle>(null)
 
@@ -157,6 +166,16 @@ const ExhibitEditor = () => {
     }
   }
 
+  const handleDelete = () => {
+    setShowDeleteConfirm(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    await deleteExhibit({ variables: { id: Number(id) } })
+    await apolloClient.clearStore()
+    navigate('/user/exhibit')
+  }
+
   if (!isNew) {
     if (exhibitLoading) {
       return <p>Lade Exponat...</p>
@@ -201,9 +220,25 @@ const ExhibitEditor = () => {
           defaultValue={text}
           onEditStateChange={(edited) => setIsTextEdited(edited)}
         />
-        <button onClick={handleSave} disabled={!isNew && !hasChanges}>
-          {isNew ? 'Erstellen' : 'Speichern'}
-        </button>
+        <div className="button-group">
+          <button onClick={handleSave} disabled={!isNew && !hasChanges}>
+            {isNew ? 'Erstellen' : 'Speichern'}
+          </button>
+          {!isNew && (
+            <button onClick={handleDelete} className="danger">
+              Löschen
+            </button>
+          )}
+        </div>
+        <Confirm
+          isOpen={showDeleteConfirm}
+          title="Exponat löschen"
+          message={`Möchtest Du das Exponat "${title}" wirklich löschen?`}
+          confirm="Löschen"
+          cancel="Abbrechen"
+          onConfirm={handleConfirmDelete}
+          onClose={() => setShowDeleteConfirm(false)}
+        />
       </article>
     </div>
   )

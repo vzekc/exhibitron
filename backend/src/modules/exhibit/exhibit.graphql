@@ -9,6 +9,7 @@ type Exhibit {
 extend type Mutation {
   createExhibit(table: Int, text: String, title: String!): Exhibit
   updateExhibit(id: Int!, table: Int, text: String, title: String): Exhibit
+  deleteExhibit(id: Int!): Boolean
 }
 
 extend type Query {

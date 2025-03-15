@@ -117,6 +117,35 @@ describe('exhibit', () => {
       expect(result.errors).toBeUndefined()
       expect(result.data!.updateExhibit!.table!.number).toBe(2)
     }
+
+    // succeed deleting exhibit
+    {
+      const result = await graphqlRequest(
+        graphql(`
+          mutation DeleteExhibit($id: Int!) {
+            deleteExhibit(id: $id)
+          }
+        `),
+        { id: exhibitId },
+        user,
+      )
+      expect(result.errors).toBeUndefined()
+    }
+
+    // check that exhibit is deleted
+    {
+      const result = await graphqlRequest(
+        graphql(`
+          query GetExhibit($id: Int!) {
+            getExhibit(id: $id) {
+              id
+            }
+          }
+        `),
+        { id: exhibitId },
+      )
+      expect(result.errors![0].message).toMatch(/^Exhibit not found/)
+    }
   })
 
   graphqlTest('nonexistent exhibit', async (graphqlRequest) => {
