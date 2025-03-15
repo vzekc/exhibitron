@@ -4,7 +4,7 @@ import resolvers from '../resolvers.js'
 import { readFileSync } from 'node:fs'
 import fastifyApollo from '@as-integrations/fastify'
 import * as path from 'node:path'
-import { createContext, destroyContext } from './context.js'
+import { Context, createContext, destroyContext } from './context.js'
 import { RequestContext } from '@mikro-orm/core'
 import { fileURLToPath } from 'node:url'
 import { initORM } from '../db.js'
@@ -17,7 +17,7 @@ const typeDefs = readFileSync(path.join(__dirname, '../generated/combined-schema
 })
 
 const createServer = async () =>
-  new ApolloServer({
+  new ApolloServer<Context>({
     typeDefs,
     resolvers,
   })

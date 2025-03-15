@@ -51,7 +51,7 @@ export const graphqlTest = (
         variables?: TVariables,
         session = {},
       ) => {
-        const result = await server.executeOperation(
+        const result = await server.executeOperation<TData>(
           {
             query,
             variables: variables || {},
