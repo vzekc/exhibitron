@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom'
-import { useEffect, useState } from 'react'
-import TextEditor from '../../components/TextEditor.tsx'
+import { useEffect, useState, useRef } from 'react'
+import TextEditor, { TextEditorHandle } from '../../components/TextEditor.tsx'
 import { useBreadcrumb } from '../../contexts/BreadcrumbContext.ts'
 import { graphql } from 'gql.tada'
 import { useQuery, useMutation, useApolloClient } from '@apollo/client'
@@ -85,11 +85,13 @@ const ExhibitEditor = () => {
   const [text, setText] = useState('')
   const [selectedTable, setSelectedTable] = useState<number | undefined>(undefined)
   const [originalTitle, setOriginalTitle] = useState('')
-  const [originalText, setOriginalText] = useState('')
   const [originalTable, setOriginalTable] = useState<number | undefined>(undefined)
+  const [isTextEdited, setIsTextEdited] = useState(false)
 
   const [updateExhibit] = useMutation(UPDATE_EXHIBIT)
   const [createExhibit] = useMutation(CREATE_EXHIBIT)
+
+  const editorRef = useRef<TextEditorHandle>(null)
 
   useEffect(() => {
     if (exhibitData?.getExhibit) {
@@ -103,16 +105,16 @@ const ExhibitEditor = () => {
       setText(newText)
       setSelectedTable(newTable)
       setOriginalTitle(newTitle)
-      setOriginalText(newText)
       setOriginalTable(newTable)
+      setIsTextEdited(false)
     } else if (isNew) {
       setDetailName(location.pathname, 'Neues Exponat')
       setTitle('')
       setText('')
       setSelectedTable(undefined)
       setOriginalTitle('')
-      setOriginalText('')
       setOriginalTable(undefined)
+      setIsTextEdited(false)
     }
   }, [exhibitData, setDetailName, isNew])
 
@@ -120,9 +122,7 @@ const ExhibitEditor = () => {
     setSelectedTable(e.target.value ? Number(e.target.value) : undefined)
 
   const hasChanges =
-    (title || '') !== (originalTitle || '') ||
-    (text || '') !== (originalText || '') ||
-    selectedTable !== originalTable
+    (title || '') !== (originalTitle || '') || isTextEdited || selectedTable !== originalTable
 
   useUnsavedChangesWarning(hasChanges)
 
@@ -132,25 +132,28 @@ const ExhibitEditor = () => {
       return
     }
 
+    const currentText = editorRef.current?.getHTML() || ''
+
     await apolloClient.resetStore()
     // When saving, we need to retrieve the text from the server as it will be
     // processed to remove unwanted HTML and to externalize inline images.
     if (isNew) {
       const result = await createExhibit({
-        variables: { title, text, table: selectedTable || null },
+        variables: { title, text: currentText, table: selectedTable || null },
       })
       const { id: savedId, text: savedText } = result.data!.createExhibit!
       navigate(`/user/exhibit/${savedId}`)
       setText(savedText!)
+      setIsTextEdited(false)
     } else {
       const result = await updateExhibit({
-        variables: { id: Number(id), title, text, table: selectedTable || null },
+        variables: { id: Number(id), title, text: currentText, table: selectedTable || null },
       })
       const { text: savedText } = result.data!.updateExhibit!
       setOriginalTitle(title)
-      setOriginalText(savedText!)
       setOriginalTable(selectedTable)
       setText(savedText!)
+      setIsTextEdited(false)
     }
   }
 
@@ -194,10 +197,9 @@ const ExhibitEditor = () => {
           </select>
         </label>
         <TextEditor
+          ref={editorRef}
           defaultValue={text}
-          onChange={(html) => {
-            setText(html)
-          }}
+          onEditStateChange={(edited) => setIsTextEdited(edited)}
         />
         <button onClick={handleSave} disabled={!isNew && !hasChanges}>
           {isNew ? 'Erstellen' : 'Speichern'}

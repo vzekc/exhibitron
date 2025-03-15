@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useQuery, useMutation, gql, useApolloClient } from '@apollo/client'
 import useMandatoryParams from '../../utils/useMandatoryParams'
 import ContentEditable from 'react-contenteditable'
-import TextEditor from '../../components/TextEditor.tsx'
+import TextEditor, { TextEditorHandle } from '../../components/TextEditor.tsx'
 import { useUnsavedChangesWarning } from '../../hooks/useUnsavedChangesWarning'
 
 const GET_PAGE = gql`
@@ -47,7 +47,8 @@ const PageEditor = () => {
   const [title, setTitle] = useState('')
   const [text, setText] = useState('')
   const [originalTitle, setOriginalTitle] = useState('')
-  const [originalText, setOriginalText] = useState('')
+  const [isTextEdited, setIsTextEdited] = useState(false)
+  const editorRef = useRef<TextEditorHandle>(null)
 
   useEffect(() => {
     if (data?.getPage) {
@@ -57,22 +58,25 @@ const PageEditor = () => {
       setTitle(newTitle)
       setText(newText)
       setOriginalTitle(newTitle)
-      setOriginalText(newText)
+      setIsTextEdited(false)
     }
   }, [data])
 
-  const hasChanges =
-    (title || '') !== (originalTitle || '') || (text || '') !== (originalText || '')
+  const hasChanges = (title || '') !== (originalTitle || '') || isTextEdited
 
   useUnsavedChangesWarning(hasChanges)
 
   const handleSave = async () => {
+    const currentText = editorRef.current?.getHTML() || ''
     let processedText: string
+
     if (data?.getPage?.id) {
-      const result = await updatePage({ variables: { id: data.getPage.id, key, title, text } })
+      const result = await updatePage({
+        variables: { id: data.getPage.id, key, title, text: currentText },
+      })
       processedText = result!.data!.updatePage.text || ''
     } else {
-      const result = await createPage({ variables: { key, title, text } })
+      const result = await createPage({ variables: { key, title, text: currentText } })
       processedText = result!.data!.createPage.text || ''
     }
     setText(processedText)
@@ -80,7 +84,7 @@ const PageEditor = () => {
     // Reset the Apollo cache to force a fresh load of all data
     await apolloClient.resetStore()
     setOriginalTitle(title)
-    setOriginalText(text)
+    setIsTextEdited(false)
   }
 
   if (loading) return <div>Loading...</div>
@@ -95,7 +99,11 @@ const PageEditor = () => {
         className="editable-title"
         tagName="h2"
       />
-      <TextEditor defaultValue={text} onChange={(html) => setText(html)} />
+      <TextEditor
+        ref={editorRef}
+        defaultValue={text}
+        onEditStateChange={(edited) => setIsTextEdited(edited)}
+      />
       <button onClick={handleSave} disabled={!hasChanges || !title}>
         Save
       </button>

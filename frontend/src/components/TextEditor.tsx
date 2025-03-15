@@ -1,104 +1,122 @@
-import Quill, { Range, Delta, EmitterSource } from 'quill'
-import { useEffect, useLayoutEffect, useRef } from 'react'
+import Quill, { Delta } from 'quill'
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useImperativeHandle,
+  forwardRef,
+} from 'react'
+import deepEqual from 'fast-deep-equal'
 import 'quill/dist/quill.snow.css'
 import './TextEditor.css'
 
 interface TextEditorProps {
   defaultValue?: string
-  onChange?: (html: string) => void
-  onTextChange?: (delta: Delta, oldContent: Delta, source: EmitterSource) => void
-  onSelectionChange?: (range: Range, oldRange: Range, source: EmitterSource) => void
+  onEditStateChange?: (isEdited: boolean) => void
 }
 
-const TextEditor = ({
-  defaultValue,
-  onChange,
-  onTextChange,
-  onSelectionChange,
-}: TextEditorProps) => {
-  const containerRef = useRef<HTMLDivElement | null>(null)
-  const quillRef = useRef<Quill | null>(null)
-  const defaultValueRef = useRef(defaultValue)
-  const onChangeRef = useRef(onChange)
-  const onTextChangeRef = useRef(onTextChange)
-  const onSelectionChangeRef = useRef(onSelectionChange)
-  const isUserInputRef = useRef(false)
+export interface TextEditorHandle {
+  getHTML: () => string
+}
 
-  useLayoutEffect(() => {
-    onTextChangeRef.current = onTextChange
-    onSelectionChangeRef.current = onSelectionChange
-  })
+const TextEditor = forwardRef<TextEditorHandle, TextEditorProps>(
+  ({ defaultValue, onEditStateChange }, ref) => {
+    const containerRef = useRef<HTMLDivElement | null>(null)
+    const quillRef = useRef<Quill | null>(null)
+    const defaultValueRef = useRef(defaultValue)
+    const onEditStateChangeRef = useRef(onEditStateChange)
+    const isUserInputRef = useRef(false)
+    const initialDeltaRef = useRef<Delta | null>(null)
+    const [isEdited, setIsEdited] = useState(false)
 
-  useEffect(() => {
-    defaultValueRef.current = defaultValue
-  }, [defaultValue])
+    useImperativeHandle(
+      ref,
+      () => ({
+        getHTML: () => {
+          if (!quillRef.current) return ''
+          return quillRef.current.getSemanticHTML().replaceAll(/&nbsp;/g, ' ')
+        },
+      }),
+      [],
+    )
 
-  useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
-
-    const editorContainer = container.appendChild(container.ownerDocument.createElement('div'))
-    const quill = new Quill(editorContainer, {
-      theme: 'snow',
-      modules: {
-        toolbar: [
-          ['bold', 'italic'],
-          ['link', 'image'],
-          ['blockquote', 'code-block'],
-          [{ list: 'ordered' }, { list: 'bullet' }],
-          // [{ header: [1, 2, 3, 4, 5, 6, false] }], // CSS FIX NEEDED
-          ['clean'],
-        ],
-      },
+    useLayoutEffect(() => {
+      onEditStateChangeRef.current = onEditStateChange
     })
 
-    quillRef.current = quill
+    useEffect(() => {
+      defaultValueRef.current = defaultValue
+    }, [defaultValue])
 
-    // Set initial content if we have it
-    if (defaultValueRef.current) {
-      console.log('defaultValueRef.current', defaultValueRef.current)
-      const convertedContent = quill.clipboard.convert({
-        html: defaultValueRef.current,
-      })
-      quill.setContents(convertedContent)
-    }
+    useEffect(() => {
+      onEditStateChangeRef.current?.(isEdited)
+    }, [isEdited])
 
-    quill.on(Quill.events.TEXT_CHANGE, (...args) => {
-      isUserInputRef.current = true
-      onTextChangeRef.current?.(...args)
-      const html = quill.getSemanticHTML().replaceAll(/&nbsp;/g, ' ')
-      console.log('changed', html)
-      onChangeRef.current?.(html)
-    })
+    useEffect(() => {
+      const container = containerRef.current
+      if (!container) return
 
-    quill.on(Quill.events.SELECTION_CHANGE, (...args) => {
-      onSelectionChangeRef.current?.(...args)
-    })
-
-    return () => {
-      quillRef.current = null
-      container.innerHTML = ''
-    }
-  }, [])
-
-  // Separate effect to handle content updates
-  useEffect(() => {
-    if (quillRef.current && defaultValue !== undefined && !isUserInputRef.current) {
-      const quill = quillRef.current
-      const currentContent = quill.getContents()
-      console.log('defaultValue', defaultValue)
-      const newContent = quill.clipboard.convert({
-        html: defaultValue || '',
+      const editorContainer = container.appendChild(container.ownerDocument.createElement('div'))
+      const quill = new Quill(editorContainer, {
+        theme: 'snow',
+        modules: {
+          toolbar: [
+            ['bold', 'italic'],
+            ['link', 'image'],
+            ['blockquote', 'code-block'],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            ['clean'],
+          ],
+        },
       })
 
-      if (defaultValue && JSON.stringify(currentContent) !== JSON.stringify(newContent)) {
-        quill.setContents(newContent)
+      quillRef.current = quill
+
+      // Set initial content and store initial delta
+      if (defaultValueRef.current) {
+        const convertedContent = quill.clipboard.convert({
+          html: defaultValueRef.current,
+        })
+        quill.setContents(convertedContent)
+        initialDeltaRef.current = quill.getContents()
+      } else {
+        initialDeltaRef.current = quill.getContents()
       }
-    }
-    isUserInputRef.current = false
-  }, [defaultValue])
 
-  return <div ref={containerRef} className="editor-container"></div>
-}
+      quill.on(Quill.events.TEXT_CHANGE, () => {
+        isUserInputRef.current = true
+
+        const currentDelta = quill.getContents()
+        const hasChanges = !deepEqual(currentDelta, initialDeltaRef.current)
+        setIsEdited(hasChanges)
+      })
+
+      return () => {
+        quillRef.current = null
+        container.innerHTML = ''
+      }
+    }, [])
+
+    // Separate effect to handle content updates from parent
+    useEffect(() => {
+      if (quillRef.current && defaultValue !== undefined && !isUserInputRef.current) {
+        const quill = quillRef.current
+        const newContent = quill.clipboard.convert({
+          html: defaultValue || '',
+        })
+
+        quill.setContents(newContent)
+        initialDeltaRef.current = quill.getContents()
+        setIsEdited(false)
+      }
+      isUserInputRef.current = false
+    }, [defaultValue])
+
+    return <div ref={containerRef} className="editor-container"></div>
+  },
+)
+
+TextEditor.displayName = 'TextEditor'
 
 export default TextEditor
