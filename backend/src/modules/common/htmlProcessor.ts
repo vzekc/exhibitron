@@ -59,6 +59,13 @@ export async function processHtml(
     }
   }
 
+  // Find all anchor elements and make them open in a new window
+  const anchorElements = document.getElementsByTagName('a')
+  for (const anchor of Array.from(anchorElements)) {
+    anchor.setAttribute('target', '_blank')
+    anchor.setAttribute('rel', 'noopener noreferrer')
+  }
+
   // Clean up global namespace
   delete globalAny.window
   delete globalAny.document
