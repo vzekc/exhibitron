@@ -11,12 +11,9 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title }) => {
   const dialogRef = useRef<HTMLDialogElement>(null)
 
   useEffect(() => {
-    console.log('Modal isOpen changed:', isOpen)
     if (isOpen) {
-      console.log('Showing modal')
       dialogRef.current?.showModal()
     } else {
-      console.log('Closing modal')
       if (dialogRef.current?.open) {
         dialogRef.current?.close()
       }
