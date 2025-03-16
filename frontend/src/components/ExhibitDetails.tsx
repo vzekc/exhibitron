@@ -16,6 +16,7 @@ const GET_EXHIBIT = graphql(`
         name
         value
       }
+      mainImage
     }
   }
 `)
@@ -28,31 +29,41 @@ const ExhibitDetails = ({ id }: { id: number }) => {
   const exhibit = data.getExhibit!
   const attributes = exhibit.attributes || []
   const hasAttributes = attributes.length > 0
+  const hasMainImage = exhibit.mainImage !== null
 
   return (
     <section className="card">
       <div>
-        <h1 style={{ float: 'left' }} className="card-title">
-          {exhibit.title}
-        </h1>
-        {hasAttributes && (
-          <div className="card-attributes" style={{ margin: '1rem 0', float: 'right' }}>
-            <dl
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'auto 1fr',
-                gap: '0.5rem',
-                margin: 0,
-              }}>
-              {attributes.map((attr, index) => (
-                <React.Fragment key={index}>
-                  <dt style={{ fontWeight: 'bold' }}>{attr.name}</dt>
-                  <dd style={{ margin: 0 }}>{attr.value}</dd>
-                </React.Fragment>
-              ))}
-            </dl>
-          </div>
-        )}
+        <h1 className="card-title">{exhibit.title}</h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+          {hasMainImage && (
+            <div className="card-image" style={{ marginRight: '1rem', flexShrink: 0 }}>
+              <img
+                src={`/api/exhibit/${exhibit.id}/image/main`}
+                alt={`Main image for ${exhibit.title}`}
+                style={{ maxWidth: '600px', maxHeight: '600px', objectFit: 'contain' }}
+              />
+            </div>
+          )}
+          {hasAttributes && (
+            <div className="card-attributes" style={{ marginLeft: 'auto' }}>
+              <dl
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'auto 1fr',
+                  gap: '0.5rem',
+                  margin: 0,
+                }}>
+                {attributes.map((attr, index) => (
+                  <React.Fragment key={index}>
+                    <dt style={{ fontWeight: 'bold' }}>{attr.name}</dt>
+                    <dd style={{ margin: 0 }}>{attr.value}</dd>
+                  </React.Fragment>
+                ))}
+              </dl>
+            </div>
+          )}
+        </div>
       </div>
       <div className="card-content" dangerouslySetInnerHTML={{ __html: exhibit.text || '' }} />
 

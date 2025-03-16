@@ -5,6 +5,7 @@ type Exhibit {
   text: String
   title: String!
   attributes: [AttributeValue!]
+  mainImage: Int
 }
 
 type AttributeValue {

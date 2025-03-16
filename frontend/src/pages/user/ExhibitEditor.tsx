@@ -6,6 +6,7 @@ import { graphql } from 'gql.tada'
 import { useQuery, useMutation, useApolloClient } from '@apollo/client'
 import { useUnsavedChangesWarning } from '../../hooks/useUnsavedChangesWarning.tsx'
 import Confirm from '../../components/Confirm.tsx'
+import axios from 'axios'
 
 const GET_DATA = graphql(`
   query GetExhibit($id: Int!) {
@@ -20,6 +21,7 @@ const GET_DATA = graphql(`
         name
         value
       }
+      mainImage
       exhibitor {
         id
         tables {
@@ -58,6 +60,7 @@ const UPDATE_EXHIBIT = graphql(`
         name
         value
       }
+      mainImage
     }
   }
 `)
@@ -80,6 +83,7 @@ const CREATE_EXHIBIT = graphql(`
         name
         value
       }
+      mainImage
     }
   }
 `)
@@ -122,6 +126,9 @@ const ExhibitEditor = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showNewAttributeInput, setShowNewAttributeInput] = useState(false)
   const [newAttributeName, setNewAttributeName] = useState('')
+  const [mainImage, setMainImage] = useState<number | null>(null)
+  const [isImageLoading, setIsImageLoading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const {
     data: exhibitData,
@@ -156,7 +163,7 @@ const ExhibitEditor = () => {
 
   useEffect(() => {
     if (exhibitData?.getExhibit) {
-      const { title, table, text, attributes } = exhibitData.getExhibit
+      const { title, table, text, attributes, mainImage } = exhibitData.getExhibit
       const newTitle = title || ''
       const newText = text || ''
       const newTable = table?.number || undefined
@@ -167,6 +174,7 @@ const ExhibitEditor = () => {
       setText(newText)
       setSelectedTable(newTable)
       setAttributes(newAttributes as Attribute[])
+      setMainImage(mainImage as number | null)
       setOriginalTitle(newTitle)
       setOriginalTable(newTable)
       setOriginalAttributes(newAttributes as Attribute[])
@@ -177,6 +185,7 @@ const ExhibitEditor = () => {
       setText('')
       setSelectedTable(undefined)
       setAttributes([])
+      setMainImage(null)
       setOriginalTitle('')
       setOriginalTable(undefined)
       setOriginalAttributes([])
@@ -303,6 +312,56 @@ const ExhibitEditor = () => {
     navigate('/user/exhibit')
   }
 
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file || !id || id === 'new') return
+
+    setIsImageLoading(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      await axios.put(`/api/exhibit/${id}/image/main`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+
+      // Refresh the exhibit data to get the updated mainImage
+      await apolloClient.refetchQueries({
+        include: [GET_DATA],
+      })
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      alert('Fehler beim Hochladen des Bildes')
+    } finally {
+      setIsImageLoading(false)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
+  }
+
+  const handleDeleteImage = async () => {
+    if (!id || id === 'new' || !mainImage) return
+
+    setIsImageLoading(true)
+    try {
+      await axios.delete(`/api/exhibit/${id}/image/main`)
+      setMainImage(null)
+
+      // Refresh the exhibit data
+      await apolloClient.refetchQueries({
+        include: [GET_DATA],
+      })
+    } catch (error) {
+      console.error('Error deleting image:', error)
+      alert('Fehler beim Löschen des Bildes')
+    } finally {
+      setIsImageLoading(false)
+    }
+  }
+
   if (!isNew) {
     if (exhibitLoading) {
       return <p>Lade Exponat...</p>
@@ -344,6 +403,46 @@ const ExhibitEditor = () => {
             ))}
           </select>
         </label>
+
+        <div className="main-image-section" style={{ marginBottom: '2rem' }}>
+          <h3>Hauptbild</h3>
+          {isImageLoading ? (
+            <p>Bild wird verarbeitet...</p>
+          ) : mainImage ? (
+            <div style={{ marginBottom: '1rem' }}>
+              <img
+                src={`/api/exhibit/${id}/image/main`}
+                alt="Hauptbild"
+                style={{ maxWidth: '300px', maxHeight: '200px', objectFit: 'contain' }}
+              />
+              <div style={{ marginTop: '0.5rem' }}>
+                <button className="secondary" onClick={() => fileInputRef.current?.click()}>
+                  Bild ersetzen
+                </button>
+                <button
+                  className="secondary outline"
+                  onClick={handleDeleteImage}
+                  style={{ marginLeft: '0.5rem' }}>
+                  Bild löschen
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <p>Kein Hauptbild vorhanden</p>
+              <button className="secondary" onClick={() => fileInputRef.current?.click()}>
+                Bild hochladen
+              </button>
+            </div>
+          )}
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleImageUpload}
+            style={{ display: 'none' }}
+            accept="image/*"
+          />
+        </div>
 
         <div className="attributes-section">
           <h3>Attribute</h3>

@@ -134,6 +134,16 @@ export const exhibitTypeResolvers: ExhibitResolvers = {
       value,
     }))
   },
+  mainImage: (exhibit) => {
+    // In the GraphQL schema, mainImage is defined as Int (the ID of the image)
+    // but in the entity, mainImage is the Image object itself
+    // There seems to be a type mismatch between the entity and the GraphQL schema
+    if (!exhibit.mainImage) return null
+
+    // Use type assertion to access the id property
+    const image = exhibit.mainImage as unknown as { id: number }
+    return image.id
+  },
 }
 
 export const exhibitResolvers = {
