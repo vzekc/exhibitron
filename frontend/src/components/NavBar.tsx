@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import React, { useEffect, useState } from 'react'
 import { useUser } from '../contexts/UserContext.ts'
 import DropdownMenu from './DropdownMenu.tsx'
@@ -14,6 +14,8 @@ const NavBar = () => {
   const location = useLocation()
   const [hasBookmarks, setHasBookmarks] = useState(getBookmarks().exhibits.length > 0)
   const [showLoginModal, setShowLoginModal] = useState(false)
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
   const [logout] = useMutation(
     gql`
       mutation Logout {
@@ -33,10 +35,29 @@ const NavBar = () => {
     },
   )
 
+  // Track if we've processed the login parameter
+  const [processedLoginParam, setProcessedLoginParam] = useState(false)
+
   const currentPath = '/' + (location.pathname.split('/')[1] || '')
   const navClasses: Partial<Record<string, string>> = {
     [currentPath]: 'active',
   }
+
+  useEffect(() => {
+    // Only process if we haven't already and the login parameter exists
+    if (!processedLoginParam && searchParams.has('login')) {
+      // Mark as processed to prevent repeated processing
+      setProcessedLoginParam(true)
+
+      // Show the modal
+      setShowLoginModal(true)
+
+      // Remove the parameter from URL
+      const url = new URL(window.location.href)
+      url.searchParams.delete('login')
+      navigate({ pathname: url.pathname, search: url.search }, { replace: true })
+    }
+  }, [searchParams, navigate, processedLoginParam])
 
   const handleLogout = async (event: React.MouseEvent) => {
     event.preventDefault()
@@ -94,8 +115,7 @@ const NavBar = () => {
         <ul>
           {user ? (
             <li>
-              <DropdownMenu
-                label={(user.nickname ? `@${user.nickname}` : user.fullName) || 'Profil'}>
+              <DropdownMenu label="Backstage">
                 <li>
                   <Link to="/user/account">Konto</Link>
                 </li>
@@ -120,7 +140,6 @@ const NavBar = () => {
               <button className="button" onClick={() => setShowLoginModal(true)}>
                 Login
               </button>
-              <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
             </li>
           )}
           <li>
@@ -138,6 +157,7 @@ const NavBar = () => {
         </ul>
       </nav>
       <Breadcrumbs />
+      <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
     </>
   )
 }

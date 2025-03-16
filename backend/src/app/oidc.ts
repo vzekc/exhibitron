@@ -75,38 +75,52 @@ export const register = async (app: FastifyInstance) => {
 
   interface AuthForumQuery {
     redirectUrl?: string
+    registrationToken?: string
   }
 
   app.get(
     '/auth/forum',
     async (request: FastifyRequest<{ Querystring: AuthForumQuery }>, reply) => {
-      const redirectUrl = request.headers.referer || '/'
+      request.session.registrationToken = request.query.registrationToken
+      request.session.redirectUrl = request.query.redirectUrl || request.headers.referer || '/'
+
       const authUrl = await app.forumOAuth2.generateAuthorizationUri(request, reply)
-      request.session.redirectUrl = redirectUrl
       return reply.redirect(authUrl)
     },
   )
 
-  app.get('/auth/callback', async function (request, reply) {
+  app.get('/auth/callback', async function (request: FastifyRequest, reply) {
+    const { registrationToken, redirectUrl } = request.session
+    delete request.session.redirectUrl
+    delete request.session.registrationToken
+
     const { token } = await this.forumOAuth2.getAccessTokenFromAuthorizationCodeFlow(request)
 
     // Retrieve user info from IdP
     const userInfo = await getUserInfo(token.access_token)
 
-    const { nickname, rank, email } = userInfo
+    const { nickname, rank } = userInfo
+    const isMember = memberRanks.includes(rank)
+    const isAdministrator = administratorRanks.includes(rank)
 
-    if (!memberRanks.includes(rank)) {
-      throw new AuthError(`Dein Benutzerstatus ${rank} ist nicht ausreichend`)
+    if (!isMember && !registrationToken) {
+      throw new AuthError('Dieses System ist nur für Mitglieder des Vereins zugänglich.')
     }
 
-    const user = await db.user.ensureVzEkCUser(nickname, email, administratorRanks.includes(rank))
+    const user = await db.user.associateForumUser({
+      nickname,
+      registrationToken,
+      isAdministrator,
+    })
 
-    request.session.userId = user.id
+    const url = new URL(redirectUrl ?? '/')
+    if (user) {
+      request.session.userId = user.id
+    } else {
+      url.pathname = url.pathname = '/register'
+      url.search = 'forumMemberNotYetRegistered'
+    }
 
-    const { redirectUrl } = request.session
-    delete request.session['redirectUrl']
-
-    // Redirect the user to the frontend application
-    return reply.redirect(redirectUrl ?? '/')
+    return reply.redirect(url.toString())
   })
 }

@@ -9,6 +9,12 @@ import { makePasswordResetEmail } from '../registration/emails.js'
 
 const logger = pino({ level: process.env.TEST_LOG_LEVEL || 'fatal' })
 
+type AssociateForumUserOptions = {
+  nickname: string
+  isAdministrator: boolean
+  registrationToken?: string
+}
+
 export class UserRepository extends EntityRepository<User> {
   async exists(email: string) {
     logger.info(`Checking if user exists: ${email}`)
@@ -55,24 +61,36 @@ export class UserRepository extends EntityRepository<User> {
     return user
   }
 
-  async ensureVzEkCUser(nickname: string, email: string, isAdministrator: boolean) {
-    let user = await this.findOne({
-      $or: [{ nickname }, { email }],
-    })
-    if (user) {
-      logger.debug(`ensureUser found existing user: @{user.nickname} (${user.email})`)
-      if (isAdministrator) {
-        // Administrator rights are only granted, but never revoked from the forum
-        user.isAdministrator = true
-      }
-      user.nickname = nickname
-    } else {
-      logger.info(`ensureUser created user: @{nickname} (${email})`)
-      user = this.create({ nickname, email, isAdministrator })
-      this.getEntityManager().persist(user)
+  async associateForumUser(options: AssociateForumUserOptions) {
+    const { nickname, isAdministrator, registrationToken } = options
+
+    const user = await this.findOne(
+      registrationToken ? { passwordResetToken: registrationToken } : { nickname },
+    )
+
+    if (!user) {
+      return null
+    }
+
+    logger.debug(`ensureUser found existing user: @{user.nickname} (${user.email})`)
+    if (isAdministrator) {
+      // Administrator rights are only granted, but never revoked from the forum
+      user.isAdministrator = true
+    }
+    user.nickname = nickname
+
+    if (registrationToken) {
+      await this.populate(user, ['passwordResetToken', 'passwordResetTokenExpires'])
+      delete user.passwordResetToken
+      delete user.passwordResetTokenExpires
     }
     await this.getEntityManager().flush()
     return user
+  }
+
+  async tokenToUser(token: string) {
+    logger.debug(`Looking up user by token: ${token}`)
+    return await this.findOneOrFail({ passwordResetToken: token })
   }
 
   createPasswordResetToken(user: User, expires: number) {

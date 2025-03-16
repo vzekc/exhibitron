@@ -66,8 +66,8 @@
 }
 
 /* Custom tooltip styles */
-.table-number[title]:hover::after {
-  content: attr(title);
+.table-number[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
   position: absolute;
   bottom: 100%;
   left: 50%;

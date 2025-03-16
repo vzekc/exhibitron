@@ -36,6 +36,7 @@ extend type Mutation {
 extend type Query {
   getRegistration(id: Int!): Registration
   getRegistrations: [Registration!]
+  isRegistered(email: String!): Boolean
 }
 
 enum RegistrationStatus {

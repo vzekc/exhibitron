@@ -1,7 +1,7 @@
 import Modal from './Modal.tsx'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm, SubmitHandler } from 'react-hook-form'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { gql, useMutation } from '@apollo/client'
 
 type Inputs = {
@@ -16,8 +16,30 @@ type LoginModalProps = {
 
 const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const [loginFailed, setLoginFailed] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const { register, handleSubmit } = useForm<Inputs>()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const [processedErrorParam, setProcessedErrorParam] = useState(false)
+
+  // Process error parameter if present
+  useEffect(() => {
+    if (!processedErrorParam && searchParams.has('error')) {
+      // Get the error message
+      const error = searchParams.get('error')
+      setErrorMessage(error)
+      setLoginFailed(true)
+
+      // Mark as processed
+      setProcessedErrorParam(true)
+
+      // Remove the parameter from URL
+      const url = new URL(window.location.href)
+      url.searchParams.delete('error')
+      navigate({ pathname: url.pathname, search: url.search }, { replace: true })
+    }
+  }, [searchParams, navigate, processedErrorParam])
+
   const [login] = useMutation(
     gql`
       mutation Login($email: String!, $password: String!) {
@@ -58,7 +80,12 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
 
   return (
     <Modal title="Login" isOpen={isOpen} onClose={onClose}>
-      <form onSubmit={handleSubmit(loginHandler)} onChange={() => setLoginFailed(false)}>
+      <form
+        onSubmit={handleSubmit(loginHandler)}
+        onChange={() => {
+          setLoginFailed(false)
+          setErrorMessage(null)
+        }}>
         <label>
           Email-Adresse: <input type="email" {...register('email', { required: true })} />
         </label>
@@ -66,7 +93,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
           Passwort: <input type="password" {...register('password', { required: true })} />
         </label>
         <p className="login-failed">
-          {loginFailed && 'Unbekannte Email-Adresse oder falsches Passwort'}
+          {loginFailed && (errorMessage || 'Unbekannte Email-Adresse oder falsches Passwort')}
         </p>
         <button type="submit">Login</button>
         <button type="submit" className="outline" onClick={forgotPassword}>

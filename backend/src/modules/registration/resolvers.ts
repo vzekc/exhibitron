@@ -17,6 +17,10 @@ export const registrationQueries: QueryResolvers<Context> = {
     requireAdmin(user)
     return db.registration.findAll()
   },
+  isRegistered: async (_, { email }, { db, exhibition }) => {
+    const registration = await db.registration.findOne({ email, exhibition })
+    return !!registration
+  },
 }
 
 export const registrationMutations: MutationResolvers<Context> = {

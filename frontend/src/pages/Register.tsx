@@ -1,9 +1,11 @@
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { useState } from 'react'
-import { ApolloError, useMutation } from '@apollo/client'
+import { useLazyQuery, useMutation } from '@apollo/client'
 import { graphql } from 'gql.tada'
 
 import './Register.css'
+import { useSearchParams } from 'react-router-dom'
+import Modal from '../components/Modal.tsx'
 
 type Inputs = {
   name: string
@@ -34,6 +36,12 @@ const REGISTER_MUTATION = graphql(`
   }
 `)
 
+const IS_REGISTERED_QUERY = graphql(`
+  query IsRegistered($email: String!) {
+    isRegistered(email: $email)
+  }
+`)
+
 const Register = () => {
   const {
     register,
@@ -41,6 +49,7 @@ const Register = () => {
     formState: { errors },
     watch,
   } = useForm<Inputs>({
+    mode: 'onBlur',
     defaultValues: {
       friday: true,
       saturday: true,
@@ -48,48 +57,42 @@ const Register = () => {
     },
   })
 
+  const [searchParams] = useSearchParams()
   const [state, setState] = useState<'entering' | 'sending' | 'done'>('entering')
   const [registerMutation] = useMutation(REGISTER_MUTATION)
+  const [checkIsRegistered] = useLazyQuery(IS_REGISTERED_QUERY)
+  const [notYetRegisteredPopup, setNotYetRegisteredPopup] = useState(
+    searchParams.has('forumMemberNotYetRegistered'),
+  )
 
   const topic = watch('topic')
+
+  const isNewEmail = async (email: string) => {
+    const isRegistered = await checkIsRegistered({
+      variables: { email },
+    })
+    if (isRegistered.data?.isRegistered) {
+      return 'Jemand hat sich bereits mit dieser Email-Adresse angemeldet! Nimm mit uns Kontakt auf, falls Du bisher keine Antwort auf Deine Anmeldung bekommen hast. Die Bearbeitung von Anmeldungen kann einige Zeit dauern'
+    }
+    return true
+  }
 
   const onSubmit: SubmitHandler<Inputs> = async (inputs) => {
     const { name, email, nickname, message, topic, topicExtras, ...data } = inputs
     setState('sending')
-    try {
-      await registerMutation({
-        variables: {
-          input: {
-            name,
-            email,
-            nickname,
-            topic: topicExtras ? topic.replace('*', topicExtras) : topic,
-            message,
-            data,
-          },
+    await registerMutation({
+      variables: {
+        input: {
+          name,
+          email,
+          nickname,
+          topic: topicExtras ? topic.replace('*', topicExtras) : topic,
+          message,
+          data,
         },
-      })
-      setState('done')
-    } catch (error) {
-      if (error instanceof ApolloError) {
-        console.log('apollo error', error.graphQLErrors)
-        const emailAlreadyRegistered = error.graphQLErrors.some(
-          (e) => e.extensions?.code === 'EMAIL_ADDRESS_IS_ALREADY_REGISTERED',
-        )
-        if (emailAlreadyRegistered) {
-          alert(
-            'Die Email-Adresse ist bereits angemeldet! Nimm mit uns Kontakt auf, falls Du bisher keine Antwort auf Deine Anmeldung bekommen hast. Die Bearbeitung von Anmeldungen kann einige Zeit dauern',
-          )
-        } else {
-          console.error('Error registering:', error.graphQLErrors)
-          alert('Ein Fehler ist aufgetreten. Bitte versuche es später erneut.')
-        }
-      } else {
-        console.error('Unexpected error:', error)
-        alert('Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es später erneut.')
-      }
-      setState('entering')
-    }
+      },
+    })
+    setState('done')
   }
 
   const content = () => {
@@ -105,152 +108,172 @@ const Register = () => {
         )
       default:
         return (
-          <form className="exhibitor-registration" onSubmit={handleSubmit(onSubmit)}>
-            <fieldset>
-              <label>
-                Nachname, Vorname
-                <input type="text" autoComplete="name" {...register('name', { required: true })} />
-                {errors.name && <div className="validation-message">Ein Name wird benötigt</div>}
-              </label>
-              <label>
-                <input type="checkbox" {...register('vzekcMember')} />
-                Ich bin Mitglied im VzEkC e.V
-              </label>
-              <p />
-              <label>
-                E-Mail Adresse
-                <input
-                  type="email"
-                  autoComplete="email"
-                  {...register('email', { required: true })}
-                />
-                {errors.email && (
-                  <div className="validation-message">
-                    Eine Email-Adresse wird benötigt, damit wir Kontakt aufnehmen können
-                  </div>
-                )}
-              </label>
-              <label>
-                Nickname (Benutzername) im Forum
-                <input type="text" autoComplete="nickname" {...register('nickname')} />
-              </label>
-              <label>
-                Registriert im Forum
-                <select {...register('forum')}>
-                  <option>forum.classic-computing.de</option>
-                  <option>www.a1k.org</option>
-                  <option>forum.atari-home.de</option>
-                  <option>forum64.de</option>
-                  <option>anderes Forum</option>
-                  <option>(kein Forum)</option>
-                </select>
-              </label>
-            </fieldset>
-            <fieldset>
-              <label>
-                Hauptthema meiner Ausstellung
-                <select {...register('topic', { required: true })}>
-                  <option></option>
-                  <option>Atari 8-Bit und ST/TT/Falcon</option>
-                  <option>Apple 8-Bit und Macintosh</option>
-                  <option>Commodore CBM</option>
-                  <option>Commodore VC20, C64, AMIGA und andere</option>
-                  <option>Sinclair</option>
-                  <option>Amstrad/Schneider</option>
-                  <option>CP/M Rechner</option>
-                  <option>IBM PC und kompatible</option>
-                  <option>MSX Computer</option>
-                  <option>Workstations (*)</option>
-                  <option>Konsolen (*)</option>
-                  <option>Etwas anderes (*)</option>
-                </select>
-              </label>
-              {errors.topic && (
-                <div className="validation-message">
-                  Bitte wähle aus, was du ausstellen möchtest
-                </div>
-              )}
-              {topic?.includes('*') && (
+          <>
+            {notYetRegisteredPopup && (
+              <Modal isOpen={notYetRegisteredPopup} onClose={() => setNotYetRegisteredPopup(false)}>
+                <h2>Du bist noch nicht registriert</h2>
+                <p>
+                  Du hast Dich über das Forum angemeldet, bist aber noch nicht als Aussteller
+                  registriert.
+                </p>
+                <p>Bitte fülle das Formular aus, wenn Du Dich als Aussteller anmelden möchtest.</p>
+              </Modal>
+            )}
+            <form className="exhibitor-registration" onSubmit={handleSubmit(onSubmit)}>
+              <fieldset>
                 <label>
-                  Weitere Angaben
+                  Name
                   <input
                     type="text"
-                    {...register('topicExtras', { required: true })}
-                    disabled={!topic?.includes('*')}
+                    autoComplete="name"
+                    {...register('name', { required: true })}
                   />
-                  {errors.topicExtras && (
+                  {errors.name && <div className="validation-message">Ein Name wird benötigt</div>}
+                </label>
+                <label>
+                  <input type="checkbox" {...register('vzekcMember')} />
+                  Ich bin Mitglied im VzEkC e.V
+                </label>
+                <p />
+                <label>
+                  E-Mail Adresse
+                  <input
+                    type="email"
+                    autoComplete="email"
+                    {...register('email', {
+                      required:
+                        'Eine Email-Adresse wird benötigt, damit wir Kontakt aufnehmen können',
+                      pattern: {
+                        value: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/i,
+                        message: 'Bitte gib eine gültige Email-Adresse ein',
+                      },
+                      validate: isNewEmail,
+                    })}
+                  />
+                  {errors.email && <div className="validation-message">{errors.email.message}</div>}
+                </label>
+                <label>
+                  Nickname (Benutzername) im Forum
+                  <input type="text" autoComplete="nickname" {...register('nickname')} />
+                </label>
+                <label>
+                  Registriert im Forum
+                  <select {...register('forum')}>
+                    <option>forum.classic-computing.de</option>
+                    <option>www.a1k.org</option>
+                    <option>forum.atari-home.de</option>
+                    <option>forum64.de</option>
+                    <option>anderes Forum</option>
+                    <option>(kein Forum)</option>
+                  </select>
+                </label>
+              </fieldset>
+              <fieldset>
+                <label>
+                  Hauptthema meiner Ausstellung
+                  <select {...register('topic', { required: true })}>
+                    <option></option>
+                    <option>Atari 8-Bit und ST/TT/Falcon</option>
+                    <option>Apple 8-Bit und Macintosh</option>
+                    <option>Commodore CBM</option>
+                    <option>Commodore VC20, C64, AMIGA und andere</option>
+                    <option>Sinclair</option>
+                    <option>Amstrad/Schneider</option>
+                    <option>CP/M Rechner</option>
+                    <option>IBM PC und kompatible</option>
+                    <option>MSX Computer</option>
+                    <option>Workstations (*)</option>
+                    <option>Konsolen (*)</option>
+                    <option>Etwas anderes (*)</option>
+                  </select>
+                </label>
+                {errors.topic && (
+                  <div className="validation-message">
+                    Bitte wähle aus, was du ausstellen möchtest
+                  </div>
+                )}
+                {topic?.includes('*') && (
+                  <label>
+                    Weitere Angaben
+                    <input
+                      type="text"
+                      {...register('topicExtras', { required: true })}
+                      disabled={!topic?.includes('*')}
+                    />
+                    {errors.topicExtras && (
+                      <div className="validation-message">
+                        Bitte erläutere, was du ausstellen möchtest
+                      </div>
+                    )}
+                  </label>
+                )}
+              </fieldset>
+              <fieldset>
+                <label>
+                  Teilnahme an folgenden Tagen:
+                  <p />
+                  <label>
+                    <input type="checkbox" {...register('friday')} />
+                    Freitag
+                  </label>
+                  <label>
+                    <input type="checkbox" {...register('saturday')} />
+                    Samstag
+                  </label>
+                  <label>
+                    <input type="checkbox" {...register('sunday')} />
+                    Sonntag
+                  </label>
+                </label>
+              </fieldset>
+              <fieldset>
+                <label>
+                  <input type="checkbox" {...register('setupHelper')} />
+                  Ich unterstütze beim Aufbau der CC 2024 am Donnerstag
+                </label>
+                <label>
+                  <input type="checkbox" {...register('gameCornerSupporter')} />
+                  Ich unterstütze die Spiele-Ecke mit eigener Hardware
+                </label>
+                <label>
+                  <input type="checkbox" {...register('dailyLunch')} />
+                  Ich wünsche mir ein tägliches Mittagessen in der Halle (Möglichkeiten werden noch
+                  geprüft)
+                </label>
+                <label>
+                  <input type="checkbox" {...register('talk')} />
+                  Ich plane einen Vortrag
+                </label>
+              </fieldset>
+              <fieldset>
+                <label>
+                  Gewünschte Anzahl Tische (je 165cm x 80cm)
+                  <select {...register('tables', { required: true })}>
+                    <option></option>
+                    <option value={0}>kein Tisch</option>
+                    <option value={1}>1</option>
+                    <option value={2}>2 (wenn verfügbar)</option>
+                  </select>
+                  {errors.name && (
                     <div className="validation-message">
-                      Bitte erläutere, was du ausstellen möchtest
+                      Bitte wähle aus, wie viele Tische Deine Ausstellung belegen wird
                     </div>
                   )}
                 </label>
-              )}
-            </fieldset>
-            <fieldset>
-              <label>
-                Teilnahme an folgenden Tagen:
-                <p />
                 <label>
-                  <input type="checkbox" {...register('friday')} />
-                  Freitag
+                  Ich wünsche mir einen Tisch neben:
+                  <input type="text" {...register('tableNextTo')} />
                 </label>
+              </fieldset>
+              <fieldset>
                 <label>
-                  <input type="checkbox" {...register('saturday')} />
-                  Samstag
+                  Mitteilung ans Orga-Team:
+                  <textarea rows={5} {...register('message')}></textarea>
                 </label>
-                <label>
-                  <input type="checkbox" {...register('sunday')} />
-                  Sonntag
-                </label>
-              </label>
-            </fieldset>
-            <fieldset>
-              <label>
-                <input type="checkbox" {...register('setupHelper')} />
-                Ich unterstütze beim Aufbau der CC 2024 am Donnerstag
-              </label>
-              <label>
-                <input type="checkbox" {...register('gameCornerSupporter')} />
-                Ich unterstütze die Spiele-Ecke mit eigener Hardware
-              </label>
-              <label>
-                <input type="checkbox" {...register('dailyLunch')} />
-                Ich wünsche mir ein tägliches Mittagessen in der Halle (Möglichkeiten werden noch
-                geprüft)
-              </label>
-              <label>
-                <input type="checkbox" {...register('talk')} />
-                Ich plane einen Vortrag
-              </label>
-            </fieldset>
-            <fieldset>
-              <label>
-                Gewünschte Anzahl Tische (je 165cm x 80cm)
-                <select {...register('tables', { required: true })}>
-                  <option></option>
-                  <option value={0}>kein Tisch</option>
-                  <option value={1}>1</option>
-                  <option value={2}>2 (wenn verfügbar)</option>
-                </select>
-                {errors.name && (
-                  <div className="validation-message">
-                    Bitte wähle aus, wie viele Tische Deine Ausstellung belegen wird
-                  </div>
-                )}
-              </label>
-              <label>
-                Ich wünsche mir einen Tisch neben:
-                <input type="text" {...register('tableNextTo')} />
-              </label>
-            </fieldset>
-            <fieldset>
-              <label>
-                Mitteilung ans Orga-Team:
-                <textarea rows={5} {...register('message')}></textarea>
-              </label>
-            </fieldset>
-            <button type="submit">Anmeldung absenden</button>
-          </form>
+              </fieldset>
+              <button type="submit">Anmeldung absenden</button>
+            </form>
+          </>
         )
     }
   }

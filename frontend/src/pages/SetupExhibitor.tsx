@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { graphql } from 'gql.tada'
 import { useMutation, useApolloClient } from '@apollo/client'
 import { useUser } from '../contexts/UserContext'
@@ -30,54 +30,58 @@ type RegistrationMethod = 'password' | null
 
 const STORAGE_KEY = 'registration_state'
 
-interface RegistrationState {
-  token: string
-  inProgress: boolean
-}
-
 const SetupExhibitor = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { reloadUser, user } = useUser()
+  const { reloadUser } = useUser()
   const [registrationMethod, setRegistrationMethod] = useState<RegistrationMethod>(null)
   const [password, setPassword] = useState('')
+  const [token, setToken] = useState<string | null>(null)
+  const [email, setEmail] = useState<string | null>(null)
   const [passwordConfirm, setPasswordConfirm] = useState('')
   const [error, setError] = useState<string | null>(null)
   const apolloClient = useApolloClient()
 
-  // Initialize or restore registration state
-  useEffect(() => {
-    const storedState = sessionStorage.getItem(STORAGE_KEY)
-    const token = searchParams.get('token')
-
-    if (storedState) {
-      const state: RegistrationState = JSON.parse(storedState)
-      // If we have a stored state and the user is now logged in, registration was successful
-      if (state.inProgress && user) {
-        sessionStorage.removeItem(STORAGE_KEY)
-        navigate('/user/profile')
-        return
-      }
-    }
-
-    if (token) {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ token, inProgress: false }))
-    }
-  }, [searchParams, user, navigate])
-
-  const token = (() => {
-    const storedState = sessionStorage.getItem(STORAGE_KEY)
-    if (storedState) {
-      return JSON.parse(storedState).token
-    }
-    return searchParams.get('token')
-  })()
-
   const [setPasswordMutation] = useMutation(SET_PASSWORD)
   const [login] = useMutation(LOGIN)
 
-  if (!token) {
-    return <p>Ungültiger Zugriff. Bitte folgen Sie dem Link in Ihrer E-Mail.</p>
+  useEffect(() => {
+    const validateToken = async () => {
+      // Skip validation if we already have a token and email
+      if (token && email) {
+        return
+      }
+
+      const tokenFromParams = searchParams.get('registrationToken') as string
+      if (tokenFromParams) {
+        const { data } = await apolloClient.query({
+          query: GET_TOKEN_EMAIL,
+          variables: { token: tokenFromParams },
+        })
+        if (data.getTokenEmail) {
+          setToken(tokenFromParams)
+          setEmail(data.getTokenEmail)
+          navigate(window.location.pathname, { replace: true })
+          return
+        }
+        // Only navigate to error page if token is invalid
+        navigate(
+          `/?login=true&error=${encodeURIComponent('Ungültiges Token oder Anmeldung bereits vollständig')}`,
+          { replace: true },
+        )
+      } else {
+        // No token provided
+        navigate(`/?login=true&error=${encodeURIComponent('Kein Registrierungstoken angegeben')}`, {
+          replace: true,
+        })
+      }
+    }
+
+    void validateToken()
+  }, [apolloClient, navigate, searchParams, token, email])
+
+  if (!token || !email) {
+    return <p>Token wird geprüft...</p>
   }
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
@@ -89,17 +93,6 @@ const SetupExhibitor = () => {
       return
     }
 
-    // Get the email associated with the token first
-    const { data: emailData } = await apolloClient.query<{ getTokenEmail: string }>({
-      query: GET_TOKEN_EMAIL,
-      variables: { token },
-    })
-
-    if (!emailData.getTokenEmail) {
-      setError('Fehler beim Abrufen der E-Mail-Adresse')
-      return
-    }
-
     // Set the password (which will invalidate the token)
     await setPasswordMutation({
       variables: { token, password },
@@ -108,22 +101,21 @@ const SetupExhibitor = () => {
     // Log in with the new credentials
     await login({
       variables: {
-        email: emailData.getTokenEmail,
+        email,
         password,
       },
     })
     await apolloClient.clearStore()
 
-    sessionStorage.removeItem(STORAGE_KEY)
     await reloadUser()
-    navigate('/user/profile', { replace: true })
+    navigate('/user/profile?welcome', { replace: true })
   }
 
   const handleForumLink = () => {
     // Store registration state before redirect
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ token, inProgress: true }))
     // Redirect to forum OAuth
-    window.location.href = `/auth/forum?token=${encodeURIComponent(token)}`
+    window.location.href = `/auth/forum?registrationToken=${encodeURIComponent(token)}&redirectUrl=${encodeURIComponent(`${window.location.origin}/user/profile?welcome`)}`
   }
 
   if (!registrationMethod) {

@@ -259,7 +259,7 @@ export const SeatingPlan: React.FC = () => {
                   height: isRotated ? width : height + 'px',
                 }}
                 onClick={() => handleTableClick(table.number)}
-                title={tooltip}>
+                data-tooltip={tooltip}>
                 {table.number}
               </div>
             )

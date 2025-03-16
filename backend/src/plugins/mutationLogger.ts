@@ -16,6 +16,7 @@ const logger = pino({
 })
 
 // Function to truncate long string arguments and redact sensitive data
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const truncateValue = (value: any, maxLength = 100): any => {
   if (typeof value === 'string' && value.length > maxLength) {
     return value.substring(0, maxLength) + '...'

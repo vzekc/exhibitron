@@ -27,7 +27,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title }) => {
   return (
     <dialog ref={dialogRef} onClose={onClose} onClick={handleClickOutside}>
       <article>
-        <header>
+        <header style={{ minHeight: '2.5rem' }}>
           <button className="close" aria-label="Close" onClick={onClose}></button>
           <p>{title}</p>
         </header>

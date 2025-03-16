@@ -29,5 +29,6 @@ declare module '@fastify/session' {
   interface FastifySessionObject {
     userId?: number
     redirectUrl?: string
+    registrationToken?: string
   }
 }
