@@ -8,9 +8,9 @@ import {
 import { Exhibit } from '../../entities.js'
 import { processHtml } from '../common/htmlProcessor.js'
 import { wrap } from '@mikro-orm/core'
-import { Attribute } from '../attribute/entity.js'
+import { ExhibitAttribute } from '../exhibitAttribute/entity.js'
 
-// Helper function to process attributes and update the Attribute table
+// Helper function to process attributes and update the ExhibitAttribute table
 async function processAttributes(
   attributeInputs: AttributeInput[] | null | undefined,
   db: Context['db'],
@@ -27,7 +27,7 @@ async function processAttributes(
   const attributeNames = Object.keys(attributesRecord)
 
   // Find existing attributes
-  const existingAttributes = await db.attribute.find({ name: { $in: attributeNames } })
+  const existingAttributes = await db.exhibitAttribute.find({ name: { $in: attributeNames } })
   const existingAttributeNames = existingAttributes.map((attr) => attr.name)
 
   // Find new attributes that need to be created
@@ -35,7 +35,7 @@ async function processAttributes(
 
   // Create new attributes if needed
   if (newAttributeNames.length > 0) {
-    const newAttributes = newAttributeNames.map((name) => db.em.create(Attribute, { name }))
+    const newAttributes = newAttributeNames.map((name) => db.em.create(ExhibitAttribute, { name }))
     await db.em.persist(newAttributes).flush()
   }
 

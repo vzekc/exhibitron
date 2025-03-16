@@ -6,7 +6,7 @@ import { exhibitResolvers } from './modules/exhibit/resolvers.js'
 import { tableResolvers } from './modules/table/resolvers.js'
 import { registrationResolvers } from './modules/registration/resolvers.js'
 import { pageResolvers } from './modules/page/resolvers.js'
-import { attributeResolvers } from './modules/attribute/resolvers.js'
+import { exhibitAttributeResolvers } from './modules/exhibitAttribute/resolvers.js'
 import { mergeResolvers } from '@graphql-tools/merge'
 import { Resolvers } from './generated/graphql.js'
 
@@ -19,7 +19,7 @@ const resolvers: Resolvers = mergeResolvers([
   tableResolvers,
   registrationResolvers,
   pageResolvers,
-  attributeResolvers,
+  exhibitAttributeResolvers,
 ])
 
 export default resolvers

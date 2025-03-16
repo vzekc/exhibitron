@@ -1,0 +1,16 @@
+type ExhibitAttribute {
+  id: Int!
+  name: String!
+  createdAt: String!
+  updatedAt: String
+}
+
+extend type Query {
+  getExhibitAttributes: [ExhibitAttribute!]!
+  getExhibitAttribute(id: Int!): ExhibitAttribute
+}
+
+extend type Mutation {
+  createExhibitAttribute(name: String!): ExhibitAttribute!
+  deleteExhibitAttribute(id: Int!): Boolean
+}

@@ -3,7 +3,7 @@ import { graphql } from 'gql.tada'
 import { ExecuteOperationFunction, graphqlTest, login } from '../../test/apollo.js'
 
 // Define types for the attribute and exhibit data
-interface AttributeData {
+interface ExhibitAttributeData {
   id: number
   name: string
 }
@@ -19,15 +19,15 @@ interface ExhibitData {
 }
 
 // Helper function to create an attribute
-const createAttribute = async (
+const createExhibitAttribute = async (
   graphqlRequest: ExecuteOperationFunction,
   name: string,
   session: { userId: number },
-): Promise<AttributeData> => {
+): Promise<ExhibitAttributeData> => {
   const result = await graphqlRequest(
     graphql(`
-      mutation CreateAttribute($name: String!) {
-        createAttribute(name: $name) {
+      mutation CreateExhibitAttribute($name: String!) {
+        createExhibitAttribute(name: $name) {
           id
           name
         }
@@ -37,7 +37,7 @@ const createAttribute = async (
     session,
   )
   expect(result.errors).toBeUndefined()
-  return result.data!.createAttribute!
+  return result.data!.createExhibitAttribute as ExhibitAttributeData
 }
 
 // Helper function to create an exhibit with attributes
@@ -72,25 +72,25 @@ const createExhibitWithAttributes = async (
     session,
   )
   expect(result.errors).toBeUndefined()
-  return result.data!.createExhibit!
+  return result.data!.createExhibit as ExhibitData
 }
 
-describe('attribute', () => {
+describe('exhibit attribute', () => {
   graphqlTest('create and list attributes as exhibitor', async (graphqlRequest) => {
     // Login as exhibitor
     const exhibitor = await login(graphqlRequest, 'daffy@example.com')
 
     // Create a new attribute
     const attributeName = `test-attribute-${Date.now()}`
-    const attribute = await createAttribute(graphqlRequest, attributeName, exhibitor)
+    const attribute = await createExhibitAttribute(graphqlRequest, attributeName, exhibitor)
 
     expect(attribute.name).toBe(attributeName)
 
     // Get all attributes
     const result = await graphqlRequest(
       graphql(`
-        query GetAttributes {
-          getAttributes {
+        query GetExhibitAttributes {
+          getExhibitAttributes {
             id
             name
           }
@@ -99,11 +99,11 @@ describe('attribute', () => {
     )
 
     expect(result.errors).toBeUndefined()
-    expect(result.data!.getAttributes).toBeDefined()
+    expect(result.data!.getExhibitAttributes).toBeDefined()
 
     // Check if our new attribute is in the list
-    const foundAttribute = result.data!.getAttributes.find(
-      (a: AttributeData) => a.name === attributeName,
+    const foundAttribute = result.data!.getExhibitAttributes.find(
+      (a: ExhibitAttributeData) => a.name === attributeName,
     )
     expect(foundAttribute).toBeDefined()
     if (foundAttribute) {
@@ -116,8 +116,8 @@ describe('attribute', () => {
     const attributeName = `test-attribute-${Date.now()}`
     const result = await graphqlRequest(
       graphql(`
-        mutation CreateAttribute($name: String!) {
-          createAttribute(name: $name) {
+        mutation CreateExhibitAttribute($name: String!) {
+          createExhibitAttribute(name: $name) {
             id
             name
           }
@@ -166,8 +166,8 @@ describe('attribute', () => {
     // Check if the attributes were automatically added to the attributes table
     const result = await graphqlRequest(
       graphql(`
-        query GetAttributes {
-          getAttributes {
+        query GetExhibitAttributes {
+          getExhibitAttributes {
             name
           }
         }
@@ -177,7 +177,7 @@ describe('attribute', () => {
     expect(result.errors).toBeUndefined()
 
     // Check if our new attributes are in the list
-    const attributeNames = result.data!.getAttributes.map((a: { name: string }) => a.name)
+    const attributeNames = result.data!.getExhibitAttributes.map((a: { name: string }) => a.name)
     expect(attributeNames).toContain(attributeName1)
     expect(attributeNames).toContain(attributeName2)
   })
@@ -243,15 +243,17 @@ describe('attribute', () => {
     // Check if the new attribute was added to the attributes table
     const attributesResult = await graphqlRequest(
       graphql(`
-        query GetAttributes {
-          getAttributes {
+        query GetExhibitAttributes {
+          getExhibitAttributes {
             name
           }
         }
       `),
     )
 
-    const attributeNames = attributesResult.data!.getAttributes.map((a: { name: string }) => a.name)
+    const attributeNames = attributesResult.data!.getExhibitAttributes.map(
+      (a: { name: string }) => a.name,
+    )
     expect(attributeNames).toContain(newAttributeName)
   })
 
@@ -261,13 +263,13 @@ describe('attribute', () => {
 
     // Create a new attribute
     const attributeName = `delete-attr-${Date.now()}`
-    const attribute = await createAttribute(graphqlRequest, attributeName, admin)
+    const attribute = await createExhibitAttribute(graphqlRequest, attributeName, admin)
 
     // Delete the attribute
     const deleteResult = await graphqlRequest(
       graphql(`
-        mutation DeleteAttribute($id: Int!) {
-          deleteAttribute(id: $id)
+        mutation DeleteExhibitAttribute($id: Int!) {
+          deleteExhibitAttribute(id: $id)
         }
       `),
       { id: attribute.id },
@@ -275,13 +277,13 @@ describe('attribute', () => {
     )
 
     expect(deleteResult.errors).toBeUndefined()
-    expect(deleteResult.data!.deleteAttribute).toBe(true)
+    expect(deleteResult.data!.deleteExhibitAttribute).toBe(true)
 
     // Verify the attribute is no longer in the list
     const attributesResult = await graphqlRequest(
       graphql(`
-        query GetAttributes {
-          getAttributes {
+        query GetExhibitAttributes {
+          getExhibitAttributes {
             id
             name
           }
@@ -289,8 +291,8 @@ describe('attribute', () => {
       `),
     )
 
-    const foundAttribute = attributesResult.data!.getAttributes.find(
-      (a: AttributeData) => a.id === attribute.id,
+    const foundAttribute = attributesResult.data!.getExhibitAttributes.find(
+      (a: ExhibitAttributeData) => a.id === attribute.id,
     )
     expect(foundAttribute).toBeUndefined()
   })
@@ -301,13 +303,13 @@ describe('attribute', () => {
 
     // Create a new attribute
     const attributeName = `nodelete-attr-${Date.now()}`
-    const attribute = await createAttribute(graphqlRequest, attributeName, exhibitor)
+    const attribute = await createExhibitAttribute(graphqlRequest, attributeName, exhibitor)
 
     // Try to delete the attribute as non-admin
     const deleteResult = await graphqlRequest(
       graphql(`
-        mutation DeleteAttribute($id: Int!) {
-          deleteAttribute(id: $id)
+        mutation DeleteExhibitAttribute($id: Int!) {
+          deleteExhibitAttribute(id: $id)
         }
       `),
       { id: attribute.id },
@@ -323,8 +325,8 @@ describe('attribute', () => {
     // Verify the attribute is still in the list
     const attributesResult = await graphqlRequest(
       graphql(`
-        query GetAttributes {
-          getAttributes {
+        query GetExhibitAttributes {
+          getExhibitAttributes {
             id
             name
           }
@@ -332,8 +334,8 @@ describe('attribute', () => {
       `),
     )
 
-    const foundAttribute = attributesResult.data!.getAttributes.find(
-      (a: AttributeData) => a.id === attribute.id,
+    const foundAttribute = attributesResult.data!.getExhibitAttributes.find(
+      (a: ExhibitAttributeData) => a.id === attribute.id,
     )
     expect(foundAttribute).toBeDefined()
   })
