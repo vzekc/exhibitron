@@ -93,18 +93,6 @@ const NavBar = () => {
           <ToplevelNavItem path="/exhibitor" label="Aussteller" />
           <ToplevelNavItem path="/schedule" label="Zeitplan" />
           <ToplevelNavItem path="/table" label="Tische" />
-          {user?.isAdministrator && (
-            <li className={navClasses['/admin'] || ''}>
-              <DropdownMenu label="Verwaltung">
-                <li>
-                  <Link to="/admin/registration">Anmeldungen</Link>
-                </li>
-                <li>
-                  <Link to="/admin/page">Seiten</Link>
-                </li>
-              </DropdownMenu>
-            </li>
-          )}
         </ul>
         <ul>
           {user ? (
@@ -124,6 +112,22 @@ const NavBar = () => {
                 </li>
                 <li>
                   <Link to="/user/help">Hilfe</Link>
+                </li>
+                {user.isAdministrator && (
+                  <>
+                    <li className="dropdown-divider">
+                      <hr />
+                    </li>
+                    <li>
+                      <Link to="/admin/registration">Anmeldungen</Link>
+                    </li>
+                    <li>
+                      <Link to="/admin/page">Seiten</Link>
+                    </li>
+                  </>
+                )}
+                <li className="dropdown-divider">
+                  <hr />
                 </li>
                 <li>
                   <a href="#" onClick={handleLogout}>
