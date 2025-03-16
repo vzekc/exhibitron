@@ -46,22 +46,34 @@ const ExhibitorDetails = ({ id }: { id: number }) => {
           <div className="contact-details">
             {email && (
               <div>
-                Email: <a href={`mailto:${email}`}>{email}</a>
+                Email:{' '}
+                <a rel="noopener noreferrer" target="_blank" href={`mailto:${email}`}>
+                  {email}
+                </a>
               </div>
             )}
             {phone && (
               <div>
-                Telefon: <a href={`tel:${phone}`}>{phone}</a>
+                Telefon:{' '}
+                <a rel="noopener noreferrer" target="_blank" href={`tel:${phone}`}>
+                  {phone}
+                </a>
               </div>
             )}
             {mastodon && (
               <div>
-                Mastodon: <a href={mastodonUrl(mastodon)}>{mastodon}</a>
+                Mastodon:{' '}
+                <a rel="noopener noreferrer" target="_blank" href={mastodonUrl(mastodon)}>
+                  {mastodon}
+                </a>
               </div>
             )}
             {website && (
               <div>
-                Website: <a href={website}>{website}</a>
+                Website:{' '}
+                <a rel="noopener noreferrer" target="_blank" href={website}>
+                  {website}
+                </a>
               </div>
             )}
           </div>
