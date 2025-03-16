@@ -14,17 +14,14 @@ import { ExhibitAttribute } from '../exhibitAttribute/entity.js'
 async function processAttributes(
   attributeInputs: AttributeInput[] | null | undefined,
   db: Context['db'],
-) {
+): Promise<[string, string][] | undefined> {
   if (!attributeInputs || attributeInputs.length === 0) return undefined
 
-  // Convert array of AttributeInput to Record<string, string>
-  const attributesRecord: Record<string, string> = {}
-  attributeInputs.forEach((attr) => {
-    attributesRecord[attr.name] = attr.value
-  })
+  // Store attributes as array of [name, value] pairs to preserve order and allow duplicates
+  const attributesArray: [string, string][] = attributeInputs.map((attr) => [attr.name, attr.value])
 
   // Get all attribute names from the incoming attributes
-  const attributeNames = Object.keys(attributesRecord)
+  const attributeNames = [...new Set(attributeInputs.map((attr) => attr.name))]
 
   // Find existing attributes
   const existingAttributes = await db.exhibitAttribute.find({ name: { $in: attributeNames } })
@@ -39,7 +36,7 @@ async function processAttributes(
     await db.em.persist(newAttributes).flush()
   }
 
-  return attributesRecord
+  return attributesArray
 }
 
 export const exhibitQueries: QueryResolvers<Context> = {
@@ -128,12 +125,11 @@ export const exhibitTypeResolvers: ExhibitResolvers = {
   exhibitor: async (exhibit, _, { db }) => db.exhibitor.findOneOrFail({ id: exhibit.exhibitor.id }),
   table: async (exhibit, _, { db }) =>
     exhibit.table ? db.table.findOneOrFail({ id: exhibit.table.id }) : null,
-  // @ts-expect-error ts2345
   attributes: (exhibit) => {
     if (!exhibit.attributes) return null
 
-    // Convert Record<string, string> to array of AttributeValue objects
-    return Object.entries(exhibit.attributes).map(([name, value]) => ({
+    // Convert array of [name, value] pairs to array of AttributeValue objects
+    return (exhibit.attributes as unknown as Array<[string, string]>).map(([name, value]) => ({
       name,
       value,
     }))

@@ -25,5 +25,5 @@ export class Exhibit extends BaseEntity<'text' | 'table' | 'attributes'> {
   exhibitor!: Exhibitor
 
   @Property({ type: 'json', nullable: true })
-  attributes?: Record<string, string>
+  attributes?: [string, string][]
 }
