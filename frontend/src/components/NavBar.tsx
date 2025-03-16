@@ -4,7 +4,6 @@ import { useUser } from '../contexts/UserContext.ts'
 import DropdownMenu from './DropdownMenu.tsx'
 import SearchTableNumber from './SearchTableNumber.tsx'
 import { getBookmarks } from '../utils/bookmarks.ts'
-import LoginModal from './LoginModal.tsx'
 import Breadcrumbs from './Breadcrumbs.tsx'
 import { gql, useMutation } from '@apollo/client'
 import './NavBar.css'
@@ -13,7 +12,6 @@ const NavBar = () => {
   const { user } = useUser()
   const location = useLocation()
   const [hasBookmarks, setHasBookmarks] = useState(getBookmarks().exhibits.length > 0)
-  const [showLoginModal, setShowLoginModal] = useState(false)
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const [logout] = useMutation(
@@ -49,23 +47,21 @@ const NavBar = () => {
       // Mark as processed to prevent repeated processing
       setProcessedLoginParam(true)
 
-      // Show the modal
-      setShowLoginModal(true)
-
-      // Remove the parameter from URL
-      const url = new URL(window.location.href)
-      url.searchParams.delete('login')
-      navigate({ pathname: url.pathname, search: url.search }, { replace: true })
+      // Redirect to login page with current path as redirectUrl
+      navigate(`/login?redirectUrl=${encodeURIComponent(location.pathname + location.search)}`, {
+        replace: true,
+      })
     }
-  }, [searchParams, navigate, processedLoginParam])
+  }, [searchParams, navigate, processedLoginParam, location])
 
   const handleLogout = async (event: React.MouseEvent) => {
     event.preventDefault()
     await logout()
   }
 
-  const handleShowLoginModal = () => {
-    setShowLoginModal(true)
+  const handleLogin = () => {
+    // Store current path in redirectUrl
+    navigate(`/login?redirectUrl=${encodeURIComponent(location.pathname + location.search)}`)
   }
 
   useEffect(() => {
@@ -75,12 +71,10 @@ const NavBar = () => {
 
     window.addEventListener('storage', updateBookmarks)
     window.addEventListener('bookmarksUpdated', updateBookmarks)
-    window.addEventListener('showLoginModal', handleShowLoginModal)
 
     return () => {
       window.removeEventListener('storage', updateBookmarks)
       window.removeEventListener('bookmarksUpdated', updateBookmarks)
-      window.removeEventListener('showLoginModal', handleShowLoginModal)
     }
   }, [])
 
@@ -129,6 +123,9 @@ const NavBar = () => {
                   <Link to="/user/exhibitorInfo">Aussteller-Infos</Link>
                 </li>
                 <li>
+                  <Link to="/user/help">Hilfe</Link>
+                </li>
+                <li>
                   <a href="#" onClick={handleLogout}>
                     Logout
                   </a>
@@ -137,7 +134,7 @@ const NavBar = () => {
             </li>
           ) : (
             <li>
-              <button className="button" onClick={() => setShowLoginModal(true)}>
+              <button className="button" onClick={handleLogin}>
                 Login
               </button>
             </li>
@@ -157,7 +154,6 @@ const NavBar = () => {
         </ul>
       </nav>
       <Breadcrumbs />
-      <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
     </>
   )
 }

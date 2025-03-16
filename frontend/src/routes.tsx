@@ -6,6 +6,7 @@ import Bookmarks from './pages/Bookmarks.tsx'
 import TableSearchResult from './pages/TableSearchResult.tsx'
 import Profile from './pages/user/Profile.tsx'
 import Register from './pages/Register.tsx'
+import Login from './pages/Login.tsx'
 import RegistrationList from './pages/admin/RegistrationList.tsx'
 import RegistrationDetails from './pages/admin/RegistrationDetails.tsx'
 import MainLayout from './components/MainLayout.tsx'
@@ -22,9 +23,26 @@ import Exhibitors from './pages/Exhibitors.tsx'
 import Exhibitor from './pages/Exibitor.tsx'
 import Table from './pages/Table'
 import SetupExhibitor from './pages/SetupExhibitor.tsx'
+import ProtectedRoute from './components/ProtectedRoute.tsx'
+import AdminProtectedRoute from './components/AdminProtectedRoute.tsx'
+import { Outlet } from 'react-router-dom'
+import { UserProvider } from './contexts/UserProvider.tsx'
+
+// Simple layout without navbar for login page
+const MinimalLayout = () => {
+  return (
+    <UserProvider>
+      <Outlet />
+    </UserProvider>
+  )
+}
 
 const routes: RouteObject[] = [
   { path: '/register', element: <Register /> },
+  {
+    element: <MinimalLayout />,
+    children: [{ path: '/login', element: <Login /> }],
+  },
   {
     element: <MainLayout />,
     children: [
@@ -36,20 +54,32 @@ const routes: RouteObject[] = [
       { path: '/schedule', element: <Page pageKey="schedule" /> },
       { path: '/bookmarks', element: <Bookmarks /> },
       { path: '/table/:number', element: <TableSearchResult /> },
-      { path: '/user/profile', element: <Profile /> },
-      { path: '/user/account', element: <Account /> },
+      // Protected user routes
       {
-        path: '/user/exhibitorInfo',
-        element: <Page pageKey="exhibitorInfo" />,
+        path: '/user',
+        element: <ProtectedRoute />,
+        children: [
+          { path: 'profile', element: <Profile /> },
+          { path: 'account', element: <Account /> },
+          { path: 'exhibitorInfo', element: <Page pageKey="exhibitorInfo" /> },
+          { path: 'exhibit', element: <UserExhibits /> },
+          { path: 'exhibit/:id', element: <ExhibitEditor /> },
+          { path: 'help', element: <Page pageKey="help" /> },
+        ],
       },
-      { path: '/user/exhibit', element: <UserExhibits /> },
-      { path: '/user/exhibit/:id', element: <ExhibitEditor /> },
       { path: '/requestPasswordReset', element: <RequestPasswordReset /> },
       { path: '/resetPassword', element: <ResetPassword /> },
-      { path: '/admin/registration', element: <RegistrationList /> },
-      { path: '/admin/registration/:id', element: <RegistrationDetails /> },
-      { path: '/admin/page', element: <PageList /> },
-      { path: '/admin/page/:key', element: <PageEditor /> },
+      // Protected admin routes
+      {
+        path: '/admin',
+        element: <AdminProtectedRoute />,
+        children: [
+          { path: 'registration', element: <RegistrationList /> },
+          { path: 'registration/:id', element: <RegistrationDetails /> },
+          { path: 'page', element: <PageList /> },
+          { path: 'page/:key', element: <PageEditor /> },
+        ],
+      },
       { path: '/table', element: <Table /> },
       { path: '/setupExhibitor', element: <SetupExhibitor /> },
       { path: '/*', element: <NotFound /> },
