@@ -247,7 +247,9 @@ const ExhibitEditor = () => {
     }
 
     const currentText = editorRef.current?.getHTML() || ''
-    const validAttributes = attributes.filter((attr) => attr.name && attr.value)
+    const validAttributes = attributes
+      .filter((attr) => attr.name && attr.value)
+      .map(({ name, value }) => ({ name, value }))
 
     await apolloClient.resetStore()
     // When saving, we need to retrieve the text from the server as it will be
