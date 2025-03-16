@@ -6,3 +6,12 @@
 .editor-container {
   margin-bottom: 1em;
 }
+
+/* Basic image styles */
+.ql-container .ql-editor img {
+  max-width: 100%;
+}
+
+.ql-container #editor-resizer .toolbar {
+  display: none;
+}

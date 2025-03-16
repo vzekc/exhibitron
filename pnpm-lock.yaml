@@ -255,6 +255,9 @@ importers:
       quill:
         specifier: ^2.0.3
         version: 2.0.3
+      quill-resize-image:
+        specifier: ^1.0.5
+        version: 1.0.5
       react:
         specifier: ^19.0.0
         version: 19.0.0
@@ -8471,6 +8474,10 @@ packages:
       fast-diff: 1.3.0
       lodash.clonedeep: 4.5.0
       lodash.isequal: 4.5.0
+    dev: false
+
+  /quill-resize-image@1.0.5:
+    resolution: {integrity: sha512-s6yinBoRXy9jsVXdK9J8WMfv4DUO6yE0uzzBWTjOu4JwcSqzlsgYivB5KCWoPAOrdxmV1mYpvvALCWa36r5Mnw==}
     dev: false
 
   /quill@2.0.3:

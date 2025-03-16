@@ -20,6 +20,7 @@
     "graphql": "^16.10.0",
     "papaparse": "^5.5.2",
     "quill": "^2.0.3",
+    "quill-resize-image": "^1.0.5",
     "react": "^19.0.0",
     "react-contenteditable": "^3.3.7",
     "react-dom": "^19.0.0",

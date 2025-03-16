@@ -1,4 +1,5 @@
 import Quill, { Delta } from 'quill'
+import QuillResizeImage from 'quill-resize-image'
 import {
   useEffect,
   useLayoutEffect,
@@ -10,6 +11,9 @@ import {
 import deepEqual from 'fast-deep-equal'
 import 'quill/dist/quill.snow.css'
 import './TextEditor.css'
+
+// Register the resize module once outside the component
+Quill.register('modules/resize', QuillResizeImage)
 
 interface TextEditorProps {
   defaultValue?: string
@@ -35,7 +39,40 @@ const TextEditor = forwardRef<TextEditorHandle, TextEditorProps>(
       () => ({
         getHTML: () => {
           if (!quillRef.current) return ''
-          return quillRef.current.getSemanticHTML().replaceAll(/&nbsp;/g, ' ')
+
+          // Get the HTML content
+          const html = quillRef.current.getSemanticHTML().replaceAll(/&nbsp;/g, ' ')
+
+          // Create a temporary div to parse the HTML
+          const tempDiv = document.createElement('div')
+          tempDiv.innerHTML = html
+
+          // Find all images in the editor content
+          const images = tempDiv.querySelectorAll('img')
+
+          // For each image, get the actual dimensions from the DOM and set them as attributes
+          images.forEach((img) => {
+            // Find the corresponding image in the editor and cast it to HTMLImageElement
+            const editorImgElement = quillRef.current?.root.querySelector(
+              `img[src="${img.getAttribute('src')}"]`,
+            )
+            if (editorImgElement) {
+              const editorImg = editorImgElement as HTMLImageElement
+              // Copy the width and height from the actual rendered image
+              if (editorImg.style.width) {
+                img.setAttribute('width', editorImg.style.width)
+              }
+              if (editorImg.style.height) {
+                img.setAttribute('height', editorImg.style.height)
+              }
+              // Copy alignment class if present
+              if (editorImg.className) {
+                img.className = editorImg.className
+              }
+            }
+          })
+
+          return tempDiv.innerHTML
         },
       }),
       [],
@@ -68,6 +105,12 @@ const TextEditor = forwardRef<TextEditorHandle, TextEditorProps>(
             [{ list: 'ordered' }, { list: 'bullet' }],
             ['clean'],
           ],
+          resize: {
+            options: {
+              onChange: () => console.log('image changed'),
+            },
+            // Use default configuration
+          },
         },
       })
 
@@ -92,7 +135,19 @@ const TextEditor = forwardRef<TextEditorHandle, TextEditorProps>(
         setIsEdited(hasChanges)
       })
 
+      // Listen for image resize events
+      const handleImageResize = () => {
+        // Trigger a text change event to mark content as edited
+        isUserInputRef.current = true
+        setIsEdited(true)
+      }
+
+      // Add event listener for image resize
+      container.addEventListener('quill-resize-image', handleImageResize)
+
       return () => {
+        // Remove event listener
+        container.removeEventListener('quill-resize-image', handleImageResize)
         quillRef.current = null
         container.innerHTML = ''
       }
