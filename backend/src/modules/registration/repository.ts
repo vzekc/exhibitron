@@ -28,7 +28,7 @@ export class RegistrationRepository extends EntityRepository<Registration> {
     return registration
   }
 
-  async approve(registration: Registration, siteUrl: string) {
+  async approve(registration: Registration, siteUrl: string, message?: string | null) {
     const userRepository = this.em.getRepository(User)
     const exhibitorRepository = this.em.getRepository(Exhibitor)
     const exhibitRepository = this.em.getRepository(Exhibit)
@@ -72,7 +72,9 @@ export class RegistrationRepository extends EntityRepository<Registration> {
       this.em.persist(exhibit)
     }
     await this.em.flush()
-    await sendEmail(makeWelcomeEmail(registration.name, registration.email, completeProfileUrl))
+    await sendEmail(
+      makeWelcomeEmail(registration.name, registration.email, completeProfileUrl, message),
+    )
   }
 
   async reject(registration: Registration) {

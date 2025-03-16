@@ -28,7 +28,7 @@ extend type Mutation {
   register(input: RegisterInput!): Registration
   setRegistrationInProgress(id: Int!): Boolean
   updateRegistrationNotes(id: Int!, notes: String!): Registration
-  approveRegistration(id: Int!, siteUrl: String!): Boolean
+  approveRegistration(id: Int!, siteUrl: String!, message: String): Boolean
   rejectRegistration(id: Int!): Boolean
   deleteRegistration(id: Int!): Boolean
 }

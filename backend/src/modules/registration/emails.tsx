@@ -2,7 +2,12 @@ import React from 'react'
 import { makeEmailBody } from '../common/emailUtils.js'
 import { Registration } from './entity.js'
 
-export const makeWelcomeEmail = (name: string, email: string, completeProfileUrl: string) => ({
+export const makeWelcomeEmail = (
+  name: string,
+  email: string,
+  completeProfileUrl: string,
+  message?: string | null,
+) => ({
   to: [email],
   subject: 'Willkommen als Aussteller auf der CC2025!',
   body: makeEmailBody(
@@ -12,6 +17,7 @@ export const makeWelcomeEmail = (name: string, email: string, completeProfileUrl
         Deine Anmeldung als Aussteller auf der CC2025 war erfolgreich. Bitte vervollständige deine
         Registrierung, um deine Anmeldung abzuschließen.
       </p>
+      {message && <p>{message}</p>}
       <a href={completeProfileUrl}>Registrierung vervollständigen</a>
     </article>,
   ),

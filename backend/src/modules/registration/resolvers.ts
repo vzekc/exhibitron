@@ -47,10 +47,10 @@ export const registrationMutations: MutationResolvers<Context> = {
     wrap(registration).assign({ notes })
     return registration
   },
-  approveRegistration: async (_, { id, siteUrl }, { db, user }) => {
+  approveRegistration: async (_, { id, siteUrl, message }, { db, user }) => {
     requireAdmin(user)
     const registration = await db.registration.findOneOrFail({ id })
-    await db.registration.approve(registration, siteUrl)
+    await db.registration.approve(registration, siteUrl, message)
     return true
   },
   rejectRegistration: async (_, { id }, { db, user }) => {

@@ -2,6 +2,7 @@ import { formatValue } from './utils.ts'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Confirm from '../../components/Confirm'
+import MessageInputModal from '../../components/MessageInputModal'
 import './RegistrationDetails.css'
 import { useBreadcrumb } from '../../contexts/BreadcrumbContext.ts'
 import { graphql } from 'gql.tada'
@@ -34,8 +35,8 @@ const GET_REGISTRATION = graphql(`
 `)
 
 const APPROVE_REGISTRATION = graphql(`
-  mutation ApproveRegistration($id: Int!, $siteUrl: String!) {
-    approveRegistration(id: $id, siteUrl: $siteUrl)
+  mutation ApproveRegistration($id: Int!, $siteUrl: String!, $message: String) {
+    approveRegistration(id: $id, siteUrl: $siteUrl, message: $message)
   }
 `)
 
@@ -78,6 +79,7 @@ const RegistrationDetails = () => {
   const [updateNotes] = useMutation(UPDATE_REGISTRATION_NOTES)
   const [notes, setNotes] = useState('')
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null)
+  const [messageModalOpen, setMessageModalOpen] = useState(false)
   const navigate = useNavigate()
   const { setDetailName } = useBreadcrumb()
   const apolloClient = useApolloClient()
@@ -96,9 +98,7 @@ const RegistrationDetails = () => {
   const handleStatusChange = async (status: string) => {
     switch (status) {
       case 'approved':
-        await approveRegistration({
-          variables: { id: parseInt(id), siteUrl: window.location.origin },
-        })
+        setMessageModalOpen(true)
         break
       case 'rejected':
         await rejectRegistration({ variables: { id: parseInt(id) } })
@@ -107,6 +107,18 @@ const RegistrationDetails = () => {
         await setRegistrationInProgress({ variables: { id: parseInt(id) } })
         break
     }
+    await refetch()
+  }
+
+  const handleApprove = async (message: string) => {
+    await approveRegistration({
+      variables: {
+        id: parseInt(id),
+        siteUrl: window.location.origin,
+        message: message || undefined,
+      },
+    })
+    setMessageModalOpen(false)
     await refetch()
   }
 
@@ -240,6 +252,13 @@ const RegistrationDetails = () => {
           isOpen={!!confirmAction}
         />
       )}
+      <MessageInputModal
+        isOpen={messageModalOpen}
+        onClose={() => setMessageModalOpen(false)}
+        onSubmit={handleApprove}
+        title="Anmeldung bestätigen"
+        submitLabel="Bestätigen und Email senden"
+      />
     </article>
   )
 }
