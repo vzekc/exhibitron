@@ -65,7 +65,7 @@ export class RegistrationRepository extends EntityRepository<Registration> {
     if (!exhibitor.exhibits.find((e) => e.title === registration.topic)) {
       const exhibit = exhibitRepository.create({
         exhibition: registration.exhibition,
-        title: registration.topic,
+        title: registration.topic.replace(/^Etwas anderes \((.*)\)$/, '$1'),
         exhibitor,
       })
       exhibitor.exhibits.add(exhibit)

@@ -1,30 +1,17 @@
 import { useForm } from 'react-hook-form'
 import { useState } from 'react'
-import { useMutation } from '@apollo/client'
-import { graphql } from 'gql.tada'
-
-const REQUEST_PASSWORD_RESET = graphql(`
-  mutation RequestPasswordReset($email: String!, $resetUrl: String!) {
-    requestPasswordReset(email: $email, resetUrl: $resetUrl)
-  }
-`)
+import { requestPasswordReset } from '../utils/requestPasswordReset.ts'
 
 type Inputs = {
   email: string
 }
 
-const makeResetUrl = () =>
-  `${window.location.protocol}//${window.location.host}/resetPassword?token=`
-
 const RequestPasswordReset = () => {
   const { register, handleSubmit } = useForm<Inputs>()
   const [requestSent, setRequestSent] = useState(false)
-  const [requestPasswordReset] = useMutation(REQUEST_PASSWORD_RESET)
 
   const onSubmit = async ({ email }: Inputs) => {
-    await requestPasswordReset({
-      variables: { email, resetUrl: makeResetUrl() },
-    })
+    await requestPasswordReset(email)
     setRequestSent(true)
   }
 

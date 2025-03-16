@@ -25,23 +25,18 @@ import Table from './pages/Table'
 import SetupExhibitor from './pages/SetupExhibitor.tsx'
 import ProtectedRoute from './components/ProtectedRoute.tsx'
 import AdminProtectedRoute from './components/AdminProtectedRoute.tsx'
-import { Outlet } from 'react-router-dom'
 import { UserProvider } from './contexts/UserProvider.tsx'
-
-// Simple layout without navbar for login page
-const MinimalLayout = () => {
-  return (
-    <UserProvider>
-      <Outlet />
-    </UserProvider>
-  )
-}
 
 const routes: RouteObject[] = [
   { path: '/register', element: <Register /> },
   {
-    element: <MinimalLayout />,
-    children: [{ path: '/login', element: <Login /> }],
+    path: '/login',
+    element: (
+      <UserProvider>
+        {' '}
+        <Login />{' '}
+      </UserProvider>
+    ),
   },
   {
     element: <MainLayout />,
