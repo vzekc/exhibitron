@@ -1,0 +1,16 @@
+type Attribute {
+  id: Int!
+  name: String!
+  createdAt: String!
+  updatedAt: String
+}
+
+extend type Query {
+  getAttributes: [Attribute!]!
+  getAttribute(id: Int!): Attribute
+}
+
+extend type Mutation {
+  createAttribute(name: String!): Attribute!
+  deleteAttribute(id: Int!): Boolean
+}

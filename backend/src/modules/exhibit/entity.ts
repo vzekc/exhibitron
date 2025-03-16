@@ -6,7 +6,7 @@ import { Exhibition } from '../exhibition/entity.js'
 import { Exhibitor } from '../exhibitor/entity.js'
 
 @Entity({ repository: () => ExhibitRepository })
-export class Exhibit extends BaseEntity<'text' | 'table'> {
+export class Exhibit extends BaseEntity<'text' | 'table' | 'attributes'> {
   [EntityRepositoryType]?: ExhibitRepository
 
   @ManyToOne()
@@ -23,4 +23,7 @@ export class Exhibit extends BaseEntity<'text' | 'table'> {
 
   @ManyToOne()
   exhibitor!: Exhibitor
+
+  @Property({ type: 'json', nullable: true })
+  attributes?: Record<string, string>
 }

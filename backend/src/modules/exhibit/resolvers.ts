@@ -1,8 +1,46 @@
 import { Context } from '../../app/context.js'
-import { ExhibitResolvers, MutationResolvers, QueryResolvers } from '../../generated/graphql.js'
+import {
+  AttributeInput,
+  ExhibitResolvers,
+  MutationResolvers,
+  QueryResolvers,
+} from '../../generated/graphql.js'
 import { Exhibit } from '../../entities.js'
 import { processHtml } from '../common/htmlProcessor.js'
 import { wrap } from '@mikro-orm/core'
+import { Attribute } from '../attribute/entity.js'
+
+// Helper function to process attributes and update the Attribute table
+async function processAttributes(
+  attributeInputs: AttributeInput[] | null | undefined,
+  db: Context['db'],
+) {
+  if (!attributeInputs || attributeInputs.length === 0) return undefined
+
+  // Convert array of AttributeInput to Record<string, string>
+  const attributesRecord: Record<string, string> = {}
+  attributeInputs.forEach((attr) => {
+    attributesRecord[attr.name] = attr.value
+  })
+
+  // Get all attribute names from the incoming attributes
+  const attributeNames = Object.keys(attributesRecord)
+
+  // Find existing attributes
+  const existingAttributes = await db.attribute.find({ name: { $in: attributeNames } })
+  const existingAttributeNames = existingAttributes.map((attr) => attr.name)
+
+  // Find new attributes that need to be created
+  const newAttributeNames = attributeNames.filter((name) => !existingAttributeNames.includes(name))
+
+  // Create new attributes if needed
+  if (newAttributeNames.length > 0) {
+    const newAttributes = newAttributeNames.map((name) => db.em.create(Attribute, { name }))
+    await db.em.persist(newAttributes).flush()
+  }
+
+  return attributesRecord
+}
 
 export const exhibitQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2345
@@ -13,16 +51,24 @@ export const exhibitQueries: QueryResolvers<Context> = {
 
 export const exhibitMutations: MutationResolvers<Context> = {
   // @ts-expect-error ts2345
-  createExhibit: async (_, { title, text, table }, { exhibition, exhibitor, db }) => {
+  createExhibit: async (_, { title, text, table, attributes }, { exhibition, exhibitor, db }) => {
     if (!exhibitor) {
       throw new Error('You must be logged in to create an exhibit')
     }
+
+    // Process attributes if provided
+    const processedAttributes = await processAttributes(
+      attributes as AttributeInput[] | null | undefined,
+      db,
+    )
+
     const exhibit = db.em.getRepository(Exhibit).create({
       exhibition,
       title,
       text: '', // Will be set after processing
       table,
       exhibitor,
+      attributes: processedAttributes,
     })
 
     if (text) {
@@ -35,11 +81,21 @@ export const exhibitMutations: MutationResolvers<Context> = {
     return exhibit
   },
   // @ts-expect-error ts2345
-  updateExhibit: async (_, { id, text, ...rest }, { db, exhibitor, user }) => {
+  updateExhibit: async (_, { id, text, attributes, ...rest }, { db, exhibitor, user }) => {
     const exhibit = await db.exhibit.findOneOrFail({ id })
     if (exhibitor !== exhibit.exhibitor && !user?.isAdministrator) {
       throw new Error('You do not have permission to update this exhibit')
     }
+
+    // Process attributes if provided
+    let processedAttributes = exhibit.attributes
+    if (attributes !== undefined) {
+      processedAttributes = await processAttributes(
+        attributes as AttributeInput[] | null | undefined,
+        db,
+      )
+    }
+
     let table = exhibit.table || null
     if ('table' in rest) {
       table = rest.table
@@ -56,7 +112,7 @@ export const exhibitMutations: MutationResolvers<Context> = {
       db.em.persist(images)
     }
 
-    return wrap(exhibit).assign({ table, text, ...rest })
+    return wrap(exhibit).assign({ table, text, attributes: processedAttributes, ...rest })
   },
   deleteExhibit: async (_, { id }, { db, exhibitor, user }) => {
     const exhibit = await db.exhibit.findOneOrFail({ id })
@@ -72,6 +128,16 @@ export const exhibitTypeResolvers: ExhibitResolvers = {
   exhibitor: async (exhibit, _, { db }) => db.exhibitor.findOneOrFail({ id: exhibit.exhibitor.id }),
   table: async (exhibit, _, { db }) =>
     exhibit.table ? db.table.findOneOrFail({ id: exhibit.table.id }) : null,
+  // @ts-expect-error ts2345
+  attributes: (exhibit) => {
+    if (!exhibit.attributes) return null
+
+    // Convert Record<string, string> to array of AttributeValue objects
+    return Object.entries(exhibit.attributes).map(([name, value]) => ({
+      name,
+      value,
+    }))
+  },
 }
 
 export const exhibitResolvers = {

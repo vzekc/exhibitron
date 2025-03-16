@@ -4,11 +4,28 @@ type Exhibit {
   table: Table
   text: String
   title: String!
+  attributes: [AttributeValue!]
+}
+
+type AttributeValue {
+  name: String!
+  value: String!
+}
+
+input AttributeInput {
+  name: String!
+  value: String!
 }
 
 extend type Mutation {
-  createExhibit(table: Int, text: String, title: String!): Exhibit
-  updateExhibit(id: Int!, table: Int, text: String, title: String): Exhibit
+  createExhibit(table: Int, text: String, title: String!, attributes: [AttributeInput!]): Exhibit
+  updateExhibit(
+    id: Int!
+    table: Int
+    text: String
+    title: String
+    attributes: [AttributeInput!]
+  ): Exhibit
   deleteExhibit(id: Int!): Boolean
 }
 
