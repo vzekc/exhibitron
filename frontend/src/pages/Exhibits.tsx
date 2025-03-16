@@ -1,4 +1,4 @@
-import ExhibitList from '../components/ExhibitList.tsx'
+import ExhibitList, { ExhibitDisplayListItem } from '../components/ExhibitList.tsx'
 import { graphql } from 'gql.tada'
 import { useQuery } from '@apollo/client'
 
@@ -17,6 +17,10 @@ const GET_EXHIBITION = graphql(`
       table {
         number
       }
+      attributes {
+        name
+        value
+      }
     }
   }
 `)
@@ -24,9 +28,17 @@ const GET_EXHIBITION = graphql(`
 const Exhibits = () => {
   const { data } = useQuery(GET_EXHIBITION)
   if (data?.getExhibits) {
+    const exhibits = data.getExhibits.map((exhibit) => {
+      const { attributes, ...rest } = exhibit
+      return {
+        ...rest,
+        attributes: Array.isArray(attributes) ? attributes : [],
+      }
+    }) as ExhibitDisplayListItem[]
+
     return (
       <article>
-        <ExhibitList exhibits={data.getExhibits} />
+        <ExhibitList exhibits={exhibits} />
       </article>
     )
   }

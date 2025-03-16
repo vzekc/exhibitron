@@ -16,6 +16,10 @@ const GET_DATA = graphql(`
       table {
         number
       }
+      attributes {
+        name
+        value
+      }
       exhibitor {
         id
         tables {
@@ -26,28 +30,65 @@ const GET_DATA = graphql(`
   }
 `)
 
+const GET_EXHIBIT_ATTRIBUTES = graphql(`
+  query GetExhibitAttributes {
+    getExhibitAttributes {
+      id
+      name
+    }
+  }
+`)
+
 const UPDATE_EXHIBIT = graphql(`
-  mutation UpdateExhibit($id: Int!, $title: String, $text: String, $table: Int) {
-    updateExhibit(id: $id, title: $title, text: $text, table: $table) {
+  mutation UpdateExhibit(
+    $id: Int!
+    $title: String
+    $text: String
+    $table: Int
+    $attributes: [AttributeInput!]
+  ) {
+    updateExhibit(id: $id, title: $title, text: $text, table: $table, attributes: $attributes) {
       id
       title
       text
       table {
         number
+      }
+      attributes {
+        name
+        value
       }
     }
   }
 `)
 
 const CREATE_EXHIBIT = graphql(`
-  mutation CreateExhibit($title: String!, $text: String, $table: Int) {
-    createExhibit(title: $title, text: $text, table: $table) {
+  mutation CreateExhibit(
+    $title: String!
+    $text: String
+    $table: Int
+    $attributes: [AttributeInput!]
+  ) {
+    createExhibit(title: $title, text: $text, table: $table, attributes: $attributes) {
       id
       title
       text
       table {
         number
       }
+      attributes {
+        name
+        value
+      }
+    }
+  }
+`)
+
+const CREATE_EXHIBIT_ATTRIBUTE = graphql(`
+  mutation CreateExhibitAttribute($name: String!) {
+    createExhibitAttribute(name: $name) {
+      id
+      name
     }
   }
 `)
@@ -68,6 +109,10 @@ const DELETE_EXHIBIT = graphql(`
   }
 `)
 
+type Attribute = {
+  name: string
+  value: string
+}
 const ExhibitEditor = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -75,6 +120,8 @@ const ExhibitEditor = () => {
   const apolloClient = useApolloClient()
   const isNew = id === 'new'
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showNewAttributeInput, setShowNewAttributeInput] = useState(false)
+  const [newAttributeName, setNewAttributeName] = useState('')
 
   const {
     data: exhibitData,
@@ -85,6 +132,8 @@ const ExhibitEditor = () => {
     skip: isNew,
   })
 
+  const { data: attributesData } = useQuery(GET_EXHIBIT_ATTRIBUTES)
+
   const { data: tablesData } = useQuery(GET_MY_TABLES, {
     skip: !isNew,
   })
@@ -92,37 +141,45 @@ const ExhibitEditor = () => {
   const [title, setTitle] = useState('')
   const [text, setText] = useState('')
   const [selectedTable, setSelectedTable] = useState<number | undefined>(undefined)
+  const [attributes, setAttributes] = useState<Attribute[]>([])
   const [originalTitle, setOriginalTitle] = useState('')
   const [originalTable, setOriginalTable] = useState<number | undefined>(undefined)
+  const [originalAttributes, setOriginalAttributes] = useState<Attribute[]>([])
   const [isTextEdited, setIsTextEdited] = useState(false)
 
   const [updateExhibit] = useMutation(UPDATE_EXHIBIT)
   const [createExhibit] = useMutation(CREATE_EXHIBIT)
+  const [createExhibitAttribute] = useMutation(CREATE_EXHIBIT_ATTRIBUTE)
   const [deleteExhibit] = useMutation(DELETE_EXHIBIT)
 
   const editorRef = useRef<TextEditorHandle>(null)
 
   useEffect(() => {
     if (exhibitData?.getExhibit) {
-      const { title, table, text } = exhibitData.getExhibit
+      const { title, table, text, attributes } = exhibitData.getExhibit
       const newTitle = title || ''
       const newText = text || ''
       const newTable = table?.number || undefined
+      const newAttributes = attributes || []
 
       setDetailName(location.pathname, newTitle)
       setTitle(newTitle)
       setText(newText)
       setSelectedTable(newTable)
+      setAttributes(newAttributes as Attribute[])
       setOriginalTitle(newTitle)
       setOriginalTable(newTable)
+      setOriginalAttributes(newAttributes as Attribute[])
       setIsTextEdited(false)
     } else if (isNew) {
       setDetailName(location.pathname, 'Neues Exponat')
       setTitle('')
       setText('')
       setSelectedTable(undefined)
+      setAttributes([])
       setOriginalTitle('')
       setOriginalTable(undefined)
+      setOriginalAttributes([])
       setIsTextEdited(false)
     }
   }, [exhibitData, setDetailName, isNew])
@@ -130,8 +187,56 @@ const ExhibitEditor = () => {
   const handleTableChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
     setSelectedTable(e.target.value ? Number(e.target.value) : undefined)
 
+  const handleAddAttribute = () => {
+    setAttributes([...attributes, { name: '', value: '' }])
+  }
+
+  const handleAttributeNameChange = (index: number, name: string) => {
+    const newAttributes = [...attributes]
+    newAttributes[index].name = name
+    setAttributes(newAttributes)
+  }
+
+  const handleAttributeValueChange = (index: number, value: string) => {
+    const newAttributes = [...attributes]
+    newAttributes[index].value = value
+    setAttributes(newAttributes)
+  }
+
+  const handleRemoveAttribute = (index: number) => {
+    const newAttributes = [...attributes]
+    newAttributes.splice(index, 1)
+    setAttributes(newAttributes)
+  }
+
+  const handleCreateNewAttribute = async () => {
+    if (newAttributeName.trim()) {
+      await createExhibitAttribute({
+        variables: { name: newAttributeName.trim() },
+        refetchQueries: [{ query: GET_EXHIBIT_ATTRIBUTES }],
+      })
+      setNewAttributeName('')
+      setShowNewAttributeInput(false)
+    }
+  }
+
+  const areAttributesEqual = (a: Attribute[], b: Attribute[]) => {
+    if (a.length !== b.length) return false
+
+    for (let i = 0; i < a.length; i++) {
+      const aItem = a[i]
+      const bItem = b.find((item) => item.name === aItem.name && item.value === aItem.value)
+      if (!bItem) return false
+    }
+
+    return true
+  }
+
   const hasChanges =
-    (title || '') !== (originalTitle || '') || isTextEdited || selectedTable !== originalTable
+    (title || '') !== (originalTitle || '') ||
+    isTextEdited ||
+    selectedTable !== originalTable ||
+    !areAttributesEqual(attributes, originalAttributes)
 
   useUnsavedChangesWarning(hasChanges)
 
@@ -142,26 +247,46 @@ const ExhibitEditor = () => {
     }
 
     const currentText = editorRef.current?.getHTML() || ''
+    const validAttributes = attributes.filter((attr) => attr.name && attr.value)
 
     await apolloClient.resetStore()
     // When saving, we need to retrieve the text from the server as it will be
     // processed to remove unwanted HTML and to externalize inline images.
     if (isNew) {
       const result = await createExhibit({
-        variables: { title, text: currentText, table: selectedTable || null },
+        variables: {
+          title,
+          text: currentText,
+          table: selectedTable || null,
+          attributes: validAttributes.length > 0 ? validAttributes : undefined,
+        },
       })
-      const { id: savedId, text: savedText } = result.data!.createExhibit!
+      const {
+        id: savedId,
+        text: savedText,
+        attributes: savedAttributes,
+      } = result.data!.createExhibit!
       navigate(`/user/exhibit/${savedId}`)
       setText(savedText!)
+      setAttributes((savedAttributes as Attribute[]) || [])
+      setOriginalAttributes((savedAttributes as Attribute[]) || [])
       setIsTextEdited(false)
     } else {
       const result = await updateExhibit({
-        variables: { id: Number(id), title, text: currentText, table: selectedTable || null },
+        variables: {
+          id: Number(id),
+          title,
+          text: currentText,
+          table: selectedTable || null,
+          attributes: validAttributes.length > 0 ? validAttributes : undefined,
+        },
       })
-      const { text: savedText } = result.data!.updateExhibit!
+      const { text: savedText, attributes: savedAttributes } = result.data!.updateExhibit!
       setOriginalTitle(title)
       setOriginalTable(selectedTable)
       setText(savedText!)
+      setAttributes((savedAttributes as Attribute[]) || [])
+      setOriginalAttributes((savedAttributes as Attribute[]) || [])
       setIsTextEdited(false)
     }
   }
@@ -194,6 +319,8 @@ const ExhibitEditor = () => {
     ? tablesData?.getCurrentExhibitor?.tables?.map((table) => table.number)
     : exhibitData?.getExhibit?.exhibitor?.tables?.map((table) => table.number)
 
+  const availableAttributes = attributesData?.getExhibitAttributes || []
+
   return (
     <div>
       <h1>{isNew ? 'Neues Exponat erstellen' : 'Exponat bearbeiten'}</h1>
@@ -215,6 +342,85 @@ const ExhibitEditor = () => {
             ))}
           </select>
         </label>
+
+        <div className="attributes-section">
+          <h3>Attribute</h3>
+          {attributes.length === 0 ? (
+            <p>Keine Attribute vorhanden</p>
+          ) : (
+            <div className="attributes-list">
+              {attributes.map((attr, index) => (
+                <div key={index} className="attribute-item grid" style={{ marginBottom: '1rem' }}>
+                  <div>
+                    <select
+                      value={attr.name}
+                      onChange={(e) => handleAttributeNameChange(index, e.target.value)}>
+                      <option value="">Attribut auswählen</option>
+                      {availableAttributes.map((availableAttr) => (
+                        <option key={availableAttr.id} value={availableAttr.name}>
+                          {availableAttr.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <input
+                      type="text"
+                      value={attr.value}
+                      onChange={(e) => handleAttributeValueChange(index, e.target.value)}
+                      placeholder="Wert"
+                    />
+                  </div>
+                  <div>
+                    <button
+                      className="secondary outline"
+                      onClick={() => handleRemoveAttribute(index)}>
+                      Entfernen
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="attribute-actions" style={{ marginTop: '1rem', marginBottom: '2rem' }}>
+            <button className="secondary" onClick={handleAddAttribute}>
+              Attribut hinzufügen
+            </button>
+            <button
+              className="secondary"
+              onClick={() => setShowNewAttributeInput(true)}
+              style={{ marginLeft: '0.5rem' }}>
+              Neues Attribut erstellen
+            </button>
+          </div>
+
+          {showNewAttributeInput && (
+            <div className="new-attribute-form grid" style={{ marginBottom: '2rem' }}>
+              <div>
+                <input
+                  type="text"
+                  value={newAttributeName}
+                  onChange={(e) => setNewAttributeName(e.target.value)}
+                  placeholder="Name des neuen Attributs"
+                />
+              </div>
+              <div>
+                <button onClick={handleCreateNewAttribute}>Erstellen</button>
+                <button
+                  className="secondary outline"
+                  onClick={() => {
+                    setShowNewAttributeInput(false)
+                    setNewAttributeName('')
+                  }}
+                  style={{ marginLeft: '0.5rem' }}>
+                  Abbrechen
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
         <TextEditor
           ref={editorRef}
           defaultValue={text}

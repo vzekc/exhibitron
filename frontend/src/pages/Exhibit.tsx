@@ -19,6 +19,10 @@ const GET_DATA = graphql(`
       table {
         number
       }
+      attributes {
+        name
+        value
+      }
       exhibitor {
         id
         user {

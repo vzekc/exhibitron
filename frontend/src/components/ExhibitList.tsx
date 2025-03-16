@@ -1,6 +1,11 @@
 import { useNavigate } from 'react-router-dom'
 import './Card.css'
 
+type Attribute = {
+  name: string
+  value: string
+}
+
 export type ExhibitDisplayListItem = {
   id: number
   title: string
@@ -11,6 +16,7 @@ export type ExhibitDisplayListItem = {
     }
   }
   table: { number: number } | null
+  attributes?: Attribute[]
 }
 
 interface ExhibitListProps {
