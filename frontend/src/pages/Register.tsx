@@ -137,7 +137,7 @@ const Register = () => {
               Nach Absendung des Formulars erhältst Du eine automatisch generierte Email mit einer
               Bestätigung Deiner Anmeldung. Bitte überprüfe auch Deinen Spam-Ordner, falls Du diese
               Email nicht nach einigen Minuten erhältst. Sobald wir Deine Anmeldung bearbeitet
-              haben, melden wir uns persönlich mit einer Bestätigung bei Dir.
+              haben, melden wir uns persönlich mit einer weiteren Email bei Dir.
             </p>
             <form className="exhibitor-registration" onSubmit={handleSubmit(onSubmit)}>
               <fieldset>
