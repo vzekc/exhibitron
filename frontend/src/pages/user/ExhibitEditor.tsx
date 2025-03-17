@@ -179,9 +179,9 @@ const ExhibitEditor = () => {
     if (a.length !== b.length) return false
 
     for (let i = 0; i < a.length; i++) {
-      const aItem = a[i]
-      const bItem = b.find((item) => item.name === aItem.name && item.value === aItem.value)
-      if (!bItem) return false
+      if (a[i].name !== b[i].name || a[i].value !== b[i].value) {
+        return false
+      }
     }
 
     return true
