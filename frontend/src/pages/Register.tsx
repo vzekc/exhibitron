@@ -229,21 +229,19 @@ const Register = () => {
                 )}
               </fieldset>
               <fieldset>
+                Teilnahme an folgenden Tagen:
+                <p />
                 <label>
-                  Teilnahme an folgenden Tagen:
-                  <p />
-                  <label>
-                    <input type="checkbox" {...register('friday')} />
-                    Freitag (12. September, nur Aussteller und persönliche Gäste)
-                  </label>
-                  <label>
-                    <input type="checkbox" {...register('saturday')} />
-                    Samstag (Publikumstag)
-                  </label>
-                  <label>
-                    <input type="checkbox" {...register('sunday')} />
-                    Sonntag (Publikumstag)
-                  </label>
+                  <input type="checkbox" {...register('friday')} />
+                  Freitag (12. September, nur Aussteller und persönliche Gäste)
+                </label>
+                <label>
+                  <input type="checkbox" {...register('saturday')} />
+                  Samstag (Publikumstag)
+                </label>
+                <label>
+                  <input type="checkbox" {...register('sunday')} />
+                  Sonntag (Publikumstag)
                 </label>
               </fieldset>
               <fieldset>
@@ -303,6 +301,10 @@ const Register = () => {
       <div className="register-header">
         <h1>Classic Computing 2025</h1>
         <img src="/vzekc-logo-transparent-border.png" alt="VzEkC Logo" />
+      </div>
+      <div className="register-header-mobile">
+        <span className="mobile-title">Classic Computing 2025</span>
+        <img src="/vzekc-logo-transparent-border.png" alt="VzEkC Logo" className="mobile-logo" />
       </div>
       {content()}
       <footer>
