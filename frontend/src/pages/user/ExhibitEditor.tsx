@@ -6,6 +6,7 @@ import { graphql } from 'gql.tada'
 import { useQuery, useMutation, useApolloClient } from '@apollo/client'
 import { useUnsavedChangesWarning } from '../../hooks/useUnsavedChangesWarning.tsx'
 import Confirm from '../../components/Confirm.tsx'
+import ExhibitAttributeEditor from '../../components/ExhibitAttributeEditor.tsx'
 import axios from 'axios'
 
 const GET_DATA = graphql(`
@@ -28,15 +29,6 @@ const GET_DATA = graphql(`
           number
         }
       }
-    }
-  }
-`)
-
-const GET_EXHIBIT_ATTRIBUTES = graphql(`
-  query GetExhibitAttributes {
-    getExhibitAttributes {
-      id
-      name
     }
   }
 `)
@@ -88,15 +80,6 @@ const CREATE_EXHIBIT = graphql(`
   }
 `)
 
-const CREATE_EXHIBIT_ATTRIBUTE = graphql(`
-  mutation CreateExhibitAttribute($name: String!) {
-    createExhibitAttribute(name: $name) {
-      id
-      name
-    }
-  }
-`)
-
 const GET_MY_TABLES = graphql(`
   query GetMyTables {
     getCurrentExhibitor {
@@ -125,8 +108,6 @@ const ExhibitEditor = () => {
   const isNew = id === 'new'
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showDeleteImageConfirm, setShowDeleteImageConfirm] = useState(false)
-  const [showNewAttributeInput, setShowNewAttributeInput] = useState(false)
-  const [newAttributeName, setNewAttributeName] = useState('')
   const [mainImage, setMainImage] = useState<number | null>(null)
   const [isImageLoading, setIsImageLoading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -139,8 +120,6 @@ const ExhibitEditor = () => {
     variables: { id: Number(id) },
     skip: isNew,
   })
-
-  const { data: attributesData } = useQuery(GET_EXHIBIT_ATTRIBUTES)
 
   const { data: tablesData } = useQuery(GET_MY_TABLES, {
     skip: !isNew,
@@ -157,7 +136,6 @@ const ExhibitEditor = () => {
 
   const [updateExhibit] = useMutation(UPDATE_EXHIBIT)
   const [createExhibit] = useMutation(CREATE_EXHIBIT)
-  const [createExhibitAttribute] = useMutation(CREATE_EXHIBIT_ATTRIBUTE)
   const [deleteExhibit] = useMutation(DELETE_EXHIBIT)
 
   const editorRef = useRef<TextEditorHandle>(null)
@@ -196,39 +174,6 @@ const ExhibitEditor = () => {
 
   const handleTableChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
     setSelectedTable(e.target.value ? Number(e.target.value) : undefined)
-
-  const handleAddAttribute = () => {
-    setAttributes([...attributes, { name: '', value: '' }])
-  }
-
-  const handleAttributeNameChange = (index: number, name: string) => {
-    const newAttributes = [...attributes]
-    newAttributes[index].name = name
-    setAttributes(newAttributes)
-  }
-
-  const handleAttributeValueChange = (index: number, value: string) => {
-    const newAttributes = [...attributes]
-    newAttributes[index].value = value
-    setAttributes(newAttributes)
-  }
-
-  const handleRemoveAttribute = (index: number) => {
-    const newAttributes = [...attributes]
-    newAttributes.splice(index, 1)
-    setAttributes(newAttributes)
-  }
-
-  const handleCreateNewAttribute = async () => {
-    if (newAttributeName.trim()) {
-      await createExhibitAttribute({
-        variables: { name: newAttributeName.trim() },
-        refetchQueries: [{ query: GET_EXHIBIT_ATTRIBUTES }],
-      })
-      setNewAttributeName('')
-      setShowNewAttributeInput(false)
-    }
-  }
 
   const areAttributesEqual = (a: Attribute[], b: Attribute[]) => {
     if (a.length !== b.length) return false
@@ -377,8 +322,6 @@ const ExhibitEditor = () => {
     ? tablesData?.getCurrentExhibitor?.tables?.map((table) => table.number)
     : exhibitData?.getExhibit?.exhibitor?.tables?.map((table) => table.number)
 
-  const availableAttributes = attributesData?.getExhibitAttributes || []
-
   return (
     <div>
       <h1>{isNew ? 'Neues Exponat erstellen' : 'Exponat bearbeiten'}</h1>
@@ -450,83 +393,7 @@ const ExhibitEditor = () => {
           />
         </div>
 
-        <div className="attributes-section">
-          <h3>Attribute</h3>
-          {attributes.length === 0 ? (
-            <p>Keine Attribute vorhanden</p>
-          ) : (
-            <div className="attributes-list">
-              {attributes.map((attr, index) => (
-                <div key={index} className="attribute-item grid" style={{ marginBottom: '1rem' }}>
-                  <div>
-                    <select
-                      value={attr.name}
-                      onChange={(e) => handleAttributeNameChange(index, e.target.value)}>
-                      <option value="">Attribut auswählen</option>
-                      {availableAttributes.map((availableAttr) => (
-                        <option key={availableAttr.id} value={availableAttr.name}>
-                          {availableAttr.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <input
-                      type="text"
-                      value={attr.value}
-                      onChange={(e) => handleAttributeValueChange(index, e.target.value)}
-                      placeholder="Wert"
-                    />
-                  </div>
-                  <div>
-                    <button
-                      className="secondary outline"
-                      onClick={() => handleRemoveAttribute(index)}>
-                      Entfernen
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div className="attribute-actions" style={{ marginTop: '1rem', marginBottom: '2rem' }}>
-            <button className="secondary" onClick={handleAddAttribute}>
-              Attribut hinzufügen
-            </button>
-            <button
-              className="secondary"
-              onClick={() => setShowNewAttributeInput(true)}
-              style={{ marginLeft: '0.5rem' }}>
-              Neues Attribut erstellen
-            </button>
-          </div>
-
-          {showNewAttributeInput && (
-            <div className="new-attribute-form grid" style={{ marginBottom: '2rem' }}>
-              <div>
-                <input
-                  type="text"
-                  value={newAttributeName}
-                  onChange={(e) => setNewAttributeName(e.target.value)}
-                  placeholder="Name des neuen Attributs"
-                />
-              </div>
-              <div>
-                <button onClick={handleCreateNewAttribute}>Erstellen</button>
-                <button
-                  className="secondary outline"
-                  onClick={() => {
-                    setShowNewAttributeInput(false)
-                    setNewAttributeName('')
-                  }}
-                  style={{ marginLeft: '0.5rem' }}>
-                  Abbrechen
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+        <ExhibitAttributeEditor attributes={attributes} onChange={setAttributes} />
 
         <TextEditor
           ref={editorRef}
