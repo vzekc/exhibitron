@@ -1,6 +1,6 @@
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { useUser } from '../../contexts/UserContext.ts'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { graphql } from 'gql.tada'
 import { useApolloClient, useMutation, useQuery } from '@apollo/client'
 import Modal from '../../components/Modal.tsx'
@@ -52,9 +52,14 @@ const Profile = () => {
   const {
     register,
     handleSubmit,
-    formState: { isDirty },
+    formState: { isDirty, errors },
+    setValue,
+    watch,
     reset,
-  } = useForm<Inputs>()
+  } = useForm<Inputs>({
+    mode: 'onBlur',
+    reValidateMode: 'onBlur',
+  })
 
   const { data, refetch } = useQuery(GET_USER_PROFILE)
   const [updateUserProfile] = useMutation(UPDATE_USER_PROFILE)
@@ -62,6 +67,9 @@ const Profile = () => {
   const [searchParams] = useSearchParams()
   const [welcome, setWelcome] = useState(searchParams.has('welcome'))
   const navigate = useNavigate()
+
+  const websiteValue = watch('website')
+  const websiteFocusedRef = useRef(false)
 
   useEffect(() => {
     navigate(window.location.pathname, { replace: true })
@@ -129,22 +137,68 @@ const Profile = () => {
               <legend>Kontaktinformationen</legend>
               <label>
                 E-Mail-Adresse:
-                <input type="email" {...register('email')} />
+                <input
+                  type="email"
+                  {...register('email', {
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: 'Ungültige E-Mail-Adresse',
+                    },
+                  })}
+                />
+                {errors.email && <div className="validation-message">{errors.email.message}</div>}
               </label>
               <label>
                 Mastodon:
-                <input type="mastodon" {...register('mastodon')} />
+                <input
+                  type="text"
+                  {...register('mastodon', {
+                    pattern: {
+                      value: /^@[a-zA-Z0-9_]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                      message: 'Mastodon sollte im Format @nutzername@server.domain sein',
+                    },
+                  })}
+                />
+                {errors.mastodon && (
+                  <div className="validation-message">{errors.mastodon.message}</div>
+                )}
               </label>
               <label>
                 Webseite:
-                <input type="url" {...register('website')} />
+                <input
+                  type="url"
+                  {...register('website', {
+                    pattern: {
+                      value: /^(https?:\/\/)?(www\.)?[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/\S*)?$/,
+                      message: 'Bitte gib eine gültige URL ein',
+                    },
+                  })}
+                  onFocus={() => {
+                    if (!websiteFocusedRef.current && !websiteValue) {
+                      setValue('website', 'https://', { shouldDirty: true })
+                      websiteFocusedRef.current = true
+                    }
+                  }}
+                />
+                {errors.website && (
+                  <div className="validation-message">{errors.website.message}</div>
+                )}
               </label>
               <label>
                 Telefon:
-                <input type="phone" {...register('phone')} />
+                <input
+                  type="tel"
+                  {...register('phone', {
+                    pattern: {
+                      value: /^(\+)?[\d\s()-]{5,20}$/,
+                      message: 'Bitte gib eine gültige Telefonnummer ein',
+                    },
+                  })}
+                />
+                {errors.phone && <div className="validation-message">{errors.phone.message}</div>}
               </label>
             </fieldset>
-            <button type="submit" disabled={!isDirty}>
+            <button type="submit" disabled={!isDirty || Object.keys(errors).length > 0}>
               Speichern
             </button>
           </form>

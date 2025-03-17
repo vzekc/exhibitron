@@ -62,3 +62,9 @@ legend {
   display: block;
   color: #aaa;
 }
+
+.validation-message {
+  color: red;
+  font-size: 0.9em;
+  margin-bottom: 1em;
+}
