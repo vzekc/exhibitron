@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
 html,
 body {
   width: 100%;
@@ -6,9 +8,39 @@ body {
 }
 
 .register-page {
-  margin-top: 2em;
+  margin-top: 0;
   transform: scale(0.9);
   transform-origin: 0 0;
+}
+
+.register-header {
+  background-color: #f0be5b;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 2rem;
+  box-sizing: border-box;
+  margin-bottom: 2rem;
+}
+
+.register-header h1 {
+  margin: 0;
+  color: #333;
+  font-size: 2rem;
+  font-family: 'Press Start 2P', cursive;
+  letter-spacing: 1px;
+  line-height: 1.3;
+  transform: scaleY(2);
+  transform-origin: top left;
+}
+
+.register-header img {
+  height: 160px;
+  margin-right: -1.3rem;
+  padding: 0;
+  margin-top: -0.2rem;
+  margin-bottom: -0.2rem;
 }
 
 .exhibitor-registration {
@@ -34,4 +66,27 @@ form.exhibitor-registration fieldset {
   color: red;
   font-size: 0.9em;
   margin-bottom: 1em;
+}
+
+.register-page footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.register-page footer p {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.register-page footer .footer-links {
+  margin-left: auto;
+}
+
+.intro {
+  margin-left: 1rem;
+  margin-right: 1rem;
 }

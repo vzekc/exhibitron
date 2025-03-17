@@ -119,6 +119,26 @@ const Register = () => {
                 <p>Bitte fülle das Formular aus, wenn Du Dich als Aussteller anmelden möchtest.</p>
               </Modal>
             )}
+            <p className="intro">
+              Hier kannst Du Dich für die{' '}
+              <a
+                href="https://www.classic-computing.de/cc2025/"
+                target="_blank"
+                rel="noreferrer nofollow">
+                Classic Computing 2025
+              </a>
+              , die vom 12. bis zum 14. September 2025 in der Freiheitshalle in Hof stattfindet, als
+              Aussteller anmelden. Die Daten, die Du in dieses Formular eingibst, werden für die
+              Planung der Ausstellung verwendet und nach der Veranstaltung gelöscht. Deine
+              Email-Adresse wird nur für die Kommunikation mit Dir im Zusammenhang mit der
+              Ausstellung verwendet. Wir geben Deine Daten nicht an Dritte weiter.
+            </p>
+            <p className="intro">
+              Nach Absendung des Formulars erhältst Du eine automatisch generierte Email mit einer
+              Bestätigung Deiner Anmeldung. Bitte überprüfe auch Deinen Spam-Ordner, falls Du diese
+              Email nicht nach einigen Minuten erhältst. Sobald wir Deine Anmeldung bearbeitet
+              haben, melden wir uns persönlich mit einer Bestätigung bei Dir.
+            </p>
             <form className="exhibitor-registration" onSubmit={handleSubmit(onSubmit)}>
               <fieldset>
                 <label>
@@ -214,15 +234,15 @@ const Register = () => {
                   <p />
                   <label>
                     <input type="checkbox" {...register('friday')} />
-                    Freitag
+                    Freitag (12. September, nur Aussteller und persönliche Gäste)
                   </label>
                   <label>
                     <input type="checkbox" {...register('saturday')} />
-                    Samstag
+                    Samstag (Publikumstag)
                   </label>
                   <label>
                     <input type="checkbox" {...register('sunday')} />
-                    Sonntag
+                    Sonntag (Publikumstag)
                   </label>
                 </label>
               </fieldset>
@@ -277,7 +297,41 @@ const Register = () => {
         )
     }
   }
-  return <article className="register-page">{content()}</article>
+
+  return (
+    <div className="register-page">
+      <div className="register-header">
+        <h1>Classic Computing 2025</h1>
+        <img src="/vzekc-logo-transparent-border.png" alt="VzEkC Logo" />
+      </div>
+      {content()}
+      <footer>
+        <p>
+          <span>
+            Die Classic Computing 2025 ist eine Veranstaltung des{' '}
+            <a href="https://vzekc.de" target="_blank" rel="noreferrer nofollow">
+              VzEkC e.V.
+            </a>
+          </span>
+          <span className="footer-links">
+            <a
+              href="https://classic-computing.de/impressum"
+              target="_blank"
+              rel="noreferrer nofollow">
+              Impressum
+            </a>{' '}
+            |{' '}
+            <a
+              href="https://forum.classic-computing.de/index.php?datenschutzerklaerung/"
+              target="_blank"
+              rel="noreferrer nofollow">
+              Datenschutz
+            </a>
+          </span>
+        </p>
+      </footer>
+    </div>
+  )
 }
 
 export default Register
