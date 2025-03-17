@@ -23,8 +23,8 @@ export default defineConfig({
   entities: ['dist/**/entity.js'],
   entitiesTs: ['src/**/entity.ts'],
   // enable debug mode to log SQL queries and discovery information
-  debug: true,
-  logger: console.log,
+  // debug: true,
+  // logger: console.log,
   // for vitest to get around `TypeError: Unknown file extension ".ts"` (ERR_UNKNOWN_FILE_EXTENSION)
   dynamicImportProvider: (id) => import(id),
   highlighter: new SqlHighlighter(),

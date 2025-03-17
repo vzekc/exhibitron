@@ -124,6 +124,7 @@ const ExhibitEditor = () => {
   const apolloClient = useApolloClient()
   const isNew = id === 'new'
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showDeleteImageConfirm, setShowDeleteImageConfirm] = useState(false)
   const [showNewAttributeInput, setShowNewAttributeInput] = useState(false)
   const [newAttributeName, setNewAttributeName] = useState('')
   const [mainImage, setMainImage] = useState<number | null>(null)
@@ -327,7 +328,6 @@ const ExhibitEditor = () => {
         },
       })
 
-      // Refresh the exhibit data to get the updated mainImage
       await apolloClient.refetchQueries({
         include: [GET_DATA],
       })
@@ -343,23 +343,20 @@ const ExhibitEditor = () => {
   }
 
   const handleDeleteImage = async () => {
+    setShowDeleteImageConfirm(true)
+  }
+
+  const handleConfirmDeleteImage = async () => {
     if (!id || id === 'new' || !mainImage) return
 
     setIsImageLoading(true)
-    try {
-      await axios.delete(`/api/exhibit/${id}/image/main`)
-      setMainImage(null)
+    await axios.delete(`/api/exhibit/${id}/image/main`)
+    setMainImage(null)
 
-      // Refresh the exhibit data
-      await apolloClient.refetchQueries({
-        include: [GET_DATA],
-      })
-    } catch (error) {
-      console.error('Error deleting image:', error)
-      alert('Fehler beim Löschen des Bildes')
-    } finally {
-      setIsImageLoading(false)
-    }
+    await apolloClient.refetchQueries({
+      include: [GET_DATA],
+    })
+    setIsImageLoading(false)
   }
 
   if (!isNew) {
@@ -425,6 +422,15 @@ const ExhibitEditor = () => {
                   style={{ marginLeft: '0.5rem' }}>
                   Bild löschen
                 </button>
+                <Confirm
+                  isOpen={showDeleteImageConfirm}
+                  title="Haupbild löschen"
+                  message={`Möchtest Du das Haupbild wirklich löschen?`}
+                  confirm="Löschen"
+                  cancel="Abbrechen"
+                  onConfirm={handleConfirmDeleteImage}
+                  onClose={() => setShowDeleteImageConfirm(false)}
+                />
               </div>
             </div>
           ) : (

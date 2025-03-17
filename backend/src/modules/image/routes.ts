@@ -1,7 +1,6 @@
 import { FastifyInstance } from 'fastify'
 import { initORM } from '../../db.js'
 import { Image } from './entity.js'
-import { MultipartFile } from '@fastify/multipart'
 import fastifyMultipart from '@fastify/multipart'
 import { Exhibit } from '../exhibit/entity.js'
 import { FastifyReply, FastifyRequest } from 'fastify'
@@ -24,7 +23,6 @@ export async function registerImageRoutes(app: FastifyInstance) {
   async function checkExhibitAuthorization(
     request: FastifyRequest<{ Params: { id: string } }>,
     reply: FastifyReply,
-    includeMainImage = true,
   ): Promise<Exhibit | null> {
     const { id } = request.params
     const userId = request.session.userId
@@ -33,25 +31,15 @@ export async function registerImageRoutes(app: FastifyInstance) {
       reply.code(401).send({ error: 'Authentication required' })
       return null
     }
-
-    // Find the exhibit and check ownership
-    const populate = includeMainImage
-      ? ['mainImage', 'exhibitor', 'exhibitor.user']
-      : ['exhibitor', 'exhibitor.user']
-
+    const user = await db.user.findOneOrFail({ id: userId })
     const exhibit = await db.exhibit.findOneOrFail(
       { id: parseInt(id, 10) },
-      { populate: populate as unknown as Populate<Exhibit, never> },
+      { populate: ['exhibitor', 'exhibitor.user'] },
     )
 
-    // Check if the user owns the exhibit
-    if (exhibit.exhibitor.user.id !== userId) {
-      // Check if user is an admin
-      const user = await db.user.findOne({ id: userId })
-      if (!user || !user.isAdministrator) {
-        reply.code(403).send({ error: 'You do not have permission to modify this exhibit' })
-        return null
-      }
+    if (!user.isAdministrator && exhibit.exhibitor.user.id !== userId) {
+      reply.code(403).send({ error: 'You do not have permission to modify this exhibit' })
+      return null
     }
 
     return exhibit
@@ -89,7 +77,7 @@ export async function registerImageRoutes(app: FastifyInstance) {
     if (!exhibit) return // Authorization failed
 
     // Parse multipart form data
-    const data = (await request.file()) as MultipartFile
+    const data = await request.file()
     if (!data) {
       return reply.code(400).send({ error: 'No file uploaded' })
     }
@@ -113,7 +101,7 @@ export async function registerImageRoutes(app: FastifyInstance) {
       image.exhibit = exhibit
 
       exhibit.mainImage = image
-      await db.em.persist(image)
+      db.em.persist(image)
     }
 
     await db.em.flush()
@@ -125,16 +113,13 @@ export async function registerImageRoutes(app: FastifyInstance) {
     const exhibit = await checkExhibitAuthorization(request, reply)
     if (!exhibit) return // Authorization failed
 
-    if (!exhibit.mainImage) {
-      return reply.code(404).send({ error: 'No main image found for this exhibit' })
+    if (exhibit.mainImage) {
+      const imageToRemove = exhibit.mainImage
+      exhibit.mainImage = undefined
+      db.em.remove(imageToRemove)
+      await db.em.flush()
     }
 
-    // Remove the association and delete the image
-    const imageToRemove = exhibit.mainImage
-    exhibit.mainImage = undefined
-    await db.em.remove(imageToRemove)
-    await db.em.flush()
-
-    return { success: true }
+    return reply.code(204).send()
   })
 }
