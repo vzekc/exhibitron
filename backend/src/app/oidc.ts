@@ -5,7 +5,6 @@ import fastifyCookie from '@fastify/cookie'
 import { FastifyInstance, FastifyRequest } from 'fastify'
 import axios from 'axios'
 import { initORM } from '../db.js'
-import { AuthError } from '../modules/common/errors.js'
 
 const woltlabBaseUrl = 'https://forum.classic-computing.de'
 const woltlabAuth: ProviderConfiguration = {
@@ -16,13 +15,6 @@ const woltlabAuth: ProviderConfiguration = {
 }
 
 const administratorRanks = ['Vorstand', 'Administrator']
-const memberRanks = [
-  'Fördermitglied',
-  'Vereinsmitglied',
-  'Schiedsrichter',
-  'Moderator',
-  ...administratorRanks,
-]
 
 const getOAuth2Credentials = (): Credentials | void => {
   const { OIDC_CLIENT_ID: id, OIDC_CLIENT_SECRET: secret } = process.env
@@ -100,12 +92,7 @@ export const register = async (app: FastifyInstance) => {
     const userInfo = await getUserInfo(token.access_token)
 
     const { nickname, rank } = userInfo
-    const isMember = memberRanks.includes(rank)
     const isAdministrator = administratorRanks.includes(rank)
-
-    if (!isMember && !registrationToken) {
-      throw new AuthError('Dieses System ist nur für Mitglieder des Vereins zugänglich.')
-    }
 
     const user = await db.user.associateForumUser({
       nickname,
