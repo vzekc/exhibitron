@@ -44,7 +44,7 @@ const CLAIM_TABLE = graphql(`
 `)
 
 const RELEASE_TABLE = graphql(`
-  mutation ClaimTable($number: Int!) {
+  mutation ReleaseTable($number: Int!) {
     releaseTable(number: $number) {
       id
     }

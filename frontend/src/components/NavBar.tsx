@@ -111,6 +111,14 @@ const NavBar = () => {
                   <Link to="/user/exhibitorInfo">Aussteller-Infos</Link>
                 </li>
                 <li>
+                  <a
+                    href="https://www.classic-computing.de/cc2025faq"
+                    target="_blank"
+                    rel="noreferrer nofollow">
+                    FAQ
+                  </a>
+                </li>
+                <li>
                   <Link to="/user/help">Hilfe</Link>
                 </li>
                 {user.isAdministrator && (
