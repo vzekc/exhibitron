@@ -34,7 +34,7 @@ export class User extends BaseEntity<
   // for automatic inference via `em.getRepository(User)`
   [EntityRepositoryType]?: UserRepository
 
-  @Property({ unique: true, index: true })
+  @Property({ unique: true, index: true, columnType: 'citext' })
   email!: string
 
   @Property()

@@ -25,7 +25,13 @@ export const createTestDatabase = async () => {
     dbName,
   })
 
-  await db.orm.schema.refreshDatabase() // Drops & re-creates schema
+  // Create citext extension first
+  await db.orm.em.execute('CREATE EXTENSION IF NOT EXISTS citext;')
+
+  // Use updateSchema instead of createSchema to avoid dropping the schema
+  // This will create missing tables and update existing ones
+  await db.orm.schema.updateSchema()
+
   await db.orm.seeder.seed(TestSeeder)
 
   return db
@@ -50,7 +56,9 @@ export const runCommand = (command: string): void => {
   }
 }
 
-export const createDatabase = (dbName: string) => runCommand(`createdb ${dbName}`)
+export const createDatabase = (dbName: string) => {
+  runCommand(`createdb ${dbName}`)
+}
 
 export const deleteDatabase = (dbName: string) => {
   if (process.env.TEST_KEEP_DB) {

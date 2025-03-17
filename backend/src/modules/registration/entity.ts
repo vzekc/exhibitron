@@ -23,7 +23,7 @@ export class Registration extends BaseEntity<'message'> {
   @Property()
   name!: string
 
-  @Property()
+  @Property({ columnType: 'citext' })
   email!: string
 
   @Property()
