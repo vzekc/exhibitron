@@ -173,6 +173,10 @@ const ExhibitAttributeEditor = ({ attributes, onChange }: ExhibitAttributeEditor
   }
 
   const handleAttributeNameChange = (index: number, name: string) => {
+    if (name.includes(':')) {
+      alert('Attributnamen dürfen keine Doppelpunkte enthalten.')
+      return
+    }
     const newAttributes = [...attributes]
     newAttributes[index] = { ...newAttributes[index], name }
     onChange(newAttributes)
@@ -203,13 +207,16 @@ const ExhibitAttributeEditor = ({ attributes, onChange }: ExhibitAttributeEditor
   }
 
   const handleCreateNewAttribute = async () => {
-    if (newAttributeName.trim()) {
+    const trimmedName = newAttributeName.trim()
+    if (trimmedName && !trimmedName.includes(':')) {
       await createExhibitAttribute({
-        variables: { name: newAttributeName.trim() },
+        variables: { name: trimmedName },
         refetchQueries: [{ query: GET_EXHIBIT_ATTRIBUTES }],
       })
       setNewAttributeName('')
       setShowNewAttributeInput(false)
+    } else if (trimmedName.includes(':')) {
+      alert('Attributnamen dürfen keine Doppelpunkte enthalten.')
     }
   }
 
