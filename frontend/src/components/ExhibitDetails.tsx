@@ -2,6 +2,7 @@ import { graphql } from 'gql.tada'
 import { useQuery } from '@apollo/client'
 import './Card.css'
 import React from 'react'
+import ExhibitorLink from './ExhibitorLink'
 
 const GET_EXHIBIT = graphql(`
   query GetExhibit($id: Int!) {
@@ -17,6 +18,9 @@ const GET_EXHIBIT = graphql(`
         value
       }
       mainImage
+      exhibitor {
+        id
+      }
     }
   }
 `)
@@ -34,7 +38,12 @@ const ExhibitDetails = ({ id }: { id: number }) => {
   return (
     <section className="card">
       <div>
-        <h1 className="card-title">{exhibit.title}</h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h1 className="card-title" style={{ margin: 0, fontSize: '1.5rem' }}>
+            {exhibit.title}
+          </h1>
+          <ExhibitorLink id={exhibit.exhibitor.id} />
+        </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
           {hasMainImage && (
             <div className="card-image" style={{ marginRight: '1rem', flexShrink: 0 }}>
