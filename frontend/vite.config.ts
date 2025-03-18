@@ -13,15 +13,10 @@ const backend = {
 const generateBuildInfoPlugin = (): Plugin => {
   return {
     name: 'generate-build-info',
-    configureServer() {
-      // For development mode
-      makeBuildInfo('development')
-    },
     buildStart() {
-      // For production build
-      if (process.env.NODE_ENV === 'production') {
-        makeBuildInfo('production')
-      }
+      // Generate build info for both development and production
+      const mode = process.env.NODE_ENV === 'production' ? 'production' : 'development'
+      makeBuildInfo(mode)
     },
   }
 }
