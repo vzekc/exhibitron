@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react'
 import { Document, Page, Text, View, StyleSheet, Image, Font, pdf } from '@react-pdf/renderer'
-import { graphql } from 'gql.tada'
+import { graphql, ResultOf } from 'gql.tada'
 import { ApolloClient } from '@apollo/client'
 
 // Register fonts (assuming you have Lato fonts in your public directory)
@@ -123,47 +122,39 @@ const GET_EXHIBIT = graphql(`
   }
 `)
 
-// Function to load image via Canvas for better compatibility
+type Exhibit = NonNullable<ResultOf<typeof GET_EXHIBIT>['getExhibit']>
+
 const getImageDataViaCanvas = async (url: string): Promise<string> => {
-  try {
-    return new Promise<string>((resolve, reject) => {
-      const img = document.createElement('img')
-      img.crossOrigin = 'Anonymous'
+  return new Promise<string>((resolve, reject) => {
+    const img = document.createElement('img')
+    img.crossOrigin = 'Anonymous'
 
-      img.onload = () => {
-        try {
-          // Create canvas element
-          const canvas = document.createElement('canvas')
-          canvas.width = img.width
-          canvas.height = img.height
+    img.onload = () => {
+      // Create canvas element
+      const canvas = document.createElement('canvas')
+      canvas.width = img.width
+      canvas.height = img.height
 
-          // Draw image to canvas
-          const ctx = canvas.getContext('2d')
-          if (!ctx) {
-            reject(new Error('Could not get canvas context'))
-            return
-          }
-
-          ctx.drawImage(img, 0, 0)
-
-          // Get data URL
-          const dataURL = canvas.toDataURL('image/png')
-          resolve(dataURL)
-        } catch (error) {
-          reject(error)
-        }
+      // Draw image to canvas
+      const ctx = canvas.getContext('2d')
+      if (!ctx) {
+        reject(new Error('Could not get canvas context'))
+        return
       }
 
-      img.onerror = () => {
-        reject(new Error('Failed to load image'))
-      }
+      ctx.drawImage(img, 0, 0)
 
-      img.src = url
-    })
-  } catch (error) {
-    console.error('Error loading image via canvas:', error)
-    return ''
-  }
+      // Get data URL
+      const dataURL = canvas.toDataURL('image/png')
+      resolve(dataURL)
+    }
+
+    img.onerror = () => {
+      reject(new Error('Failed to load image'))
+    }
+
+    img.src = url
+  })
 }
 
 // Function to strip HTML tags from text for PDF
@@ -210,7 +201,7 @@ const ExhibitPDFDocument = ({
   mainImageBase64,
   logoBase64,
 }: {
-  exhibit: any
+  exhibit: Exhibit
   mainImageBase64: string
   logoBase64: string
 }) => {
@@ -240,7 +231,7 @@ const ExhibitPDFDocument = ({
 
           {attributes.length > 0 && (
             <View style={styles.attributesContainer}>
-              {attributes.map((attr: any, index: number) => (
+              {attributes.map((attr, index) => (
                 <View key={index} style={styles.attributeRow}>
                   <Text style={styles.attributeLabel}>{attr.name}:</Text>
                   <Text style={styles.attributeValue}>{attr.value}</Text>
@@ -262,66 +253,63 @@ const ExhibitPDFDocument = ({
  * Generate and download a PDF for an exhibit
  * @param id The exhibit ID
  * @param client The Apollo client instance
+ * @param displayInWindow Whether to display the PDF in the current window instead of downloading
  * @returns A promise that resolves when the PDF is generated and downloaded
  */
 export const generateAndDownloadPDF = async (
   id: number,
-  client: ApolloClient<any>,
+  client: ApolloClient<object>,
+  displayInWindow = false,
 ): Promise<void> => {
-  try {
-    // Fetch exhibit data
-    const result = await client.query({
-      query: GET_EXHIBIT,
-      variables: { id },
-    })
+  const result = await client.query({
+    query: GET_EXHIBIT,
+    variables: { id },
+  })
 
-    if (!result.data?.getExhibit) {
-      throw new Error('Exhibit not found')
-    }
+  const exhibit = result.data.getExhibit
 
-    const exhibit = result.data.getExhibit
+  if (!exhibit) {
+    throw new Error('Exhibit not found')
+  }
 
-    // Generate file name
-    const fileName = `${exhibit.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`
+  // Generate file name
+  const fileName = `${exhibit.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`
 
-    // Load images if needed
-    let mainImageBase64 = ''
-    let logoBase64 = ''
+  // Load images if needed
+  let mainImageBase64 = ''
+  let logoBase64 = ''
 
-    // Main image
-    if (exhibit.mainImage) {
-      try {
-        const imageUrl = `/api/exhibit/${id}/image/main`
-        const fullUrl = imageUrl.startsWith('/') ? `${window.location.origin}${imageUrl}` : imageUrl
-        mainImageBase64 = await getImageDataViaCanvas(fullUrl)
-      } catch (error) {
-        console.error('Error fetching main image:', error)
-      }
-    }
+  // Main image
+  if (exhibit.mainImage) {
+    const imageUrl = `/api/exhibit/${id}/image/main`
+    const fullUrl = imageUrl.startsWith('/') ? `${window.location.origin}${imageUrl}` : imageUrl
+    mainImageBase64 = await getImageDataViaCanvas(fullUrl)
+  }
 
-    // Logo
-    try {
-      const logoUrl = '/vzekc-logo-transparent-border.png'
-      const fullUrl = logoUrl.startsWith('/') ? `${window.location.origin}${logoUrl}` : logoUrl
-      logoBase64 = await getImageDataViaCanvas(fullUrl)
-    } catch (error) {
-      console.warn('Could not load logo:', error)
-    }
+  const logoUrl = '/vzekc-logo-transparent-border.png'
+  const fullUrl = logoUrl.startsWith('/') ? `${window.location.origin}${logoUrl}` : logoUrl
+  logoBase64 = await getImageDataViaCanvas(fullUrl)
 
-    // Create the document element
-    const pdfDocument = (
-      <ExhibitPDFDocument
-        exhibit={exhibit}
-        mainImageBase64={mainImageBase64}
-        logoBase64={logoBase64}
-      />
-    )
+  // Create the document element
+  const pdfDocument = (
+    <ExhibitPDFDocument
+      exhibit={exhibit}
+      mainImageBase64={mainImageBase64}
+      logoBase64={logoBase64}
+    />
+  )
 
-    // Generate the PDF blob
-    const blob = await pdf(pdfDocument).toBlob()
+  // Generate the PDF blob
+  const blob = await pdf(pdfDocument).toBlob()
 
-    // Create URL and trigger download
-    const url = URL.createObjectURL(blob)
+  // Create URL for the blob
+  const url = URL.createObjectURL(blob)
+
+  if (displayInWindow) {
+    // Open in the current window
+    window.open(url, '_blank')
+  } else {
+    // Trigger download
     const a = document.createElement('a')
     a.href = url
     a.download = fileName
@@ -333,8 +321,5 @@ export const generateAndDownloadPDF = async (
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
     }, 100)
-  } catch (error) {
-    console.error('Error generating PDF:', error)
-    throw error
   }
 }

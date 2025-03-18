@@ -112,12 +112,13 @@ const Exhibit = () => {
     navigate('/exhibit')
   }
 
-  const handlePdfClick = async () => {
+  const handlePdfClick = async (event: React.MouseEvent) => {
     if (isPdfGenerating) return
 
     try {
       setIsPdfGenerating(true)
-      await generateAndDownloadPDF(parseInt(id!), apolloClient)
+      const displayInWindow = event.shiftKey
+      await generateAndDownloadPDF(parseInt(id!), apolloClient, displayInWindow)
     } catch (error) {
       console.error('Error generating PDF:', error)
     } finally {
@@ -142,7 +143,7 @@ const Exhibit = () => {
                 onClick={handlePdfClick}
                 disabled={isPdfGenerating}
                 className="button image-only-button"
-                title="Als PDF speichern">
+                title="Als PDF speichern (Shift+Klick öffnet im Browser)">
                 <img src="/pdf.svg" className="button-image inverted-image" />
               </button>
               <button onClick={handleEdit} className="button image-only-button">
