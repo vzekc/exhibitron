@@ -28,7 +28,7 @@ const Breadcrumbs = () => {
   const { detailNames, navHistory, addToHistory } = useBreadcrumb()
 
   const getLabel = (path: string) => {
-    return detailNames[path] || breadcrumbMap[path] || path
+    return detailNames[path] || breadcrumbMap[path] || ''
   }
 
   // Update navigation history when location changes
