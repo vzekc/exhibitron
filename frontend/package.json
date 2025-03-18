@@ -3,9 +3,13 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  },
   "scripts": {
     "dev": "vite",
-    "build": "pnpm generate-graphql-types && tsc -b && vite build",
+    "build": "pnpm generate-graphql-types && node src/build/makeBuildInfo.js && tsc -b && vite build",
     "lint": "eslint . && tsc -b",
     "preview": "vite preview",
     "generate-graphql-types": "gql.tada generate-output --tsconfig tsconfig.app.json"
@@ -39,6 +43,8 @@
     "eslint-plugin-react-refresh": "^0.4.18",
     "globals": "^15.14.0",
     "prettier": "^3.5.1",
+    "ts-node": "^10.9.2",
+    "@types/node": "^20.11.30",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.22.0",
     "vite": "^6.1.0"
