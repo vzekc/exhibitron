@@ -105,7 +105,7 @@ const NavBar = () => {
                   <Link to="/user/profile">Profil</Link>
                 </li>
                 <li>
-                  <Link to="/user/exhibit">Meine Exponate</Link>
+                  <Link to="/user/exhibit">Deine Exponate</Link>
                 </li>
                 <li>
                   <Link to="/user/exhibitorInfo">Aussteller-Infos</Link>

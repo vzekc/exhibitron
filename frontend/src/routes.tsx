@@ -3,7 +3,7 @@ import { RouteObject } from 'react-router-dom'
 import Exhibits from './pages/Exhibits.tsx'
 import Exhibit from './pages/Exhibit.tsx'
 import Bookmarks from './pages/Bookmarks.tsx'
-import TableSearchResult from './pages/TableSearchResult.tsx'
+import Table from './pages/Table.tsx'
 import Profile from './pages/user/Profile.tsx'
 import Register from './pages/Register.tsx'
 import Login from './pages/Login.tsx'
@@ -21,7 +21,7 @@ import Page from './components/Page.tsx'
 import PageList from './pages/admin/PageList.tsx'
 import Exhibitors from './pages/Exhibitors.tsx'
 import Exhibitor from './pages/Exibitor.tsx'
-import Table from './pages/Table'
+import Tables from './pages/Tables.tsx'
 import SetupExhibitor from './pages/SetupExhibitor.tsx'
 import ProtectedRoute from './components/ProtectedRoute.tsx'
 import AdminProtectedRoute from './components/AdminProtectedRoute.tsx'
@@ -48,7 +48,7 @@ const routes: RouteObject[] = [
       { path: '/exhibitor/:id', element: <Exhibitor /> },
       { path: '/schedule', element: <Page pageKey="schedule" /> },
       { path: '/bookmarks', element: <Bookmarks /> },
-      { path: '/table/:number', element: <TableSearchResult /> },
+      { path: '/table/:number', element: <Table /> },
       // Protected user routes
       {
         path: '/user',
@@ -75,7 +75,7 @@ const routes: RouteObject[] = [
           { path: 'page/:key', element: <PageEditor /> },
         ],
       },
-      { path: '/table', element: <Table /> },
+      { path: '/table', element: <Tables /> },
       { path: '/setupExhibitor', element: <SetupExhibitor /> },
       { path: '/*', element: <NotFound /> },
     ],

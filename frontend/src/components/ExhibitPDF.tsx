@@ -1,14 +1,5 @@
 import { useState, useEffect } from 'react'
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  StyleSheet,
-  Image,
-  Font,
-  pdf,
-} from '@react-pdf/renderer'
+import { Document, Page, Text, View, StyleSheet, Image, Font, pdf } from '@react-pdf/renderer'
 import { graphql } from 'gql.tada'
 import { ApolloClient } from '@apollo/client'
 
@@ -273,7 +264,10 @@ const ExhibitPDFDocument = ({
  * @param client The Apollo client instance
  * @returns A promise that resolves when the PDF is generated and downloaded
  */
-export const generateAndDownloadPDF = async (id: number, client: ApolloClient<any>): Promise<void> => {
+export const generateAndDownloadPDF = async (
+  id: number,
+  client: ApolloClient<any>,
+): Promise<void> => {
   try {
     // Fetch exhibit data
     const result = await client.query({
@@ -298,9 +292,7 @@ export const generateAndDownloadPDF = async (id: number, client: ApolloClient<an
     if (exhibit.mainImage) {
       try {
         const imageUrl = `/api/exhibit/${id}/image/main`
-        const fullUrl = imageUrl.startsWith('/')
-          ? `${window.location.origin}${imageUrl}`
-          : imageUrl
+        const fullUrl = imageUrl.startsWith('/') ? `${window.location.origin}${imageUrl}` : imageUrl
         mainImageBase64 = await getImageDataViaCanvas(fullUrl)
       } catch (error) {
         console.error('Error fetching main image:', error)

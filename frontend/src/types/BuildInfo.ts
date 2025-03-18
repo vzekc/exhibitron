@@ -3,6 +3,7 @@ export interface BuildInfo {
   branchName: string
   commitSha: string
   environment: 'development' | 'production'
+  buildMode: 'development' | 'production'
 }
 
 export const defaultBuildInfo: BuildInfo = {
@@ -10,4 +11,5 @@ export const defaultBuildInfo: BuildInfo = {
   branchName: 'development',
   commitSha: 'development',
   environment: 'development',
+  buildMode: 'development',
 }

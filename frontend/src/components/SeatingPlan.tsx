@@ -140,6 +140,7 @@ const tables: TableArea[] = table_coordinates.tables.map((table) => ({
 const GET_TABLES = graphql(`
   query GetTables {
     getCurrentExhibition {
+      id
       tables {
         id
         number

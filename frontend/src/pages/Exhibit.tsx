@@ -1,7 +1,6 @@
 import { useLocation, useParams, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import ExhibitDetails from '../components/ExhibitDetails.tsx'
-import ExhibitorLink from '../components/ExhibitorLink.tsx'
 import { addBookmark, isBookmarked, removeBookmark } from '../utils/bookmarks.ts'
 import { useBreadcrumb } from '../contexts/BreadcrumbContext.ts'
 import { graphql } from 'gql.tada'
@@ -79,8 +78,8 @@ const Exhibit = () => {
 
   useEffect(() => {
     if (data?.getExhibit) {
-      const { title, exhibitor } = data.getExhibit
-      setDetailName(location.pathname, `${title} (${exhibitor.user.fullName})`)
+      const { title } = data.getExhibit
+      setDetailName(location.pathname, title)
     }
   }, [data, setDetailName, location])
 
@@ -129,7 +128,6 @@ const Exhibit = () => {
   return (
     <div>
       <article>
-        <ExhibitorLink id={exhibit.exhibitor.id} />
         <ExhibitDetails id={exhibit.id} />
         <div className="button-group">
           <button onClick={handleBookmark} className="button image-only-button">
