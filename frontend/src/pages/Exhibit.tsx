@@ -77,8 +77,8 @@ const Exhibit = () => {
 
   useEffect(() => {
     if (data?.getExhibit) {
-      const { title, exhibitor } = data.getExhibit
-      setDetailName(location.pathname, `${title} (${exhibitor.user.fullName})`)
+      const { title } = data.getExhibit
+      setDetailName(location.pathname, title)
     }
   }, [data, setDetailName, location])
 
