@@ -40,7 +40,11 @@ const Exhibitors = () => {
             {exhibitors.map((exhibitor) => (
               <Link to={`/exhibitor/${exhibitor.id}`} className="card clickable" key={exhibitor.id}>
                 <div className="card-title">{exhibitor.fullName}</div>
-                <div className="card-content">{exhibitor.exhibits.join(', ')}</div>
+                <div className="card-content">
+                  {exhibitor.exhibits.map((title) => (
+                    <div className="exhibit-title">{title}</div>
+                  ))}
+                </div>
               </Link>
             ))}
           </div>
