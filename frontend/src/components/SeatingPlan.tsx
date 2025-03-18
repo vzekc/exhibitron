@@ -152,6 +152,9 @@ const GET_TABLES = graphql(`
           exhibits {
             id
             title
+            table {
+              number
+            }
           }
         }
       }
@@ -214,6 +217,7 @@ export const SeatingPlan: React.FC = () => {
           exhibitorName: table.exhibitor?.user.fullName ?? 'Unknown',
           exhibits:
             table.exhibitor?.exhibits
+              ?.filter((exhibit) => !exhibit.table || exhibit.table.number === table.number)
               ?.map((exhibit) => exhibit.title)
               .sort((a, b) => a.localeCompare(b)) ?? [],
         },
@@ -245,7 +249,7 @@ export const SeatingPlan: React.FC = () => {
 
             const tableInfo = occupiedTablesMap.get(table.number)
             const tooltip = tableInfo
-              ? `${tableInfo.exhibitorName} (${tableInfo.exhibits.join(', ')})`
+              ? `${tableInfo.exhibitorName}\n${tableInfo.exhibits.join('\n')}`
               : 'Nicht belegt'
 
             return (

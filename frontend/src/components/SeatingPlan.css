@@ -64,3 +64,14 @@
 .table-rotated {
   transform: rotate(90deg);
 }
+
+/* Tooltip styling */
+.table-number[data-tooltip]:hover::before {
+  white-space: pre;
+  text-align: left;
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.5;
+  z-index: 100;
+}
