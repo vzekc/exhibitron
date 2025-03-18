@@ -1,7 +1,7 @@
-import { Link, RouteObject, useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import './Breadcrumbs.css'
 import { useBreadcrumb } from '../contexts/BreadcrumbContext.ts'
-import routes from '../routes.tsx'
+import { useEffect } from 'react'
 
 const breadcrumbMap: { [key: string]: string } = {
   registration: 'Anmeldungen',
@@ -18,40 +18,46 @@ const breadcrumbMap: { [key: string]: string } = {
   bookmarks: 'Lesezeichen',
   resetPassword: 'Passwort zurücksetzen',
   setupExhibitor: 'Registrierung abschließen',
+  help: 'Hilfe',
 }
 
 const Breadcrumbs = () => {
   const location = useLocation()
-  const { detailNames } = useBreadcrumb()
-  const pathSegments = location.pathname.split('/').filter(Boolean)
+  const { detailNames, navHistory, addToHistory } = useBreadcrumb()
 
-  const routeExists = (path: string, routes: RouteObject[]): boolean => {
-    for (const route of routes) {
-      if (route.path === path) {
-        return true
-      }
-      if (route.children && routeExists(path, route.children)) {
-        return true
-      }
+  // Update navigation history when location changes
+  useEffect(() => {
+    const path = location.pathname
+    const pathSegments = path.split('/').filter(Boolean)
+
+    // Get the appropriate label for the current path
+    let label = detailNames[path]
+
+    if (!label && pathSegments.length > 0) {
+      // If we don't have a detail name, try to find it in the breadcrumb map
+      const lastSegment = pathSegments[pathSegments.length - 1]
+      label = breadcrumbMap[lastSegment] || lastSegment
     }
-    return false
-  }
+
+    // Default to the path itself if no label was found
+    if (!label) {
+      label = path === '/' ? 'CC2025' : pathSegments[pathSegments.length - 1] || 'CC2025'
+    }
+
+    addToHistory(path, label)
+  }, [location.pathname, detailNames, addToHistory])
+
+  // Display only the home item plus the last two navigation items
+  const breadcrumbsToShow = navHistory.slice(-3)
 
   return (
     <nav aria-label="breadcrumb" className="breadcrumbs">
       <ol>
-        <li className="breadcrumb-item">
-          <Link to="/">CC2025</Link>
-        </li>
-        {pathSegments.map((segment, index) => {
-          const path = `/${pathSegments.slice(0, index + 1).join('/')}`
-          const isLast = index === pathSegments.length - 1
-          const label = isLast
-            ? detailNames[path] || breadcrumbMap[segment] || segment
-            : breadcrumbMap[segment] || segment
+        {breadcrumbsToShow.map((item, index) => {
+          const isLast = index === breadcrumbsToShow.length - 1
           return (
-            <li key={path} className={`breadcrumb-item ${isLast ? 'active' : ''}`}>
-              {isLast || !routeExists(path, routes) ? label : <Link to={path}>{label}</Link>}
+            <li key={item.path} className={`breadcrumb-item ${isLast ? 'active' : ''}`}>
+              {isLast ? item.label : <Link to={item.path}>{item.label}</Link>}
             </li>
           )
         })}
