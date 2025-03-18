@@ -8,6 +8,7 @@ import { graphql } from 'gql.tada'
 import { useQuery, useMutation, useApolloClient } from '@apollo/client'
 import { useUser } from '../contexts/UserContext.ts'
 import Confirm from '../components/Confirm.tsx'
+import { generateAndDownloadPDF } from '../components/ExhibitPDF.tsx'
 import '../components/Card.css'
 
 const GET_DATA = graphql(`
@@ -62,6 +63,7 @@ const Exhibit = () => {
   })
   const [deleteExhibit] = useMutation(DELETE_EXHIBIT)
   const location = useLocation()
+  const [isPdfGenerating, setIsPdfGenerating] = useState(false)
 
   const handleBookmark = () => {
     if (!data!.getExhibit) {
@@ -111,6 +113,19 @@ const Exhibit = () => {
     navigate('/exhibit')
   }
 
+  const handlePdfClick = async () => {
+    if (isPdfGenerating) return
+
+    try {
+      setIsPdfGenerating(true)
+      await generateAndDownloadPDF(parseInt(id!), apolloClient)
+    } catch (error) {
+      console.error('Error generating PDF:', error)
+    } finally {
+      setIsPdfGenerating(false)
+    }
+  }
+
   return (
     <div>
       <article>
@@ -120,10 +135,18 @@ const Exhibit = () => {
           <button onClick={handleBookmark} className="button image-only-button">
             <img
               src={bookmarked ? '/bookmarked.svg' : '/bookmark.svg'}
-              className="button-image inverted-image"></img>
+              className="button-image inverted-image"
+            />
           </button>
           {canEdit && (
             <>
+              <button
+                onClick={handlePdfClick}
+                disabled={isPdfGenerating}
+                className="button image-only-button"
+                title="Als PDF speichern">
+                <img src="/pdf.svg" className="button-image inverted-image" />
+              </button>
               <button onClick={handleEdit} className="button image-only-button">
                 <img src="/edit.svg" className="button-image inverted-image" />
               </button>
