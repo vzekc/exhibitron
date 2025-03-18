@@ -3,13 +3,13 @@ import { BreadcrumbContext, NavHistoryItem } from './BreadcrumbContext.ts'
 
 export const BreadcrumbProvider = ({ children }: { children: ReactNode }) => {
   const [detailNames, setDetailNames] = useState<{ [path: string]: string }>({})
-  const [navHistory, setNavHistory] = useState<NavHistoryItem[]>([{ path: '/', label: 'CC2025' }])
+  const [navHistory, setNavHistory] = useState<NavHistoryItem[]>([{ path: '/' }])
 
   const setDetailName = useCallback((path: string, name: string) => {
     setDetailNames((prev) => ({ ...prev, [path]: name }))
   }, [])
 
-  const addToHistory = useCallback((path: string, label: string) => {
+  const addToHistory = useCallback((path: string) => {
     setNavHistory((prev) => {
       // If we're navigating to the same path that's already in history, don't add it again
       if (prev.some((item) => item.path === path)) {
@@ -19,7 +19,7 @@ export const BreadcrumbProvider = ({ children }: { children: ReactNode }) => {
       }
 
       // Otherwise add the new navigation entry
-      return [...prev, { path, label }]
+      return [...prev, { path }]
     })
   }, [])
 
