@@ -59,11 +59,20 @@ export const exhibitMutations: MutationResolvers<Context> = {
       db,
     )
 
+    // Look up the table by number if provided
+    let tableEntity = null
+    if (table) {
+      tableEntity = await db.table.findOneOrFail({
+        exhibition,
+        number: table,
+      })
+    }
+
     const exhibit = db.em.getRepository(Exhibit).create({
       exhibition,
       title,
       text: '', // Will be set after processing
-      table,
+      table: tableEntity,
       exhibitor,
       attributes: processedAttributes,
     })
@@ -101,6 +110,7 @@ export const exhibitMutations: MutationResolvers<Context> = {
             number: rest.table,
           })
         : null
+      delete rest.table
     }
 
     if (text) {
