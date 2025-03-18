@@ -1,6 +1,7 @@
 import { Document, Page, Text, View, StyleSheet, Image, Font, pdf } from '@react-pdf/renderer'
 import { graphql, ResultOf } from 'gql.tada'
 import { ApolloClient } from '@apollo/client'
+import QRCode from 'qrcode'
 
 // Register fonts (assuming you have Lato fonts in your public directory)
 Font.register({
@@ -94,6 +95,13 @@ const styles = StyleSheet.create({
   border: {
     border: '1pt solid #000',
     padding: 10,
+  },
+  qrCode: {
+    position: 'absolute',
+    bottom: 30,
+    right: 30,
+    width: 80,
+    height: 80,
   },
 })
 
@@ -200,14 +208,18 @@ const ExhibitPDFDocument = ({
   exhibit,
   mainImageBase64,
   logoBase64,
+  qrCodeBase64,
 }: {
   exhibit: Exhibit
   mainImageBase64: string
   logoBase64: string
+  qrCodeBase64?: string
 }) => {
   const attributes = exhibit.attributes || []
   const hasMainImage = mainImageBase64 !== '' && mainImageBase64.startsWith('data:')
   const hasLogo = logoBase64 !== '' && logoBase64.startsWith('data:')
+  const hasQrCode =
+    qrCodeBase64 !== undefined && qrCodeBase64 !== '' && qrCodeBase64.startsWith('data:')
   const exhibitorName = exhibit.exhibitor?.user?.fullName || ''
 
   return (
@@ -244,23 +256,46 @@ const ExhibitPDFDocument = ({
         <View style={styles.textContent}>
           <Text>{stripHtml(exhibit.text || '')}</Text>
         </View>
+
+        {hasQrCode && <Image src={qrCodeBase64} style={styles.qrCode} />}
       </Page>
     </Document>
   )
 }
 
 /**
+ * Generate a QR code as a data URL
+ * @param url The URL to encode in the QR code
+ * @returns A promise that resolves to the QR code as a data URL
+ */
+const generateQRCode = async (url: string): Promise<string> =>
+  QRCode.toDataURL(url, {
+    margin: 1,
+    width: 200,
+  })
+
+/**
+ * Parameters for generating and downloading a PDF
+ */
+export interface GeneratePDFParams {
+  /** The exhibit ID */
+  id: number
+  /** The Apollo client instance */
+  client: ApolloClient<object>
+  /** Whether to display the PDF in the current window instead of downloading */
+  displayInWindow?: boolean
+  /** Optional URL to include as a QR code in the PDF */
+  url?: string
+}
+
+/**
  * Generate and download a PDF for an exhibit
- * @param id The exhibit ID
- * @param client The Apollo client instance
- * @param displayInWindow Whether to display the PDF in the current window instead of downloading
+ * @param params Configuration parameters
  * @returns A promise that resolves when the PDF is generated and downloaded
  */
-export const generateAndDownloadPDF = async (
-  id: number,
-  client: ApolloClient<object>,
-  displayInWindow = false,
-): Promise<void> => {
+export const generateAndDownloadPDF = async (params: GeneratePDFParams): Promise<void> => {
+  const { id, client, displayInWindow = false, url: qrUrl } = params
+
   const result = await client.query({
     query: GET_EXHIBIT,
     variables: { id },
@@ -278,6 +313,7 @@ export const generateAndDownloadPDF = async (
   // Load images if needed
   let mainImageBase64 = ''
   let logoBase64 = ''
+  let qrCodeBase64 = ''
 
   // Main image
   if (exhibit.mainImage) {
@@ -287,8 +323,13 @@ export const generateAndDownloadPDF = async (
   }
 
   const logoUrl = '/vzekc-logo-transparent-border.png'
-  const fullUrl = logoUrl.startsWith('/') ? `${window.location.origin}${logoUrl}` : logoUrl
-  logoBase64 = await getImageDataViaCanvas(fullUrl)
+  const fullLogoUrl = logoUrl.startsWith('/') ? `${window.location.origin}${logoUrl}` : logoUrl
+  logoBase64 = await getImageDataViaCanvas(fullLogoUrl)
+
+  // Generate QR code if URL is provided
+  if (qrUrl) {
+    qrCodeBase64 = await generateQRCode(qrUrl)
+  }
 
   // Create the document element
   const pdfDocument = (
@@ -296,6 +337,7 @@ export const generateAndDownloadPDF = async (
       exhibit={exhibit}
       mainImageBase64={mainImageBase64}
       logoBase64={logoBase64}
+      qrCodeBase64={qrCodeBase64}
     />
   )
 
@@ -303,15 +345,15 @@ export const generateAndDownloadPDF = async (
   const blob = await pdf(pdfDocument).toBlob()
 
   // Create URL for the blob
-  const url = URL.createObjectURL(blob)
+  const blobUrl = URL.createObjectURL(blob)
 
   if (displayInWindow) {
     // Open in the current window
-    window.open(url, '_blank')
+    window.open(blobUrl, '_blank')
   } else {
     // Trigger download
     const a = document.createElement('a')
-    a.href = url
+    a.href = blobUrl
     a.download = fileName
     document.body.appendChild(a)
     a.click()
@@ -319,7 +361,7 @@ export const generateAndDownloadPDF = async (
     // Clean up
     setTimeout(() => {
       document.body.removeChild(a)
-      URL.revokeObjectURL(url)
+      URL.revokeObjectURL(blobUrl)
     }, 100)
   }
 }
