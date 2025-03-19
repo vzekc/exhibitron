@@ -5,101 +5,114 @@ import QRCode from 'qrcode'
 
 // Register fonts (assuming you have Lato fonts in your public directory)
 Font.register({
-  family: 'Lato',
-  fonts: [{ src: '/fonts/Lato-Regular.ttf' }, { src: '/fonts/Lato-Bold.ttf', fontWeight: 'bold' }],
+  family: 'PT Sans',
+  fonts: [
+    { src: '/fonts/PTSans-Regular.ttf' },
+    { src: '/fonts/PTSans-Bold.ttf', fontWeight: 'bold' },
+  ],
 })
 
 const styles = StyleSheet.create({
   page: {
     flexDirection: 'column',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#ffffff',
     padding: 30,
-    fontFamily: 'Lato',
+    fontFamily: 'PT Sans',
   },
   header: {
-    marginBottom: 20,
+    marginBottom: 15,
     position: 'relative',
     height: 60,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
   },
-  logo: {
+  headerLogo: {
     position: 'absolute',
     top: 0,
     right: 0,
-    width: 100,
-    height: 50,
+    width: 150,
+    height: 40,
     objectFit: 'contain',
   },
   titleSection: {
-    marginBottom: 30,
-  },
-  mainTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#4a4a4a',
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 18,
-    color: '#8B0000', // dark red like in the screenshot
     marginBottom: 15,
   },
-  infoText: {
+  mainTitle: {
+    fontSize: 32,
+    color: '#4a4a4a',
+  },
+  subtitle: {
+    fontSize: 20,
+    color: '#cc0000',
+    marginBottom: 15,
+  },
+  introText: {
     fontSize: 14,
     color: '#4a4a4a',
-    marginBottom: 5,
+    marginBottom: 20,
   },
   contentRow: {
     flexDirection: 'row',
     marginBottom: 20,
+    marginTop: 20,
   },
   imageContainer: {
     width: '40%',
     marginRight: '5%',
   },
   image: {
-    maxWidth: '100%',
-    maxHeight: 300,
+    width: '100%',
+    height: 'auto',
     objectFit: 'contain',
   },
   attributesContainer: {
     width: '55%',
+    border: '1pt solid #000000',
+    padding: 10,
   },
   attributeRow: {
     flexDirection: 'row',
-    marginBottom: 6,
+    marginBottom: 8,
   },
   attributeLabel: {
     width: '40%',
-    fontWeight: 'bold',
     fontSize: 12,
+    color: '#4a4a4a',
   },
   attributeValue: {
     width: '60%',
     fontSize: 12,
+    color: '#4a4a4a',
   },
   textContent: {
     marginTop: 20,
     fontSize: 12,
     lineHeight: 1.5,
+    color: '#4a4a4a',
   },
   footer: {
-    marginTop: 20,
-    fontSize: 10,
-    color: '#666',
-    borderTop: '1pt solid #ddd',
-    paddingTop: 10,
-  },
-  border: {
-    border: '1pt solid #000',
-    padding: 10,
-  },
-  qrCode: {
     position: 'absolute',
     bottom: 30,
+    left: 30,
     right: 30,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  footerLogo: {
+    width: 92,
+    height: 92,
+    objectFit: 'contain',
+  },
+  exhibitorName: {
+    fontSize: 16,
+    color: '#cc0000',
+    textAlign: 'center',
+    flex: 1,
+    marginHorizontal: 20,
+  },
+  qrCode: {
     width: 80,
     height: 80,
   },
@@ -207,17 +220,18 @@ const stripHtml = (html: string) => {
 const ExhibitPDFDocument = ({
   exhibit,
   mainImageBase64,
-  logoBase64,
+  headerLogoBase64,
+  footerLogoBase64,
   qrCodeBase64,
 }: {
   exhibit: Exhibit
   mainImageBase64: string
-  logoBase64: string
+  headerLogoBase64: string
+  footerLogoBase64: string
   qrCodeBase64?: string
 }) => {
   const attributes = exhibit.attributes || []
   const hasMainImage = mainImageBase64 !== '' && mainImageBase64.startsWith('data:')
-  const hasLogo = logoBase64 !== '' && logoBase64.startsWith('data:')
   const hasQrCode =
     qrCodeBase64 !== undefined && qrCodeBase64 !== '' && qrCodeBase64.startsWith('data:')
   const exhibitorName = exhibit.exhibitor?.user?.fullName || ''
@@ -226,12 +240,11 @@ const ExhibitPDFDocument = ({
     <Document>
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
-          {hasLogo && <Image src={logoBase64} style={styles.logo} />}
+          <Image src={headerLogoBase64} style={styles.headerLogo} />
         </View>
 
         <View style={styles.titleSection}>
           <Text style={styles.mainTitle}>{exhibit.title}</Text>
-          {exhibitorName && <Text style={styles.subtitle}>{exhibitorName}</Text>}
         </View>
 
         <View style={styles.contentRow}>
@@ -257,7 +270,11 @@ const ExhibitPDFDocument = ({
           <Text>{stripHtml(exhibit.text || '')}</Text>
         </View>
 
-        {hasQrCode && <Image src={qrCodeBase64} style={styles.qrCode} />}
+        <View style={styles.footer}>
+          <Image src={footerLogoBase64} style={styles.footerLogo} />
+          {exhibitorName && <Text style={styles.exhibitorName}>{exhibitorName}</Text>}
+          {hasQrCode && <Image src={qrCodeBase64} style={styles.qrCode} />}
+        </View>
       </Page>
     </Document>
   )
@@ -310,25 +327,48 @@ export const generateAndDownloadPDF = async (params: GeneratePDFParams): Promise
   // Generate file name
   const fileName = `${exhibit.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`
 
-  // Load images if needed
+  // Load images
   let mainImageBase64 = ''
-  let logoBase64 = ''
+  let headerLogoBase64 = ''
+  let footerLogoBase64 = ''
   let qrCodeBase64 = ''
+
+  // Load logos
+  const headerLogoUrl = '/cc-logo.svg'
+  const footerLogoUrl = '/vzekc-logo.svg'
+
+  const fullHeaderLogoUrl = headerLogoUrl.startsWith('/')
+    ? `${window.location.origin}${headerLogoUrl}`
+    : headerLogoUrl
+  const fullFooterLogoUrl = footerLogoUrl.startsWith('/')
+    ? `${window.location.origin}${footerLogoUrl}`
+    : footerLogoUrl
+
+  try {
+    headerLogoBase64 = await getImageDataViaCanvas(fullHeaderLogoUrl)
+    footerLogoBase64 = await getImageDataViaCanvas(fullFooterLogoUrl)
+  } catch (error) {
+    console.error('Failed to load logos:', error)
+  }
 
   // Main image
   if (exhibit.mainImage) {
     const imageUrl = `/api/exhibit/${id}/image/main`
     const fullUrl = imageUrl.startsWith('/') ? `${window.location.origin}${imageUrl}` : imageUrl
-    mainImageBase64 = await getImageDataViaCanvas(fullUrl)
+    try {
+      mainImageBase64 = await getImageDataViaCanvas(fullUrl)
+    } catch (error) {
+      console.error('Failed to load main image:', error)
+    }
   }
-
-  const logoUrl = '/vzekc-logo-transparent-border.png'
-  const fullLogoUrl = logoUrl.startsWith('/') ? `${window.location.origin}${logoUrl}` : logoUrl
-  logoBase64 = await getImageDataViaCanvas(fullLogoUrl)
 
   // Generate QR code if URL is provided
   if (qrUrl) {
-    qrCodeBase64 = await generateQRCode(qrUrl)
+    try {
+      qrCodeBase64 = await generateQRCode(qrUrl)
+    } catch (error) {
+      console.error('Failed to generate QR code:', error)
+    }
   }
 
   // Create the document element
@@ -336,7 +376,8 @@ export const generateAndDownloadPDF = async (params: GeneratePDFParams): Promise
     <ExhibitPDFDocument
       exhibit={exhibit}
       mainImageBase64={mainImageBase64}
-      logoBase64={logoBase64}
+      headerLogoBase64={headerLogoBase64}
+      footerLogoBase64={footerLogoBase64}
       qrCodeBase64={qrCodeBase64}
     />
   )
