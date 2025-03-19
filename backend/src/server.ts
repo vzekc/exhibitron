@@ -2,6 +2,7 @@ import { bootstrap } from './app.js'
 
 try {
   const { url } = await bootstrap({
+    host: '::',
     port: 3001,
     migrate: false,
     logLevel: process.env.LOG_LEVEL ?? 'INFO',

@@ -56,17 +56,19 @@ export async function createApp({
 }
 
 export async function bootstrap({
+  host,
   port,
   migrate,
   logLevel = 'INFO',
 }: {
+  host?: string
   port?: number
   migrate?: boolean
   logLevel?: string
 } = {}) {
   const app = await createApp({ migrate, logLevel })
 
-  const url = await app.listen({ port })
+  const url = await app.listen({ host, port })
 
   return { app, url }
 }
