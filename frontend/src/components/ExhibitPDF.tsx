@@ -68,8 +68,9 @@ const styles = StyleSheet.create({
   },
   attributesContainer: {
     width: '55%',
-    border: '1pt solid #000000',
+    border: '1pt solid #333333',
     padding: 10,
+    paddingBottom: 3,
   },
   attributeRow: {
     flexDirection: 'row',
@@ -79,14 +80,15 @@ const styles = StyleSheet.create({
     width: '40%',
     fontSize: 12,
     color: '#4a4a4a',
+    marginRight: '2%',
   },
   attributeValue: {
-    width: '60%',
+    width: '58%',
     fontSize: 12,
     color: '#4a4a4a',
   },
   textContent: {
-    marginTop: 20,
+    marginTop: 0,
     fontSize: 12,
     lineHeight: 1.5,
     color: '#4a4a4a',
@@ -107,6 +109,7 @@ const styles = StyleSheet.create({
   },
   exhibitorName: {
     fontSize: 32,
+    fontWeight: 'bold',
     color: '#cc0000',
     textAlign: 'center',
     flex: 1,
