@@ -33,6 +33,78 @@
           "length": 6,
           "mappedType": "datetime"
         },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        }
+      },
+      "name": "exhibit_attribute",
+      "schema": "public",
+      "indexes": [
+        {
+          "columnNames": ["name"],
+          "composite": false,
+          "keyName": "exhibit_attribute_name_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "exhibit_attribute_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {},
+      "nativeEnums": {
+        "registration_status": {
+          "name": "registration_status",
+          "schema": "public",
+          "items": ["approved", "inProgress", "new", "rejected"]
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
         "key": {
           "name": "key",
           "type": "varchar(255)",
@@ -275,13 +347,12 @@
         },
         "email": {
           "name": "email",
-          "type": "varchar(255)",
+          "type": "citext",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": 255,
-          "mappedType": "string"
+          "mappedType": "unknown"
         },
         "topic": {
           "name": "topic",
@@ -457,13 +528,12 @@
         },
         "email": {
           "name": "email",
-          "type": "varchar(255)",
+          "type": "citext",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": 255,
-          "mappedType": "string"
+          "mappedType": "unknown"
         },
         "full_name": {
           "name": "full_name",
@@ -888,11 +958,37 @@
           "primary": false,
           "nullable": false,
           "mappedType": "integer"
+        },
+        "attributes": {
+          "name": "attributes",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "json"
+        },
+        "main_image_id": {
+          "name": "main_image_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
         }
       },
       "name": "exhibit",
       "schema": "public",
       "indexes": [
+        {
+          "columnNames": ["main_image_id"],
+          "composite": false,
+          "keyName": "exhibit_main_image_id_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
         {
           "keyName": "exhibit_pkey",
           "columnNames": ["id"],
@@ -927,6 +1023,15 @@
           "localTableName": "public.exhibit",
           "referencedColumnNames": ["id"],
           "referencedTableName": "public.exhibitor",
+          "updateRule": "cascade"
+        },
+        "exhibit_main_image_id_foreign": {
+          "constraintName": "exhibit_main_image_id_foreign",
+          "columnNames": ["main_image_id"],
+          "localTableName": "public.exhibit",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.image",
+          "deleteRule": "set null",
           "updateRule": "cascade"
         }
       },
