@@ -31,15 +31,15 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     right: 0,
-    width: 150,
-    height: 40,
+    width: 225,
+    height: 60,
     objectFit: 'contain',
   },
   titleSection: {
     marginBottom: 15,
   },
   mainTitle: {
-    fontSize: 32,
+    fontSize: 36,
     color: '#4a4a4a',
   },
   subtitle: {
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     objectFit: 'contain',
   },
   exhibitorName: {
-    fontSize: 16,
+    fontSize: 32,
     color: '#cc0000',
     textAlign: 'center',
     flex: 1,
