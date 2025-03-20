@@ -9,6 +9,7 @@ import { Exhibit } from '../../entities.js'
 import { processHtml } from '../common/htmlProcessor.js'
 import { wrap } from '@mikro-orm/core'
 import { ExhibitAttribute } from '../exhibitAttribute/entity.js'
+import { Document } from '../document/entity.js'
 
 // Helper function to process attributes and update the ExhibitAttribute table
 async function processAttributes(
@@ -72,6 +73,8 @@ export const exhibitMutations: MutationResolvers<Context> = {
       exhibition,
       title,
       text: '', // Will be set after processing
+      description: null,
+      descriptionExtension: null,
       table: tableEntity,
       exhibitor,
       attributes: processedAttributes,
@@ -79,8 +82,9 @@ export const exhibitMutations: MutationResolvers<Context> = {
 
     if (text) {
       const { sanitizedHtml, images } = await processHtml(text, db.em, { exhibit })
-      exhibit.text = sanitizedHtml
       db.em.persist(images)
+      exhibit.description = db.em.create(Document, { html: sanitizedHtml, images: images })
+      exhibit.text = sanitizedHtml
     }
 
     await db.em.persist(exhibit).flush()

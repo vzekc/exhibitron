@@ -21,10 +21,10 @@ export class Exhibit extends BaseEntity<'text' | 'table' | 'attributes'> {
   text!: string
 
   @OneToOne(() => Document, { nullable: true, orphanRemoval: true })
-  description!: Document
+  description!: Document | null
 
   @OneToOne(() => Document, { nullable: true, orphanRemoval: true })
-  descriptionExtension!: Document
+  descriptionExtension!: Document | null
 
   @ManyToOne({ nullable: true })
   table?: Table
