@@ -4,6 +4,7 @@ import { Image } from '../image/entity.js'
 import { Exhibit } from '../exhibit/entity.js'
 import { Page } from '../page/entity.js'
 import { JSDOM } from 'jsdom'
+import { Document } from '../document/entity.js'
 
 interface ProcessedHtml {
   sanitizedHtml: string
@@ -13,7 +14,7 @@ interface ProcessedHtml {
 export async function processHtml(
   html: string,
   em: EntityManager,
-  context?: { exhibit?: Exhibit; page?: Page },
+  context?: { exhibit?: Exhibit; page?: Page; document?: Document },
 ): Promise<ProcessedHtml> {
   // Create a virtual DOM using JSDOM
   const window = new JSDOM('').window
