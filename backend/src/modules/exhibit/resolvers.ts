@@ -6,7 +6,6 @@ import {
   QueryResolvers,
 } from '../../generated/graphql.js'
 import { Exhibit } from '../../entities.js'
-import { processHtml } from '../common/htmlProcessor.js'
 import { wrap } from '@mikro-orm/core'
 import { ExhibitAttribute } from '../exhibitAttribute/entity.js'
 import { Document } from '../document/entity.js'
@@ -72,7 +71,7 @@ export const exhibitMutations: MutationResolvers<Context> = {
     const exhibit = db.em.getRepository(Exhibit).create({
       exhibition,
       title,
-      text: '', // Will be set after processing
+      text: '', // Keep for backward compatibility, will be set later
       description: null,
       descriptionExtension: null,
       table: tableEntity,
@@ -81,10 +80,10 @@ export const exhibitMutations: MutationResolvers<Context> = {
     })
 
     if (text) {
-      const { sanitizedHtml, images } = await processHtml(text, db.em, { exhibit })
-      db.em.persist(images)
-      exhibit.description = db.em.create(Document, { html: sanitizedHtml, images: images })
-      exhibit.text = sanitizedHtml
+      // Create Document entity with HTML - it will automatically process images
+      exhibit.description = db.em.create(Document, { html: text })
+      // Keep text column in sync for backward compatibility
+      exhibit.text = text
     }
 
     await db.em.persist(exhibit).flush()
@@ -118,12 +117,17 @@ export const exhibitMutations: MutationResolvers<Context> = {
     }
 
     if (text) {
-      const { sanitizedHtml, images } = await processHtml(text, db.em, { exhibit })
-      text = sanitizedHtml
-      db.em.persist(images)
+      // Create or update Document entity
+      if (!exhibit.description) {
+        exhibit.description = db.em.create(Document, { html: text })
+      } else {
+        exhibit.description.html = text
+      }
+      // Keep text column in sync for backward compatibility
+      exhibit.text = text
     }
 
-    return wrap(exhibit).assign({ table, text, attributes: processedAttributes, ...rest })
+    return wrap(exhibit).assign({ table, attributes: processedAttributes, ...rest })
   },
   deleteExhibit: async (_, { id }, { db, exhibitor, user }) => {
     const exhibit = await db.exhibit.findOneOrFail({ id })

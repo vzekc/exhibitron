@@ -1,5 +1,6 @@
-import { OptionalProps, PrimaryKey, Property } from '@mikro-orm/core'
+import { Entity, OptionalProps, PrimaryKey, Property } from '@mikro-orm/core'
 
+@Entity()
 export abstract class BaseEntity<Optional = never> {
   [OptionalProps]?: 'createdAt' | 'updatedAt' | Optional
 

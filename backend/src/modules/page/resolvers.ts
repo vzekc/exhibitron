@@ -1,8 +1,8 @@
 import { Context } from '../../app/context.js'
 import { MutationResolvers, QueryResolvers } from '../../generated/graphql.js'
 import { requireAdmin } from '../../db.js'
-import { processHtml } from '../common/htmlProcessor.js'
 import { wrap } from '@mikro-orm/core'
+import { Document } from '../document/entity.js'
 
 export const pageQueries: QueryResolvers<Context> = {
   getPage: async (_, { key }, { db, exhibition }) => db.page.findOne({ exhibition, key }),
@@ -15,13 +15,14 @@ export const pageMutations: MutationResolvers<Context> = {
       exhibition,
       key,
       title,
-      text: '', // Will be set after processing
+      text: '', // Keep for backward compatibility
     })
 
     if (text) {
-      const { sanitizedHtml, images } = await processHtml(text, db.em, { page })
-      page.text = sanitizedHtml
-      db.em.persist(images)
+      // Create Document entity with HTML - it will automatically process images
+      page.content = db.em.create(Document, { html: text })
+      // Keep text in sync for backward compatibility
+      page.text = text
     }
 
     await db.em.persistAndFlush(page)
@@ -31,14 +32,18 @@ export const pageMutations: MutationResolvers<Context> = {
     requireAdmin(user)
     const page = await db.page.findOneOrFail({ id })
 
-    let processedText = text
     if (text) {
-      const { sanitizedHtml, images } = await processHtml(text, db.em, { page })
-      processedText = sanitizedHtml
-      db.em.persist(images)
+      // Create or update Document entity
+      if (!page.content) {
+        page.content = db.em.create(Document, { html: text })
+      } else {
+        page.content.html = text
+      }
+      // Keep text in sync for backward compatibility
+      page.text = text
     }
 
-    wrap(page).assign({ key, title, text: processedText })
+    wrap(page).assign({ key, title })
     await db.em.persistAndFlush(page)
     return page
   },
