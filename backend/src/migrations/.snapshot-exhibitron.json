@@ -1,7 +1,5 @@
 {
-  "namespaces": [
-    "public"
-  ],
+  "namespaces": ["public"],
   "name": "public",
   "tables": [
     {
@@ -50,9 +48,7 @@
       "indexes": [
         {
           "keyName": "document_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -65,12 +61,7 @@
         "registration_status": {
           "name": "registration_status",
           "schema": "public",
-          "items": [
-            "approved",
-            "inProgress",
-            "new",
-            "rejected"
-          ]
+          "items": ["approved", "inProgress", "new", "rejected"]
         }
       }
     },
@@ -120,9 +111,7 @@
       "schema": "public",
       "indexes": [
         {
-          "columnNames": [
-            "name"
-          ],
+          "columnNames": ["name"],
           "composite": false,
           "keyName": "exhibit_attribute_name_unique",
           "constraint": true,
@@ -131,9 +120,7 @@
         },
         {
           "keyName": "exhibit_attribute_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -146,12 +133,7 @@
         "registration_status": {
           "name": "registration_status",
           "schema": "public",
-          "items": [
-            "approved",
-            "inProgress",
-            "new",
-            "rejected"
-          ]
+          "items": ["approved", "inProgress", "new", "rejected"]
         }
       }
     },
@@ -221,9 +203,7 @@
       "schema": "public",
       "indexes": [
         {
-          "columnNames": [
-            "key"
-          ],
+          "columnNames": ["key"],
           "composite": false,
           "keyName": "exhibition_key_unique",
           "constraint": true,
@@ -232,9 +212,7 @@
         },
         {
           "keyName": "exhibition_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -247,12 +225,7 @@
         "registration_status": {
           "name": "registration_status",
           "schema": "public",
-          "items": [
-            "approved",
-            "inProgress",
-            "new",
-            "rejected"
-          ]
+          "items": ["approved", "inProgress", "new", "rejected"]
         }
       }
     },
@@ -339,9 +312,7 @@
       "schema": "public",
       "indexes": [
         {
-          "columnNames": [
-            "key"
-          ],
+          "columnNames": ["key"],
           "composite": false,
           "keyName": "page_key_unique",
           "constraint": true,
@@ -349,9 +320,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "content_id"
-          ],
+          "columnNames": ["content_id"],
           "composite": false,
           "keyName": "page_content_id_unique",
           "constraint": true,
@@ -360,10 +329,7 @@
         },
         {
           "keyName": "page_exhibition_id_key_unique",
-          "columnNames": [
-            "exhibition_id",
-            "key"
-          ],
+          "columnNames": ["exhibition_id", "key"],
           "composite": true,
           "constraint": true,
           "primary": false,
@@ -371,9 +337,7 @@
         },
         {
           "keyName": "page_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -384,25 +348,17 @@
       "foreignKeys": {
         "page_exhibition_id_foreign": {
           "constraintName": "page_exhibition_id_foreign",
-          "columnNames": [
-            "exhibition_id"
-          ],
+          "columnNames": ["exhibition_id"],
           "localTableName": "public.page",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.exhibition",
           "updateRule": "cascade"
         },
         "page_content_id_foreign": {
           "constraintName": "page_content_id_foreign",
-          "columnNames": [
-            "content_id"
-          ],
+          "columnNames": ["content_id"],
           "localTableName": "public.page",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.document",
           "deleteRule": "set null",
           "updateRule": "cascade"
@@ -412,12 +368,7 @@
         "registration_status": {
           "name": "registration_status",
           "schema": "public",
-          "items": [
-            "approved",
-            "inProgress",
-            "new",
-            "rejected"
-          ]
+          "items": ["approved", "inProgress", "new", "rejected"]
         }
       }
     },
@@ -470,12 +421,7 @@
           "nullable": false,
           "nativeEnumName": "registration_status",
           "default": "'new'",
-          "enumItems": [
-            "approved",
-            "inProgress",
-            "new",
-            "rejected"
-          ],
+          "enumItems": ["approved", "inProgress", "new", "rejected"],
           "mappedType": "enum"
         },
         "name": {
@@ -550,10 +496,7 @@
       "indexes": [
         {
           "keyName": "registration_exhibition_id_email_unique",
-          "columnNames": [
-            "exhibition_id",
-            "email"
-          ],
+          "columnNames": ["exhibition_id", "email"],
           "composite": true,
           "constraint": true,
           "primary": false,
@@ -561,9 +504,7 @@
         },
         {
           "keyName": "registration_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -574,13 +515,9 @@
       "foreignKeys": {
         "registration_exhibition_id_foreign": {
           "constraintName": "registration_exhibition_id_foreign",
-          "columnNames": [
-            "exhibition_id"
-          ],
+          "columnNames": ["exhibition_id"],
           "localTableName": "public.registration",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.exhibition",
           "updateRule": "cascade"
         }
@@ -589,12 +526,7 @@
         "registration_status": {
           "name": "registration_status",
           "schema": "public",
-          "items": [
-            "approved",
-            "inProgress",
-            "new",
-            "rejected"
-          ]
+          "items": ["approved", "inProgress", "new", "rejected"]
         }
       }
     },
@@ -635,9 +567,7 @@
       "indexes": [
         {
           "keyName": "session_pkey",
-          "columnNames": [
-            "sid"
-          ],
+          "columnNames": ["sid"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -650,12 +580,7 @@
         "registration_status": {
           "name": "registration_status",
           "schema": "public",
-          "items": [
-            "approved",
-            "inProgress",
-            "new",
-            "rejected"
-          ]
+          "items": ["approved", "inProgress", "new", "rejected"]
         }
       }
     },
@@ -784,9 +709,7 @@
       "schema": "public",
       "indexes": [
         {
-          "columnNames": [
-            "email"
-          ],
+          "columnNames": ["email"],
           "composite": false,
           "keyName": "user_email_index",
           "constraint": false,
@@ -794,9 +717,7 @@
           "unique": false
         },
         {
-          "columnNames": [
-            "email"
-          ],
+          "columnNames": ["email"],
           "composite": false,
           "keyName": "user_email_unique",
           "constraint": true,
@@ -804,9 +725,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "nickname"
-          ],
+          "columnNames": ["nickname"],
           "composite": false,
           "keyName": "user_nickname_index",
           "constraint": false,
@@ -814,9 +733,7 @@
           "unique": false
         },
         {
-          "columnNames": [
-            "nickname"
-          ],
+          "columnNames": ["nickname"],
           "composite": false,
           "keyName": "user_nickname_unique",
           "constraint": true,
@@ -824,9 +741,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "password_reset_token"
-          ],
+          "columnNames": ["password_reset_token"],
           "composite": false,
           "keyName": "user_password_reset_token_index",
           "constraint": false,
@@ -834,9 +749,7 @@
           "unique": false
         },
         {
-          "columnNames": [
-            "password_reset_token"
-          ],
+          "columnNames": ["password_reset_token"],
           "composite": false,
           "keyName": "user_password_reset_token_unique",
           "constraint": true,
@@ -845,9 +758,7 @@
         },
         {
           "keyName": "user_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -860,12 +771,7 @@
         "registration_status": {
           "name": "registration_status",
           "schema": "public",
-          "items": [
-            "approved",
-            "inProgress",
-            "new",
-            "rejected"
-          ]
+          "items": ["approved", "inProgress", "new", "rejected"]
         }
       }
     },
@@ -924,9 +830,7 @@
       "indexes": [
         {
           "keyName": "exhibitor_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -937,25 +841,17 @@
       "foreignKeys": {
         "exhibitor_exhibition_id_foreign": {
           "constraintName": "exhibitor_exhibition_id_foreign",
-          "columnNames": [
-            "exhibition_id"
-          ],
+          "columnNames": ["exhibition_id"],
           "localTableName": "public.exhibitor",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.exhibition",
           "updateRule": "cascade"
         },
         "exhibitor_user_id_foreign": {
           "constraintName": "exhibitor_user_id_foreign",
-          "columnNames": [
-            "user_id"
-          ],
+          "columnNames": ["user_id"],
           "localTableName": "public.exhibitor",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.user",
           "updateRule": "cascade"
         }
@@ -964,12 +860,7 @@
         "registration_status": {
           "name": "registration_status",
           "schema": "public",
-          "items": [
-            "approved",
-            "inProgress",
-            "new",
-            "rejected"
-          ]
+          "items": ["approved", "inProgress", "new", "rejected"]
         }
       }
     },
@@ -1037,10 +928,7 @@
       "indexes": [
         {
           "keyName": "table_exhibition_id_number_unique",
-          "columnNames": [
-            "exhibition_id",
-            "number"
-          ],
+          "columnNames": ["exhibition_id", "number"],
           "composite": true,
           "constraint": true,
           "primary": false,
@@ -1048,9 +936,7 @@
         },
         {
           "keyName": "table_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -1061,25 +947,17 @@
       "foreignKeys": {
         "table_exhibition_id_foreign": {
           "constraintName": "table_exhibition_id_foreign",
-          "columnNames": [
-            "exhibition_id"
-          ],
+          "columnNames": ["exhibition_id"],
           "localTableName": "public.table",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.exhibition",
           "updateRule": "cascade"
         },
         "table_exhibitor_id_foreign": {
           "constraintName": "table_exhibitor_id_foreign",
-          "columnNames": [
-            "exhibitor_id"
-          ],
+          "columnNames": ["exhibitor_id"],
           "localTableName": "public.table",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.exhibitor",
           "deleteRule": "set null",
           "updateRule": "cascade"
@@ -1089,12 +967,7 @@
         "registration_status": {
           "name": "registration_status",
           "schema": "public",
-          "items": [
-            "approved",
-            "inProgress",
-            "new",
-            "rejected"
-          ]
+          "items": ["approved", "inProgress", "new", "rejected"]
         }
       }
     },
@@ -1216,9 +1089,7 @@
       "schema": "public",
       "indexes": [
         {
-          "columnNames": [
-            "description_id"
-          ],
+          "columnNames": ["description_id"],
           "composite": false,
           "keyName": "exhibit_description_id_unique",
           "constraint": true,
@@ -1226,9 +1097,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "description_extension_id"
-          ],
+          "columnNames": ["description_extension_id"],
           "composite": false,
           "keyName": "exhibit_description_extension_id_unique",
           "constraint": true,
@@ -1236,9 +1105,7 @@
           "unique": true
         },
         {
-          "columnNames": [
-            "main_image_id"
-          ],
+          "columnNames": ["main_image_id"],
           "composite": false,
           "keyName": "exhibit_main_image_id_unique",
           "constraint": true,
@@ -1247,9 +1114,7 @@
         },
         {
           "keyName": "exhibit_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -1260,76 +1125,52 @@
       "foreignKeys": {
         "exhibit_exhibition_id_foreign": {
           "constraintName": "exhibit_exhibition_id_foreign",
-          "columnNames": [
-            "exhibition_id"
-          ],
+          "columnNames": ["exhibition_id"],
           "localTableName": "public.exhibit",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.exhibition",
           "updateRule": "cascade"
         },
         "exhibit_description_id_foreign": {
           "constraintName": "exhibit_description_id_foreign",
-          "columnNames": [
-            "description_id"
-          ],
+          "columnNames": ["description_id"],
           "localTableName": "public.exhibit",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.document",
           "deleteRule": "set null",
           "updateRule": "cascade"
         },
         "exhibit_description_extension_id_foreign": {
           "constraintName": "exhibit_description_extension_id_foreign",
-          "columnNames": [
-            "description_extension_id"
-          ],
+          "columnNames": ["description_extension_id"],
           "localTableName": "public.exhibit",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.document",
           "deleteRule": "set null",
           "updateRule": "cascade"
         },
         "exhibit_table_id_foreign": {
           "constraintName": "exhibit_table_id_foreign",
-          "columnNames": [
-            "table_id"
-          ],
+          "columnNames": ["table_id"],
           "localTableName": "public.exhibit",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.table",
           "deleteRule": "set null",
           "updateRule": "cascade"
         },
         "exhibit_exhibitor_id_foreign": {
           "constraintName": "exhibit_exhibitor_id_foreign",
-          "columnNames": [
-            "exhibitor_id"
-          ],
+          "columnNames": ["exhibitor_id"],
           "localTableName": "public.exhibit",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.exhibitor",
           "updateRule": "cascade"
         },
         "exhibit_main_image_id_foreign": {
           "constraintName": "exhibit_main_image_id_foreign",
-          "columnNames": [
-            "main_image_id"
-          ],
+          "columnNames": ["main_image_id"],
           "localTableName": "public.exhibit",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.image",
           "deleteRule": "set null",
           "updateRule": "cascade"
@@ -1339,12 +1180,7 @@
         "registration_status": {
           "name": "registration_status",
           "schema": "public",
-          "items": [
-            "approved",
-            "inProgress",
-            "new",
-            "rejected"
-          ]
+          "items": ["approved", "inProgress", "new", "rejected"]
         }
       }
     },
@@ -1441,9 +1277,7 @@
       "indexes": [
         {
           "keyName": "image_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -1454,39 +1288,27 @@
       "foreignKeys": {
         "image_exhibit_id_foreign": {
           "constraintName": "image_exhibit_id_foreign",
-          "columnNames": [
-            "exhibit_id"
-          ],
+          "columnNames": ["exhibit_id"],
           "localTableName": "public.image",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.exhibit",
           "deleteRule": "set null",
           "updateRule": "cascade"
         },
         "image_page_id_foreign": {
           "constraintName": "image_page_id_foreign",
-          "columnNames": [
-            "page_id"
-          ],
+          "columnNames": ["page_id"],
           "localTableName": "public.image",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.page",
           "deleteRule": "set null",
           "updateRule": "cascade"
         },
         "image_document_id_foreign": {
           "constraintName": "image_document_id_foreign",
-          "columnNames": [
-            "document_id"
-          ],
+          "columnNames": ["document_id"],
           "localTableName": "public.image",
-          "referencedColumnNames": [
-            "id"
-          ],
+          "referencedColumnNames": ["id"],
           "referencedTableName": "public.document",
           "deleteRule": "set null",
           "updateRule": "cascade"
@@ -1496,12 +1318,7 @@
         "registration_status": {
           "name": "registration_status",
           "schema": "public",
-          "items": [
-            "approved",
-            "inProgress",
-            "new",
-            "rejected"
-          ]
+          "items": ["approved", "inProgress", "new", "rejected"]
         }
       }
     }
@@ -1510,12 +1327,7 @@
     "registration_status": {
       "name": "registration_status",
       "schema": "public",
-      "items": [
-        "approved",
-        "inProgress",
-        "new",
-        "rejected"
-      ]
+      "items": ["approved", "inProgress", "new", "rejected"]
     }
   }
 }

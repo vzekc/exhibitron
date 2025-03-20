@@ -1,6 +1,15 @@
-import { Entity, OptionalProps, PrimaryKey, Property } from '@mikro-orm/core'
+import {
+  Entity,
+  OptionalProps,
+  PrimaryKey,
+  Property,
+  BeforeCreate,
+  BeforeUpdate,
+  AfterCreate,
+  AfterUpdate,
+} from '@mikro-orm/core'
 
-@Entity()
+@Entity({ abstract: true })
 export abstract class BaseEntity<Optional = never> {
   [OptionalProps]?: 'createdAt' | 'updatedAt' | Optional
 
@@ -12,4 +21,16 @@ export abstract class BaseEntity<Optional = never> {
 
   @Property({ nullable: true, onUpdate: () => new Date() })
   updatedAt?: Date
+
+  @BeforeCreate()
+  beforeCreateBase(): void {}
+
+  @AfterCreate()
+  afterCreateBase(): void {}
+
+  @BeforeUpdate()
+  beforeUpdateBase(): void {}
+
+  @AfterUpdate()
+  afterUpdateBase(): void {}
 }
