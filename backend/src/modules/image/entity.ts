@@ -19,4 +19,7 @@ export class Image extends BaseEntity {
 
   @ManyToOne({ nullable: true })
   page?: Page
+
+  @ManyToOne({ nullable: true })
+  document?: Document
 }

@@ -33,6 +33,69 @@
           "length": 6,
           "mappedType": "datetime"
         },
+        "html": {
+          "name": "html",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        }
+      },
+      "name": "document",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "document_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {},
+      "nativeEnums": {
+        "registration_status": {
+          "name": "registration_status",
+          "schema": "public",
+          "items": ["approved", "inProgress", "new", "rejected"]
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
         "name": {
           "name": "name",
           "type": "varchar(255)",
@@ -941,6 +1004,24 @@
           "nullable": true,
           "mappedType": "text"
         },
+        "description_id": {
+          "name": "description_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
+        "description_extension_id": {
+          "name": "description_extension_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
         "table_id": {
           "name": "table_id",
           "type": "int",
@@ -982,6 +1063,22 @@
       "schema": "public",
       "indexes": [
         {
+          "columnNames": ["description_id"],
+          "composite": false,
+          "keyName": "exhibit_description_id_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": ["description_extension_id"],
+          "composite": false,
+          "keyName": "exhibit_description_extension_id_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
           "columnNames": ["main_image_id"],
           "composite": false,
           "keyName": "exhibit_main_image_id_unique",
@@ -1006,6 +1103,24 @@
           "localTableName": "public.exhibit",
           "referencedColumnNames": ["id"],
           "referencedTableName": "public.exhibition",
+          "updateRule": "cascade"
+        },
+        "exhibit_description_id_foreign": {
+          "constraintName": "exhibit_description_id_foreign",
+          "columnNames": ["description_id"],
+          "localTableName": "public.exhibit",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.document",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        },
+        "exhibit_description_extension_id_foreign": {
+          "constraintName": "exhibit_description_extension_id_foreign",
+          "columnNames": ["description_extension_id"],
+          "localTableName": "public.exhibit",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.document",
+          "deleteRule": "set null",
           "updateRule": "cascade"
         },
         "exhibit_table_id_foreign": {
@@ -1120,6 +1235,15 @@
           "primary": false,
           "nullable": true,
           "mappedType": "integer"
+        },
+        "document_id": {
+          "name": "document_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
         }
       },
       "name": "image",
@@ -1151,6 +1275,15 @@
           "localTableName": "public.image",
           "referencedColumnNames": ["id"],
           "referencedTableName": "public.page",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        },
+        "image_document_id_foreign": {
+          "constraintName": "image_document_id_foreign",
+          "columnNames": ["document_id"],
+          "localTableName": "public.image",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.document",
           "deleteRule": "set null",
           "updateRule": "cascade"
         }

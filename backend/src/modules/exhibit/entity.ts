@@ -5,6 +5,7 @@ import { ExhibitRepository } from './repository.js'
 import { Exhibition } from '../exhibition/entity.js'
 import { Exhibitor } from '../exhibitor/entity.js'
 import { Image } from '../image/entity.js'
+import { Document } from '../document/entity.js'
 
 @Entity({ repository: () => ExhibitRepository })
 export class Exhibit extends BaseEntity<'text' | 'table' | 'attributes'> {
@@ -18,6 +19,12 @@ export class Exhibit extends BaseEntity<'text' | 'table' | 'attributes'> {
 
   @Property({ columnType: 'text', nullable: true })
   text!: string
+
+  @OneToOne(() => Document, { nullable: true, orphanRemoval: true })
+  description!: Document
+
+  @OneToOne(() => Document, { nullable: true, orphanRemoval: true })
+  descriptionExtension!: Document
 
   @ManyToOne({ nullable: true })
   table?: Table
