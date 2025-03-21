@@ -65,3 +65,7 @@ legend {
   font-size: 0.9em;
   margin-bottom: 1em;
 }
+
+.login-form {
+  min-width: 420px;
+}

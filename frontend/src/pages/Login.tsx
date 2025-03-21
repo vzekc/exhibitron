@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useApolloClient, useMutation } from '@apollo/client'
+import { useApolloClient, useLazyQuery, useMutation } from '@apollo/client'
 import { useUser } from '../contexts/UserContext'
 import { graphql } from 'gql.tada'
 
@@ -10,16 +10,31 @@ type Inputs = {
   password: string
 }
 
+const IS_FORUM_USER = graphql(`
+  query IsForumUser($email: String!) {
+    isForumUser(email: $email)
+  }
+`)
+
+type State = 'forumLogin' | 'waitingForPassword' | 'passwordEntered'
+
+const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+const isValidEmail = (email: string) => emailPattern.test(email)
+
 const Login = () => {
   const [loginFailed, setLoginFailed] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const { register, handleSubmit } = useForm<Inputs>()
+  const { register, handleSubmit, watch } = useForm<Inputs>()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const [processedErrorParam, setProcessedErrorParam] = useState(false)
   const [processedRedirectParam, setProcessedRedirectParam] = useState(false)
+  const [state, setState] = useState<State>('forumLogin')
   const apolloClient = useApolloClient()
   const { user, reloadUser } = useUser()
+  const email = watch('email')
+  const password = watch('password')
+  const [isForumUser] = useLazyQuery(IS_FORUM_USER)
 
   // Get redirectUrl from query parameter or session storage
   const redirectUrl =
@@ -39,6 +54,27 @@ const Login = () => {
       setProcessedRedirectParam(true)
     }
   }, [searchParams, setSearchParams, processedRedirectParam])
+
+  useEffect(() => {
+    const checkState = async () => {
+      console.log('check state')
+      if (password !== '') {
+        setState('passwordEntered')
+      } else if (email !== '') {
+        setState('waitingForPassword')
+        if (isValidEmail(email)) {
+          const { data } = await isForumUser({ variables: { email } })
+          if (data?.isForumUser) {
+            setState('forumLogin')
+          }
+        }
+      } else {
+        setState('forumLogin')
+      }
+    }
+
+    void checkState()
+  }, [email, password, isForumUser])
 
   // If user is already logged in, redirect to the redirectUrl
   useEffect(() => {
@@ -153,14 +189,21 @@ const Login = () => {
                 </small>
               )}
             </div>
-            <button type="submit" className="primary" style={buttonStyle}>
-              Login
-            </button>
+            {state === 'forumLogin' ? (
+              <button type="button" className="secondary" style={buttonStyle} onClick={forumLogin}>
+                Über das VzEkC-Forum anmelden
+              </button>
+            ) : (
+              <button
+                type="submit"
+                className="primary"
+                style={buttonStyle}
+                disabled={state !== 'passwordEntered'}>
+                Login
+              </button>
+            )}
             <button type="button" className="outline" style={buttonStyle} onClick={forgotPassword}>
               Passwort vergessen
-            </button>
-            <button type="button" className="secondary" style={buttonStyle} onClick={forumLogin}>
-              Über das VzEkC-Forum anmelden
             </button>
           </form>
         </article>

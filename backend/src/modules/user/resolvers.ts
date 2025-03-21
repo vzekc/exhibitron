@@ -19,6 +19,10 @@ export const userQueries: QueryResolvers<Context> = {
     const userWithToken = await db.user.findOne({ passwordResetToken: token })
     return userWithToken?.email || null
   },
+  isForumUser: async (_, { email }, { db }) => {
+    const user = await db.user.findOne({ email })
+    return !!user?.nickname
+  },
 }
 
 export const userMutations: MutationResolvers<Context> = {
