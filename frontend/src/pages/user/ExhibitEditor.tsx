@@ -344,54 +344,56 @@ const ExhibitEditor = () => {
           </select>
         </label>
 
-        <div className="main-image-section" style={{ marginBottom: '2rem' }}>
-          <h3>Hauptbild</h3>
-          {isImageLoading ? (
-            <p>Bild wird verarbeitet...</p>
-          ) : mainImage ? (
-            <div style={{ marginBottom: '1rem' }}>
-              <img
-                src={`/api/exhibit/${id}/image/main`}
-                alt="Hauptbild"
-                style={{ maxWidth: '300px', maxHeight: '200px', objectFit: 'contain' }}
-              />
-              <div style={{ marginTop: '0.5rem' }}>
-                <button className="secondary" onClick={() => fileInputRef.current?.click()}>
-                  Bild ersetzen
-                </button>
-                <button
-                  className="secondary outline"
-                  onClick={handleDeleteImage}
-                  style={{ marginLeft: '0.5rem' }}>
-                  Bild löschen
-                </button>
-                <Confirm
-                  isOpen={showDeleteImageConfirm}
-                  title="Haupbild löschen"
-                  message={`Möchtest Du das Haupbild wirklich löschen?`}
-                  confirm="Löschen"
-                  cancel="Abbrechen"
-                  onConfirm={handleConfirmDeleteImage}
-                  onClose={() => setShowDeleteImageConfirm(false)}
+        {!isNew && (
+          <div className="main-image-section" style={{ marginBottom: '2rem' }}>
+            <h3>Hauptbild</h3>
+            {isImageLoading ? (
+              <p>Bild wird verarbeitet...</p>
+            ) : mainImage ? (
+              <div style={{ marginBottom: '1rem' }}>
+                <img
+                  src={`/api/exhibit/${id}/image/main`}
+                  alt="Hauptbild"
+                  style={{ maxWidth: '300px', maxHeight: '200px', objectFit: 'contain' }}
                 />
+                <div style={{ marginTop: '0.5rem' }}>
+                  <button className="secondary" onClick={() => fileInputRef.current?.click()}>
+                    Bild ersetzen
+                  </button>
+                  <button
+                    className="secondary outline"
+                    onClick={handleDeleteImage}
+                    style={{ marginLeft: '0.5rem' }}>
+                    Bild löschen
+                  </button>
+                  <Confirm
+                    isOpen={showDeleteImageConfirm}
+                    title="Haupbild löschen"
+                    message={`Möchtest Du das Haupbild wirklich löschen?`}
+                    confirm="Löschen"
+                    cancel="Abbrechen"
+                    onConfirm={handleConfirmDeleteImage}
+                    onClose={() => setShowDeleteImageConfirm(false)}
+                  />
+                </div>
               </div>
-            </div>
-          ) : (
-            <div>
-              <p>Kein Hauptbild vorhanden</p>
-              <button className="secondary" onClick={() => fileInputRef.current?.click()}>
-                Bild hochladen
-              </button>
-            </div>
-          )}
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleImageUpload}
-            style={{ display: 'none' }}
-            accept="image/*"
-          />
-        </div>
+            ) : (
+              <div>
+                <p>Kein Hauptbild vorhanden</p>
+                <button className="secondary" onClick={() => fileInputRef.current?.click()}>
+                  Bild hochladen
+                </button>
+              </div>
+            )}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImageUpload}
+              style={{ display: 'none' }}
+              accept="image/*"
+            />
+          </div>
+        )}
 
         <ExhibitAttributeEditor attributes={attributes} onChange={setAttributes} />
 
