@@ -69,3 +69,7 @@ legend {
 .login-form {
   min-width: 420px;
 }
+
+.password-input-hidden {
+  display: none;
+}
