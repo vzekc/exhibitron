@@ -29,6 +29,8 @@ export const userMutations: MutationResolvers<Context> = {
   login: async (_, { email, password }, { db, session }) => {
     const user = await db.user.login(email, password)
     if (!user) {
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
       throw new GraphQLError('Invalid email address or password', {
         extensions: {
           code: 'UNAUTHENTICATED',

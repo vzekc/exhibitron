@@ -35,6 +35,32 @@ const Login = () => {
   const email = watch('email')
   const password = watch('password')
   const [isForumUser] = useLazyQuery(IS_FORUM_USER)
+  const [login, { loading: loggingIn }] = useMutation(
+    graphql(`
+      mutation Login($email: String!, $password: String!) {
+        login(email: $email, password: $password) {
+          id
+          email
+          fullName
+        }
+      }
+    `),
+    {
+      onCompleted: async (data) => {
+        if (data.login) {
+          await apolloClient.clearStore()
+          await reloadUser()
+          // Redirect will happen in the useEffect above
+        } else {
+          setLoginFailed(true)
+        }
+      },
+      onError: (error) => {
+        console.log('Login error:', error)
+        setLoginFailed(true)
+      },
+    },
+  )
 
   // Get redirectUrl from query parameter or session storage
   const redirectUrl =
@@ -57,7 +83,7 @@ const Login = () => {
 
   useEffect(() => {
     const checkState = async () => {
-      console.log('check state')
+      setLoginFailed(false)
       if (password !== '') {
         setState('passwordEntered')
       } else if (email !== '') {
@@ -101,33 +127,6 @@ const Login = () => {
     }
   }, [searchParams, setSearchParams, processedErrorParam])
 
-  const [login] = useMutation(
-    graphql(`
-      mutation Login($email: String!, $password: String!) {
-        login(email: $email, password: $password) {
-          id
-          email
-          fullName
-        }
-      }
-    `),
-    {
-      onCompleted: async (data) => {
-        if (data.login) {
-          await apolloClient.clearStore()
-          await reloadUser()
-          // Redirect will happen in the useEffect above
-        } else {
-          setLoginFailed(true)
-        }
-      },
-      onError: (error) => {
-        console.log('Login error:', error)
-        setLoginFailed(true)
-      },
-    },
-  )
-
   const forumLogin = () => {
     // Add redirect parameter to forum login
     const redirectParam = redirectUrl
@@ -138,6 +137,7 @@ const Login = () => {
 
   const loginHandler: SubmitHandler<Inputs> = async (inputs) => {
     const { email, password } = inputs
+    setLoginFailed(false)
     await login({ variables: { email, password } })
   }
 
@@ -184,9 +184,7 @@ const Login = () => {
             {/* Error message area - always takes up space */}
             <div style={{ minHeight: '1.5rem', marginBottom: '1rem' }}>
               {loginFailed && (
-                <small style={{ color: 'var(--del-color)' }}>
-                  {errorMessage || 'Unbekannte Email-Adresse oder falsches Passwort'}
-                </small>
+                <div className="login-error">{errorMessage || 'Ungültige Login-Informationen'}</div>
               )}
             </div>
             {state === 'forumLogin' ? (
@@ -198,7 +196,7 @@ const Login = () => {
                 type="submit"
                 className="primary"
                 style={buttonStyle}
-                disabled={state !== 'passwordEntered'}>
+                disabled={state !== 'passwordEntered' || loggingIn}>
                 Login
               </button>
             )}
