@@ -171,7 +171,10 @@ const Login = () => {
                 <input id="email" type="email" {...register('email', { required: true })} />
               </label>
             </div>
-            <div className={state === 'forumLogin' ? 'password-input-hidden' : ''}>
+            <div
+              className={
+                state === 'forumLogin' || !isValidEmail(email) ? 'password-input-hidden' : ''
+              }>
               <label htmlFor="password">
                 Passwort
                 <input
