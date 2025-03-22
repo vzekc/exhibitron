@@ -177,4 +177,67 @@ describe('exhibit', () => {
       expect(result.errors![0].message).toMatch(/^Exhibit not found/)
     }
   })
+
+  graphqlTest(
+    'returns HTML content from document when querying text field',
+    async (graphqlRequest) => {
+      const exhibitor = await login(graphqlRequest, 'daffy@example.com')
+
+      // Create HTML content with distinctive formatting
+      const htmlContent = '<p><strong>Formatted</strong> exhibit content with <em>styling</em></p>'
+
+      // Create an exhibit with this HTML content
+      const id = await createExhibit(
+        graphqlRequest,
+        {
+          title: 'HTML Test Exhibit',
+          text: htmlContent,
+        },
+        exhibitor,
+      )
+
+      // Query the exhibit and verify text field returns the HTML content
+      const result = await graphqlRequest(
+        graphql(`
+          query GetExhibitText($id: Int!) {
+            getExhibit(id: $id) {
+              id
+              title
+              text
+            }
+          }
+        `),
+        { id },
+      )
+
+      expect(result.errors).toBeUndefined()
+      expect(result.data!.getExhibit!.text).toBe(htmlContent)
+
+      // Also test that an exhibit without a Document entity returns empty string
+      const emptyId = await createExhibit(
+        graphqlRequest,
+        {
+          title: 'Empty HTML Test Exhibit',
+          // No text provided, so no Document entity will be created
+        },
+        exhibitor,
+      )
+
+      const emptyResult = await graphqlRequest(
+        graphql(`
+          query GetEmptyExhibitText($id: Int!) {
+            getExhibit(id: $id) {
+              id
+              title
+              text
+            }
+          }
+        `),
+        { id: emptyId },
+      )
+
+      expect(emptyResult.errors).toBeUndefined()
+      expect(emptyResult.data!.getExhibit!.text).toBe('')
+    },
+  )
 })

@@ -3,6 +3,7 @@ import { MutationResolvers, QueryResolvers, PageResolvers } from '../../generate
 import { requireAdmin } from '../../db.js'
 import { wrap } from '@mikro-orm/core'
 import { Document } from '../document/entity.js'
+import { Page } from './entity.js'
 
 export const pageQueries: QueryResolvers<Context> = {
   getPage: async (_, { key }, { db, exhibition }) => db.page.findOne({ exhibition, key }),
@@ -63,17 +64,13 @@ export const pageMutations: MutationResolvers<Context> = {
   },
 }
 
-export const pageTypeResolvers: PageResolvers = {
+export const pageTypeResolvers: PageResolvers<Context> = {
   text: (page) => {
-    // Type assertion to access entity properties not in GraphQL type
-    const pageEntity = page as unknown as { content?: { html?: string } | null; text: string }
+    // Use the Page entity type to properly access the content property
+    const pageEntity = page as unknown as Page
 
-    // If the page has content with HTML, return that
-    if (pageEntity.content?.html) {
-      return pageEntity.content.html
-    }
-    // Otherwise, fall back to the legacy text field
-    return pageEntity.text
+    // Return HTML content from Document entity if it exists, otherwise return null/empty string
+    return pageEntity.content?.html ?? ''
   },
 }
 

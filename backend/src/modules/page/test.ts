@@ -201,4 +201,73 @@ describe('page', () => {
     // Verify we have data-temp-id attributes which will be replaced with real IDs after flush
     expect(page.content.html).toMatch(/data-temp-id="[\d_]+"/)
   })
+
+  graphqlTest(
+    'returns HTML content from document when querying text field',
+    async (graphqlRequest) => {
+      const admin = await login(graphqlRequest, 'admin@example.com')
+
+      // Create HTML content with distinctive formatting
+      const htmlContent = '<p><strong>Formatted</strong> content with <em>styling</em></p>'
+
+      // Create a page with this HTML content
+      await createPage(
+        graphqlRequest,
+        {
+          key: 'html-test',
+          title: 'HTML Test',
+          text: htmlContent,
+        },
+        admin,
+      )
+
+      // Query the page and verify text field returns the HTML content
+      const result = await graphqlRequest(
+        graphql(`
+          query GetPageText($key: String!) {
+            getPage(key: $key) {
+              id
+              title
+              text
+            }
+          }
+        `),
+        { key: 'html-test' },
+      )
+
+      expect(result.errors).toBeUndefined()
+      expect(result.data!.getPage!.text).toBe(htmlContent)
+
+      // Also test that a page without a Document entity returns empty string
+      const emptyResult = await graphqlRequest(
+        graphql(`
+          mutation CreateAndGetEmptyPage {
+            createPage(key: "empty-test", title: "Empty Test", text: "") {
+              id
+              key
+            }
+          }
+        `),
+        {},
+        admin,
+      )
+
+      expect(emptyResult.errors).toBeUndefined()
+
+      const emptyPageQuery = await graphqlRequest(
+        graphql(`
+          query GetEmptyPageText($key: String!) {
+            getPage(key: $key) {
+              id
+              text
+            }
+          }
+        `),
+        { key: 'empty-test' },
+      )
+
+      expect(emptyPageQuery.errors).toBeUndefined()
+      expect(emptyPageQuery.data!.getPage!.text).toBe('')
+    },
+  )
 })
