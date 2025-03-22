@@ -17,9 +17,6 @@ export class Exhibit extends BaseEntity<'text' | 'table' | 'attributes'> {
   @Property()
   title!: string
 
-  @Property({ columnType: 'text', nullable: true })
-  text!: string
-
   @OneToOne(() => Document, { nullable: true, orphanRemoval: true, eager: true })
   description!: Document | null
 

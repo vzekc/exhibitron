@@ -17,7 +17,4 @@ export class Page extends BaseEntity {
 
   @OneToOne(() => Document, { nullable: true, orphanRemoval: true, eager: true })
   content!: Document | null
-
-  @Property({ columnType: 'text' })
-  text!: string
 }

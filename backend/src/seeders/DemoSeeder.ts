@@ -1,10 +1,12 @@
-import { EntityManager } from '@mikro-orm/core'
+import { EntityManager, RequiredEntityData } from '@mikro-orm/core'
 import { Seeder } from '@mikro-orm/seeder'
 import { User } from '../modules/user/entity.js'
 import { Table } from '../modules/table/entity.js'
 import { Exhibit } from '../modules/exhibit/entity.js'
 import { Exhibition } from '../modules/exhibition/entity.js'
 import { Exhibitor } from '../modules/exhibitor/entity.js'
+import { Document } from '../modules/document/entity.js'
+import { Page } from '../modules/page/entity.js'
 
 export class DemoSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {
@@ -48,56 +50,120 @@ export class DemoSeeder extends Seeder {
 
     const exhibitors = users.map((user) => em.create(Exhibitor, { user, exhibition }))
 
-    const exhibits = [
-      em.create(Exhibit, {
+    // Create home page with Document entity
+    const homePage = em.create(Page, {
+      key: 'home',
+      exhibition,
+      title: 'Demo Home Page',
+    })
+    const homeContent = em.create(Document, {
+      html: '<h1>Welcome to the Classic Computing 2025 Exhibition</h1><p>This is a demo of our exhibition platform.</p>',
+    })
+    homePage.content = homeContent
+
+    // Create a Documents repository to process HTML content
+    const documentRepo = em.getRepository(Document)
+    await documentRepo.processHtmlContent(homeContent)
+
+    // Create exhibits with Document entities for descriptions
+    const exhibitDescriptions: Record<string, Document> = {}
+    const exhibitExtensions: Record<string, Document> = {}
+
+    const exhibitData = [
+      {
+        id: 1,
         exhibition,
         title: 'Bildschirmtext',
-        text: 'Bildschirmtext war ein interaktives Textsystem, das in den 1990er Jahren in Deutschland weit verbreitet war.',
+        html: 'Bildschirmtext war ein interaktives Textsystem, das in den 1990er Jahren in Deutschland weit verbreitet war.',
         table: tables[0],
         exhibitor: exhibitors[0],
-      }),
-      em.create(Exhibit, {
+      },
+      {
+        id: 2,
         exhibition,
         title: 'TELEBAHN',
-        text: 'TELEBAHN ist ein X.25-Netzwerk.',
+        html: 'TELEBAHN ist ein X.25-Netzwerk.',
+        extendedHtml:
+          'TELEBAHN ist die erweiterte Version des deutschen X.25-Netzwerks, das in den 1980er Jahren eingeführt wurde.',
         exhibitor: exhibitors[0],
-      }),
-      em.create(Exhibit, {
+      },
+      {
+        id: 3,
         exhibition,
         title: 'GIGI',
-        text: 'Der GIGI ist ein Grafikterminal, welches auch ein eingebautes Microsoft BASIC besitzt.',
+        html: 'Der GIGI ist ein Grafikterminal, welches auch ein eingebautes Microsoft BASIC besitzt.',
         table: tables[1],
         exhibitor: exhibitors[0],
-      }),
-      em.create(Exhibit, {
+      },
+      {
+        id: 4,
         exhibition,
         title: 'PDP-8',
-        text: `Der [PDP-8](https://de.wikipedia.org/wiki/PDP-8) (bei Anwendern meist 'die PDP-8') war ein 12-Bit
+        html: `Der [PDP-8](https://de.wikipedia.org/wiki/PDP-8) (bei Anwendern meist 'die PDP-8') war ein 12-Bit
          Minirechner aus der Reihe Programmed Data Processor von Digital 
          Equipment Corporation (DEC). Es war der erste kommerziell erfolgreiche 
          Minicomputer mit weit über 50.000 verkauften Exemplaren, Schätzungen
          gehen sogar von bis zu 300.000 Exemplaren aus bei Berücksichtigung 
-         von kompatiblen Nachbauten.
-
+         von kompatiblen Nachbauten.`,
+        extendedHtml: `
 ![image](https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Digital_pdp8-e2.jpg/2880px-Digital_pdp8-e2.jpg)
-        `,
+
+## Technische Daten
+- 12-Bit-Architektur
+- Taktfrequenz: 1,5 MHz
+- Arbeitsspeicher: 4 KB, erweiterbar auf 32 KB
+- Gewicht: ca. 12,5 kg
+`,
         exhibitor: exhibitors[1],
-      }),
-      em.create(Exhibit, {
+      },
+      {
+        id: 5,
         exhibition,
         title: 'Patcher',
-        text: 'Der Patcher ist ein **Retro-Universal-Laptop** auf Raspberry-Pi-Basis.',
+        html: 'Der Patcher ist ein **Retro-Universal-Laptop** auf Raspberry-Pi-Basis.',
         table: tables[2],
         exhibitor: exhibitors[2],
-      }),
-      em.create(Exhibit, {
+      },
+      {
+        id: 6,
         exhibition,
         title: 'Macintosh SE/30',
-        text: 'Der Macintosh SE/30 war ein Computer der Firma Apple.',
+        html: 'Der Macintosh SE/30 war ein Computer der Firma Apple.',
+        extendedHtml:
+          'Der Macintosh SE/30 wurde 1989 eingeführt und gilt bis heute als einer der besten klassischen Macintosh-Computer. Er verfügt über einen Motorola 68030 Prozessor mit 16 MHz und kann bis zu 128 MB RAM aufnehmen.',
         table: tables[3],
         exhibitor: exhibitors[2],
-      }),
+      },
     ]
+
+    const exhibits = exhibitData.map(({ html, extendedHtml, ...exhibitProps }) => {
+      // Create Document for exhibit description
+      const description = em.create(Document, { html })
+      exhibitDescriptions[exhibitProps.id] = description
+
+      // Create exhibit with Document entities
+      const exhibitObj: RequiredEntityData<Exhibit> = {
+        ...exhibitProps,
+        description,
+      }
+
+      // Add description extension if provided
+      if (extendedHtml) {
+        const extension = em.create(Document, { html: extendedHtml })
+        exhibitExtensions[exhibitProps.id] = extension
+        exhibitObj.descriptionExtension = extension
+      }
+
+      return em.create(Exhibit, exhibitObj)
+    })
+
+    // Process all document HTML content
+    for (const doc of Object.values(exhibitDescriptions)) {
+      await documentRepo.processHtmlContent(doc)
+    }
+    for (const doc of Object.values(exhibitExtensions)) {
+      await documentRepo.processHtmlContent(doc)
+    }
 
     exhibitors[0].exhibits.add(exhibits[0], exhibits[1], exhibits[2])
     exhibitors[1].exhibits.add(exhibits[3])
@@ -111,6 +177,6 @@ export class DemoSeeder extends Seeder {
     tables[4].exhibitor = exhibitors[1]
     tables[5].exhibitor = exhibitors[1]
 
-    await em.persistAndFlush([...tables, ...users, ...exhibits])
+    await em.persistAndFlush([...tables, ...users, ...exhibits, homePage])
   }
 }

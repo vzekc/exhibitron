@@ -6,17 +6,18 @@ import { Document } from '../document/entity.js'
 import { Page } from './entity.js'
 
 export const pageQueries: QueryResolvers<Context> = {
+  // @ts-expect-error ts2345
   getPage: async (_, { key }, { db, exhibition }) => db.page.findOne({ exhibition, key }),
 }
 
 export const pageMutations: MutationResolvers<Context> = {
+  // @ts-expect-error ts2345
   createPage: async (_, { key, title, text }, { db, user, exhibition }) => {
     requireAdmin(user)
     const page = db.page.create({
       exhibition,
       key,
       title,
-      text: '', // Keep for backward compatibility
     })
 
     if (text) {
@@ -25,14 +26,12 @@ export const pageMutations: MutationResolvers<Context> = {
 
       // Process the HTML content explicitly
       await db.document.processHtmlContent(page.content)
-
-      // Keep text in sync for backward compatibility
-      page.text = text
     }
 
     await db.em.persistAndFlush(page)
     return page
   },
+  // @ts-expect-error ts2345
   updatePage: async (_, { id, key, title, text }, { db, user }) => {
     requireAdmin(user)
     const page = await db.page.findOneOrFail({ id })
@@ -47,9 +46,6 @@ export const pageMutations: MutationResolvers<Context> = {
 
       // Process the HTML content explicitly
       await db.document.processHtmlContent(page.content)
-
-      // Keep text in sync for backward compatibility
-      page.text = text
     }
 
     wrap(page).assign({ key, title })

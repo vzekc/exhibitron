@@ -71,7 +71,6 @@ export const exhibitMutations: MutationResolvers<Context> = {
     const exhibit = db.em.getRepository(Exhibit).create({
       exhibition,
       title,
-      text: '', // Keep for backward compatibility, will be set later
       description: null,
       descriptionExtension: null,
       table: tableEntity,
@@ -84,8 +83,6 @@ export const exhibitMutations: MutationResolvers<Context> = {
       exhibit.description = db.em.create(Document, { html: text })
       // Process the HTML content explicitly
       await db.document.processHtmlContent(exhibit.description)
-      // Keep text column in sync for backward compatibility
-      exhibit.text = text
     }
 
     await db.em.persist(exhibit).flush()
@@ -127,8 +124,6 @@ export const exhibitMutations: MutationResolvers<Context> = {
       }
       // Process the HTML content explicitly
       await db.document.processHtmlContent(exhibit.description)
-      // Keep text column in sync for backward compatibility
-      exhibit.text = text
     }
 
     return wrap(exhibit).assign({ table, attributes: processedAttributes, ...rest })

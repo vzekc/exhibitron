@@ -297,15 +297,6 @@
           "primary": false,
           "nullable": true,
           "mappedType": "integer"
-        },
-        "text": {
-          "name": "text",
-          "type": "text",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "text"
         }
       },
       "name": "page",
@@ -1020,15 +1011,6 @@
           "nullable": false,
           "length": 255,
           "mappedType": "string"
-        },
-        "text": {
-          "name": "text",
-          "type": "text",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": true,
-          "mappedType": "text"
         },
         "description_id": {
           "name": "description_id",

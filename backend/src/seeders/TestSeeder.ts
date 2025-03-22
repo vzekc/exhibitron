@@ -6,6 +6,7 @@ import { Exhibition } from '../modules/exhibition/entity.js'
 import { Exhibitor } from '../modules/exhibitor/entity.js'
 import { Exhibit } from '../modules/exhibit/entity.js'
 import { Page } from '../modules/page/entity.js'
+import { Document } from '../modules/document/entity.js'
 
 export class TestSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {
@@ -15,19 +16,27 @@ export class TestSeeder extends Seeder {
       hostMatch: 'localhost|2025\\.classic-computing\\.de',
     })
 
-    em.create(Page, {
+    // Create home page with Document entity
+    const homePage = em.create(Page, {
       key: 'home',
       exhibition,
       title: 'Home',
-      text: 'Welcome to the Classic Computing 2025 exhibition!',
     })
+    const homeContent = em.create(Document, {
+      html: 'Welcome to the Classic Computing 2025 exhibition!',
+    })
+    homePage.content = homeContent
 
-    em.create(Page, {
+    // Create schedule page with Document entity
+    const schedulePage = em.create(Page, {
       key: 'schedule',
       exhibition,
       title: 'Schedule',
-      text: 'The schedule for the exhibition will be available soon.',
     })
+    const scheduleContent = em.create(Document, {
+      html: 'The schedule for the exhibition will be available soon.',
+    })
+    schedulePage.content = scheduleContent
 
     em.create(User, {
       id: 1001,
@@ -42,6 +51,10 @@ export class TestSeeder extends Seeder {
       em.create(Table, { exhibition, id: number, number })
     }
 
+    // Process document HTML content
+    const documentRepo = em.getRepository(Document)
+    await documentRepo.processHtmlContent(homeContent)
+    await documentRepo.processHtmlContent(scheduleContent)
     ;[
       {
         id: 1002,
