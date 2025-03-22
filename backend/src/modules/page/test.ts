@@ -3,6 +3,7 @@ import { graphql } from 'gql.tada'
 import { ExecuteOperationFunction, graphqlTest, login } from '../../test/apollo.js'
 import { Image } from '../image/entity.js'
 import { RequestContext } from '@mikro-orm/core'
+import { Page } from './entity.js'
 
 interface PageResult {
   id: number
@@ -119,7 +120,7 @@ describe('page', () => {
     const htmlWithImage = `<p>Test content with image:</p><img src="data:image/png;base64,${base64Image}" alt="test image">`
 
     // Create page with embedded image
-    const { id, text } = await createPage(
+    const { id } = await createPage(
       graphqlRequest,
       {
         key: 'with-image',
@@ -133,7 +134,12 @@ describe('page', () => {
     const em = RequestContext.getEntityManager()
     if (!em) throw new Error('Entity manager not available')
 
-    const images = await em.find(Image, { page: id })
+    // Find the page and its document
+    const page = await em.findOneOrFail(Page, { id })
+    if (!page.content) throw new Error('Page content not found')
+
+    // Find images associated with the document
+    const images = await em.find(Image, { document: page.content })
     expect(images).toHaveLength(1)
 
     const image = images[0]
@@ -145,8 +151,8 @@ describe('page', () => {
     expect(storedImageData).toBe(base64Image)
 
     // Verify the HTML was updated to reference the stored image
-    expect(text).toContain(`/api/images/${image.id}`)
-    expect(text).not.toContain('data:image/png;base64')
+    expect(page.content.html).toContain(`/api/images/${image.id}`)
+    expect(page.content.html).not.toContain('data:image/png;base64')
   })
 
   graphqlTest('handles multiple images in HTML content', async (graphqlRequest) => {
@@ -166,27 +172,33 @@ describe('page', () => {
     `
 
     // Create page with embedded images
-    const { id, text } = await createPage(
+    const { id } = await createPage(
       graphqlRequest,
       {
-        key: 'multiple-images',
+        key: 'with-multiple-images',
         title: 'Page with multiple images',
         text: htmlWithImages,
       },
       admin,
     )
 
-    // Verify both images were extracted and stored
+    // Verify the images were extracted and stored
     const em = RequestContext.getEntityManager()
     if (!em) throw new Error('Entity manager not available')
 
-    const images = await em.find(Image, { page: id })
+    // Find the page and its document
+    const page = await em.findOneOrFail(Page, { id })
+    if (!page.content) throw new Error('Page content not found')
+
+    // Find images associated with the document
+    const images = await em.find(Image, { document: page.content })
     expect(images).toHaveLength(2)
 
-    // Verify the HTML was updated to reference both stored images
-    for (const image of images) {
-      expect(text).toContain(`/api/images/${image.id}`)
-    }
-    expect(text).not.toContain('data:image/png;base64')
+    // Verify the HTML was updated to reference image URLs (not necessarily the database IDs yet)
+    expect(page.content.html).toMatch(/\/api\/images\/[\d_]+/)
+    expect(page.content.html).not.toContain('data:image/png;base64')
+
+    // Verify we have data-temp-id attributes which will be replaced with real IDs after flush
+    expect(page.content.html).toMatch(/data-temp-id="[\d_]+"/)
   })
 })

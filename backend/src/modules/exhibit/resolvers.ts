@@ -80,8 +80,10 @@ export const exhibitMutations: MutationResolvers<Context> = {
     })
 
     if (text) {
-      // Create Document entity with HTML - it will automatically process images
+      // Create Document entity with HTML
       exhibit.description = db.em.create(Document, { html: text })
+      // Process the HTML content explicitly
+      await db.document.processHtmlContent(exhibit.description)
       // Keep text column in sync for backward compatibility
       exhibit.text = text
     }
@@ -123,6 +125,8 @@ export const exhibitMutations: MutationResolvers<Context> = {
       } else {
         exhibit.description.html = text
       }
+      // Process the HTML content explicitly
+      await db.document.processHtmlContent(exhibit.description)
       // Keep text column in sync for backward compatibility
       exhibit.text = text
     }

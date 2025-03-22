@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect } from 'vitest'
 import { RequestContext, wrap } from '@mikro-orm/core'
 import { Document } from './entity.js'
 import { Image } from '../image/entity.js'
@@ -12,18 +12,18 @@ describe('Document', () => {
     const htmlWithImage = `<p>Test content with image:</p><img src="data:image/png;base64,${base64Image}" alt="test image">`
 
     const em = RequestContext.getEntityManager()!
+    const documentRepo = em.getRepository(Document)
 
     const document = em.create(Document, {
       html: htmlWithImage,
     })
 
-    console.log('flushing document')
+    await documentRepo.processHtmlContent(document)
+
     await em.persistAndFlush(document)
 
-    console.log('clearing')
     em.clear()
 
-    console.log('reloading document')
     const reloadedDocument = await em.findOneOrFail(
       Document,
       { id: document.id },
@@ -61,27 +61,30 @@ describe('Document', () => {
       <img src="data:image/png;base64,${base64Image2}" alt="second test image">
     `
 
-    // Get entity manager
     const em = RequestContext.getEntityManager()
     if (!em) throw new Error('Entity manager not available')
+    const documentRepo = em.getRepository(Document)
 
     // Create a document with two embedded images
     const document = em.create(Document, {
       html: htmlWithTwoImages,
     })
 
-    // Save the document
+    await documentRepo.processHtmlContent(document)
+
     await em.persistAndFlush(document)
 
-    // Clear entity manager
     em.clear()
 
-    // Reload the document
-    const reloadedDocument = await em.findOneOrFail(Document, { id: document.id })
+    const reloadedDocument = await em.findOneOrFail(
+      Document,
+      { id: document.id },
+      { populate: ['images'] },
+    )
+    const reloadedDocumentRepo = em.getRepository(Document)
 
     // Verify both images were created
     const images = await em.find(Image, { document: reloadedDocument })
-    console.log(`Found ${images.length} images associated with the document`)
     expect(images).toHaveLength(2)
 
     // Get image IDs for later verification
@@ -97,7 +100,8 @@ describe('Document', () => {
     // Update document with new HTML
     wrap(reloadedDocument).assign({ html: htmlWithOneImage })
 
-    // Save the document
+    await reloadedDocumentRepo.processHtmlContent(reloadedDocument)
+
     await em.persistAndFlush(reloadedDocument)
 
     // Clear entity manager
@@ -108,7 +112,6 @@ describe('Document', () => {
 
     // Verify only one image remains in the database
     const remainingImages = await em.find(Image, { document: updatedDocument })
-    console.log(`Found ${remainingImages.length} images after removing one image`)
     expect(remainingImages).toHaveLength(1)
     expect(remainingImages[0].id).toBe(imageIds[0])
 
@@ -123,27 +126,25 @@ describe('Document', () => {
       'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
     const htmlWithImage = `<p>Initial image:</p><img src="data:image/png;base64,${base64Image1}" alt="initial image">`
 
-    // Get entity manager
     const em = RequestContext.getEntityManager()
     if (!em) throw new Error('Entity manager not available')
+    const documentRepo = em.getRepository(Document)
 
-    // Create a document with embedded image
     const document = em.create(Document, {
       html: htmlWithImage,
     })
 
-    // Save the document
+    await documentRepo.processHtmlContent(document)
+
     await em.persistAndFlush(document)
 
-    // Clear entity manager
     em.clear()
 
-    // Reload the document
     const reloadedDocument = await em.findOneOrFail(Document, { id: document.id })
+    const reloadedDocumentRepo = em.getRepository(Document)
 
     // Verify initial image was created
     const initialImages = await em.find(Image, { document: reloadedDocument })
-    console.log(`Found ${initialImages.length} initial images`)
     expect(initialImages).toHaveLength(1)
     const initialImageId = initialImages[0].id
 
@@ -155,18 +156,16 @@ describe('Document', () => {
     // Update document with new HTML containing the new base64 image
     wrap(reloadedDocument).assign({ html: htmlWithReplacedImage })
 
-    // Save the document
+    await reloadedDocumentRepo.processHtmlContent(reloadedDocument)
+
     await em.persistAndFlush(reloadedDocument)
 
-    // Clear entity manager
     em.clear()
 
-    // Reload the document again
     const finalDocument = await em.findOneOrFail(Document, { id: document.id })
 
     // Verify the old image was removed and the new one was added
     const updatedImages = await em.find(Image, { document: finalDocument })
-    console.log(`Found ${updatedImages.length} images after replacement`)
     expect(updatedImages).toHaveLength(1)
     expect(updatedImages[0].id).not.toBe(initialImageId)
 

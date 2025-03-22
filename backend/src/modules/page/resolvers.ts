@@ -19,8 +19,12 @@ export const pageMutations: MutationResolvers<Context> = {
     })
 
     if (text) {
-      // Create Document entity with HTML - it will automatically process images
+      // Create Document entity with HTML
       page.content = db.em.create(Document, { html: text })
+
+      // Process the HTML content explicitly
+      await db.document.processHtmlContent(page.content)
+
       // Keep text in sync for backward compatibility
       page.text = text
     }
@@ -39,6 +43,10 @@ export const pageMutations: MutationResolvers<Context> = {
       } else {
         page.content.html = text
       }
+
+      // Process the HTML content explicitly
+      await db.document.processHtmlContent(page.content)
+
       // Keep text in sync for backward compatibility
       page.text = text
     }
