@@ -27,20 +27,45 @@ export class Migration20250320040833_add_document_model extends Migration {
       `alter table "image" add constraint "image_document_id_foreign" foreign key ("document_id") references "document" ("id") on update cascade on delete set null;`,
     )
 
-    // Data migration: Create document rows from exhibit.text
+    // Create a temporary table to map exhibits to their documents
     this.addSql(`
-      WITH inserted_documents AS (
-        INSERT INTO "document" ("created_at", "updated_at", "html")
-        SELECT "created_at", "updated_at", "text"
-        FROM "exhibit"
-        WHERE "text" IS NOT NULL
-        RETURNING "id", "html"
-      )
-      UPDATE "exhibit" e
-      SET "description_id" = d.id
-      FROM inserted_documents d
-      WHERE e."text" = d."html" AND e."text" IS NOT NULL;
+      CREATE TEMPORARY TABLE exhibit_document_map (
+        exhibit_id INT PRIMARY KEY,
+        document_id INT
+      );
     `)
+
+    // Insert documents and record mapping in one transaction
+    this.addSql(`
+      DO $$
+      DECLARE
+        doc_id INT;
+        ex_id INT;
+      BEGIN
+        FOR ex_id IN (SELECT id FROM "exhibit" WHERE "text" IS NOT NULL ORDER BY id)
+        LOOP
+          INSERT INTO "document" ("created_at", "updated_at", "html")
+          SELECT "created_at", "updated_at", "text"
+          FROM "exhibit"
+          WHERE id = ex_id
+          RETURNING id INTO doc_id;
+          
+          INSERT INTO exhibit_document_map (exhibit_id, document_id)
+          VALUES (ex_id, doc_id);
+        END LOOP;
+      END $$;
+    `)
+
+    // Update exhibits using the mapping table
+    this.addSql(`
+      UPDATE "exhibit" e
+      SET "description_id" = m.document_id
+      FROM exhibit_document_map m
+      WHERE e.id = m.exhibit_id;
+    `)
+
+    // Clean up temporary table
+    this.addSql(`DROP TABLE exhibit_document_map;`)
 
     // Update images to point to documents instead of exhibits
     this.addSql(`
@@ -54,6 +79,14 @@ export class Migration20250320040833_add_document_model extends Migration {
   }
 
   override async down(): Promise<void> {
+    // Restore text from documents back to exhibits
+    this.addSql(`
+      UPDATE "exhibit" e
+      SET "text" = d."html"
+      FROM "document" d
+      WHERE e."description_id" = d.id;
+    `)
+
     // Restore image references to their original exhibits
     this.addSql(`
       UPDATE "image" i

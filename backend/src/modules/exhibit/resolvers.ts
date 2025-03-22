@@ -166,6 +166,20 @@ export const exhibitTypeResolvers: ExhibitResolvers = {
     const image = exhibit.mainImage as unknown as { id: number }
     return image.id
   },
+  text: (exhibit) => {
+    // Type assertion to access entity properties not in GraphQL type
+    const exhibitEntity = exhibit as unknown as {
+      description?: { html?: string } | null
+      text?: string
+    }
+
+    // If the exhibit has description with HTML, return that
+    if (exhibitEntity.description?.html) {
+      return exhibitEntity.description.html
+    }
+    // Otherwise, fall back to the legacy text field
+    return exhibitEntity.text || null
+  },
 }
 
 export const exhibitResolvers = {

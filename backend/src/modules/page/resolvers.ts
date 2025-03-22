@@ -1,5 +1,5 @@
 import { Context } from '../../app/context.js'
-import { MutationResolvers, QueryResolvers } from '../../generated/graphql.js'
+import { MutationResolvers, QueryResolvers, PageResolvers } from '../../generated/graphql.js'
 import { requireAdmin } from '../../db.js'
 import { wrap } from '@mikro-orm/core'
 import { Document } from '../document/entity.js'
@@ -63,7 +63,22 @@ export const pageMutations: MutationResolvers<Context> = {
   },
 }
 
+export const pageTypeResolvers: PageResolvers = {
+  text: (page) => {
+    // Type assertion to access entity properties not in GraphQL type
+    const pageEntity = page as unknown as { content?: { html?: string } | null; text: string }
+
+    // If the page has content with HTML, return that
+    if (pageEntity.content?.html) {
+      return pageEntity.content.html
+    }
+    // Otherwise, fall back to the legacy text field
+    return pageEntity.text
+  },
+}
+
 export const pageResolvers = {
   Query: pageQueries,
   Mutation: pageMutations,
+  Page: pageTypeResolvers,
 }
