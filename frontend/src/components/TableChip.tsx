@@ -7,7 +7,7 @@ interface TableChipProps {
 
 const TableChip = ({ number }: TableChipProps) => {
   return (
-    <Card to={`/table/${number}`} className="mt-3 w-40">
+    <Card to={`/table/${number}`} className="mb-3 w-40">
       <div className="flex items-center gap-4">
         <div className="flex-shrink-0">
           <div className="flex h-[50px] w-[50px] items-center justify-center rounded-md bg-gray-100">

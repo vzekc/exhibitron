@@ -5,7 +5,12 @@ import { graphql } from 'gql.tada'
 
 import { useSearchParams } from 'react-router-dom'
 import Modal from '@components/Modal.tsx'
-import PageHeading from '../components/PageHeading'
+import { RetroHeader } from '../components/RetroHeader'
+import { FormField } from '../components/FormField'
+import { FormFieldset } from '../components/FormFieldset'
+import { FormInput } from '../components/FormInput'
+import { FormSelect } from '../components/FormSelect'
+import { FormTextarea } from '../components/FormTextarea'
 
 type Inputs = {
   name: string
@@ -98,66 +103,77 @@ const Register = () => {
   const content = () => {
     switch (state) {
       case 'sending':
-        return <p>Die Anmeldung wird gesendet...</p>
+        return (
+          <div className="py-8 text-center">
+            <p className="text-lg text-gray-700">Die Anmeldung wird gesendet...</p>
+          </div>
+        )
       case 'done':
         return (
-          <>
-            <h2>Vielen Dank für deine Anmeldung!</h2>
-            <p>Wir melden uns in den nächsten Tagen bei Dir!</p>
-          </>
+          <div className="py-8 text-center">
+            <h2 className="mb-4 text-2xl font-bold text-gray-900">
+              Vielen Dank für deine Anmeldung!
+            </h2>
+            <p className="text-lg text-gray-700">Wir melden uns in den nächsten Tagen bei Dir!</p>
+          </div>
         )
       default:
         return (
           <>
             {notYetRegisteredPopup && (
               <Modal isOpen={notYetRegisteredPopup} onClose={() => setNotYetRegisteredPopup(false)}>
-                <h2>Du bist noch nicht registriert</h2>
-                <p>
+                <h2 className="mb-4 text-xl font-bold text-gray-900">
+                  Du bist noch nicht registriert
+                </h2>
+                <p className="mb-4 text-gray-700">
                   Du hast Dich über das Forum angemeldet, bist aber noch nicht als Aussteller
                   registriert.
                 </p>
-                <p>Bitte fülle das Formular aus, wenn Du Dich als Aussteller anmelden möchtest.</p>
+                <p className="text-gray-700">
+                  Bitte fülle das Formular aus, wenn Du Dich als Aussteller anmelden möchtest.
+                </p>
               </Modal>
             )}
-            <p>
-              Hier kannst Du Dich für die{' '}
-              <a
-                href="https://www.classic-computing.de/cc2025/"
-                target="_blank"
-                rel="noreferrer nofollow">
-                Classic Computing 2025
-              </a>
-              , die vom 12. bis zum 14. September 2025 in der Freiheitshalle in Hof stattfindet, als
-              Aussteller anmelden. Die Daten, die Du in dieses Formular eingibst, werden für die
-              Planung der Ausstellung verwendet und nach der Veranstaltung gelöscht. Deine
-              Email-Adresse wird nur für die Kommunikation mit Dir im Zusammenhang mit der
-              Ausstellung verwendet. Wir geben Deine Daten nicht an Dritte weiter.
-            </p>
-            <p>
-              Nach Absendung des Formulars erhältst Du eine automatisch generierte Email mit einer
-              Bestätigung Deiner Anmeldung. Bitte überprüfe auch Deinen Spam-Ordner, falls Du diese
-              Email nicht nach einigen Minuten erhältst. Sobald wir Deine Anmeldung bearbeitet
-              haben, melden wir uns persönlich mit einer weiteren Email bei Dir.
-            </p>
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <fieldset>
-                <label>
-                  Name
-                  <input
+            <div className="prose mb-8 max-w-none">
+              <p>
+                Hier kannst Du Dich für die{' '}
+                <a
+                  href="https://www.classic-computing.de/cc2025/"
+                  target="_blank"
+                  rel="noreferrer nofollow"
+                  className="text-blue-600 hover:text-blue-800">
+                  Classic Computing 2025
+                </a>
+                , die vom 12. bis zum 14. September 2025 in der Freiheitshalle in Hof stattfindet,
+                als Aussteller anmelden. Die Daten, die Du in dieses Formular eingibst, werden für
+                die Planung der Ausstellung verwendet und nach der Veranstaltung gelöscht. Deine
+                Email-Adresse wird nur für die Kommunikation mit Dir im Zusammenhang mit der
+                Ausstellung verwendet. Wir geben Deine Daten nicht an Dritte weiter.
+              </p>
+              <p>
+                Nach Absendung des Formulars erhältst Du eine automatisch generierte Email mit einer
+                Bestätigung Deiner Anmeldung. Bitte überprüfe auch Deinen Spam-Ordner, falls Du
+                diese Email nicht nach einigen Minuten erhältst. Sobald wir Deine Anmeldung
+                bearbeitet haben, melden wir uns persönlich mit einer weiteren Email bei Dir.
+              </p>
+            </div>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              <FormFieldset title="Persönliche Informationen">
+                <FormField label="Name" error={errors.name?.message}>
+                  <FormInput
                     type="text"
                     autoComplete="name"
-                    {...register('name', { required: true })}
+                    {...register('name', { required: 'Ein Name wird benötigt' })}
                   />
-                  {errors.name && <div>Ein Name wird benötigt</div>}
-                </label>
-                <label>
-                  <input type="checkbox" {...register('vzekcMember')} />
-                  Ich bin Mitglied im VzEkC e.V
-                </label>
-                <p />
-                <label>
-                  E-Mail Adresse
-                  <input
+                </FormField>
+                <FormField>
+                  <div className="flex items-center">
+                    <FormInput type="checkbox" {...register('vzekcMember')} className="mr-2" />
+                    <span>Ich bin Mitglied im VzEkC e.V</span>
+                  </div>
+                </FormField>
+                <FormField label="E-Mail Adresse" error={errors.email?.message}>
+                  <FormInput
                     type="email"
                     autoComplete="email"
                     {...register('email', {
@@ -170,28 +186,28 @@ const Register = () => {
                       validate: isNewEmail,
                     })}
                   />
-                  {errors.email && <div>{errors.email.message}</div>}
-                </label>
-                <label>
-                  Nickname (Benutzername) im Forum
-                  <input type="text" autoComplete="nickname" {...register('nickname')} />
-                </label>
-                <label>
-                  Registriert im Forum
-                  <select {...register('forum')}>
+                </FormField>
+                <FormField label="Nickname (Benutzername) im Forum">
+                  <FormInput type="text" autoComplete="nickname" {...register('nickname')} />
+                </FormField>
+                <FormField label="Registriert im Forum">
+                  <FormSelect {...register('forum')}>
                     <option>forum.classic-computing.de</option>
                     <option>www.a1k.org</option>
                     <option>forum.atari-home.de</option>
                     <option>forum64.de</option>
                     <option>anderes Forum</option>
                     <option>(kein Forum)</option>
-                  </select>
-                </label>
-              </fieldset>
-              <fieldset>
-                <label>
-                  Hauptthema meiner Ausstellung
-                  <select {...register('topic', { required: true })}>
+                  </FormSelect>
+                </FormField>
+              </FormFieldset>
+
+              <FormFieldset title="Ausstellung">
+                <FormField label="Hauptthema meiner Ausstellung" error={errors.topic?.message}>
+                  <FormSelect
+                    {...register('topic', {
+                      required: 'Bitte wähle aus, was du ausstellen möchtest',
+                    })}>
                     <option></option>
                     <option>Atari 8-Bit und ST/TT/Falcon</option>
                     <option>Apple 8-Bit und Macintosh</option>
@@ -205,81 +221,100 @@ const Register = () => {
                     <option>Workstations (*)</option>
                     <option>Konsolen (*)</option>
                     <option>Etwas anderes (*)</option>
-                  </select>
-                </label>
-                {errors.topic && <div>Bitte wähle aus, was du ausstellen möchtest</div>}
+                  </FormSelect>
+                </FormField>
                 {topic?.includes('*') && (
-                  <label>
-                    Weitere Angaben
-                    <input
+                  <FormField label="Weitere Angaben" error={errors.topicExtras?.message}>
+                    <FormInput
                       type="text"
-                      {...register('topicExtras', { required: true })}
+                      {...register('topicExtras', {
+                        required: 'Bitte erläutere, was du ausstellen möchtest',
+                      })}
                       disabled={!topic?.includes('*')}
                     />
-                    {errors.topicExtras && <div>Bitte erläutere, was du ausstellen möchtest</div>}
-                  </label>
+                  </FormField>
                 )}
-              </fieldset>
-              <fieldset>
-                Teilnahme an folgenden Tagen:
-                <p />
-                <label>
-                  <input type="checkbox" {...register('friday')} />
-                  Freitag (12. September, nur Aussteller und persönliche Gäste)
-                </label>
-                <label>
-                  <input type="checkbox" {...register('saturday')} />
-                  Samstag (Publikumstag)
-                </label>
-                <label>
-                  <input type="checkbox" {...register('sunday')} />
-                  Sonntag (Publikumstag)
-                </label>
-              </fieldset>
-              <fieldset>
-                <label>
-                  <input type="checkbox" {...register('setupHelper')} />
-                  Ich unterstütze beim Aufbau der CC 2024 am Donnerstag
-                </label>
-                <label>
-                  <input type="checkbox" {...register('gameCornerSupporter')} />
-                  Ich unterstütze die Spiele-Ecke mit eigener Hardware
-                </label>
-                <label>
-                  <input type="checkbox" {...register('dailyLunch')} />
-                  Ich wünsche mir ein tägliches Mittagessen in der Halle (Möglichkeiten werden noch
-                  geprüft)
-                </label>
-                <label>
-                  <input type="checkbox" {...register('talk')} />
-                  Ich plane einen Vortrag
-                </label>
-              </fieldset>
-              <fieldset>
-                <label>
-                  Gewünschte Anzahl Tische (je 165cm x 80cm)
-                  <select {...register('tables', { required: true })}>
+              </FormFieldset>
+
+              <FormFieldset title="Teilnahme">
+                <FormField>
+                  <div className="space-y-2">
+                    <div className="flex items-center">
+                      <FormInput type="checkbox" {...register('friday')} className="mr-2" />
+                      <span>Freitag (12. September, nur Aussteller und persönliche Gäste)</span>
+                    </div>
+                    <div className="flex items-center">
+                      <FormInput type="checkbox" {...register('saturday')} className="mr-2" />
+                      <span>Samstag (Publikumstag)</span>
+                    </div>
+                    <div className="flex items-center">
+                      <FormInput type="checkbox" {...register('sunday')} className="mr-2" />
+                      <span>Sonntag (Publikumstag)</span>
+                    </div>
+                  </div>
+                </FormField>
+              </FormFieldset>
+
+              <FormFieldset title="Unterstützung">
+                <div className="space-y-2">
+                  <div className="flex items-center">
+                    <FormInput type="checkbox" {...register('setupHelper')} className="mr-2" />
+                    <span>Ich unterstütze beim Aufbau der CC 2024 am Donnerstag</span>
+                  </div>
+                  <div className="flex items-center">
+                    <FormInput
+                      type="checkbox"
+                      {...register('gameCornerSupporter')}
+                      className="mr-2"
+                    />
+                    <span>Ich unterstütze die Spiele-Ecke mit eigener Hardware</span>
+                  </div>
+                  <div className="flex items-center">
+                    <FormInput type="checkbox" {...register('dailyLunch')} className="mr-2" />
+                    <span>
+                      Ich wünsche mir ein tägliches Mittagessen in der Halle (Möglichkeiten werden
+                      noch geprüft)
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <FormInput type="checkbox" {...register('talk')} className="mr-2" />
+                    <span>Ich plane einen Vortrag</span>
+                  </div>
+                </div>
+              </FormFieldset>
+
+              <FormFieldset title="Tische">
+                <FormField
+                  label="Gewünschte Anzahl Tische (je 165cm x 80cm)"
+                  error={errors.tables?.message}>
+                  <FormSelect
+                    {...register('tables', {
+                      required: 'Bitte wähle aus, wie viele Tische Deine Ausstellung belegen wird',
+                    })}>
                     <option></option>
                     <option value={0}>kein Tisch</option>
                     <option value={1}>1</option>
                     <option value={2}>2 (wenn verfügbar)</option>
-                  </select>
-                  {errors.name && (
-                    <div>Bitte wähle aus, wie viele Tische Deine Ausstellung belegen wird</div>
-                  )}
-                </label>
-                <label>
-                  Ich wünsche mir einen Tisch neben:
-                  <input type="text" {...register('tableNextTo')} />
-                </label>
-              </fieldset>
-              <fieldset>
-                <label>
-                  Mitteilung ans Orga-Team:
-                  <textarea rows={5} {...register('message')}></textarea>
-                </label>
-              </fieldset>
-              <button type="submit">Anmeldung absenden</button>
+                  </FormSelect>
+                </FormField>
+                <FormField label="Ich wünsche mir einen Tisch neben:">
+                  <FormInput type="text" {...register('tableNextTo')} />
+                </FormField>
+              </FormFieldset>
+
+              <FormFieldset title="Mitteilungen">
+                <FormField label="Mitteilung ans Orga-Team:">
+                  <FormTextarea rows={5} {...register('message')} />
+                </FormField>
+              </FormFieldset>
+
+              <div className="flex justify-center">
+                <button
+                  type="submit"
+                  className="rounded-md bg-blue-600 px-6 py-3 font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                  Anmeldung absenden
+                </button>
+              </div>
             </form>
           </>
         )
@@ -287,40 +322,39 @@ const Register = () => {
   }
 
   return (
-    <div>
-      <div>
-        <PageHeading>Classic Computing 2025</PageHeading>
-        <img src="/vzekc-logo-transparent-border.png" alt="VzEkC Logo" />
-      </div>
-      <div>
-        <span>Classic Computing 2025</span>
-        <img src="/vzekc-logo-transparent-border.png" alt="VzEkC Logo" />
-      </div>
+    <div className="mx-auto max-w-4xl px-4 py-8">
+      <RetroHeader />
       {content()}
-      <footer>
-        <p>
-          <span>
+      <footer className="mt-12 border-t border-gray-200 pt-8">
+        <div className="flex flex-col items-center justify-between space-y-4 sm:flex-row sm:space-y-0">
+          <p className="text-sm text-gray-600">
             Die Classic Computing 2025 ist eine Veranstaltung des{' '}
-            <a href="https://vzekc.de" target="_blank" rel="noreferrer nofollow">
+            <a
+              href="https://vzekc.de"
+              target="_blank"
+              rel="noreferrer nofollow"
+              className="text-blue-600 hover:text-blue-800">
               VzEkC e.V.
             </a>
-          </span>
-          <span>
+          </p>
+          <div className="text-sm text-gray-600">
             <a
               href="https://classic-computing.de/impressum"
               target="_blank"
-              rel="noreferrer nofollow">
+              rel="noreferrer nofollow"
+              className="text-blue-600 hover:text-blue-800">
               Impressum
             </a>{' '}
             |{' '}
             <a
               href="https://forum.classic-computing.de/index.php?datenschutzerklaerung/"
               target="_blank"
-              rel="noreferrer nofollow">
+              rel="noreferrer nofollow"
+              className="text-blue-600 hover:text-blue-800">
               Datenschutz
             </a>
-          </span>
-        </p>
+          </div>
+        </div>
       </footer>
     </div>
   )

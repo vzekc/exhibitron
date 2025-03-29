@@ -3,6 +3,10 @@ import React, { useEffect, useState } from 'react'
 import { graphql } from 'gql.tada'
 import { useMutation, useApolloClient } from '@apollo/client'
 import { useExhibitor } from '@contexts/ExhibitorContext.ts'
+import Card from '@components/Card.tsx'
+import { FormField } from '@components/FormField'
+import { FormFieldset } from '@components/FormFieldset'
+import { FormInput } from '@components/FormInput'
 
 const SET_PASSWORD = graphql(`
   mutation SetPassword($token: String!, $password: String!) {
@@ -120,50 +124,63 @@ const SetupExhibitor = () => {
 
   if (!registrationMethod) {
     return (
-      <article>
-        <h2>Registrierung abschließen</h2>
-        <p>Bitte wähle, wie Du Dich registrieren möchtest:</p>
-        <div>
-          <button onClick={() => setRegistrationMethod('password')}>Kennwort setzen</button>
-          <button onClick={handleForumLink}>
+      <Card className="mx-auto max-w-3xl">
+        <h2 className="mb-4 text-2xl font-bold text-gray-900">Registrierung abschließen</h2>
+        <p className="mb-6 text-gray-700">Bitte wähle, wie Du Dich registrieren möchtest:</p>
+        <div className="flex flex-col gap-4 sm:flex-row">
+          <button
+            onClick={() => setRegistrationMethod('password')}
+            className="flex-1 rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+            Kennwort setzen
+          </button>
+          <button
+            onClick={handleForumLink}
+            className="flex-1 rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
             Mit Account auf forum.classic-computing.de verknüpfen
           </button>
         </div>
-      </article>
+      </Card>
     )
   }
 
   return (
-    <article>
-      <h2>Neues Kennwort setzen</h2>
-      <form onSubmit={handlePasswordSubmit}>
-        <label>
-          Kennwort:
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </label>
-        <label>
-          Kennwort bestätigen:
-          <input
-            type="password"
-            value={passwordConfirm}
-            onChange={(e) => setPasswordConfirm(e.target.value)}
-            required
-          />
-        </label>
-        {error && <p>{error}</p>}
-        <div>
-          <button type="submit">Kennwort setzen</button>
-          <button type="button" onClick={() => setRegistrationMethod(null)}>
+    <Card className="mx-auto max-w-3xl">
+      <h2 className="mb-6 text-2xl font-bold text-gray-900">Neues Kennwort setzen</h2>
+      <form onSubmit={handlePasswordSubmit} className="space-y-6">
+        <FormFieldset title="Kennwort">
+          <FormField label="Kennwort" error={error || undefined}>
+            <FormInput
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </FormField>
+          <FormField label="Kennwort bestätigen" error={error || undefined}>
+            <FormInput
+              type="password"
+              value={passwordConfirm}
+              onChange={(e) => setPasswordConfirm(e.target.value)}
+              required
+            />
+          </FormField>
+        </FormFieldset>
+
+        <div className="flex justify-center gap-4">
+          <button
+            type="submit"
+            className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+            Kennwort setzen
+          </button>
+          <button
+            type="button"
+            onClick={() => setRegistrationMethod(null)}
+            className="rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
             Zurück
           </button>
         </div>
       </form>
-    </article>
+    </Card>
   )
 }
 

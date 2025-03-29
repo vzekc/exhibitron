@@ -106,14 +106,14 @@ const Exhibit = () => {
           {bookmarked ? 'Lesezeichen' : 'Lesezeichen'}
         </Button>
         {canEdit && (
-          <>
-            <Button onClick={handleEdit} variant="secondary" icon="edit">
-              Bearbeiten
-            </Button>
-            <Button onClick={handleDelete} variant="danger" icon="delete">
-              Löschen
-            </Button>
-          </>
+          <Button onClick={handleEdit} variant="secondary" icon="edit">
+            Bearbeiten
+          </Button>
+        )}
+        {canEdit && (
+          <Button onClick={handleDelete} variant="danger" icon="delete">
+            Löschen
+          </Button>
         )}
       </ActionBar>
       <Confirm

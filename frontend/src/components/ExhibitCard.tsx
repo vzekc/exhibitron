@@ -90,7 +90,11 @@ const ExhibitCard = ({ id }: { id: number }) => {
         </Article>
       )}
 
-      {exhibit.table && <TableChip number={exhibit.table.number} />}
+      {exhibit.table && (
+        <div className="mt-3">
+          <TableChip number={exhibit.table.number} />
+        </div>
+      )}
     </section>
   )
 }

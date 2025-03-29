@@ -153,34 +153,34 @@ const Table = () => {
   if (!exhibitor) {
     return (
       <article>
-        <h2>Dieser Tisch ist nicht belegt.</h2>
-        <Actions />
-      </article>
-    )
-  } else {
-    return (
-      <article>
-        {onThisTableExhibits?.length ? (
-          <>
-            <OneOrMoreExhibits exhibits={onThisTableExhibits} />
-            <OtherExhibits
-              exhibits={otherExhibitorExhibits}
-              title={`Andere Exponate von ${exhibitor.user.fullName}`}
-            />
-          </>
-        ) : (
-          <>
-            <OneOrMoreExhibits exhibits={noTableExhibits} />
-            <OtherExhibits
-              exhibits={onAnyTableExhibits}
-              title={`Exponate von ${exhibitor.user.fullName} auf anderen Tischen`}
-            />
-          </>
-        )}
+        <h2>Der Tisch {number} ist nicht belegt.</h2>
         <Actions />
       </article>
     )
   }
+  if (!onThisTableExhibits?.length && !onAnyTableExhibits?.length) {
+    return <ExhibitorCard exhibitor={exhibitor} />
+  }
+  if (onThisTableExhibits?.length) {
+    return (
+      <article>
+        <OneOrMoreExhibits exhibits={onThisTableExhibits} />
+        <OtherExhibits
+          exhibits={otherExhibitorExhibits}
+          title={`Andere Exponate von ${exhibitor.user.fullName}`}
+        />
+      </article>
+    )
+  }
+  return (
+    <article>
+      <OneOrMoreExhibits exhibits={noTableExhibits} />
+      <OtherExhibits
+        exhibits={onAnyTableExhibits}
+        title={`Exponate von ${exhibitor.user.fullName} auf anderen Tischen`}
+      />
+    </article>
+  )
 }
 
 export default Table

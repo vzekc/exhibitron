@@ -7,6 +7,7 @@ import ExhibitChip from '../ExhibitChip'
 import { FragmentOf } from 'gql.tada'
 import { graphql } from 'gql.tada'
 import { useMutation } from '@apollo/client'
+import TableChip from '@components/TableChip.tsx'
 
 const GET_TABLES = graphql(
   `
@@ -246,19 +247,11 @@ const TableInfoPanel: React.FC<TableInfoPanelProps> = ({
 
   return (
     <div
-      className="table-info-panel fixed z-50 max-w-[400px] overflow-hidden rounded-t-xl bg-white shadow-lg md:relative md:rounded-lg"
+      className="table-info-panel fixed z-50 max-w-[400px] overflow-hidden rounded-t-xl bg-green-100 shadow-lg md:relative md:rounded-lg"
       style={style}
       ref={measureRef}>
-      <div className="flex items-center justify-between border-b border-gray-300 bg-gray-100 px-4 py-3">
-        <h3 className="m-0 text-lg font-medium">Tisch {selectedTable}</h3>
-        <button
-          onClick={onClose}
-          className="cursor-pointer border-0 bg-transparent p-0 text-2xl leading-none text-gray-600 hover:text-black">
-          ×
-        </button>
-      </div>
-
       <div className="overflow-y-auto p-4">
+        <TableChip number={selectedTable} />
         {tableInfo ? (
           <div className="space-y-4">
             <ExhibitorChip exhibitor={tableInfo.exhibitor} />
@@ -279,7 +272,7 @@ const TableInfoPanel: React.FC<TableInfoPanelProps> = ({
             )}
           </div>
         ) : (
-          <p className="m-0 mb-4 text-gray-600">Dieser Tisch ist nicht belegt</p>
+          <p className="m-0 mb-4 text-gray-600">Tisch {selectedTable} ist nicht belegt</p>
         )}
       </div>
 
@@ -313,10 +306,9 @@ const TableInfoPanel: React.FC<TableInfoPanelProps> = ({
       {showReleaseConfirmation && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-            <h3 className="mb-4 text-lg font-medium">Tisch freigeben</h3>
+            <h3 className="mb-4 text-lg font-medium">Tisch {selectedTable} freigeben</h3>
             <p className="mb-4 text-gray-600">
-              Bist Du sicher, dass Du diesen Tisch freigeben möchtest? Diese Aktion kann nicht
-              rückgängig gemacht werden.
+              Bist Du sicher, dass Du den Tisch {selectedTable} freigeben möchtest?
             </p>
             <div className="flex justify-end gap-2">
               <Button variant="secondary" onClick={() => setShowReleaseConfirmation(false)}>
