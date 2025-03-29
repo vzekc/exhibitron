@@ -9,6 +9,7 @@ import Register from './pages/Register.tsx'
 import Login from './pages/Login.tsx'
 import RegistrationList from './pages/admin/RegistrationList.tsx'
 import RegistrationDetails from './pages/admin/RegistrationDetails.tsx'
+import TableLabels from './pages/admin/TableLabels.tsx'
 import MainLayout from '@components/MainLayout.tsx'
 import NotFound from './pages/NotFound.tsx'
 import RequestPasswordReset from './pages/RequestPasswordReset.tsx'
@@ -73,6 +74,7 @@ const routes: RouteObject[] = [
           { path: 'registration/:id', element: <RegistrationDetails /> },
           { path: 'page', element: <PageList /> },
           { path: 'page/:key', element: <PageEditor /> },
+          { path: 'tableLabels', element: <TableLabels /> },
         ],
       },
       { path: '/table', element: <Tables /> },

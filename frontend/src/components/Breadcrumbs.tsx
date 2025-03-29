@@ -17,6 +17,7 @@ const breadcrumbMap: { [key: string]: string } = {
   '/admin': 'Verwaltung',
   '/admin/page': 'Seiten',
   '/admin/registration': 'Anmeldungen',
+  '/admin/tableLabels': 'Tisch-Labels',
   '/resetPassword': 'Passwort zurücksetzen',
   '/setupExhibitor': 'Registrierung abschließen',
   '/help': 'Hilfe',
