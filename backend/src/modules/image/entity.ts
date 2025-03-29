@@ -1,11 +1,12 @@
-import { Entity, ManyToOne, Property } from '@mikro-orm/core'
+import { Entity, Property, Unique, EntityRepositoryType } from '@mikro-orm/core'
 import { BaseEntity } from '../common/base.entity.js'
-import { Exhibit } from '../exhibit/entity.js'
-import { Page } from '../page/entity.js'
+import { ImageRepository } from './repository.js'
 
-@Entity()
-export class Image extends BaseEntity {
-  @Property({ columnType: 'bytea' })
+@Entity({ repository: () => ImageRepository })
+export class ImageStorage extends BaseEntity {
+  [EntityRepositoryType]?: ImageRepository
+
+  @Property({ columnType: 'bytea', lazy: true })
   data!: Buffer
 
   @Property()
@@ -14,9 +15,13 @@ export class Image extends BaseEntity {
   @Property()
   filename!: string
 
-  @ManyToOne({ nullable: true })
-  exhibit?: Exhibit
+  @Property()
+  @Unique()
+  slug!: string
 
-  @ManyToOne({ nullable: true })
-  page?: Page
+  @Property()
+  width!: number
+
+  @Property()
+  height!: number
 }

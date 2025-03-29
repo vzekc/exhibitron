@@ -1,5 +1,6 @@
-import Modal from './Modal.tsx'
 import React from 'react'
+import Modal from './Modal.tsx'
+import Button from './Button.tsx'
 
 interface ConfirmProps {
   title: string
@@ -21,10 +22,14 @@ const Confirm: React.FC<ConfirmProps> = ({
   isOpen,
 }) => (
   <Modal isOpen={isOpen} title={title} onClose={onClose}>
-    <p>{message}</p>
-    <footer>
-      <button onClick={onConfirm}>{confirm}</button>
-      <button onClick={onClose}>{cancel}</button>
+    <p className="mb-6 text-gray-700">{message}</p>
+    <footer className="flex justify-end space-x-2 border-t border-gray-200 pt-4">
+      <Button variant="secondary" onClick={onClose}>
+        {cancel}
+      </Button>
+      <Button variant="danger" onClick={onConfirm}>
+        {confirm}
+      </Button>
     </footer>
   </Modal>
 )

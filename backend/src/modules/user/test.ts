@@ -1,6 +1,6 @@
 import { expect, MockedFunction, vi, beforeAll } from 'vitest'
 import { graphql } from 'gql.tada'
-import { graphqlTest, login } from '../../test/apollo.js'
+import { graphqlTest, login } from '../../test/server.js'
 import { sendEmail } from '../common/sendEmail.js'
 
 vi.mock('../common/sendEmail')
@@ -24,7 +24,7 @@ graphqlTest('login', async (graphqlRequest) => {
     expect(result.data?.getCurrentUser).toBeNull()
   }
 
-  const session = await login(graphqlRequest, 'meistereder@example.com', 'password123')
+  const session = await login('meistereder@example.com', 'password123')
 
   {
     const result = await graphqlRequest(
@@ -47,7 +47,7 @@ graphqlTest('login', async (graphqlRequest) => {
 })
 
 graphqlTest('update', async (graphqlRequest) => {
-  const session = await login(graphqlRequest, 'meistereder@example.com', 'password123')
+  const session = await login('meistereder@example.com', 'password123')
 
   {
     const result = await graphqlRequest(
@@ -85,7 +85,7 @@ graphqlTest('lookups', async (graphqlRequest) => {
     expect(result.errors![0].message).toBe('You must be an administrator to perform this operation')
   }
 
-  const admin = await login(graphqlRequest, 'admin@example.com')
+  const admin = await login('admin@example.com')
 
   {
     const result = await graphqlRequest(
@@ -130,7 +130,7 @@ graphqlTest('lookups', async (graphqlRequest) => {
 })
 
 graphqlTest('profile', async (graphqlRequest) => {
-  const admin = await login(graphqlRequest, 'admin@example.com')
+  const admin = await login('admin@example.com')
   {
     const result = await graphqlRequest(
       graphql(`
@@ -149,7 +149,7 @@ graphqlTest('profile', async (graphqlRequest) => {
     })
   }
 
-  const donald = await login(graphqlRequest, 'donald@example.com')
+  const donald = await login('donald@example.com')
   {
     const result = await graphqlRequest(
       graphql(`
@@ -170,7 +170,7 @@ graphqlTest('profile', async (graphqlRequest) => {
 })
 
 graphqlTest('user list', async (graphqlRequest) => {
-  const admin = await login(graphqlRequest, 'admin@example.com')
+  const admin = await login('admin@example.com')
   {
     const result = await graphqlRequest(
       graphql(`
@@ -220,7 +220,7 @@ graphqlTest('password reset', async (graphqlRequest) => {
     expect(result.errors).toBeUndefined()
   }
 
-  const donald = await login(graphqlRequest, 'donald@example.com', 'newpassword')
+  const donald = await login('donald@example.com', 'newpassword')
   {
     const result = await graphqlRequest(
       graphql(`

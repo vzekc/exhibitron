@@ -2,8 +2,11 @@ import { useState, useEffect } from 'react'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useApolloClient, useLazyQuery, useMutation } from '@apollo/client'
-import { useUser } from '../contexts/UserContext'
+import { useExhibitor } from '@contexts/ExhibitorContext.ts'
 import { graphql } from 'gql.tada'
+import PageHeading from '../components/PageHeading'
+import '../styles/auth.css'
+import { ExhibitorProvider } from '@contexts/ExhibitorProvider.tsx'
 
 type Inputs = {
   email: string
@@ -31,7 +34,7 @@ const Login = () => {
   const [processedRedirectParam, setProcessedRedirectParam] = useState(false)
   const [state, setState] = useState<State>('forumLogin')
   const apolloClient = useApolloClient()
-  const { user, reloadUser } = useUser()
+  const { exhibitor, reloadExhibitor } = useExhibitor()
   const email = watch('email')
   const password = watch('password')
   const [isForumUser] = useLazyQuery(IS_FORUM_USER)
@@ -49,7 +52,7 @@ const Login = () => {
       onCompleted: async (data) => {
         if (data.login) {
           await apolloClient.clearStore()
-          await reloadUser()
+          await reloadExhibitor()
           // Redirect will happen in the useEffect above
         } else {
           setLoginFailed(true)
@@ -84,15 +87,16 @@ const Login = () => {
   useEffect(() => {
     const checkState = async () => {
       setLoginFailed(false)
-      if (password !== '') {
-        setState('passwordEntered')
-      } else if (email !== '') {
-        setState('waitingForPassword')
+      if (email !== '') {
         if (isValidEmail(email)) {
           const { data } = await isForumUser({ variables: { email } })
-          if (data?.isForumUser) {
+          if (data?.isForumUser && !password) {
             setState('forumLogin')
+          } else {
+            setState('passwordEntered')
           }
+        } else {
+          setState('passwordEntered')
         }
       } else {
         setState('forumLogin')
@@ -104,12 +108,12 @@ const Login = () => {
 
   // If user is already logged in, redirect to the redirectUrl
   useEffect(() => {
-    if (user) {
+    if (exhibitor) {
       // Clear the redirectUrl from session storage
       sessionStorage.removeItem('redirectUrl')
       navigate(redirectUrl, { replace: true })
     }
-  }, [user, navigate, redirectUrl])
+  }, [exhibitor, navigate, redirectUrl])
 
   // Process error parameter if present
   useEffect(() => {
@@ -145,73 +149,74 @@ const Login = () => {
     navigate('/requestPasswordReset')
   }
 
-  // Button style to make them full width
-  const buttonStyle = {
-    width: '100%',
-    marginBottom: '0.75rem',
-  }
-
   return (
-    <div className="container">
-      <div className="grid">
-        <div></div>
+    <div className="min-h-screen bg-gray-50 py-12">
+      <div className="auth-container">
         <article>
-          <header>
-            <h1>Login</h1>
+          <header className="mb-8">
+            <PageHeading>Login</PageHeading>
           </header>
           <form
+            className="auth-form"
             onSubmit={handleSubmit(loginHandler)}
             onChange={() => {
               setLoginFailed(false)
               setErrorMessage(null)
             }}>
-            <div>
-              <label htmlFor="email">
+            <div className="auth-form-group">
+              <label htmlFor="email" className="auth-label">
                 Email-Adresse
-                <input id="email" type="email" {...register('email', { required: true })} />
+                <input
+                  id="email"
+                  type="email"
+                  className="auth-input"
+                  {...register('email', { required: true })}
+                />
               </label>
             </div>
-            <div
-              className={
-                state === 'forumLogin' || !isValidEmail(email) ? 'password-input-hidden' : ''
-              }>
-              <label htmlFor="password">
+            <div className={`auth-form-group ${email === '' ? 'password-input-hidden' : ''}`}>
+              <label htmlFor="password" className="auth-label">
                 Passwort
                 <input
                   id="password"
                   type="password"
+                  className="auth-input"
                   {...register('password', { required: true })}
                 />
               </label>
             </div>
-            {/* Error message area - always takes up space */}
-            <div style={{ minHeight: '1.5rem', marginBottom: '1rem' }}>
+            {/* Error message area */}
+            <div className="min-h-[24px]">
               {loginFailed && (
-                <div className="login-error">{errorMessage || 'Ungültige Login-Informationen'}</div>
+                <div className="auth-error">{errorMessage || 'Ungültige Login-Informationen'}</div>
               )}
             </div>
             {state === 'forumLogin' ? (
-              <button type="button" className="secondary" style={buttonStyle} onClick={forumLogin}>
+              <button type="button" className="auth-button" onClick={forumLogin}>
                 Über das VzEkC-Forum anmelden
               </button>
             ) : (
               <button
                 type="submit"
-                className="primary"
-                style={buttonStyle}
+                className="auth-button"
                 disabled={state !== 'passwordEntered' || loggingIn}>
                 Login
               </button>
             )}
-            <button type="button" className="outline" style={buttonStyle} onClick={forgotPassword}>
+            <button type="button" className="auth-button-secondary" onClick={forgotPassword}>
               Passwort vergessen
             </button>
           </form>
         </article>
-        <div></div>
       </div>
     </div>
   )
 }
 
-export default Login
+export default function LoginWithProvider() {
+  return (
+    <ExhibitorProvider>
+      <Login />
+    </ExhibitorProvider>
+  )
+}

@@ -18,6 +18,17 @@ export const tableMutations: MutationResolvers<Context> = {
   },
   // @ts-expect-error ts2345
   releaseTable: async (_, { number }, { db, exhibition, exhibitor, user }) => {
+    // Find all exhibits associated with this table
+    const table = await db.table.findOneOrFail({ exhibition, number })
+    const exhibits = await db.exhibit.find({ table })
+
+    // Unassign all exhibits from the table
+    for (const exhibit of exhibits) {
+      exhibit.table = undefined
+    }
+    await db.em.flush()
+
+    // Now release the table
     return await db.table.release(exhibition, number, user?.isAdministrator ? null : exhibitor)
   },
   // @ts-expect-error ts2345

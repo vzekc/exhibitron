@@ -1,25 +1,25 @@
 // App.tsx
 import { useRoutes } from 'react-router-dom'
-import '@picocss/pico/css/pico.min.css'
-import ErrorBoundary from './components/ErrorBoundary.tsx'
+import ErrorBoundary from '@components/ErrorBoundary.tsx'
 import routes from './routes.tsx'
-import { BuildInfo } from './components/BuildInfo'
-import './App.css'
+import BuildInfo from '@components/BuildInfo.tsx'
 
 const App = () => {
   const element = useRoutes(routes)
 
   return (
-    <div className="app-container min-h-screen flex flex-col">
-      <main className="container flex-grow">
+    <div className="min-h-screen bg-gray-50">
+      <main className="m-6 pb-8">
         <ErrorBoundary
           fallback={
-            <p style={{ color: 'red' }}>Irgendwas ist schief gegangen - Versuch's noch mal!</p>
+            <p className="p-4 text-red-600">Irgendwas ist schief gegangen - Versuch's noch mal!</p>
           }>
           {element}
         </ErrorBoundary>
       </main>
-      <BuildInfo />
+      <footer className="border-t border-gray-200 bg-white">
+        <BuildInfo />
+      </footer>
     </div>
   )
 }

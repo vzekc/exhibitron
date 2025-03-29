@@ -1,6 +1,6 @@
 import { expect } from 'vitest'
 import { graphql } from 'gql.tada'
-import { ExecuteOperationFunction, graphqlTest, login } from '../../test/apollo.js'
+import { ExecuteOperationFunction, graphqlTest, login } from '../../test/server.js'
 
 const getUserToExhibitorMap = async (graphqlRequest: ExecuteOperationFunction) => {
   const result = await graphqlRequest(
@@ -27,9 +27,9 @@ const getUserToExhibitorMap = async (graphqlRequest: ExecuteOperationFunction) =
 
 graphqlTest('claim and release', async (graphqlRequest) => {
   const userToExhibitorMap = await getUserToExhibitorMap(graphqlRequest)
-  const donald = await login(graphqlRequest, 'donald@example.com')
-  const daffy = await login(graphqlRequest, 'daffy@example.com')
-  const admin = await login(graphqlRequest, 'admin@example.com')
+  const donald = await login('donald@example.com')
+  const daffy = await login('daffy@example.com')
+  const admin = await login('admin@example.com')
 
   // verify table can be claimed
   {

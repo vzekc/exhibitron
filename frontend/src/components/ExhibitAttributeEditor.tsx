@@ -1,8 +1,10 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { graphql } from 'gql.tada'
 import { useMutation, useQuery } from '@apollo/client'
 import { DndProvider, useDrag, useDrop } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
+import { ExhibitAttributeSelector } from './ExhibitAttributeSelector.tsx'
+import { showMessage } from './MessageModalUtil'
 
 const GET_EXHIBIT_ATTRIBUTES = graphql(`
   query GetExhibitAttributes {
@@ -41,20 +43,16 @@ interface DraggableAttributeItemProps {
   index: number
   attr: Attribute
   moveAttribute: (dragIndex: number, hoverIndex: number) => void
-  handleAttributeNameChange: (index: number, name: string) => void
   handleAttributeValueChange: (index: number, value: string) => void
   handleRemoveAttribute: (index: number) => void
-  availableAttributes: Array<{ id: number; name: string }>
 }
 
 const DraggableAttributeItem = ({
   index,
   attr,
   moveAttribute,
-  handleAttributeNameChange,
   handleAttributeValueChange,
   handleRemoveAttribute,
-  availableAttributes,
 }: DraggableAttributeItemProps) => {
   const ref = useRef<HTMLDivElement>(null)
 
@@ -123,63 +121,84 @@ const DraggableAttributeItem = ({
   return (
     <div
       ref={ref}
-      className="attribute-item grid"
-      style={{
-        marginBottom: '1rem',
-        opacity: isDragging ? 0.5 : 1,
-        cursor: 'move',
-        padding: '0.5rem',
-        border: '1px dashed #ccc',
-        backgroundColor: '#f9f9f9',
-      }}>
-      <div>
-        <select
-          value={attr.name}
-          onChange={(e) => handleAttributeNameChange(index, e.target.value)}>
-          <option value="">Attribut auswählen</option>
-          {availableAttributes.map((availableAttr) => (
-            <option key={availableAttr.id} value={availableAttr.name}>
-              {availableAttr.name}
-            </option>
-          ))}
-        </select>
+      className={`flex items-center space-x-4 rounded p-2 ${isDragging ? 'bg-gray-100' : 'bg-white'} mb-2 border border-gray-200`}>
+      {/* Drag handle */}
+      <div className="flex-shrink-0 cursor-move text-gray-400">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round">
+          <line x1="8" y1="6" x2="16" y2="6"></line>
+          <line x1="8" y1="12" x2="16" y2="12"></line>
+          <line x1="8" y1="18" x2="16" y2="18"></line>
+        </svg>
       </div>
-      <div>
+
+      {/* Attribute name (displayed as label) */}
+      <div className="min-w-[120px] flex-shrink-0 font-medium">{attr.name}</div>
+
+      {/* Value input */}
+      <div className="flex-grow">
         <input
           type="text"
           value={attr.value}
           onChange={(e) => handleAttributeValueChange(index, e.target.value)}
           placeholder="Wert"
+          className="w-full rounded border border-gray-300 p-2"
         />
       </div>
-      <div>
-        <button className="secondary outline" onClick={() => handleRemoveAttribute(index)}>
-          Entfernen
-        </button>
-      </div>
+
+      {/* Remove button */}
+      <button
+        onClick={() => handleRemoveAttribute(index)}
+        className="flex-shrink-0 p-2 text-red-500 hover:text-red-700"
+        aria-label="Entfernen">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
     </div>
   )
 }
 
 const ExhibitAttributeEditor = ({ attributes, onChange }: ExhibitAttributeEditorProps) => {
-  const [showNewAttributeInput, setShowNewAttributeInput] = useState(false)
-  const [newAttributeName, setNewAttributeName] = useState('')
+  const [showAddAttributeInput, setShowAddAttributeInput] = useState(false)
 
   const { data: attributesData } = useQuery(GET_EXHIBIT_ATTRIBUTES)
   const [createExhibitAttribute] = useMutation(CREATE_EXHIBIT_ATTRIBUTE)
 
-  const handleAddAttribute = () => {
-    onChange([...attributes, { name: '', value: '' }])
-  }
-
-  const handleAttributeNameChange = (index: number, name: string) => {
-    if (name.includes(':')) {
-      alert('Attributnamen dürfen keine Doppelpunkte enthalten.')
-      return
+  // Add event listener for Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showAddAttributeInput) {
+        setShowAddAttributeInput(false)
+      }
     }
-    const newAttributes = [...attributes]
-    newAttributes[index] = { ...newAttributes[index], name }
-    onChange(newAttributes)
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [showAddAttributeInput])
+
+  const handleAddAttribute = () => {
+    setShowAddAttributeInput(true)
   }
 
   const handleAttributeValueChange = (index: number, value: string) => {
@@ -206,17 +225,36 @@ const ExhibitAttributeEditor = ({ attributes, onChange }: ExhibitAttributeEditor
     onChange(newAttributes)
   }
 
-  const handleCreateNewAttribute = async () => {
-    const trimmedName = newAttributeName.trim()
+  const handleCreateNewAttribute = async (name: string) => {
+    const trimmedName = name.trim()
     if (trimmedName && !trimmedName.includes(':')) {
-      await createExhibitAttribute({
-        variables: { name: trimmedName },
-        refetchQueries: [{ query: GET_EXHIBIT_ATTRIBUTES }],
-      })
-      setNewAttributeName('')
-      setShowNewAttributeInput(false)
+      try {
+        await createExhibitAttribute({
+          variables: { name: trimmedName },
+          refetchQueries: [{ query: GET_EXHIBIT_ATTRIBUTES }],
+        })
+        return true
+      } catch (error) {
+        console.error('Error creating attribute:', error)
+        return false
+      }
     } else if (trimmedName.includes(':')) {
-      alert('Attributnamen dürfen keine Doppelpunkte enthalten.')
+      await showMessage('Ungültiger Name', 'Attributnamen dürfen keine Doppelpunkte enthalten.')
+      return false
+    }
+    return false
+  }
+
+  const handleSelectAttribute = (name: string) => {
+    onChange([...attributes, { name, value: '' }])
+    setShowAddAttributeInput(false)
+  }
+
+  const handleCreateAttributeFromComboBox = async (name: string) => {
+    const success = await handleCreateNewAttribute(name)
+    if (success) {
+      // After creation, add the new attribute to the list
+      handleSelectAttribute(name)
     }
   }
 
@@ -224,61 +262,46 @@ const ExhibitAttributeEditor = ({ attributes, onChange }: ExhibitAttributeEditor
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="attributes-section">
-        <h3>Attribute</h3>
+      <div className="rounded-lg bg-white p-2">
         {attributes.length === 0 ? (
-          <p>Keine Attribute vorhanden</p>
+          <p className="mb-4 italic text-gray-500">Keine Attribute vorhanden</p>
         ) : (
-          <div className="attributes-list">
+          <div className="mb-4">
             {attributes.map((attr, index) => (
               <DraggableAttributeItem
                 key={index}
                 index={index}
                 attr={attr}
                 moveAttribute={moveAttribute}
-                handleAttributeNameChange={handleAttributeNameChange}
                 handleAttributeValueChange={handleAttributeValueChange}
                 handleRemoveAttribute={handleRemoveAttribute}
-                availableAttributes={availableAttributes}
               />
             ))}
           </div>
         )}
 
-        <div className="attribute-actions" style={{ marginTop: '1rem', marginBottom: '2rem' }}>
-          <button className="secondary" onClick={handleAddAttribute}>
-            Attribut hinzufügen
-          </button>
-          <button
-            className="secondary"
-            onClick={() => setShowNewAttributeInput(true)}
-            style={{ marginLeft: '0.5rem' }}>
-            Neues Attribut erstellen
-          </button>
-        </div>
-
-        {showNewAttributeInput && (
-          <div className="new-attribute-form grid" style={{ marginBottom: '2rem' }}>
-            <div>
-              <input
-                type="text"
-                value={newAttributeName}
-                onChange={(e) => setNewAttributeName(e.target.value)}
-                placeholder="Name des neuen Attributs"
-              />
-            </div>
-            <div>
-              <button onClick={handleCreateNewAttribute}>Erstellen</button>
+        {showAddAttributeInput ? (
+          <div className="mb-4 rounded border border-gray-200 p-3">
+            <ExhibitAttributeSelector
+              options={availableAttributes}
+              onSelect={handleSelectAttribute}
+              onCreateNew={handleCreateAttributeFromComboBox}
+            />
+            <div className="mt-2 flex justify-end">
               <button
-                className="secondary outline"
-                onClick={() => {
-                  setShowNewAttributeInput(false)
-                  setNewAttributeName('')
-                }}
-                style={{ marginLeft: '0.5rem' }}>
+                onClick={() => setShowAddAttributeInput(false)}
+                className="rounded bg-gray-300 px-3 py-1 text-sm text-gray-700 hover:bg-gray-400">
                 Abbrechen
               </button>
             </div>
+          </div>
+        ) : (
+          <div className="mt-4 flex space-x-2">
+            <button
+              onClick={handleAddAttribute}
+              className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
+              Attribut hinzufügen
+            </button>
           </div>
         )}
       </div>

@@ -1,5 +1,6 @@
 import { defineConfig, Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
+import tsConfigPaths from 'vite-tsconfig-paths'
 import * as path from 'path'
 import { makeBuildInfo } from './src/build/makeBuildInfo.js' assert { type: 'js' }
 
@@ -23,7 +24,7 @@ const generateBuildInfoPlugin = (): Plugin => {
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), generateBuildInfoPlugin()],
+  plugins: [react(), generateBuildInfoPlugin(), tsConfigPaths()],
   server: {
     proxy: {
       '/graphql': backend,
@@ -38,5 +39,8 @@ export default defineConfig({
         main: path.resolve(__dirname, 'index.html'),
       },
     },
+  },
+  css: {
+    postcss: './postcss.config.js',
   },
 })

@@ -1,25 +1,21 @@
-import { getBookmarks } from '../utils/bookmarks.ts'
-import ExhibitList from '../components/ExhibitList.tsx'
+import { getBookmarks } from '@utils/bookmarks.ts'
+import ChipContainer from '@components/ChipContainer.tsx'
+import ExhibitChip from '@components/ExhibitChip.tsx'
+import { FragmentOf } from 'gql.tada'
+
+type ExhibitCardItem = FragmentOf<typeof ExhibitChip.fragment>
 
 const Bookmarks = () => {
-  // fixme bookmark types?!
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const bookmarks = (getBookmarks().exhibits as any)
-    .map(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ({ exhibitor, ...e }: { exhibitor: any }) => ({
-        ...e,
-        exhibitorId: exhibitor.id!,
-        exhibitorName: exhibitor.fullName!,
-      }),
-    )
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .sort((a: any, b: any) => a.title.localeCompare(b.title))
+  const bookmarks = getBookmarks().exhibits as ExhibitCardItem[]
 
   return (
     <article>
       {bookmarks.length ? (
-        <ExhibitList notFoundLabel="Keine Lesezeichen gefunden" exhibits={bookmarks} />
+        <ChipContainer>
+          {bookmarks.map((exhibit, index: number) => (
+            <ExhibitChip key={index} exhibit={exhibit} />
+          ))}
+        </ChipContainer>
       ) : (
         <p>Hier findest Du die Exponate, die Du mit einem Lesezeichen versehen hast.</p>
       )}

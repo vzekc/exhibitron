@@ -1,40 +1,32 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import React, { useEffect } from 'react'
-import ExhibitList, { ExhibitDisplayListItem } from '../components/ExhibitList.tsx'
-import { useUser } from '../contexts/UserContext.ts'
-import { graphql } from 'gql.tada'
+import { useExhibitor } from '@contexts/ExhibitorContext.ts'
+import { FragmentOf, graphql } from 'gql.tada'
 import { useApolloClient, useMutation, useQuery } from '@apollo/client'
-import ExhibitorDetails from '../components/ExhibitorDetails.tsx'
-import ExhibitDetails from '../components/ExhibitDetails.tsx'
-import { useBreadcrumb } from '../contexts/BreadcrumbContext.ts'
+import ExhibitorCard from '@components/ExhibitorCard.tsx'
+import ExhibitCard from '@components/ExhibitCard.tsx'
+import { useBreadcrumb } from '@contexts/BreadcrumbContext.ts'
+import ExhibitChip from '@components/ExhibitChip.tsx'
+import ChipContainer from '@components/ChipContainer.tsx'
 
-const GET_TABLE = graphql(`
-  query GetTable($number: Int!) {
-    getTable(number: $number) {
-      exhibitor {
-        id
-        user {
-          id
-          fullName
-        }
-        exhibits {
-          id
-          title
-          table {
-            number
+const GET_TABLE = graphql(
+  `
+    query GetTable($number: Int!) {
+      getTable(number: $number) {
+        exhibitor {
+          ...ExhibitorDetails
+          exhibits {
+            ...ExhibitCard
           }
         }
-      }
-      exhibits {
-        id
-        title
-        table {
-          number
+        exhibits {
+          ...ExhibitCard
         }
       }
     }
-  }
-`)
+  `,
+  [ExhibitChip.fragment, ExhibitorCard.fragment],
+)
 
 const CLAIM_TABLE = graphql(`
   mutation ClaimTable($number: Int!) {
@@ -52,6 +44,8 @@ const RELEASE_TABLE = graphql(`
   }
 `)
 
+type ExhibitCardItem = FragmentOf<typeof ExhibitChip.fragment>
+
 const Table = () => {
   const { number } = useParams<{ number: string }>()
   const { data } = useQuery(GET_TABLE, { variables: { number: +number! } })
@@ -59,7 +53,7 @@ const Table = () => {
   const [claimTable] = useMutation(CLAIM_TABLE)
   const [releaseTable] = useMutation(RELEASE_TABLE)
   const navigate = useNavigate()
-  const { user: currentUser } = useUser()
+  const { exhibitor: currentUser } = useExhibitor()
   const { setDetailName } = useBreadcrumb()
 
   useEffect(() => {
@@ -91,18 +85,20 @@ const Table = () => {
   const noTableExhibits = exhibitorExhibits?.filter((exhibit) => !exhibit.table)
   const onAnyTableExhibits = exhibitorExhibits?.filter((exhibit) => exhibit.table)
 
-  const OneOrMoreExhibits = ({ exhibits }: { exhibits: ExhibitDisplayListItem[] | undefined }) => {
+  const OneOrMoreExhibits = ({ exhibits }: { exhibits: ExhibitCardItem[] | undefined }) => {
     switch (exhibits?.length) {
       case undefined:
       case 0:
         return <></>
       case 1:
-        return <ExhibitDetails {...exhibits[0]} />
+        return <ExhibitCard {...exhibits[0]} />
       default:
         return (
-          <section>
-            <ExhibitList exhibits={exhibits!} />
-          </section>
+          <ChipContainer>
+            {exhibits?.map((exhibit) => (
+              <ExhibitChip exhibit={exhibit} key={exhibit.id} noExhibitor noTable />
+            ))}
+          </ChipContainer>
         )
     }
   }
@@ -111,7 +107,7 @@ const Table = () => {
     exhibits,
     title,
   }: {
-    exhibits: ExhibitDisplayListItem[] | undefined
+    exhibits: ExhibitCardItem[] | undefined
     title: string
   }) => {
     switch (exhibits?.length) {
@@ -120,9 +116,13 @@ const Table = () => {
         return <></>
       default:
         return (
-          <section>
-            <h3>{title}</h3>
-            <ExhibitList exhibits={exhibits!} />
+          <section className="mb-3 mt-6">
+            <h3 className="mb-3 text-xl">{title}</h3>
+            <ChipContainer>
+              {exhibits?.map((exhibit, index: number) => (
+                <ExhibitChip key={index} exhibit={exhibit} noExhibitor />
+              ))}
+            </ChipContainer>
           </section>
         )
     }
@@ -139,7 +139,7 @@ const Table = () => {
       )
     } else if (
       !onThisTableExhibits?.length &&
-      (currentUser.id === exhibitor.user.id || currentUser.isAdministrator)
+      (currentUser.id === exhibitor.user.id || currentUser.user.isAdministrator)
     ) {
       return (
         <button onClick={handleReleaseTable.bind(null, tableNumber)} type="submit">
@@ -177,7 +177,6 @@ const Table = () => {
             />
           </>
         )}
-        <ExhibitorDetails id={exhibitor.id} />
         <Actions />
       </article>
     )

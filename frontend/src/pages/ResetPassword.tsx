@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation } from '@apollo/client'
 import { graphql } from 'gql.tada'
+import PageHeading from '../components/PageHeading'
+import '../styles/auth.css'
 
 const RESET_PASSWORD = graphql(`
   mutation ResetPassword($token: String!, $password: String!) {
@@ -50,42 +52,58 @@ const ResetPassword = () => {
   }
 
   return (
-    <article>
-      {message ? (
-        <p>{message}</p>
-      ) : (
-        <>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <label>
-              Neues Kennwort
-              <input
-                type="password"
-                {...register('password', {
-                  required: 'Kennwort ist erforderlich',
-                })}
-              />
-              {errors.password && (
-                <div className="validation-message">{errors.password.message}</div>
-              )}
-            </label>
-            <label>
-              Wiederhole neues Kennwort
-              <input
-                type="password"
-                {...register('passwordRepeat', {
-                  required: 'Kennwortwiederholung ist erforderlich',
-                  validate: (value) => value === password || 'Die Kennwörter stimmen nicht überein',
-                })}
-              />
-              {errors.passwordRepeat && (
-                <div className="validation-message">{errors.passwordRepeat.message}</div>
-              )}
-            </label>
-            <button type="submit">Passwort zurücksetzen</button>
-          </form>
-        </>
-      )}
-    </article>
+    <div className="min-h-screen bg-gray-50 py-12">
+      <div className="auth-container">
+        <article>
+          <header className="mb-8">
+            <PageHeading>Neues Passwort setzen</PageHeading>
+          </header>
+          {message ? (
+            <div className="text-center">
+              <p className="text-base text-gray-700">{message}</p>
+            </div>
+          ) : (
+            <form className="auth-form" onSubmit={handleSubmit(onSubmit)}>
+              <div className="auth-form-group">
+                <label htmlFor="password" className="auth-label">
+                  Neues Kennwort
+                  <input
+                    id="password"
+                    type="password"
+                    className="auth-input"
+                    {...register('password', {
+                      required: 'Kennwort ist erforderlich',
+                    })}
+                  />
+                  {errors.password && <div className="auth-error">{errors.password.message}</div>}
+                </label>
+              </div>
+              <div className="auth-form-group">
+                <label htmlFor="passwordRepeat" className="auth-label">
+                  Wiederhole neues Kennwort
+                  <input
+                    id="passwordRepeat"
+                    type="password"
+                    className="auth-input"
+                    {...register('passwordRepeat', {
+                      required: 'Kennwortwiederholung ist erforderlich',
+                      validate: (value) =>
+                        value === password || 'Die Kennwörter stimmen nicht überein',
+                    })}
+                  />
+                  {errors.passwordRepeat && (
+                    <div className="auth-error">{errors.passwordRepeat.message}</div>
+                  )}
+                </label>
+              </div>
+              <button type="submit" className="auth-button">
+                Passwort zurücksetzen
+              </button>
+            </form>
+          )}
+        </article>
+      </div>
+    </div>
   )
 }
 

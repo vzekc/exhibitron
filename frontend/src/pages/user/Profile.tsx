@@ -1,13 +1,26 @@
 import { useForm, SubmitHandler } from 'react-hook-form'
-import { useUser } from '../../contexts/UserContext.ts'
+import { useExhibitor } from '@contexts/ExhibitorContext.ts'
 import { useEffect, useState, useRef } from 'react'
 import { graphql } from 'gql.tada'
 import { useApolloClient, useMutation, useQuery } from '@apollo/client'
-import Modal from '../../components/Modal.tsx'
+import Modal from '@components/Modal.tsx'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import ActionBar from '@components/ActionBar.tsx'
+import Button from '@components/Button.tsx'
+import PageHeading from '@components/PageHeading.tsx'
+import {
+  FormSection,
+  FormFieldGroup,
+  FormLabel,
+  SectionLabel,
+  Input,
+  TextArea,
+} from '@components/Form.tsx'
+import ImageUploader from '@components/ImageUploader.tsx'
 
 type Inputs = {
   fullName: string
+  topic: string
   bio: string
   email: string
   mastodon: string
@@ -17,22 +30,27 @@ type Inputs = {
 
 const GET_USER_PROFILE = graphql(`
   query GetUserProfile {
-    getCurrentUser {
+    getCurrentExhibitor {
       id
-      fullName
-      bio
-      contacts {
-        email
-        mastodon
-        phone
-        website
+      topic
+      user {
+        id
+        fullName
+        bio
+        contacts {
+          email
+          mastodon
+          phone
+          website
+        }
+        profileImage
       }
     }
   }
 `)
 
 const UPDATE_USER_PROFILE = graphql(`
-  mutation UpdateUserProfile($input: UpdateUserProfileInput!) {
+  mutation UpdateUserProfile($input: UpdateUserProfileInput!, $exhibitorId: Int!, $topic: String) {
     updateUserProfile(input: $input) {
       id
       fullName
@@ -44,11 +62,14 @@ const UPDATE_USER_PROFILE = graphql(`
         website
       }
     }
+    updateExhibitor(id: $exhibitorId, topic: $topic) {
+      id
+    }
   }
 `)
 
 const Profile = () => {
-  const { reloadUser } = useUser()
+  const { reloadExhibitor, exhibitor } = useExhibitor()
   const {
     register,
     handleSubmit,
@@ -67,6 +88,7 @@ const Profile = () => {
   const [searchParams] = useSearchParams()
   const [welcome, setWelcome] = useState(searchParams.has('welcome'))
   const navigate = useNavigate()
+  const [profileImage, setProfileImage] = useState<number | null>(null)
 
   const websiteValue = watch('website')
   const websiteFocusedRef = useRef(false)
@@ -76,11 +98,11 @@ const Profile = () => {
   }, [navigate])
 
   const updateProfile: SubmitHandler<Inputs> = async (inputs) => {
-    const { fullName, bio, ...contacts } = inputs
+    const { fullName, bio, topic, ...contacts } = inputs
     await updateUserProfile({
-      variables: { input: { fullName, bio, contacts } },
+      variables: { input: { fullName, bio, contacts }, exhibitorId: exhibitor!.id, topic },
     })
-    await reloadUser()
+    await reloadExhibitor()
     reset(inputs)
     await apolloClient.resetStore()
     await refetch()
@@ -88,20 +110,22 @@ const Profile = () => {
 
   useEffect(() => {
     if (data) {
-      const newUser = data.getCurrentUser
+      const newUser = data.getCurrentExhibitor!.user
       reset({
         fullName: newUser?.fullName || '',
+        topic: data.getCurrentExhibitor?.topic || '',
         bio: newUser?.bio || '',
         email: newUser?.contacts?.email || '',
         mastodon: newUser?.contacts?.mastodon || '',
         phone: newUser?.contacts?.phone || '',
         website: newUser?.contacts?.website || '',
       })
+      setProfileImage(newUser?.profileImage as number | null)
     }
   }, [data, reset])
 
   return (
-    data && (
+    data?.getCurrentExhibitor && (
       <>
         <Modal
           isOpen={welcome}
@@ -116,91 +140,123 @@ const Profile = () => {
             Informationen und Funktionen für Aussteller. Viel Spaß!
           </p>
         </Modal>
-        <article>
-          <h2>Aussteller-Profil</h2>
-          <p>
-            Hier kannst du dein Profil bearbeiten. Alle Informationen, die Du hier eingibst, sind
-            öffentlich sichtbar.
-          </p>
-          <form onSubmit={handleSubmit(updateProfile)}>
-            <fieldset>
-              <label>
-                Angezeigter Name:
-                <input type="string" {...register('fullName', { required: true })} />
-              </label>
-              <label>
-                Über mich:
-                <textarea {...register('bio')} />
-              </label>
-            </fieldset>
-            <fieldset>
-              <legend>Kontaktinformationen</legend>
-              <label>
-                E-Mail-Adresse:
-                <input
-                  type="email"
-                  {...register('email', {
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: 'Ungültige E-Mail-Adresse',
-                    },
-                  })}
-                />
-                {errors.email && <div className="validation-message">{errors.email.message}</div>}
-              </label>
-              <label>
-                Mastodon:
-                <input
-                  type="text"
-                  {...register('mastodon', {
-                    pattern: {
-                      value: /^@[a-zA-Z0-9_]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                      message: 'Mastodon sollte im Format @nutzername@server.domain sein',
-                    },
-                  })}
-                />
-                {errors.mastodon && (
-                  <div className="validation-message">{errors.mastodon.message}</div>
-                )}
-              </label>
-              <label>
-                Webseite:
-                <input
-                  type="url"
-                  {...register('website', {
-                    pattern: {
-                      value: /^(https?:\/\/)?(www\.)?[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/\S*)?$/,
-                      message: 'Bitte gib eine gültige URL ein',
-                    },
-                  })}
-                  onFocus={() => {
-                    if (!websiteFocusedRef.current && !websiteValue) {
-                      setValue('website', 'https://', { shouldDirty: true })
-                      websiteFocusedRef.current = true
-                    }
+
+        <article className="space-y-6">
+          <header>
+            <PageHeading>Profil</PageHeading>
+            <p className="mt-2 text-base text-gray-700">
+              Hier kannst du dein Profil bearbeiten. Alle Informationen, die Du hier eingibst, sind
+              öffentlich sichtbar.
+            </p>
+          </header>
+
+          <form onSubmit={handleSubmit(updateProfile)} className="space-y-6">
+            <div className="flex flex-col gap-6 md:flex-row">
+              <FormSection className="md:w-1/3">
+                <SectionLabel>Profilbild</SectionLabel>
+                <ImageUploader
+                  imageId={profileImage}
+                  imageUrl={`/api/user/${data.getCurrentExhibitor.user.id}/image/profile`}
+                  onImageChange={(newImageId) => {
+                    setProfileImage(newImageId)
+                    apolloClient.refetchQueries({
+                      include: [GET_USER_PROFILE],
+                    })
                   }}
+                  title=""
+                  alt="Profilbild"
+                  enableCropping={true}
                 />
-                {errors.website && (
-                  <div className="validation-message">{errors.website.message}</div>
-                )}
-              </label>
-              <label>
-                Telefon:
-                <input
-                  type="tel"
-                  {...register('phone', {
-                    pattern: {
-                      value: /^(\+)?[\d\s()-]{5,20}$/,
-                      message: 'Bitte gib eine gültige Telefonnummer ein',
-                    },
-                  })}
-                />
-                {errors.phone && <div className="validation-message">{errors.phone.message}</div>}
-              </label>
-            </fieldset>
-            <button type="submit" disabled={!isDirty || Object.keys(errors).length > 0}>
-              Speichern
-            </button>
+              </FormSection>
+
+              <div className="flex-1 space-y-6 md:w-2/3">
+                <FormSection>
+                  <SectionLabel>Persönliche Informationen</SectionLabel>
+                  <FormFieldGroup>
+                    <FormLabel>Angezeigter Name</FormLabel>
+                    <Input
+                      type="text"
+                      {...register('fullName', { required: true })}
+                      error={errors.fullName?.message}
+                    />
+                    <FormLabel>Thema meiner Ausstellung</FormLabel>
+                    <Input
+                      type="text"
+                      {...register('topic', { required: false })}
+                      error={errors.topic?.message}
+                    />
+
+                    <FormLabel>Über mich</FormLabel>
+                    <TextArea rows={4} {...register('bio')} error={errors.bio?.message} />
+                  </FormFieldGroup>
+                </FormSection>
+
+                <FormSection>
+                  <SectionLabel>Kontaktinformationen</SectionLabel>
+                  <FormFieldGroup>
+                    <FormLabel>E-Mail-Adresse</FormLabel>
+                    <Input
+                      type="email"
+                      {...register('email', {
+                        pattern: {
+                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                          message: 'Ungültige E-Mail-Adresse',
+                        },
+                      })}
+                      error={errors.email?.message}
+                    />
+
+                    <FormLabel>Mastodon</FormLabel>
+                    <Input
+                      type="text"
+                      {...register('mastodon', {
+                        pattern: {
+                          value: /^@[a-zA-Z0-9_]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                          message: 'Mastodon sollte im Format @nutzername@server.domain sein',
+                        },
+                      })}
+                      error={errors.mastodon?.message}
+                    />
+
+                    <FormLabel>Webseite</FormLabel>
+                    <Input
+                      type="url"
+                      {...register('website', {
+                        pattern: {
+                          value: /^(https?:\/\/)?(www\.)?[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/\S*)?$/,
+                          message: 'Bitte gib eine gültige URL ein',
+                        },
+                      })}
+                      error={errors.website?.message}
+                      onFocus={() => {
+                        if (!websiteFocusedRef.current && !websiteValue) {
+                          setValue('website', 'https://', { shouldDirty: true })
+                          websiteFocusedRef.current = true
+                        }
+                      }}
+                    />
+
+                    <FormLabel>Telefon</FormLabel>
+                    <Input
+                      type="tel"
+                      {...register('phone', {
+                        pattern: {
+                          value: /^(\+)?[\d\s()-]{5,20}$/,
+                          message: 'Bitte gib eine gültige Telefonnummer ein',
+                        },
+                      })}
+                      error={errors.phone?.message}
+                    />
+                  </FormFieldGroup>
+                </FormSection>
+              </div>
+            </div>
+
+            <ActionBar>
+              <Button type="submit" disabled={!isDirty || Object.keys(errors).length > 0}>
+                Speichern
+              </Button>
+            </ActionBar>
           </form>
         </article>
       </>

@@ -1,5 +1,6 @@
 import { Context } from '../../app/context.js'
 import { ExhibitionResolvers, QueryResolvers } from '../../generated/graphql.js'
+import { QueryOrder } from '@mikro-orm/core'
 
 export const exhibitionQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2345
@@ -13,7 +14,8 @@ export const exhibitionQueries: QueryResolvers<Context> = {
 
 export const exhibitionTypeResolvers: ExhibitionResolvers = {
   exhibitors: async (exhibition, _, { db }) => db.exhibitor.find({ exhibition }),
-  exhibits: async (exhibition, _, { db }) => db.exhibit.find({ exhibition }),
+  exhibits: async (exhibition, _, { db }) =>
+    db.exhibit.find({ exhibition }, { orderBy: { title: QueryOrder.ASC } }),
   tables: async (exhibition, _, { db }) => db.table.find({ exhibition }),
   pages: async (exhibition, _, { db }) => db.page.find({ exhibition }),
 }

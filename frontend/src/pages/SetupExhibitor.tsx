@@ -2,7 +2,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import React, { useEffect, useState } from 'react'
 import { graphql } from 'gql.tada'
 import { useMutation, useApolloClient } from '@apollo/client'
-import { useUser } from '../contexts/UserContext'
+import { useExhibitor } from '@contexts/ExhibitorContext.ts'
 
 const SET_PASSWORD = graphql(`
   mutation SetPassword($token: String!, $password: String!) {
@@ -33,7 +33,7 @@ const STORAGE_KEY = 'registration_state'
 const SetupExhibitor = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { reloadUser } = useUser()
+  const { reloadExhibitor } = useExhibitor()
   const [registrationMethod, setRegistrationMethod] = useState<RegistrationMethod>(null)
   const [password, setPassword] = useState('')
   const [token, setToken] = useState<string | null>(null)
@@ -107,7 +107,7 @@ const SetupExhibitor = () => {
     })
     await apolloClient.clearStore()
 
-    await reloadUser()
+    await reloadExhibitor()
     navigate('/user/profile?welcome', { replace: true })
   }
 
@@ -123,7 +123,7 @@ const SetupExhibitor = () => {
       <article>
         <h2>Registrierung abschließen</h2>
         <p>Bitte wähle, wie Du Dich registrieren möchtest:</p>
-        <div className="grid">
+        <div>
           <button onClick={() => setRegistrationMethod('password')}>Kennwort setzen</button>
           <button onClick={handleForumLink}>
             Mit Account auf forum.classic-computing.de verknüpfen
@@ -155,10 +155,10 @@ const SetupExhibitor = () => {
             required
           />
         </label>
-        {error && <p className="error">{error}</p>}
-        <div className="grid">
+        {error && <p>{error}</p>}
+        <div>
           <button type="submit">Kennwort setzen</button>
-          <button type="button" className="secondary" onClick={() => setRegistrationMethod(null)}>
+          <button type="button" onClick={() => setRegistrationMethod(null)}>
             Zurück
           </button>
         </div>

@@ -1,16 +1,16 @@
 import {
-  BeforeCreate,
-  BeforeUpdate,
   Embeddable,
   Embedded,
   Entity,
   EntityRepositoryType,
-  EventArgs,
   Property,
+  OneToOne,
+  Cascade,
 } from '@mikro-orm/core'
 import { BaseEntity } from '../common/base.entity.js'
-import { hash, verify } from 'argon2'
+import { verify } from 'argon2'
 import { UserRepository } from './repository.js'
+import { ImageStorage } from '../image/entity.js'
 
 @Embeddable()
 export class Contacts {
@@ -25,6 +25,23 @@ export class Contacts {
 
   @Property()
   website?: string
+}
+
+@Entity()
+export class ProfileImage extends BaseEntity {
+  @OneToOne(() => ImageStorage, { cascade: [Cascade.PERSIST], eager: true, deleteRule: 'cascade' })
+  image!: ImageStorage
+
+  @OneToOne(() => ImageStorage, {
+    nullable: true,
+    cascade: [Cascade.PERSIST],
+    eager: true,
+    deleteRule: 'cascade',
+  })
+  thumbnail?: ImageStorage
+
+  @OneToOne(() => User)
+  user!: User
 }
 
 @Entity({ repository: () => UserRepository })
@@ -61,24 +78,15 @@ export class User extends BaseEntity<
   @Property()
   isAdministrator: boolean = false
 
+  @OneToOne(() => ProfileImage, (image) => image.user)
+  profileImage?: ProfileImage
+
   @Embedded(() => Contacts, { object: true })
   contacts: Contacts = {}
 
-  constructor(email: string, password: string) {
+  constructor(email: string) {
     super()
     this.email = email
-    this.password = password // keep plain text, will be hashed via hooks
-  }
-
-  @BeforeCreate()
-  @BeforeUpdate()
-  async hashPassword(args: EventArgs<User>) {
-    // hash only if the password was changed
-    const password = args.changeSet?.payload.password
-
-    if (password) {
-      this.password = await hash(password)
-    }
   }
 
   async verifyPassword(password: string) {

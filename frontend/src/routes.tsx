@@ -9,7 +9,7 @@ import Register from './pages/Register.tsx'
 import Login from './pages/Login.tsx'
 import RegistrationList from './pages/admin/RegistrationList.tsx'
 import RegistrationDetails from './pages/admin/RegistrationDetails.tsx'
-import MainLayout from './components/MainLayout.tsx'
+import MainLayout from '@components/MainLayout.tsx'
 import NotFound from './pages/NotFound.tsx'
 import RequestPasswordReset from './pages/RequestPasswordReset.tsx'
 import ResetPassword from './pages/ResetPassword.tsx'
@@ -17,25 +17,25 @@ import Account from './pages/user/Account.tsx'
 import UserExhibits from './pages/user/Exhibits.tsx'
 import ExhibitEditor from './pages/user/ExhibitEditor.tsx'
 import PageEditor from './pages/admin/PageEditor.tsx'
-import Page from './components/Page.tsx'
+import Page from '@components/Page.tsx'
 import PageList from './pages/admin/PageList.tsx'
 import Exhibitors from './pages/Exhibitors.tsx'
 import Exhibitor from './pages/Exibitor.tsx'
 import Tables from './pages/Tables.tsx'
 import SetupExhibitor from './pages/SetupExhibitor.tsx'
-import ProtectedRoute from './components/ProtectedRoute.tsx'
-import AdminProtectedRoute from './components/AdminProtectedRoute.tsx'
-import { UserProvider } from './contexts/UserProvider.tsx'
+import ProtectedRoute from '@components/ProtectedRoute.tsx'
+import AdminProtectedRoute from '@components/AdminProtectedRoute.tsx'
+import { ExhibitorProvider } from '@contexts/ExhibitorProvider.tsx'
 
 const routes: RouteObject[] = [
   { path: '/register', element: <Register /> },
   {
     path: '/login',
     element: (
-      <UserProvider>
+      <ExhibitorProvider>
         {' '}
         <Login />{' '}
-      </UserProvider>
+      </ExhibitorProvider>
     ),
   },
   {

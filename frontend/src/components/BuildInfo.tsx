@@ -1,18 +1,17 @@
-import { buildInfo } from '../generated/buildInfo'
-import './BuildInfo.css'
+import { buildInfo } from '@generated/buildInfo'
 
-export function BuildInfo() {
-  return (
-    <div className="build-info">
-      <div className="build-info-trigger" title="Build Information" />
-      <div className="build-info-chip">
-        <div className="build-info-chip-content">
-          <span>{buildInfo.buildMode}</span>
-          <span>{buildInfo.branchName}</span>
-          <span>{buildInfo.commitSha}</span>
-          <span>{new Date(buildInfo.deploymentDate).toLocaleString()}</span>
-        </div>
-      </div>
+const BuildInfo = () => (
+  <div className="group fixed bottom-0 right-0 p-4">
+    <div className="h-8 w-8"></div>
+    <div
+      className="absolute bottom-0 right-0 hidden space-x-4 border-l border-t border-gray-200 bg-white p-4 group-hover:flex"
+      title="Build Information">
+      <div>{buildInfo.buildMode}</div>
+      <div>{buildInfo.branchName}</div>
+      <div>{buildInfo.commitSha}</div>
+      <div className="whitespace-nowrap">{new Date(buildInfo.deploymentDate).toLocaleString()}</div>
     </div>
-  )
-}
+  </div>
+)
+
+export default BuildInfo

@@ -1,6 +1,6 @@
 import { expect, describe } from 'vitest'
 import { graphql } from 'gql.tada'
-import { ExecuteOperationFunction, graphqlTest, login } from '../../test/apollo.js'
+import { ExecuteOperationFunction, graphqlTest, login, Session } from '../../test/server.js'
 
 // Define types for the attribute and exhibit data
 interface ExhibitAttributeData {
@@ -22,7 +22,7 @@ interface ExhibitData {
 const createExhibitAttribute = async (
   graphqlRequest: ExecuteOperationFunction,
   name: string,
-  session: { userId: number },
+  session: Session,
 ): Promise<ExhibitAttributeData> => {
   const result = await graphqlRequest(
     graphql(`
@@ -46,20 +46,25 @@ const createExhibitWithAttributes = async (
   input: {
     title: string
     table?: number
-    text?: string
+    description?: string
     attributes?: Array<{ name: string; value: string }>
   },
-  session: { userId: number },
+  session: Session,
 ): Promise<ExhibitData> => {
   const result = await graphqlRequest(
     graphql(`
       mutation CreateExhibit(
         $title: String!
         $table: Int
-        $text: String
+        $description: String
         $attributes: [AttributeInput!]
       ) {
-        createExhibit(title: $title, table: $table, text: $text, attributes: $attributes) {
+        createExhibit(
+          title: $title
+          table: $table
+          description: $description
+          attributes: $attributes
+        ) {
           id
           attributes {
             name
@@ -78,7 +83,7 @@ const createExhibitWithAttributes = async (
 describe('exhibit attribute', () => {
   graphqlTest('create and list attributes as exhibitor', async (graphqlRequest) => {
     // Login as exhibitor
-    const exhibitor = await login(graphqlRequest, 'daffy@example.com')
+    const exhibitor = await login('daffy@example.com')
 
     // Create a new attribute
     const attributeName = `test-attribute-${Date.now()}`
@@ -132,7 +137,7 @@ describe('exhibit attribute', () => {
 
   graphqlTest('automatically create attributes when used in exhibits', async (graphqlRequest) => {
     // Login as a user
-    const user = await login(graphqlRequest, 'daffy@example.com')
+    const user = await login('daffy@example.com')
 
     // Create unique attribute names for this test
     const attributeName1 = `exhibit-attr-1-${Date.now()}`
@@ -184,7 +189,7 @@ describe('exhibit attribute', () => {
 
   graphqlTest('update exhibit attributes', async (graphqlRequest) => {
     // Login as a user
-    const user = await login(graphqlRequest, 'daffy@example.com')
+    const user = await login('daffy@example.com')
 
     // Create an exhibit with attributes
     const attributeName = `update-attr-${Date.now()}`
@@ -259,7 +264,7 @@ describe('exhibit attribute', () => {
 
   graphqlTest('delete an attribute as admin', async (graphqlRequest) => {
     // Login as admin
-    const admin = await login(graphqlRequest, 'admin@example.com')
+    const admin = await login('admin@example.com')
 
     // Create a new attribute
     const attributeName = `delete-attr-${Date.now()}`
@@ -299,7 +304,7 @@ describe('exhibit attribute', () => {
 
   graphqlTest('fail to delete attribute as non-admin', async (graphqlRequest) => {
     // Login as regular exhibitor
-    const exhibitor = await login(graphqlRequest, 'daffy@example.com')
+    const exhibitor = await login('daffy@example.com')
 
     // Create a new attribute
     const attributeName = `nodelete-attr-${Date.now()}`

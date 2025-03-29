@@ -126,7 +126,7 @@ const GET_EXHIBIT = graphql(`
     getExhibit(id: $id) {
       id
       title
-      text
+      description
       exhibitor {
         id
         user {
@@ -219,7 +219,7 @@ const stripHtml = (html: string) => {
   return plainText.replace(/\n{3,}/g, '\n\n').trim()
 }
 
-// Create the PDF Document component
+// eslint-disable-next-line react-refresh/only-export-components
 const ExhibitPDFDocument = ({
   exhibit,
   mainImageBase64,
@@ -270,7 +270,7 @@ const ExhibitPDFDocument = ({
         </View>
 
         <View style={styles.textContent}>
-          <Text>{stripHtml(exhibit.text || '')}</Text>
+          <Text>{stripHtml(exhibit.description || '')}</Text>
         </View>
 
         <View style={styles.footer}>
@@ -294,16 +294,10 @@ const generateQRCode = async (url: string): Promise<string> =>
     width: 200,
   })
 
-/**
- * Parameters for generating and downloading a PDF
- */
-export interface GeneratePDFParams {
+interface GeneratePDFParams {
   /** The exhibit ID */
   id: number
-  /** The Apollo client instance */
   client: ApolloClient<object>
-  /** Whether to display the PDF in the current window instead of downloading */
-  displayInWindow?: boolean
   /** Optional URL to include as a QR code in the PDF */
   url?: string
 }
@@ -314,7 +308,7 @@ export interface GeneratePDFParams {
  * @returns A promise that resolves when the PDF is generated and downloaded
  */
 export const generateAndDownloadPDF = async (params: GeneratePDFParams): Promise<void> => {
-  const { id, client, displayInWindow = false, url: qrUrl } = params
+  const { id, client, url: qrUrl } = params
 
   const result = await client.query({
     query: GET_EXHIBIT,
@@ -326,9 +320,6 @@ export const generateAndDownloadPDF = async (params: GeneratePDFParams): Promise
   if (!exhibit) {
     throw new Error('Exhibit not found')
   }
-
-  // Generate file name
-  const fileName = `${exhibit.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`
 
   // Load images
   let mainImageBase64 = ''
@@ -390,22 +381,5 @@ export const generateAndDownloadPDF = async (params: GeneratePDFParams): Promise
 
   // Create URL for the blob
   const blobUrl = URL.createObjectURL(blob)
-
-  if (displayInWindow) {
-    // Open in the current window
-    window.open(blobUrl, '_blank')
-  } else {
-    // Trigger download
-    const a = document.createElement('a')
-    a.href = blobUrl
-    a.download = fileName
-    document.body.appendChild(a)
-    a.click()
-
-    // Clean up
-    setTimeout(() => {
-      document.body.removeChild(a)
-      URL.revokeObjectURL(blobUrl)
-    }, 100)
-  }
+  window.open(blobUrl, '_blank')
 }

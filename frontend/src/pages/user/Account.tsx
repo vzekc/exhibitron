@@ -1,11 +1,13 @@
-import { useUser } from '../../contexts/UserContext.ts'
-import { requestPasswordReset } from '../../utils/requestPasswordReset.ts'
+import { useExhibitor } from '@contexts/ExhibitorContext.ts'
+import { requestPasswordReset } from '@utils/requestPasswordReset.ts'
 import { useState, useEffect } from 'react'
-import Confirm from '../../components/Confirm.tsx'
-import './Account.css'
+import Confirm from '@components/Confirm.tsx'
+import PageHeading from '@components/PageHeading.tsx'
+import { FormSection, FormFieldGroup, FormLabel, SectionLabel } from '@components/Form.tsx'
+import Button from '@components/Button.tsx'
 
 const Account = () => {
-  const { user } = useUser()
+  const { exhibitor } = useExhibitor()
   const [passwordResetRequested, setPasswordResetRequested] = useState(false)
   const [showResetMessage, setShowResetMessage] = useState(false)
   const [deleteAccountRequested, setDeleteAccountRequested] = useState(false)
@@ -22,14 +24,14 @@ const Account = () => {
     }
   }, [showResetMessage])
 
-  if (!user) {
+  if (!exhibitor) {
     return <div>Loading...</div>
   }
 
   const handlePasswordResetRequest = async () => {
     setPasswordResetRequested(true)
     setShowResetMessage(true)
-    await requestPasswordReset(user.email)
+    await requestPasswordReset(exhibitor.user.email)
   }
 
   const handleConnectForumAccount = () => {
@@ -53,29 +55,54 @@ const Account = () => {
         onClose={() => setDeleteAccountRequested(false)}
         isOpen={deleteAccountRequested}
       />
-      <article className="account-settings">
-        <label>
-          Email-Adresse: <span>{user.email}</span>
-        </label>
-        <div>
-          {!showResetMessage ? (
-            <button onClick={handlePasswordResetRequest} disabled={passwordResetRequested}>
-              Kennwort zurücksetzen
-            </button>
-          ) : (
-            <span className="reset-message">
-              Du erhältst gleich eine Email mit einem Link zum Zurücksetzen Deines Kennworts.
-            </span>
-          )}
-          {!user.nickname && (
-            <button style={{ display: 'none' }} onClick={handleConnectForumAccount}>
-              Forum-Account verbinden
-            </button>
-          )}
-          <button style={{ display: 'none' }} className="danger" onClick={handleDeleteAccount}>
-            Konto löschen
-          </button>
-        </div>
+      <article className="space-y-6">
+        <header>
+          <PageHeading>Account-Einstellungen</PageHeading>
+          <p className="mt-2 text-base text-gray-700">
+            Hier kannst Du Deine Account-Einstellungen verwalten und Dein Konto löschen.
+          </p>
+        </header>
+
+        <FormSection>
+          <SectionLabel>Kontoinformationen</SectionLabel>
+          <FormFieldGroup>
+            <FormLabel>Email-Adresse</FormLabel>
+            <div className="mt-1 text-gray-900">{exhibitor.user.email}</div>
+          </FormFieldGroup>
+        </FormSection>
+
+        <FormSection>
+          <SectionLabel>Kennwort</SectionLabel>
+          <FormFieldGroup>
+            {!showResetMessage ? (
+              <Button onClick={handlePasswordResetRequest} disabled={passwordResetRequested}>
+                Kennwort zurücksetzen
+              </Button>
+            ) : (
+              <div className="rounded-md bg-blue-50 p-4 text-sm text-blue-700">
+                Du erhältst gleich eine Email mit einem Link zum Zurücksetzen Deines Kennworts.
+              </div>
+            )}
+          </FormFieldGroup>
+        </FormSection>
+
+        {!exhibitor.user.nickname && (
+          <FormSection>
+            <SectionLabel>Forum-Account</SectionLabel>
+            <FormFieldGroup>
+              <Button onClick={handleConnectForumAccount}>Forum-Account verbinden</Button>
+            </FormFieldGroup>
+          </FormSection>
+        )}
+
+        <FormSection>
+          <SectionLabel>Konto löschen</SectionLabel>
+          <FormFieldGroup>
+            <Button onClick={handleDeleteAccount} variant="danger">
+              Konto löschen
+            </Button>
+          </FormFieldGroup>
+        </FormSection>
       </article>
     </>
   )

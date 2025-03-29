@@ -1,77 +1,16 @@
-.seating-plan {
-  width: 100%;
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.seating-plan-container {
-  position: relative;
-  width: 100%;
-  height: auto;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.seating-plan-container img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.table-overlays {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-
-.table-number {
-  position: absolute;
-  background-color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #004085;
-  font-weight: bold;
-  font-size: 14px;
+/* SVG Element styles - update selectors to target tables correctly */
+.react-svg [id^='table_'].occupied rect,
+.react-svg [id^='table_'].occupied path {
+  fill: #4caf50;
   cursor: pointer;
-  pointer-events: auto;
-  transition: background-color 0.2s;
-  padding: 0;
-  line-height: 1;
-  transform-origin: center center;
 }
 
-.table-number:hover {
-  background-color: #5bc0de;
-  z-index: 1;
+.react-svg [id^='table_'] {
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.table-number.occupied {
-  background-color: #5cb85c;
-  color: white;
-}
-
-.table-number.occupied:hover {
-  background-color: #449d44;
-}
-
-.table-rotated {
-  transform: rotate(90deg);
-}
-
-/* Tooltip styling */
-.table-number[data-tooltip]:hover::before {
-  white-space: pre;
-  text-align: left;
-  max-width: 250px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.5;
-  z-index: 100;
+.react-svg [id^='table_']:hover rect,
+.react-svg [id^='table_']:hover path {
+  fill: #2196f3;
 }

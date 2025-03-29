@@ -5,9 +5,8 @@ import {
   MutationResolvers,
   QueryResolvers,
 } from '../../generated/graphql.js'
-import { Exhibit } from '../../entities.js'
-import { processHtml } from '../common/htmlProcessor.js'
-import { wrap } from '@mikro-orm/core'
+import { Exhibit, ExhibitImage } from './entity.js'
+import { wrap, QueryOrder } from '@mikro-orm/core'
 import { ExhibitAttribute } from '../exhibitAttribute/entity.js'
 
 // Helper function to process attributes and update the ExhibitAttribute table
@@ -43,12 +42,17 @@ export const exhibitQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2345
   getExhibit: async (_, { id }, { db }) => db.exhibit.findOneOrFail({ id }),
   // @ts-expect-error ts2345
-  getExhibits: async (_, _args, { db }) => db.exhibit.findAll(),
+  getExhibits: async (_, _args, { db }) =>
+    db.exhibit.findAll({ orderBy: { title: QueryOrder.ASC } }),
 }
 
 export const exhibitMutations: MutationResolvers<Context> = {
   // @ts-expect-error ts2345
-  createExhibit: async (_, { title, text, table, attributes }, { exhibition, exhibitor, db }) => {
+  createExhibit: async (
+    _,
+    { title, description, descriptionExtension, table, attributes },
+    { exhibition, exhibitor, db },
+  ) => {
     if (!exhibitor) {
       throw new Error('You must be logged in to create an exhibit')
     }
@@ -71,23 +75,33 @@ export const exhibitMutations: MutationResolvers<Context> = {
     const exhibit = db.em.getRepository(Exhibit).create({
       exhibition,
       title,
-      text: '', // Will be set after processing
+      description: null,
+      descriptionExtension: null,
       table: tableEntity,
       exhibitor,
       attributes: processedAttributes,
     })
 
-    if (text) {
-      const { sanitizedHtml, images } = await processHtml(text, db.em, { exhibit })
-      exhibit.text = sanitizedHtml
-      db.em.persist(images)
+    if (description) {
+      exhibit.description = await db.document.ensureDocument(exhibit.description, description)
+    }
+
+    if (descriptionExtension) {
+      exhibit.descriptionExtension = await db.document.ensureDocument(
+        exhibit.descriptionExtension,
+        descriptionExtension,
+      )
     }
 
     await db.em.persist(exhibit).flush()
     return exhibit
   },
   // @ts-expect-error ts2345
-  updateExhibit: async (_, { id, text, attributes, ...rest }, { db, exhibitor, user }) => {
+  updateExhibit: async (
+    _,
+    { id, description, descriptionExtension, attributes, ...rest },
+    { db, exhibitor, user },
+  ) => {
     const exhibit = await db.exhibit.findOneOrFail({ id })
     if (exhibitor !== exhibit.exhibitor && !user?.isAdministrator) {
       throw new Error('You do not have permission to update this exhibit')
@@ -113,13 +127,19 @@ export const exhibitMutations: MutationResolvers<Context> = {
       delete rest.table
     }
 
-    if (text) {
-      const { sanitizedHtml, images } = await processHtml(text, db.em, { exhibit })
-      text = sanitizedHtml
-      db.em.persist(images)
+    if (description) {
+      exhibit.description = await db.document.ensureDocument(exhibit.description, description)
+    }
+    if (descriptionExtension) {
+      exhibit.descriptionExtension = await db.document.ensureDocument(
+        exhibit.descriptionExtension,
+        descriptionExtension,
+      )
     }
 
-    return wrap(exhibit).assign({ table, text, attributes: processedAttributes, ...rest })
+    const updatedExhibit = wrap(exhibit).assign({ table, attributes: processedAttributes, ...rest })
+    await db.em.persist(updatedExhibit).flush()
+    return updatedExhibit
   },
   deleteExhibit: async (_, { id }, { db, exhibitor, user }) => {
     const exhibit = await db.exhibit.findOneOrFail({ id })
@@ -145,14 +165,18 @@ export const exhibitTypeResolvers: ExhibitResolvers = {
     }))
   },
   mainImage: (exhibit) => {
-    // In the GraphQL schema, mainImage is defined as Int (the ID of the image)
-    // but in the entity, mainImage is the Image object itself
-    // There seems to be a type mismatch between the entity and the GraphQL schema
     if (!exhibit.mainImage) return null
 
-    // Use type assertion to access the id property
-    const image = exhibit.mainImage as unknown as { id: number }
+    const image = exhibit.mainImage as unknown as ExhibitImage
     return image.id
+  },
+  description: (exhibit) => {
+    const exhibitEntity = exhibit as unknown as Exhibit
+    return exhibitEntity.description?.html ?? ''
+  },
+  descriptionExtension: (exhibit) => {
+    const exhibitEntity = exhibit as unknown as Exhibit
+    return exhibitEntity.descriptionExtension?.html ?? ''
   },
 }
 

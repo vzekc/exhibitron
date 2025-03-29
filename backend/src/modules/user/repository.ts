@@ -6,6 +6,7 @@ import { match, P } from 'ts-pattern'
 import { pino } from 'pino'
 import { sendEmail } from '../common/sendEmail.js'
 import { makePasswordResetEmail } from '../registration/emails.js'
+import { hash } from 'argon2'
 
 const logger = pino({ level: process.env.TEST_LOG_LEVEL || 'fatal' })
 
@@ -110,6 +111,11 @@ export class UserRepository extends EntityRepository<User> {
     }
   }
 
+  async setPassword(user: User, password: string) {
+    user.password = await hash(password)
+    await this.getEntityManager().flush()
+  }
+
   async resetPassword(token: string, password: string) {
     const user = await this.findOne(
       { passwordResetToken: token },
@@ -121,7 +127,7 @@ export class UserRepository extends EntityRepository<User> {
     if (user.passwordResetTokenExpires < new Date()) {
       throw new PermissionDeniedError('Password reset token expired')
     }
-    user.password = password
+    await this.setPassword(user, password)
     user.passwordResetToken = undefined
     user.passwordResetTokenExpires = undefined
     await this.getEntityManager().flush()

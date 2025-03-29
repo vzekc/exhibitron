@@ -1,20 +1,42 @@
 import { useNavigate, useParams } from 'react-router-dom'
-import { useEffect, useState, useRef } from 'react'
-import TextEditor, { TextEditorHandle } from '../../components/TextEditor.tsx'
-import { useBreadcrumb } from '../../contexts/BreadcrumbContext.ts'
+import React, { useEffect, useState, useRef } from 'react'
+import TextEditor, { TextEditorHandle } from '@components/TextEditor.tsx'
+import { useBreadcrumb } from '@contexts/BreadcrumbContext.ts'
 import { graphql } from 'gql.tada'
 import { useQuery, useMutation, useApolloClient } from '@apollo/client'
-import { useUnsavedChangesWarning } from '../../hooks/useUnsavedChangesWarning.tsx'
-import Confirm from '../../components/Confirm.tsx'
-import ExhibitAttributeEditor from '../../components/ExhibitAttributeEditor.tsx'
-import axios from 'axios'
+import { useUnsavedChangesWarning } from '@hooks/useUnsavedChangesWarning.tsx'
+import Confirm from '@components/Confirm.tsx'
+import ExhibitAttributeEditor from '@components/ExhibitAttributeEditor.tsx'
+import ImageUploader from '@components/ImageUploader.tsx'
+import { showMessage } from '@components/MessageModalUtil.tsx'
+import Button from '@components/Button.tsx'
+import ActionBar from '@components/ActionBar.tsx'
+import PageHeading from '@components/PageHeading.tsx'
+import { FormSection, FormFieldGroup, FormLabel, SectionLabel, Input } from '@components/Form.tsx'
+import { useForm, SubmitHandler } from 'react-hook-form'
+import { generateAndDownloadPDF } from '@components/ExhibitPDF.tsx'
+
+type Attribute = {
+  name: string
+  value: string
+}
+
+type ExhibitFormData = {
+  title: string
+  table?: number
+  description: string
+  descriptionExtension: string
+  attributes: Attribute[]
+  mainImage: number | null
+}
 
 const GET_DATA = graphql(`
   query GetExhibit($id: Int!) {
     getExhibit(id: $id) {
       id
       title
-      text
+      description
+      descriptionExtension
       table {
         number
       }
@@ -37,14 +59,23 @@ const UPDATE_EXHIBIT = graphql(`
   mutation UpdateExhibit(
     $id: Int!
     $title: String
-    $text: String
+    $description: String
+    $descriptionExtension: String
     $table: Int
     $attributes: [AttributeInput!]
   ) {
-    updateExhibit(id: $id, title: $title, text: $text, table: $table, attributes: $attributes) {
+    updateExhibit(
+      id: $id
+      title: $title
+      description: $description
+      descriptionExtension: $descriptionExtension
+      table: $table
+      attributes: $attributes
+    ) {
       id
       title
-      text
+      description
+      descriptionExtension
       table {
         number
       }
@@ -60,14 +91,22 @@ const UPDATE_EXHIBIT = graphql(`
 const CREATE_EXHIBIT = graphql(`
   mutation CreateExhibit(
     $title: String!
-    $text: String
+    $description: String
+    $descriptionExtension: String
     $table: Int
     $attributes: [AttributeInput!]
   ) {
-    createExhibit(title: $title, text: $text, table: $table, attributes: $attributes) {
+    createExhibit(
+      title: $title
+      description: $description
+      descriptionExtension: $descriptionExtension
+      table: $table
+      attributes: $attributes
+    ) {
       id
       title
-      text
+      description
+      descriptionExtension
       table {
         number
       }
@@ -96,10 +135,6 @@ const DELETE_EXHIBIT = graphql(`
   }
 `)
 
-type Attribute = {
-  name: string
-  value: string
-}
 const ExhibitEditor = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -107,10 +142,28 @@ const ExhibitEditor = () => {
   const apolloClient = useApolloClient()
   const isNew = id === 'new'
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [showDeleteImageConfirm, setShowDeleteImageConfirm] = useState(false)
-  const [mainImage, setMainImage] = useState<number | null>(null)
-  const [isImageLoading, setIsImageLoading] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isPdfGenerating, setIsPdfGenerating] = useState(false)
+  const descriptionEditorRef = useRef<TextEditorHandle>(null)
+  const descriptionExtensionEditorRef = useRef<TextEditorHandle>(null)
+
+  const {
+    register,
+    handleSubmit,
+    formState: { isDirty, errors },
+    setValue,
+    watch,
+    reset,
+  } = useForm<ExhibitFormData>({
+    mode: 'onBlur',
+    defaultValues: {
+      title: '',
+      table: undefined,
+      description: '',
+      descriptionExtension: '',
+      attributes: [],
+      mainImage: null,
+    },
+  })
 
   const {
     data: exhibitData,
@@ -125,183 +178,132 @@ const ExhibitEditor = () => {
     skip: !isNew,
   })
 
-  const [title, setTitle] = useState('')
-  const [text, setText] = useState('')
-  const [selectedTable, setSelectedTable] = useState<number | undefined>(undefined)
-  const [attributes, setAttributes] = useState<Attribute[]>([])
-  const [originalTitle, setOriginalTitle] = useState('')
-  const [originalTable, setOriginalTable] = useState<number | undefined>(undefined)
-  const [originalAttributes, setOriginalAttributes] = useState<Attribute[]>([])
-  const [isTextEdited, setIsTextEdited] = useState(false)
-
   const [updateExhibit] = useMutation(UPDATE_EXHIBIT)
   const [createExhibit] = useMutation(CREATE_EXHIBIT)
   const [deleteExhibit] = useMutation(DELETE_EXHIBIT)
 
-  const editorRef = useRef<TextEditorHandle>(null)
-
   useEffect(() => {
     if (exhibitData?.getExhibit) {
-      const { title, table, text, attributes, mainImage } = exhibitData.getExhibit
-      const newTitle = title || ''
-      const newText = text || ''
-      const newTable = table?.number || undefined
-      const newAttributes = attributes || []
-
-      setDetailName(location.pathname, newTitle)
-      setTitle(newTitle)
-      setText(newText)
-      setSelectedTable(newTable)
-      setAttributes(newAttributes as Attribute[])
-      setMainImage(mainImage as number | null)
-      setOriginalTitle(newTitle)
-      setOriginalTable(newTable)
-      setOriginalAttributes(newAttributes as Attribute[])
-      setIsTextEdited(false)
+      const { title, table, description, descriptionExtension, attributes, mainImage } =
+        exhibitData.getExhibit
+      reset({
+        title: title || '',
+        table: table?.number || undefined,
+        description: description || '',
+        descriptionExtension: descriptionExtension || '',
+        attributes: attributes || [],
+        mainImage: mainImage as number | null,
+      })
+      setDetailName(location.pathname, title || '')
     } else if (isNew) {
+      reset({
+        title: '',
+        table: undefined,
+        description: '',
+        descriptionExtension: '',
+        attributes: [],
+        mainImage: null,
+      })
       setDetailName(location.pathname, 'Neues Exponat')
-      setTitle('')
-      setText('')
-      setSelectedTable(undefined)
-      setAttributes([])
-      setMainImage(null)
-      setOriginalTitle('')
-      setOriginalTable(undefined)
-      setOriginalAttributes([])
-      setIsTextEdited(false)
     }
-  }, [exhibitData, setDetailName, isNew])
+  }, [exhibitData, setDetailName, isNew, reset])
 
   const handleTableChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
-    setSelectedTable(e.target.value ? Number(e.target.value) : undefined)
+    setValue('table', e.target.value ? Number(e.target.value) : undefined, { shouldDirty: true })
 
-  const areAttributesEqual = (a: Attribute[], b: Attribute[]) => {
-    if (a.length !== b.length) return false
-
-    for (let i = 0; i < a.length; i++) {
-      if (a[i].name !== b[i].name || a[i].value !== b[i].value) {
-        return false
-      }
-    }
-
-    return true
+  const handleAttributesChange = (newAttributes: Attribute[]) => {
+    setValue('attributes', newAttributes, { shouldDirty: true })
   }
 
-  const hasChanges =
-    (title || '') !== (originalTitle || '') ||
-    isTextEdited ||
-    selectedTable !== originalTable ||
-    !areAttributesEqual(attributes, originalAttributes)
+  const handleMainImageChange = (newImageId: number | null) => {
+    setValue('mainImage', newImageId, { shouldDirty: true })
+    apolloClient.refetchQueries({
+      include: [GET_DATA],
+    })
+  }
 
-  useUnsavedChangesWarning(hasChanges)
+  useUnsavedChangesWarning(isDirty)
 
-  const handleSave = async () => {
-    if (!title.trim()) {
-      alert('Bitte gib einen Titel für das Exponat ein')
+  const onSubmit: SubmitHandler<ExhibitFormData> = async (data) => {
+    if (!data.title.trim()) {
+      await showMessage('Fehlende Angabe', 'Bitte gib einen Titel für das Exponat ein')
       return
     }
 
-    const currentText = editorRef.current?.getHTML() || ''
-    const validAttributes = attributes
+    const currentDescription = descriptionEditorRef.current?.getHTML() || ''
+    const currentDescriptionExtension = descriptionExtensionEditorRef.current?.getHTML() || ''
+    const validAttributes = data.attributes
       .filter((attr) => attr.name && attr.value)
       .map(({ name, value }) => ({ name, value }))
 
     await apolloClient.resetStore()
-    // When saving, we need to retrieve the text from the server as it will be
-    // processed to remove unwanted HTML and to externalize inline images.
     if (isNew) {
       const result = await createExhibit({
         variables: {
-          title,
-          text: currentText,
-          table: selectedTable || null,
+          title: data.title,
+          description: currentDescription,
+          descriptionExtension: currentDescriptionExtension,
+          table: data.table || null,
           attributes: validAttributes.length > 0 ? validAttributes : undefined,
         },
       })
       const {
         id: savedId,
-        text: savedText,
+        description: savedDescription,
+        descriptionExtension: savedDescriptionExtension,
         attributes: savedAttributes,
       } = result.data!.createExhibit!
       navigate(`/user/exhibit/${savedId}`)
-      setText(savedText!)
-      setAttributes((savedAttributes as Attribute[]) || [])
-      setOriginalAttributes((savedAttributes as Attribute[]) || [])
-      setIsTextEdited(false)
+      setValue('description', savedDescription!)
+      setValue('descriptionExtension', savedDescriptionExtension!)
+      setValue('attributes', (savedAttributes as Attribute[]) || [])
     } else {
       const result = await updateExhibit({
         variables: {
           id: Number(id),
-          title,
-          text: currentText,
-          table: selectedTable || null,
+          title: data.title,
+          description: currentDescription,
+          descriptionExtension: currentDescriptionExtension,
+          table: data.table || null,
           attributes: validAttributes.length > 0 ? validAttributes : undefined,
         },
       })
-      const { text: savedText, attributes: savedAttributes } = result.data!.updateExhibit!
-      setOriginalTitle(title)
-      setOriginalTable(selectedTable)
-      setText(savedText!)
-      setAttributes((savedAttributes as Attribute[]) || [])
-      setOriginalAttributes((savedAttributes as Attribute[]) || [])
-      setIsTextEdited(false)
+      const {
+        description: savedDescription,
+        descriptionExtension: savedDescriptionExtension,
+        attributes: savedAttributes,
+      } = result.data!.updateExhibit!
+      setValue('description', savedDescription!)
+      setValue('descriptionExtension', savedDescriptionExtension!)
+      setValue('attributes', (savedAttributes as Attribute[]) || [])
     }
   }
 
-  const handleDelete = () => {
-    setShowDeleteConfirm(true)
-  }
-
-  const handleConfirmDelete = async () => {
+  const handleDelete = async () => {
     await deleteExhibit({ variables: { id: Number(id) } })
     await apolloClient.clearStore()
     navigate('/user/exhibit')
   }
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file || !id || id === 'new') return
+  const handlePdfClick = async () => {
+    if (isPdfGenerating) return
 
-    setIsImageLoading(true)
     try {
-      const formData = new FormData()
-      formData.append('file', file)
+      setIsPdfGenerating(true)
 
-      await axios.put(`/api/exhibit/${id}/image/main`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      })
+      // Get the current full URL for the QR code
+      const currentUrl = window.location.href
 
-      await apolloClient.refetchQueries({
-        include: [GET_DATA],
+      await generateAndDownloadPDF({
+        id: parseInt(id!),
+        client: apolloClient,
+        url: currentUrl,
       })
     } catch (error) {
-      console.error('Error uploading image:', error)
-      alert('Fehler beim Hochladen des Bildes')
+      console.error('Error generating PDF:', error)
     } finally {
-      setIsImageLoading(false)
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''
-      }
+      setIsPdfGenerating(false)
     }
-  }
-
-  const handleDeleteImage = async () => {
-    setShowDeleteImageConfirm(true)
-  }
-
-  const handleConfirmDeleteImage = async () => {
-    if (!id || id === 'new' || !mainImage) return
-
-    setIsImageLoading(true)
-    await axios.delete(`/api/exhibit/${id}/image/main`)
-    setMainImage(null)
-
-    await apolloClient.refetchQueries({
-      include: [GET_DATA],
-    })
-    setIsImageLoading(false)
   }
 
   if (!isNew) {
@@ -318,111 +320,136 @@ const ExhibitEditor = () => {
     }
   }
 
-  const tables = isNew
-    ? tablesData?.getCurrentExhibitor?.tables?.map((table) => table.number)
-    : exhibitData?.getExhibit?.exhibitor?.tables?.map((table) => table.number)
+  const tables =
+    (isNew
+      ? tablesData?.getCurrentExhibitor?.tables?.map((table) => table.number)
+      : exhibitData?.getExhibit?.exhibitor?.tables?.map((table) => table.number)) || []
 
   return (
-    <div>
-      <h1>{isNew ? 'Neues Exponat erstellen' : 'Exponat bearbeiten'}</h1>
-      <article>
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Titel eingeben..."
-        />
-        <label>
-          Tisch
-          <select value={selectedTable} onChange={handleTableChange}>
-            <option value="">Kein Tisch</option>
-            {tables?.map((table) => (
-              <option key={table} value={table}>
-                {table}
-              </option>
-            ))}
-          </select>
-        </label>
+    <>
+      <article className="space-y-6">
+        <header>
+          <PageHeading>{isNew ? 'Neues Exponat' : 'Exponat bearbeiten'}</PageHeading>
+        </header>
 
-        {!isNew && (
-          <div className="main-image-section" style={{ marginBottom: '2rem' }}>
-            <h3>Hauptbild</h3>
-            {isImageLoading ? (
-              <p>Bild wird verarbeitet...</p>
-            ) : mainImage ? (
-              <div style={{ marginBottom: '1rem' }}>
-                <img
-                  src={`/api/exhibit/${id}/image/main`}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <FormSection>
+            <SectionLabel>Exponat-Details</SectionLabel>
+            <FormFieldGroup>
+              <FormLabel>Titel</FormLabel>
+              <Input
+                type="text"
+                {...register('title', { required: true })}
+                error={errors.title?.message}
+              />
+
+              {!isNew && tables.length > 0 && (
+                <>
+                  <FormLabel>Tisch</FormLabel>
+                  <select
+                    value={watch('table') || ''}
+                    onChange={handleTableChange}
+                    className="mt-1 block w-full rounded-md border border-gray-300 bg-gray-50 p-2 shadow-sm focus:border-blue-500 focus:bg-white focus:ring-blue-500">
+                    <option value="">Kein Tisch zugewiesen</option>
+                    {tables.map((number) => (
+                      <option key={number} value={number}>
+                        Tisch {number}
+                      </option>
+                    ))}
+                  </select>
+                </>
+              )}
+            </FormFieldGroup>
+          </FormSection>
+
+          <div className="flex flex-col gap-6 md:flex-row">
+            {!isNew && (
+              <FormSection className="md:w-[40%]">
+                <SectionLabel>Hauptbild</SectionLabel>
+                <ImageUploader
+                  imageId={watch('mainImage')}
+                  imageUrl={`/api/exhibit/${id}/image/main`}
+                  onImageChange={handleMainImageChange}
+                  title=""
                   alt="Hauptbild"
-                  style={{ maxWidth: '300px', maxHeight: '200px', objectFit: 'contain' }}
                 />
-                <div style={{ marginTop: '0.5rem' }}>
-                  <button className="secondary" onClick={() => fileInputRef.current?.click()}>
-                    Bild ersetzen
-                  </button>
-                  <button
-                    className="secondary outline"
-                    onClick={handleDeleteImage}
-                    style={{ marginLeft: '0.5rem' }}>
-                    Bild löschen
-                  </button>
-                  <Confirm
-                    isOpen={showDeleteImageConfirm}
-                    title="Haupbild löschen"
-                    message={`Möchtest Du das Haupbild wirklich löschen?`}
-                    confirm="Löschen"
-                    cancel="Abbrechen"
-                    onConfirm={handleConfirmDeleteImage}
-                    onClose={() => setShowDeleteImageConfirm(false)}
-                  />
-                </div>
-              </div>
-            ) : (
-              <div>
-                <p>Kein Hauptbild vorhanden</p>
-                <button className="secondary" onClick={() => fileInputRef.current?.click()}>
-                  Bild hochladen
-                </button>
-              </div>
+              </FormSection>
             )}
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleImageUpload}
-              style={{ display: 'none' }}
-              accept="image/*"
-            />
+
+            <FormSection className="md:w-[60%]">
+              <SectionLabel>Datenblatt</SectionLabel>
+              <ExhibitAttributeEditor
+                attributes={watch('attributes')}
+                onChange={handleAttributesChange}
+              />
+            </FormSection>
           </div>
-        )}
 
-        <ExhibitAttributeEditor attributes={attributes} onChange={setAttributes} />
+          <FormSection>
+            <SectionLabel>Beschreibung</SectionLabel>
+            <TextEditor
+              ref={descriptionEditorRef}
+              defaultValue={watch('description')}
+              onEditStateChange={(edited) => {
+                if (edited) {
+                  setValue('description', descriptionEditorRef.current?.getHTML() || '', {
+                    shouldDirty: true,
+                  })
+                }
+              }}
+            />
+            <br />
+            <SectionLabel>Erweiterte Beschreibung (nur im Web)</SectionLabel>
+            <TextEditor
+              ref={descriptionExtensionEditorRef}
+              defaultValue={watch('descriptionExtension')}
+              onEditStateChange={(edited) => {
+                if (edited) {
+                  setValue(
+                    'descriptionExtension',
+                    descriptionExtensionEditorRef.current?.getHTML() || '',
+                    {
+                      shouldDirty: true,
+                    },
+                  )
+                }
+              }}
+            />
+          </FormSection>
 
-        <TextEditor
-          ref={editorRef}
-          defaultValue={text}
-          onEditStateChange={(edited) => setIsTextEdited(edited)}
-        />
-        <div className="button-group">
-          <button onClick={handleSave} disabled={!isNew && !hasChanges}>
-            {isNew ? 'Erstellen' : 'Speichern'}
-          </button>
-          {!isNew && (
-            <button onClick={handleDelete} className="danger">
-              Löschen
-            </button>
-          )}
-        </div>
-        <Confirm
-          isOpen={showDeleteConfirm}
-          title="Exponat löschen"
-          message={`Möchtest Du das Exponat "${title}" wirklich löschen?`}
-          confirm="Löschen"
-          cancel="Abbrechen"
-          onConfirm={handleConfirmDelete}
-          onClose={() => setShowDeleteConfirm(false)}
-        />
+          <ActionBar>
+            <Button type="submit" disabled={!isDirty || !watch('title').trim()}>
+              {isNew ? 'Erstellen' : 'Speichern'}
+            </Button>
+            {!isNew && (
+              <Button
+                onClick={handlePdfClick}
+                disabled={isPdfGenerating || isDirty}
+                variant="secondary"
+                icon="pdf"
+                title="Als PDF speichern (Shift+Klick öffnet im Browser)">
+                PDF
+              </Button>
+            )}
+            {!isNew && (
+              <Button onClick={() => setShowDeleteConfirm(true)} variant="danger">
+                Löschen
+              </Button>
+            )}
+          </ActionBar>
+        </form>
       </article>
-    </div>
+
+      <Confirm
+        isOpen={showDeleteConfirm}
+        title="Exponat löschen"
+        message={`Möchtest Du das Exponat "${watch('title')}" wirklich löschen?`}
+        confirm="Löschen"
+        cancel="Abbrechen"
+        onConfirm={handleDelete}
+        onClose={() => setShowDeleteConfirm(false)}
+      />
+    </>
   )
 }
 

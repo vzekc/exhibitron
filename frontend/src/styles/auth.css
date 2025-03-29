@@ -1,0 +1,35 @@
+.auth-container {
+  @apply mx-auto mt-8 max-w-md rounded-lg bg-white p-6 shadow-md;
+}
+
+.auth-form {
+  @apply space-y-6;
+}
+
+.auth-form-group {
+  @apply space-y-2;
+}
+
+.auth-label {
+  @apply block text-sm font-medium text-gray-700;
+}
+
+.auth-input {
+  @apply block w-full rounded-md border border-gray-300 px-3 py-2 text-base shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500;
+}
+
+.auth-button {
+  @apply w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.auth-button-secondary {
+  @apply w-full rounded-md border border-blue-600 bg-white px-4 py-2 text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+}
+
+.auth-error {
+  @apply mt-2 text-sm text-red-600;
+}
+
+.password-input-hidden {
+  @apply hidden;
+}

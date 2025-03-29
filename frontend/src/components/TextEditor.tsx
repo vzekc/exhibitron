@@ -9,7 +9,13 @@ import {
 } from 'react'
 import deepEqual from 'fast-deep-equal'
 import 'quill/dist/quill.snow.css'
-import './TextEditor.css'
+
+// No type declarations for quill exist
+const Font = Quill.import('formats/font')
+// @ts-expect-error TS18046
+Font.whitelist = ['lato']
+// @ts-expect-error TS2769
+Quill.register(Font)
 
 interface TextEditorProps {
   defaultValue?: string
@@ -18,6 +24,7 @@ interface TextEditorProps {
 
 export interface TextEditorHandle {
   getHTML: () => string
+  resetEditState: () => void
 }
 
 const TextEditor = forwardRef<TextEditorHandle, TextEditorProps>(
@@ -35,7 +42,15 @@ const TextEditor = forwardRef<TextEditorHandle, TextEditorProps>(
       () => ({
         getHTML: () => {
           if (!quillRef.current) return ''
-          return quillRef.current.getSemanticHTML().replaceAll(/&nbsp;/g, ' ')
+          const html = quillRef.current.getSemanticHTML().replaceAll(/&nbsp;/g, ' ')
+          console.log('html', html)
+          return html
+        },
+        resetEditState: () => {
+          if (quillRef.current) {
+            initialDeltaRef.current = quillRef.current.getContents()
+            setIsEdited(false)
+          }
         },
       }),
       [],
@@ -62,6 +77,7 @@ const TextEditor = forwardRef<TextEditorHandle, TextEditorProps>(
         theme: 'snow',
         modules: {
           toolbar: [
+            [{ header: [1, false] }],
             ['bold', 'italic'],
             ['link', 'image'],
             ['blockquote', 'code-block'],
@@ -69,9 +85,24 @@ const TextEditor = forwardRef<TextEditorHandle, TextEditorProps>(
             ['clean'],
           ],
         },
+        formats: [
+          'header',
+          'bold',
+          'italic',
+          'link',
+          'image',
+          'blockquote',
+          'code-block',
+          'list',
+          'font',
+        ],
       })
 
       quillRef.current = quill
+
+      // Set default font family and size
+      quill.root.style.fontFamily = 'Lato, sans-serif'
+      quill.root.style.fontSize = '1rem'
 
       // Set initial content and store initial delta
       if (defaultValueRef.current) {
@@ -113,7 +144,13 @@ const TextEditor = forwardRef<TextEditorHandle, TextEditorProps>(
       isUserInputRef.current = false
     }, [defaultValue])
 
-    return <div ref={containerRef} className="editor-container"></div>
+    return (
+      <div
+        ref={containerRef}
+        className="overflow-hidden rounded-md border border-gray-300 bg-white shadow-sm">
+        {/* Quill editor will be inserted here */}
+      </div>
+    )
   },
 )
 

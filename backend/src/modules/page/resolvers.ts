@@ -1,44 +1,42 @@
 import { Context } from '../../app/context.js'
-import { MutationResolvers, QueryResolvers } from '../../generated/graphql.js'
+import { MutationResolvers, QueryResolvers, PageResolvers } from '../../generated/graphql.js'
 import { requireAdmin } from '../../db.js'
-import { processHtml } from '../common/htmlProcessor.js'
 import { wrap } from '@mikro-orm/core'
+import { Page } from './entity.js'
 
 export const pageQueries: QueryResolvers<Context> = {
+  // @ts-expect-error ts2345
   getPage: async (_, { key }, { db, exhibition }) => db.page.findOne({ exhibition, key }),
 }
 
 export const pageMutations: MutationResolvers<Context> = {
-  createPage: async (_, { key, title, text }, { db, user, exhibition }) => {
+  // @ts-expect-error ts2345
+  createPage: async (_, { key, title, html }, { db, user, exhibition }) => {
     requireAdmin(user)
     const page = db.page.create({
       exhibition,
       key,
       title,
-      text: '', // Will be set after processing
     })
 
-    if (text) {
-      const { sanitizedHtml, images } = await processHtml(text, db.em, { page })
-      page.text = sanitizedHtml
-      db.em.persist(images)
+    if (html) {
+      // Create Document entity with HTML
+      page.content = await db.document.ensureDocument(null, html)
     }
 
     await db.em.persistAndFlush(page)
     return page
   },
-  updatePage: async (_, { id, key, title, text }, { db, user }) => {
+  // @ts-expect-error ts2345
+  updatePage: async (_, { id, key, title, html }, { db, user }) => {
     requireAdmin(user)
     const page = await db.page.findOneOrFail({ id })
 
-    let processedText = text
-    if (text) {
-      const { sanitizedHtml, images } = await processHtml(text, db.em, { page })
-      processedText = sanitizedHtml
-      db.em.persist(images)
+    if (html) {
+      page.content = await db.document.ensureDocument(page.content, html)
     }
 
-    wrap(page).assign({ key, title, text: processedText })
+    wrap(page).assign({ key, title })
     await db.em.persistAndFlush(page)
     return page
   },
@@ -50,7 +48,18 @@ export const pageMutations: MutationResolvers<Context> = {
   },
 }
 
+export const pageTypeResolvers: PageResolvers<Context> = {
+  html: (page) => {
+    // Use the Page entity type to properly access the content property
+    const pageEntity = page as unknown as Page
+
+    // Return HTML content from Document entity if it exists, otherwise return null/empty string
+    return pageEntity.content?.html ?? ''
+  },
+}
+
 export const pageResolvers = {
   Query: pageQueries,
   Mutation: pageMutations,
+  Page: pageTypeResolvers,
 }

@@ -4,7 +4,7 @@ const NotFound = () => {
   const location = useLocation()
   return (
     <article>
-      <code style={{ background: 'white', color: '#cc4500' }}>
+      <code>
         %EXHIBITRON-W-SEARCHFAIL, error searching for {window.location.origin}
         {location.pathname}
         <br />

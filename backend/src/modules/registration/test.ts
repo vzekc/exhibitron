@@ -1,6 +1,6 @@
 import { describe, expect } from 'vitest'
 import { graphql } from 'gql.tada'
-import { ExecuteOperationFunction, graphqlTest, login } from '../../test/apollo.js'
+import { ExecuteOperationFunction, graphqlTest, login } from '../../test/server.js'
 import { RegisterInput } from '../../generated/graphql.js'
 
 describe('registration', () => {
@@ -53,7 +53,7 @@ describe('registration', () => {
   })
 
   graphqlTest('retrieve all', async (graphqlRequest) => {
-    const admin = await login(graphqlRequest, 'admin@example.com')
+    const admin = await login('admin@example.com')
     const result = await graphqlRequest(
       graphql(`
         query GetRegistrations {
@@ -71,7 +71,7 @@ describe('registration', () => {
   })
 
   graphqlTest('retrieve all without admin rights', async (graphqlRequest) => {
-    const user = await login(graphqlRequest, 'donald@example.com')
+    const user = await login('donald@example.com')
     const result = await graphqlRequest(
       graphql(`
         query GetRegistrations {
@@ -87,7 +87,7 @@ describe('registration', () => {
   })
 
   graphqlTest('update', async (graphqlRequest) => {
-    const admin = await login(graphqlRequest, 'admin@example.com')
+    const admin = await login('admin@example.com')
     const registrationId = await createRegistration(graphqlRequest)
 
     const result = await graphqlRequest(
@@ -109,7 +109,7 @@ describe('registration', () => {
   })
 
   graphqlTest('update without admin rights', async (graphqlRequest) => {
-    const user = await login(graphqlRequest, 'donald@example.com')
+    const user = await login('donald@example.com')
     const registrationId = await createRegistration(graphqlRequest)
 
     const result = await graphqlRequest(
@@ -130,7 +130,7 @@ describe('registration', () => {
   })
 
   graphqlTest('update nonexistent', async (graphqlRequest) => {
-    const admin = await login(graphqlRequest, 'admin@example.com')
+    const admin = await login('admin@example.com')
     const result = await graphqlRequest(
       graphql(`
         mutation UpdateRegistrationNotes($id: Int!, $notes: String!) {
@@ -146,7 +146,7 @@ describe('registration', () => {
   })
 
   graphqlTest('approve, reject and delete registration', async (graphqlRequest) => {
-    const admin = await login(graphqlRequest, 'admin@example.com')
+    const admin = await login('admin@example.com')
     const registrationId = await createRegistration(graphqlRequest)
 
     {

@@ -2,7 +2,7 @@ type Page {
   id: Int!
   key: String!
   title: String!
-  text: String!
+  html: String!
 }
 
 extend type Query {
@@ -10,7 +10,7 @@ extend type Query {
 }
 
 extend type Mutation {
-  createPage(key: String!, title: String!, text: String!): Page!
-  updatePage(id: Int!, key: String!, title: String, text: String): Page!
+  createPage(key: String!, title: String!, html: String!): Page!
+  updatePage(id: Int!, key: String!, title: String, html: String): Page!
   deletePage(id: Int!): Boolean!
 }

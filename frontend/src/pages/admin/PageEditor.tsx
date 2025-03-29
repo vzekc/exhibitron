@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 import { useQuery, useMutation, gql, useApolloClient } from '@apollo/client'
-import useMandatoryParams from '../../utils/useMandatoryParams'
+import useMandatoryParams from '@utils/useMandatoryParams'
 import ContentEditable from 'react-contenteditable'
-import TextEditor, { TextEditorHandle } from '../../components/TextEditor.tsx'
-import { useUnsavedChangesWarning } from '../../hooks/useUnsavedChangesWarning.tsx'
+import TextEditor, { TextEditorHandle } from '@components/TextEditor.tsx'
+import { useUnsavedChangesWarning } from '@hooks/useUnsavedChangesWarning.tsx'
+import Button from '@components/Button.tsx'
 
 const GET_PAGE = gql`
   query GetPage($key: String!) {
@@ -11,29 +12,29 @@ const GET_PAGE = gql`
       id
       key
       title
-      text
+      html
     }
   }
 `
 
 const CREATE_PAGE = gql`
-  mutation CreatePage($key: String!, $title: String!, $text: String!) {
-    createPage(key: $key, title: $title, text: $text) {
+  mutation CreatePage($key: String!, $title: String!, $html: String!) {
+    createPage(key: $key, title: $title, html: $html) {
       id
       key
       title
-      text
+      html
     }
   }
 `
 
 const UPDATE_PAGE = gql`
-  mutation UpdatePage($id: Int!, $key: String!, $title: String!, $text: String!) {
-    updatePage(id: $id, key: $key, title: $title, text: $text) {
+  mutation UpdatePage($id: Int!, $key: String!, $title: String!, $html: String!) {
+    updatePage(id: $id, key: $key, title: $title, html: $html) {
       id
       key
       title
-      text
+      html
     }
   }
 `
@@ -45,7 +46,7 @@ const PageEditor = () => {
   const [createPage] = useMutation(CREATE_PAGE)
   const [updatePage] = useMutation(UPDATE_PAGE)
   const [title, setTitle] = useState('')
-  const [text, setText] = useState('')
+  const [html, setHtml] = useState('')
   const [originalTitle, setOriginalTitle] = useState('')
   const [isTextEdited, setIsTextEdited] = useState(false)
   const editorRef = useRef<TextEditorHandle>(null)
@@ -53,10 +54,10 @@ const PageEditor = () => {
   useEffect(() => {
     if (data?.getPage) {
       const newTitle = data.getPage.title || ''
-      const newText = data.getPage.text || ''
+      const newHtml = data.getPage.html || ''
 
       setTitle(newTitle)
-      setText(newText)
+      setHtml(newHtml)
       setOriginalTitle(newTitle)
       setIsTextEdited(false)
     }
@@ -67,24 +68,25 @@ const PageEditor = () => {
   useUnsavedChangesWarning(hasChanges)
 
   const handleSave = async () => {
-    const currentText = editorRef.current?.getHTML() || ''
-    let processedText: string
+    const currentHtml = editorRef.current?.getHTML() || ''
+    let processedHtml: string
 
     if (data?.getPage?.id) {
       const result = await updatePage({
-        variables: { id: data.getPage.id, key, title, text: currentText },
+        variables: { id: data.getPage.id, key, title, html: currentHtml },
       })
-      processedText = result!.data!.updatePage.text || ''
+      processedHtml = result!.data!.updatePage.html || ''
     } else {
-      const result = await createPage({ variables: { key, title, text: currentText } })
-      processedText = result!.data!.createPage.text || ''
+      const result = await createPage({ variables: { key, title, html: currentHtml } })
+      processedHtml = result!.data!.createPage.html || ''
     }
-    setText(processedText)
+    setHtml(processedHtml)
 
     // Reset the Apollo cache to force a fresh load of all data
     await apolloClient.resetStore()
     setOriginalTitle(title)
     setIsTextEdited(false)
+    editorRef.current?.resetEditState()
   }
 
   if (loading) return <div>Loading...</div>
@@ -96,17 +98,16 @@ const PageEditor = () => {
         html={title}
         placeholder="Titel der Seite"
         onChange={(e) => setTitle(e.target.value)}
-        className="editable-title"
         tagName="h2"
       />
       <TextEditor
         ref={editorRef}
-        defaultValue={text}
+        defaultValue={html}
         onEditStateChange={(edited) => setIsTextEdited(edited)}
       />
-      <button onClick={handleSave} disabled={!hasChanges || !title}>
-        Save
-      </button>
+      <Button onClick={handleSave} disabled={!hasChanges || !title}>
+        Speichern
+      </Button>
     </div>
   )
 }

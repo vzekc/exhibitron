@@ -1,10 +1,36 @@
-import { Entity, EntityRepositoryType, ManyToOne, Property, OneToOne } from '@mikro-orm/core'
+import {
+  Entity,
+  EntityRepositoryType,
+  ManyToOne,
+  Property,
+  OneToOne,
+  Cascade,
+} from '@mikro-orm/core'
 import { BaseEntity } from '../common/base.entity.js'
 import { Table } from '../table/entity.js'
 import { ExhibitRepository } from './repository.js'
 import { Exhibition } from '../exhibition/entity.js'
 import { Exhibitor } from '../exhibitor/entity.js'
-import { Image } from '../image/entity.js'
+import { Document } from '../document/entity.js'
+import { ImageStorage } from '../image/entity.js'
+
+@Entity()
+export class ExhibitImage extends BaseEntity {
+  @OneToOne(() => ImageStorage, { cascade: [Cascade.PERSIST], eager: true, deleteRule: 'cascade' })
+  image!: ImageStorage
+
+  @OneToOne(() => ImageStorage, {
+    nullable: true,
+    cascade: [Cascade.PERSIST],
+    eager: true,
+    deleteRule: 'cascade',
+    orphanRemoval: true,
+  })
+  thumbnail?: ImageStorage
+
+  @OneToOne(() => Exhibit)
+  exhibit!: Exhibit
+}
 
 @Entity({ repository: () => ExhibitRepository })
 export class Exhibit extends BaseEntity<'text' | 'table' | 'attributes'> {
@@ -16,8 +42,11 @@ export class Exhibit extends BaseEntity<'text' | 'table' | 'attributes'> {
   @Property()
   title!: string
 
-  @Property({ columnType: 'text', nullable: true })
-  text!: string
+  @OneToOne(() => Document, { nullable: true, orphanRemoval: true, eager: true })
+  description!: Document | null
+
+  @OneToOne(() => Document, { nullable: true, orphanRemoval: true, eager: true })
+  descriptionExtension!: Document | null
 
   @ManyToOne({ nullable: true })
   table?: Table
@@ -28,6 +57,6 @@ export class Exhibit extends BaseEntity<'text' | 'table' | 'attributes'> {
   @Property({ type: 'json', nullable: true })
   attributes?: [string, string][]
 
-  @OneToOne(() => Image, { nullable: true, orphanRemoval: true })
-  mainImage?: Image
+  @OneToOne(() => ExhibitImage, (image) => image.exhibit, { nullable: true, orphanRemoval: true })
+  mainImage?: ExhibitImage
 }

@@ -1,55 +1,35 @@
 import { graphql } from 'gql.tada'
 import { useQuery } from '@apollo/client'
-import { Link } from 'react-router-dom'
-import '../components/Card.css'
+import ChipContainer from '@components/ChipContainer.tsx'
+import ExhibitorChip from '@components/ExhibitorChip.tsx'
 
-const GET_EXHIBITORS = graphql(`
-  query GetExhibitors {
-    getCurrentExhibition {
-      id
-      exhibitors {
+const GET_EXHIBITORS = graphql(
+  `
+    query GetExhibitors {
+      getCurrentExhibition {
         id
-        user {
-          id
-          fullName
-        }
-        exhibits {
-          title
+        exhibitors {
+          ...ExhibitorChip
         }
       }
     }
-  }
-`)
+  `,
+  [ExhibitorChip.fragment],
+)
 
 const Exhibitors = () => {
   const { data } = useQuery(GET_EXHIBITORS)
   if (data?.getCurrentExhibition) {
-    const exhibitors = [...data!.getCurrentExhibition!.exhibitors!]
-      .map(({ id, user, exhibits }) => ({
-        id,
-        fullName: user.fullName,
-        exhibits: ((exhibits as Array<{ title: string }>) || [])
-          .map((e) => e.title)
-          .sort((a, b) => a.localeCompare(b)),
-      }))
-      .sort(({ fullName: a }, { fullName: b }) => a.localeCompare(b))
+    const exhibitors = [...data!.getCurrentExhibition!.exhibitors!].sort(
+      ({ user: a }, { user: b }) =>
+        (a.nickname || a.fullName || '').localeCompare(b.nickname || b.fullName || ''),
+    )
     return (
-      <article className="exhibitors-page">
-        <div className="container">
-          <div className="cards-grid">
-            {exhibitors.map((exhibitor) => (
-              <Link to={`/exhibitor/${exhibitor.id}`} className="card clickable" key={exhibitor.id}>
-                <div className="card-title">{exhibitor.fullName}</div>
-                <div className="card-content">
-                  {exhibitor.exhibits.map((title) => (
-                    <div className="exhibit-title">{title}</div>
-                  ))}
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </article>
+      <ChipContainer>
+        {exhibitors.map((exhibitor) => (
+          <ExhibitorChip key={exhibitor.id} exhibitor={exhibitor} />
+        ))}
+      </ChipContainer>
     )
   }
 }

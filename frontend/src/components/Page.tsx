@@ -1,7 +1,10 @@
 // src/components/Page.tsx
 import { useQuery, gql } from '@apollo/client'
 import React from 'react'
-import { useUser } from '../contexts/UserContext.ts'
+import { useExhibitor } from '@contexts/ExhibitorContext.ts'
+import Article from './Article'
+import ServerHtmlContent from './ServerHtmlContent'
+import PageHeading from './PageHeading'
 
 const GET_CURRENT_EXHIBITION = gql`
   query GetCurrentExhibition {
@@ -10,7 +13,7 @@ const GET_CURRENT_EXHIBITION = gql`
       pages {
         key
         title
-        text
+        html
       }
     }
   }
@@ -22,7 +25,7 @@ interface PageProps {
 
 const Page: React.FC<PageProps> = ({ pageKey }) => {
   const { loading, error, data } = useQuery(GET_CURRENT_EXHIBITION)
-  const { user } = useUser()
+  const { exhibitor } = useExhibitor()
 
   if (loading) return <div>Lade...</div>
   if (error) return <div>Fehler: {error.message}</div>
@@ -30,7 +33,7 @@ const Page: React.FC<PageProps> = ({ pageKey }) => {
   const page = data.getCurrentExhibition.pages.find((page: { key: string }) => page.key === pageKey)
 
   if (!page) {
-    if (user?.isAdministrator) {
+    if (exhibitor?.user.isAdministrator) {
       return (
         <div>
           <p>
@@ -45,10 +48,10 @@ const Page: React.FC<PageProps> = ({ pageKey }) => {
   }
 
   return (
-    <article>
-      <h1>{page.title}</h1>
-      <div dangerouslySetInnerHTML={{ __html: page.text }} />
-    </article>
+    <Article>
+      <PageHeading>{page.title}</PageHeading>
+      <ServerHtmlContent html={page.html} />
+    </Article>
   )
 }
 

@@ -1,5 +1,4 @@
 import { expect } from 'vitest'
-import { bootstrap } from '../app.js'
 import { initORM } from '../db.js'
 import config from '../mikro-orm.config.js'
 import { TestSeeder } from '../seeders/TestSeeder.js'
@@ -35,17 +34,6 @@ export const createTestDatabase = async () => {
   await db.orm.seeder.seed(TestSeeder)
 
   return db
-}
-
-export async function initTestApp() {
-  // this will create all the ORM services and cache them
-  const db = await createTestDatabase()
-
-  const { app } = await bootstrap({
-    logLevel: process.env.TEST_LOG_LEVEL || 'fatal',
-  })
-
-  return { app, db }
 }
 
 export const runCommand = (command: string): void => {

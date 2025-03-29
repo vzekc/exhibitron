@@ -4,9 +4,11 @@ import * as oidc from './app/oidc.js'
 import * as orm from './app/orm.js'
 import * as session from './app/session.js'
 import * as graphql from './app/graphql.js'
+import fastifyMultipart from '@fastify/multipart'
 import { errorHandler } from './modules/common/errors.js'
 import { registerUserRoutes } from './modules/user/routes.js'
 import { registerImageRoutes } from './modules/image/routes.js'
+import { registerExhibitImageRoutes } from './modules/exhibit/routes.js'
 
 const registerErrorHandler = (app: FastifyInstance) => {
   // register global error handler to process 404 errors from `findOneOrFail` calls
@@ -40,6 +42,13 @@ export async function createApp({
     },
   })
 
+  // Register multipart plugin for file uploads
+  await app.register(fastifyMultipart, {
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB limit
+    },
+  })
+
   await oidc.register(app)
   await orm.register(app, !!migrate)
   await session.register(app)
@@ -51,6 +60,7 @@ export async function createApp({
 
   await registerUserRoutes(app)
   await registerImageRoutes(app)
+  await registerExhibitImageRoutes(app)
 
   return app
 }

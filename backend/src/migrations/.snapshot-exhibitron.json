@@ -33,6 +33,141 @@
           "length": 6,
           "mappedType": "datetime"
         },
+        "html": {
+          "name": "html",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        }
+      },
+      "name": "document",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "document_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {},
+      "nativeEnums": {
+        "registration_status": {
+          "name": "registration_status",
+          "schema": "public",
+          "items": ["approved", "inProgress", "new", "rejected"]
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        }
+      },
+      "name": "exhibit_attribute",
+      "schema": "public",
+      "indexes": [
+        {
+          "columnNames": ["name"],
+          "composite": false,
+          "keyName": "exhibit_attribute_name_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "exhibit_attribute_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {},
+      "nativeEnums": {
+        "registration_status": {
+          "name": "registration_status",
+          "schema": "public",
+          "items": ["approved", "inProgress", "new", "rejected"]
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
         "key": {
           "name": "key",
           "type": "varchar(255)",
@@ -125,6 +260,224 @@
           "length": 6,
           "mappedType": "datetime"
         },
+        "data": {
+          "name": "data",
+          "type": "bytea",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "blob"
+        },
+        "mime_type": {
+          "name": "mime_type",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "filename": {
+          "name": "filename",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "slug": {
+          "name": "slug",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "width": {
+          "name": "width",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "height": {
+          "name": "height",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        }
+      },
+      "name": "image_storage",
+      "schema": "public",
+      "indexes": [
+        {
+          "columnNames": ["slug"],
+          "composite": false,
+          "keyName": "image_storage_slug_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "image_storage_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {},
+      "nativeEnums": {
+        "registration_status": {
+          "name": "registration_status",
+          "schema": "public",
+          "items": ["approved", "inProgress", "new", "rejected"]
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "image_id": {
+          "name": "image_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "document_id": {
+          "name": "document_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        }
+      },
+      "name": "document_image",
+      "schema": "public",
+      "indexes": [
+        {
+          "columnNames": ["image_id"],
+          "composite": false,
+          "keyName": "document_image_image_id_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "document_image_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "document_image_image_id_foreign": {
+          "constraintName": "document_image_image_id_foreign",
+          "columnNames": ["image_id"],
+          "localTableName": "public.document_image",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.image_storage",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        },
+        "document_image_document_id_foreign": {
+          "constraintName": "document_image_document_id_foreign",
+          "columnNames": ["document_id"],
+          "localTableName": "public.document_image",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.document",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {
+        "registration_status": {
+          "name": "registration_status",
+          "schema": "public",
+          "items": ["approved", "inProgress", "new", "rejected"]
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
         "key": {
           "name": "key",
           "type": "varchar(255)",
@@ -154,14 +507,14 @@
           "length": 255,
           "mappedType": "string"
         },
-        "text": {
-          "name": "text",
-          "type": "text",
+        "content_id": {
+          "name": "content_id",
+          "type": "int",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
-          "mappedType": "text"
+          "nullable": true,
+          "mappedType": "integer"
         }
       },
       "name": "page",
@@ -171,6 +524,14 @@
           "columnNames": ["key"],
           "composite": false,
           "keyName": "page_key_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": ["content_id"],
+          "composite": false,
+          "keyName": "page_content_id_unique",
           "constraint": true,
           "primary": false,
           "unique": true
@@ -200,6 +561,15 @@
           "localTableName": "public.page",
           "referencedColumnNames": ["id"],
           "referencedTableName": "public.exhibition",
+          "updateRule": "cascade"
+        },
+        "page_content_id_foreign": {
+          "constraintName": "page_content_id_foreign",
+          "columnNames": ["content_id"],
+          "localTableName": "public.page",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.document",
+          "deleteRule": "set null",
           "updateRule": "cascade"
         }
       },
@@ -275,13 +645,12 @@
         },
         "email": {
           "name": "email",
-          "type": "varchar(255)",
+          "type": "citext",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": 255,
-          "mappedType": "string"
+          "mappedType": "unknown"
         },
         "topic": {
           "name": "topic",
@@ -457,13 +826,12 @@
         },
         "email": {
           "name": "email",
-          "type": "varchar(255)",
+          "type": "citext",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": 255,
-          "mappedType": "string"
+          "mappedType": "unknown"
         },
         "full_name": {
           "name": "full_name",
@@ -647,6 +1015,138 @@
           "length": 6,
           "mappedType": "datetime"
         },
+        "image_id": {
+          "name": "image_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "thumbnail_id": {
+          "name": "thumbnail_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        }
+      },
+      "name": "profile_image",
+      "schema": "public",
+      "indexes": [
+        {
+          "columnNames": ["image_id"],
+          "composite": false,
+          "keyName": "profile_image_image_id_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": ["thumbnail_id"],
+          "composite": false,
+          "keyName": "profile_image_thumbnail_id_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": ["user_id"],
+          "composite": false,
+          "keyName": "profile_image_user_id_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "profile_image_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "profile_image_image_id_foreign": {
+          "constraintName": "profile_image_image_id_foreign",
+          "columnNames": ["image_id"],
+          "localTableName": "public.profile_image",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.image_storage",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        },
+        "profile_image_thumbnail_id_foreign": {
+          "constraintName": "profile_image_thumbnail_id_foreign",
+          "columnNames": ["thumbnail_id"],
+          "localTableName": "public.profile_image",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.image_storage",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        },
+        "profile_image_user_id_foreign": {
+          "constraintName": "profile_image_user_id_foreign",
+          "columnNames": ["user_id"],
+          "localTableName": "public.profile_image",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.user",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {
+        "registration_status": {
+          "name": "registration_status",
+          "schema": "public",
+          "items": ["approved", "inProgress", "new", "rejected"]
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
         "exhibition_id": {
           "name": "exhibition_id",
           "type": "int",
@@ -664,6 +1164,16 @@
           "primary": false,
           "nullable": false,
           "mappedType": "integer"
+        },
+        "topic": {
+          "name": "topic",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
         }
       },
       "name": "exhibitor",
@@ -862,14 +1372,23 @@
           "length": 255,
           "mappedType": "string"
         },
-        "text": {
-          "name": "text",
-          "type": "text",
+        "description_id": {
+          "name": "description_id",
+          "type": "int",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
-          "mappedType": "text"
+          "mappedType": "integer"
+        },
+        "description_extension_id": {
+          "name": "description_extension_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
         },
         "table_id": {
           "name": "table_id",
@@ -888,11 +1407,36 @@
           "primary": false,
           "nullable": false,
           "mappedType": "integer"
+        },
+        "attributes": {
+          "name": "attributes",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "json"
         }
       },
       "name": "exhibit",
       "schema": "public",
       "indexes": [
+        {
+          "columnNames": ["description_id"],
+          "composite": false,
+          "keyName": "exhibit_description_id_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": ["description_extension_id"],
+          "composite": false,
+          "keyName": "exhibit_description_extension_id_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
         {
           "keyName": "exhibit_pkey",
           "columnNames": ["id"],
@@ -910,6 +1454,24 @@
           "localTableName": "public.exhibit",
           "referencedColumnNames": ["id"],
           "referencedTableName": "public.exhibition",
+          "updateRule": "cascade"
+        },
+        "exhibit_description_id_foreign": {
+          "constraintName": "exhibit_description_id_foreign",
+          "columnNames": ["description_id"],
+          "localTableName": "public.exhibit",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.document",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        },
+        "exhibit_description_extension_id_foreign": {
+          "constraintName": "exhibit_description_extension_id_foreign",
+          "columnNames": ["description_extension_id"],
+          "localTableName": "public.exhibit",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.document",
+          "deleteRule": "set null",
           "updateRule": "cascade"
         },
         "exhibit_table_id_foreign": {
@@ -969,34 +1531,23 @@
           "length": 6,
           "mappedType": "datetime"
         },
-        "data": {
-          "name": "data",
-          "type": "bytea",
+        "image_id": {
+          "name": "image_id",
+          "type": "int",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "mappedType": "blob"
+          "mappedType": "integer"
         },
-        "mime_type": {
-          "name": "mime_type",
-          "type": "varchar(255)",
+        "thumbnail_id": {
+          "name": "thumbnail_id",
+          "type": "int",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
-          "length": 255,
-          "mappedType": "string"
-        },
-        "filename": {
-          "name": "filename",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 255,
-          "mappedType": "string"
+          "nullable": true,
+          "mappedType": "integer"
         },
         "exhibit_id": {
           "name": "exhibit_id",
@@ -1004,24 +1555,39 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": true,
-          "mappedType": "integer"
-        },
-        "page_id": {
-          "name": "page_id",
-          "type": "int",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": true,
+          "nullable": false,
           "mappedType": "integer"
         }
       },
-      "name": "image",
+      "name": "exhibit_image",
       "schema": "public",
       "indexes": [
         {
-          "keyName": "image_pkey",
+          "columnNames": ["image_id"],
+          "composite": false,
+          "keyName": "exhibit_image_image_id_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": ["thumbnail_id"],
+          "composite": false,
+          "keyName": "exhibit_image_thumbnail_id_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": ["exhibit_id"],
+          "composite": false,
+          "keyName": "exhibit_image_exhibit_id_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "exhibit_image_pkey",
           "columnNames": ["id"],
           "composite": false,
           "constraint": true,
@@ -1031,22 +1597,30 @@
       ],
       "checks": [],
       "foreignKeys": {
-        "image_exhibit_id_foreign": {
-          "constraintName": "image_exhibit_id_foreign",
-          "columnNames": ["exhibit_id"],
-          "localTableName": "public.image",
+        "exhibit_image_image_id_foreign": {
+          "constraintName": "exhibit_image_image_id_foreign",
+          "columnNames": ["image_id"],
+          "localTableName": "public.exhibit_image",
           "referencedColumnNames": ["id"],
-          "referencedTableName": "public.exhibit",
-          "deleteRule": "set null",
+          "referencedTableName": "public.image_storage",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         },
-        "image_page_id_foreign": {
-          "constraintName": "image_page_id_foreign",
-          "columnNames": ["page_id"],
-          "localTableName": "public.image",
+        "exhibit_image_thumbnail_id_foreign": {
+          "constraintName": "exhibit_image_thumbnail_id_foreign",
+          "columnNames": ["thumbnail_id"],
+          "localTableName": "public.exhibit_image",
           "referencedColumnNames": ["id"],
-          "referencedTableName": "public.page",
-          "deleteRule": "set null",
+          "referencedTableName": "public.image_storage",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        },
+        "exhibit_image_exhibit_id_foreign": {
+          "constraintName": "exhibit_image_exhibit_id_foreign",
+          "columnNames": ["exhibit_id"],
+          "localTableName": "public.exhibit_image",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.exhibit",
           "updateRule": "cascade"
         }
       },

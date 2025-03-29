@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Icon from './Icon'
 
 const isMobileDevice = (): boolean => {
   // @ts-expect-error ts2339
@@ -27,28 +28,30 @@ const SearchTableNumber = () => {
     }
   }
 
-  const scanQrCode = () => {
+  const scanQrCode = (e: React.MouseEvent) => {
+    e.preventDefault()
     console.log('scan qr code')
   }
 
   return (
-    <form onSubmit={handleSearchSubmit}>
-      <fieldset role="group">
+    <form onSubmit={handleSearchSubmit} className="flex">
+      <div className="flex">
         {isMobileDevice() && (
-          <button className="button image-only-button" onClick={scanQrCode}>
-            <img src="/scan-qr-code.svg" className="inverted-image button-image"></img>
+          <button onClick={scanQrCode} className="border border-gray-300 bg-gray-100 px-2 py-1">
+            <Icon name="scan-qr-code" alt="Scan QR Code" />
           </button>
         )}
         <input
           type="text"
           value={searchQuery}
           onChange={handleSearchChange}
-          style={{ width: '4em' }}
+          placeholder="Tisch #"
+          className="border border-gray-300 px-2 py-1"
         />
-        <button className="butto image-only-button" type="submit">
-          <img src="/search-table.svg" className="inverted-image button-image"></img>
+        <button type="submit" className="border border-gray-300 bg-gray-100 px-2 py-1">
+          <Icon name="search-table" alt="Search Table" />
         </button>
-      </fieldset>
+      </div>
     </form>
   )
 }

@@ -12,15 +12,18 @@ import { Exhibitor } from './modules/exhibitor/entity.js'
 import { ExhibitionRepository } from './modules/exhibition/repository.js'
 import { Exhibition } from './modules/exhibition/entity.js'
 import { Page } from './modules/page/entity.js'
-import { ImageRepository } from './modules/image/repository.js'
-import { Image } from './modules/image/entity.js'
 import { ExhibitAttributeRepository } from './modules/exhibitAttribute/repository.js'
 import { ExhibitAttribute } from './modules/exhibitAttribute/entity.js'
+import { Document } from './modules/document/entity.js'
+import { DocumentRepository } from './modules/document/repository.js'
+import { ImageStorage } from './modules/image/entity.js'
+import { ImageRepository } from './modules/image/repository.js'
 
 export interface Services {
   dbName?: string
   orm: MikroORM
   em: EntityManager
+  image: ImageRepository
   user: UserRepository
   exhibit: ExhibitRepository
   exhibitor: EntityRepository<Exhibitor>
@@ -28,7 +31,7 @@ export interface Services {
   table: TableRepository
   registration: RegistrationRepository
   page: EntityRepository<Page>
-  image: ImageRepository
+  document: DocumentRepository
   exhibitAttribute: ExhibitAttributeRepository
 }
 
@@ -52,6 +55,7 @@ export async function initORM(options?: Options): Promise<Services> {
     dbName: options?.dbName || undefined,
     orm,
     em: orm.em,
+    image: orm.em.getRepository(ImageStorage),
     user: orm.em.getRepository(User),
     exhibit: orm.em.getRepository(Exhibit),
     exhibitor: orm.em.getRepository(Exhibitor),
@@ -59,7 +63,7 @@ export async function initORM(options?: Options): Promise<Services> {
     table: orm.em.getRepository(Table),
     registration: orm.em.getRepository(Registration),
     page: orm.em.getRepository(Page),
-    image: orm.em.getRepository(Image),
+    document: orm.em.getRepository(Document),
     exhibitAttribute: orm.em.getRepository(ExhibitAttribute),
   })
 }

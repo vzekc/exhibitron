@@ -6,10 +6,12 @@ import {
 } from '../../generated/graphql.js'
 import { ExhibitAttribute } from './entity.js'
 import { requireAdmin } from '../../db.js'
+import { QueryOrder } from '@mikro-orm/core'
 
 export const exhibitAttributeQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2345
-  getExhibitAttributes: async (_, _args, { db }) => db.exhibitAttribute.findAll(),
+  getExhibitAttributes: async (_, _args, { db }) =>
+    db.exhibitAttribute.findAll({ orderBy: { createdAt: QueryOrder.ASC } }),
   // @ts-expect-error ts2345
   getExhibitAttribute: async (_, { id }, { db }) => db.exhibitAttribute.findOne({ id }),
 }

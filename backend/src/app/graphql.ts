@@ -51,9 +51,3 @@ export const register = async (app: FastifyInstance) => {
     await db.orm.close()
   })
 }
-
-export const createTestServer = async () => {
-  const server = await createServer()
-  await server.start()
-  return server
-}

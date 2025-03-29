@@ -1,4 +1,4 @@
-import apolloClient from '../apolloClient.ts'
+import apolloClient from '@apolloClient.ts'
 import { graphql } from 'gql.tada'
 
 const REQUEST_PASSWORD_RESET = graphql(`

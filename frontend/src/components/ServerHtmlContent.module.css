@@ -1,0 +1,33 @@
+.serverHtmlContent {
+  /* This class will be used to scope all styles within the server-rendered HTML content */
+  all: initial;
+  display: block;
+  font-family: inherit;
+  line-height: 1.5;
+  color: inherit;
+}
+
+/* Add any additional scoped styles you need here */
+.serverHtmlContent h1,
+.serverHtmlContent h2,
+.serverHtmlContent h3,
+.serverHtmlContent h4,
+.serverHtmlContent h5,
+.serverHtmlContent h6 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.serverHtmlContent p {
+  margin-bottom: 1em;
+}
+
+.serverHtmlContent a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.serverHtmlContent img {
+  max-width: 100%;
+  height: auto;
+}

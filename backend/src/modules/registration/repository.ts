@@ -9,7 +9,6 @@ import {
 } from './emails.js'
 import { sendEmail } from '../common/sendEmail.js'
 import { User } from '../user/entity.js'
-import { Exhibit } from '../exhibit/entity.js'
 import { Exhibitor } from '../exhibitor/entity.js'
 
 export type RegistrationData = Omit<Registration, keyof BaseEntity | 'notes'>
@@ -31,7 +30,6 @@ export class RegistrationRepository extends EntityRepository<Registration> {
   async approve(registration: Registration, siteUrl: string, message?: string | null) {
     const userRepository = this.em.getRepository(User)
     const exhibitorRepository = this.em.getRepository(Exhibitor)
-    const exhibitRepository = this.em.getRepository(Exhibit)
 
     let completeProfileUrl = `${siteUrl}/user/profile`
 
@@ -51,6 +49,7 @@ export class RegistrationRepository extends EntityRepository<Registration> {
     let exhibitor: Exhibitor | null = await exhibitorRepository.findOne(
       {
         user,
+        topic: registration.topic.replace(/^Etwas anderes \((.*)\)$/, '$1'),
         exhibition: registration.exhibition,
       },
       { populate: ['exhibits'] },
@@ -61,15 +60,6 @@ export class RegistrationRepository extends EntityRepository<Registration> {
         user,
       })
       this.em.persist(exhibitor)
-    }
-    if (!exhibitor.exhibits.find((e) => e.title === registration.topic)) {
-      const exhibit = exhibitRepository.create({
-        exhibition: registration.exhibition,
-        title: registration.topic.replace(/^Etwas anderes \((.*)\)$/, '$1'),
-        exhibitor,
-      })
-      exhibitor.exhibits.add(exhibit)
-      this.em.persist(exhibit)
     }
     await this.em.flush()
     await sendEmail(

@@ -3,9 +3,9 @@ import { useState } from 'react'
 import { useLazyQuery, useMutation } from '@apollo/client'
 import { graphql } from 'gql.tada'
 
-import './Register.css'
 import { useSearchParams } from 'react-router-dom'
-import Modal from '../components/Modal.tsx'
+import Modal from '@components/Modal.tsx'
+import PageHeading from '../components/PageHeading'
 
 type Inputs = {
   name: string
@@ -119,7 +119,7 @@ const Register = () => {
                 <p>Bitte fülle das Formular aus, wenn Du Dich als Aussteller anmelden möchtest.</p>
               </Modal>
             )}
-            <p className="intro">
+            <p>
               Hier kannst Du Dich für die{' '}
               <a
                 href="https://www.classic-computing.de/cc2025/"
@@ -133,13 +133,13 @@ const Register = () => {
               Email-Adresse wird nur für die Kommunikation mit Dir im Zusammenhang mit der
               Ausstellung verwendet. Wir geben Deine Daten nicht an Dritte weiter.
             </p>
-            <p className="intro">
+            <p>
               Nach Absendung des Formulars erhältst Du eine automatisch generierte Email mit einer
               Bestätigung Deiner Anmeldung. Bitte überprüfe auch Deinen Spam-Ordner, falls Du diese
               Email nicht nach einigen Minuten erhältst. Sobald wir Deine Anmeldung bearbeitet
               haben, melden wir uns persönlich mit einer weiteren Email bei Dir.
             </p>
-            <form className="exhibitor-registration" onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={handleSubmit(onSubmit)}>
               <fieldset>
                 <label>
                   Name
@@ -148,7 +148,7 @@ const Register = () => {
                     autoComplete="name"
                     {...register('name', { required: true })}
                   />
-                  {errors.name && <div className="validation-message">Ein Name wird benötigt</div>}
+                  {errors.name && <div>Ein Name wird benötigt</div>}
                 </label>
                 <label>
                   <input type="checkbox" {...register('vzekcMember')} />
@@ -170,7 +170,7 @@ const Register = () => {
                       validate: isNewEmail,
                     })}
                   />
-                  {errors.email && <div className="validation-message">{errors.email.message}</div>}
+                  {errors.email && <div>{errors.email.message}</div>}
                 </label>
                 <label>
                   Nickname (Benutzername) im Forum
@@ -207,11 +207,7 @@ const Register = () => {
                     <option>Etwas anderes (*)</option>
                   </select>
                 </label>
-                {errors.topic && (
-                  <div className="validation-message">
-                    Bitte wähle aus, was du ausstellen möchtest
-                  </div>
-                )}
+                {errors.topic && <div>Bitte wähle aus, was du ausstellen möchtest</div>}
                 {topic?.includes('*') && (
                   <label>
                     Weitere Angaben
@@ -220,11 +216,7 @@ const Register = () => {
                       {...register('topicExtras', { required: true })}
                       disabled={!topic?.includes('*')}
                     />
-                    {errors.topicExtras && (
-                      <div className="validation-message">
-                        Bitte erläutere, was du ausstellen möchtest
-                      </div>
-                    )}
+                    {errors.topicExtras && <div>Bitte erläutere, was du ausstellen möchtest</div>}
                   </label>
                 )}
               </fieldset>
@@ -273,9 +265,7 @@ const Register = () => {
                     <option value={2}>2 (wenn verfügbar)</option>
                   </select>
                   {errors.name && (
-                    <div className="validation-message">
-                      Bitte wähle aus, wie viele Tische Deine Ausstellung belegen wird
-                    </div>
+                    <div>Bitte wähle aus, wie viele Tische Deine Ausstellung belegen wird</div>
                   )}
                 </label>
                 <label>
@@ -297,14 +287,14 @@ const Register = () => {
   }
 
   return (
-    <div className="register-page">
-      <div className="register-header">
-        <h1>Classic Computing 2025</h1>
+    <div>
+      <div>
+        <PageHeading>Classic Computing 2025</PageHeading>
         <img src="/vzekc-logo-transparent-border.png" alt="VzEkC Logo" />
       </div>
-      <div className="register-header-mobile">
-        <span className="mobile-title">Classic Computing 2025</span>
-        <img src="/vzekc-logo-transparent-border.png" alt="VzEkC Logo" className="mobile-logo" />
+      <div>
+        <span>Classic Computing 2025</span>
+        <img src="/vzekc-logo-transparent-border.png" alt="VzEkC Logo" />
       </div>
       {content()}
       <footer>
@@ -315,7 +305,7 @@ const Register = () => {
               VzEkC e.V.
             </a>
           </span>
-          <span className="footer-links">
+          <span>
             <a
               href="https://classic-computing.de/impressum"
               target="_blank"

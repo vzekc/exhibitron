@@ -1,8 +1,13 @@
 type Exhibitor {
   id: Int!
   user: User!
+  topic: String
   exhibits: [Exhibit!]
   tables: [Table!]
+}
+
+extend type Mutation {
+  updateExhibitor(id: Int!, topic: String): Exhibitor
 }
 
 extend type Query {

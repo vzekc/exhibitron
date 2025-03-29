@@ -20,6 +20,7 @@ type User {
   id: Int!
   isAdministrator: Boolean
   nickname: String
+  profileImage: Int
 }
 
 input UpdateUserProfileInput {
