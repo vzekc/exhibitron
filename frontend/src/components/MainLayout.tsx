@@ -6,12 +6,14 @@ import { BreadcrumbProvider } from '@contexts/BreadcrumbProvider.tsx'
 
 const MainLayout = () => {
   return (
-    <ExhibitorProvider>
-      <BreadcrumbProvider>
-        <NavBar />
-        <Outlet />
-      </BreadcrumbProvider>
-    </ExhibitorProvider>
+    <div className="ml-6 mr-6">
+      <ExhibitorProvider>
+        <BreadcrumbProvider>
+          <NavBar />
+          <Outlet />
+        </BreadcrumbProvider>
+      </ExhibitorProvider>
+    </div>
   )
 }
 

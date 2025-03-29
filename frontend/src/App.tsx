@@ -9,7 +9,7 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <main className="m-6 pb-8">
+      <main className="pb-8">
         <ErrorBoundary
           fallback={
             <p className="p-4 text-red-600">Irgendwas ist schief gegangen - Versuch's noch mal!</p>
