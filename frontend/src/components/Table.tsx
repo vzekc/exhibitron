@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react'
+import React, { ReactNode, useState, useEffect, useRef } from 'react'
 
 // Define types for the two table variants
 type DataTableHeader = {
@@ -7,28 +7,123 @@ type DataTableHeader = {
   onClick?: () => void
   className?: string
   sortDirection?: 'asc' | 'desc' | null
+  sortable?: boolean
+  sortKey?: string
 }
 
 type KeyValueHeaders = [ReactNode, ReactNode]
 
-interface TableProps {
+interface TableProps<T extends { id: string | number; [key: string]: unknown }> {
   headers: Array<DataTableHeader> | KeyValueHeaders
   children: ReactNode
   className?: string
   onRowClick?: (index: number) => void
   variant?: 'data' | 'keyValue'
   maxHeight?: string
+  data?: T[]
+  onSort?: (sortedData: T[]) => void
+  defaultSortKey?: string
+  defaultSortDirection?: 'asc' | 'desc'
 }
 
-export const Table: React.FC<TableProps> = ({
+export const Table = <T extends { id: string | number; [key: string]: unknown }>({
   headers,
   children,
   className = '',
   variant = 'data',
   maxHeight,
-}) => {
+  data,
+  onSort,
+  defaultSortKey,
+  defaultSortDirection = 'asc',
+}: TableProps<T>) => {
+  const [sortConfig, setSortConfig] = useState<{
+    key: string
+    direction: 'asc' | 'desc'
+  } | null>(defaultSortKey ? { key: defaultSortKey, direction: defaultSortDirection } : null)
+
+  // Store the history of sort columns with their directions in order of most recent to oldest
+  const sortHistory = useRef<Array<{ key: string; direction: 'asc' | 'desc' }>>([])
+
   // For KeyValue tables, headers should be a tuple of [key, value] labels
   const isKeyValueTable = variant === 'keyValue'
+
+  // Handle sorting when sortConfig changes
+  useEffect(() => {
+    if (!data || !onSort) return
+
+    // If no sort config, maintain original order
+    if (!sortConfig) {
+      onSort([...data])
+      return
+    }
+
+    // Create a copy of the data and sort it
+    const sortedData = [...data].sort((a, b) => {
+      // Convert values to lowercase strings for case-insensitive comparison
+      const valueA = String(a[sortConfig!.key]).toLowerCase()
+      const valueB = String(b[sortConfig!.key]).toLowerCase()
+
+      // First compare by the current sort key
+      if (valueA !== valueB) {
+        if (valueA < valueB) {
+          return sortConfig!.direction === 'asc' ? -1 : 1
+        }
+        return sortConfig!.direction === 'asc' ? 1 : -1
+      }
+
+      // If values are equal, use the sort history as tiebreakers
+      for (const historySort of sortHistory.current) {
+        if (historySort.key === sortConfig!.key) continue // Skip the current sort key
+
+        const historyValueA = String(a[historySort.key]).toLowerCase()
+        const historyValueB = String(b[historySort.key]).toLowerCase()
+
+        if (historyValueA !== historyValueB) {
+          if (historyValueA < historyValueB) {
+            return historySort.direction === 'asc' ? -1 : 1
+          }
+          return historySort.direction === 'asc' ? 1 : -1
+        }
+      }
+
+      return 0
+    })
+
+    onSort(sortedData)
+  }, [sortConfig, data, onSort])
+
+  const handleSort = (key: string) => {
+    setSortConfig((current) => {
+      if (current?.key === key) {
+        // If clicking the same column, just toggle direction
+        const newDirection = current.direction === 'asc' ? 'desc' : 'asc'
+
+        // Update the direction in history
+        const historyIndex = sortHistory.current.findIndex((h) => h.key === key)
+        if (historyIndex >= 0) {
+          sortHistory.current[historyIndex].direction = newDirection
+        }
+
+        return {
+          key,
+          direction: newDirection,
+        }
+      }
+
+      // If clicking a new column:
+      // 1. Remove it from history if it was there
+      // 2. Add it to the front of history with its direction
+      // 3. Set it as the new sort key
+      sortHistory.current = sortHistory.current.filter((h) => h.key !== key)
+      sortHistory.current.unshift({ key, direction: 'asc' })
+
+      return {
+        key,
+        direction: 'asc',
+      }
+    })
+  }
 
   // Create the table headers based on the variant
   const renderHeaders = () => {
@@ -48,14 +143,20 @@ export const Table: React.FC<TableProps> = ({
           {(headers as Array<DataTableHeader>).map((header, index) => (
             <th
               key={header.key || index}
-              onClick={header.onClick}
-              className={`px-4 py-3 text-left text-sm font-medium text-gray-500 ${header.onClick ? 'cursor-pointer hover:bg-gray-100' : ''} ${header.className || ''}`}>
+              onClick={
+                header.sortable
+                  ? () => handleSort(header.sortKey || header.key || '')
+                  : header.onClick
+              }
+              className={`px-4 py-3 text-left text-sm font-medium text-gray-500 ${
+                header.sortable || header.onClick ? 'cursor-pointer hover:bg-gray-100' : ''
+              } ${header.className || ''}`}>
               <div className="flex items-center gap-2">
                 {header.content}
-                {header.onClick && (
+                {header.sortable && (
                   <div className="ml-2 flex flex-col">
                     <svg
-                      className={`h-5 w-5 ${header.sortDirection === 'asc' ? 'text-black' : 'text-gray-200'}`}
+                      className={`h-5 w-5 ${sortConfig?.key === (header.sortKey || header.key) && sortConfig?.direction === 'asc' ? 'text-black' : 'text-gray-200'}`}
                       viewBox="0 0 24 24"
                       fill="currentColor"
                       stroke="currentColor"
@@ -63,7 +164,7 @@ export const Table: React.FC<TableProps> = ({
                       <path d="M7 14l5-5 5 5z" />
                     </svg>
                     <svg
-                      className={`-mt-2 h-5 w-5 ${header.sortDirection === 'desc' ? 'text-black' : 'text-gray-200'}`}
+                      className={`-mt-2 h-5 w-5 ${sortConfig?.key === (header.sortKey || header.key) && sortConfig?.direction === 'desc' ? 'text-black' : 'text-gray-200'}`}
                       viewBox="0 0 24 24"
                       fill="currentColor"
                       stroke="currentColor"
@@ -97,15 +198,11 @@ export const Table: React.FC<TableProps> = ({
   // For data tables, implement fixed header with scrollable body
   return (
     <div className="relative flex h-full flex-col overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className={`min-w-full divide-y divide-gray-200 ${className}`}>
-          <thead className="sticky top-0 z-10 bg-gray-50">{renderHeaders()}</thead>
-        </table>
-      </div>
       <div
         className="flex-grow overflow-auto"
         style={maxHeight ? { maxHeight } : { height: 'calc(100vh - 200px)' }}>
         <table className={`min-w-full divide-y divide-gray-200 ${className}`}>
+          <thead className="sticky top-0 z-10 bg-gray-50">{renderHeaders()}</thead>
           <tbody className="divide-y divide-gray-200 bg-white">{children}</tbody>
         </table>
       </div>
@@ -124,7 +221,9 @@ export const TableRow: React.FC<TableRowProps> = ({ children, onClick, className
   return (
     <tr
       onClick={onClick}
-      className={`${className} ${onClick ? 'cursor-pointer hover:bg-gray-50' : ''} ${index !== undefined && index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+      className={`${className} ${onClick ? 'cursor-pointer hover:bg-gray-50' : ''} ${
+        index !== undefined && index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+      }`}>
       {children}
     </tr>
   )

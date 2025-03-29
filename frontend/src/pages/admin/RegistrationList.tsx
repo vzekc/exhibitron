@@ -82,48 +82,15 @@ const StatusChip = ({ status }: { status: string }) => {
 const RegistrationList = () => {
   const { data } = useQuery(GET_REGISTRATIONS)
   type Registrations = NonNullable<typeof data>['getRegistrations']
-  const [sortConfig, setSortConfig] = useState<{
-    key: TableColumn
-    direction: 'asc' | 'desc'
-  }>({ key: 'createdAt', direction: 'desc' })
   const [sortedRegistrations, setSortedRegistrations] = useState<Registrations>([])
   const navigate = useNavigate()
 
+  // Initialize sorted data when data changes
   useEffect(() => {
     if (data?.getRegistrations) {
-      // Use current sorted data as the base for the next sort to maintain stability
-      // When we have a previous sort result and it's not empty
-      const dataToSort =
-        sortedRegistrations && sortedRegistrations.length > 0
-          ? [...sortedRegistrations] // Create a copy to avoid mutation
-          : [...data.getRegistrations]
-
-      // Create a copy of the data with original indices to ensure stable sort
-      const dataWithIndices = dataToSort.map((item, index) => ({ item, index }))
-
-      // Perform the sort, using original index as a tiebreaker for stability
-      dataWithIndices.sort((a, b) => {
-        // Convert values to lowercase strings for case-insensitive comparison
-        const valueA = String(a.item[sortConfig.key]).toLowerCase()
-        const valueB = String(b.item[sortConfig.key]).toLowerCase()
-
-        if (valueA < valueB) {
-          return sortConfig.direction === 'asc' ? -1 : 1
-        }
-        if (valueA > valueB) {
-          return sortConfig.direction === 'asc' ? 1 : -1
-        }
-        // If values are equal, maintain original order (stable sort)
-        return a.index - b.index
-      })
-
-      // Extract the sorted items
-      setSortedRegistrations(dataWithIndices.map(({ item }) => item))
-    } else {
-      // Reset sorted data if original data is not available
-      setSortedRegistrations([])
+      setSortedRegistrations(data.getRegistrations)
     }
-  }, [sortConfig, data])
+  }, [data])
 
   const generateCSV = (registrations: Registrations) => {
     if (!registrations) {
@@ -145,14 +112,6 @@ const RegistrationList = () => {
     return Papa.unparse(registrations, { columns })
   }
 
-  const requestSort = (key: TableColumn) => {
-    let direction: 'asc' | 'desc' = 'asc'
-    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc'
-    }
-    setSortConfig({ key, direction })
-  }
-
   const handleDownload = () => {
     const csv = generateCSV(data?.getRegistrations || [])
     downloadCSV(csv, 'registrations.csv')
@@ -165,8 +124,8 @@ const RegistrationList = () => {
   const tableHeaders = tableColumns.map((column) => ({
     key: column,
     content: getColumnHeader(column),
-    onClick: () => requestSort(column),
-    sortDirection: sortConfig.key === column ? sortConfig.direction : null,
+    sortable: true,
+    sortKey: column,
   }))
 
   return (
@@ -179,7 +138,13 @@ const RegistrationList = () => {
         </p>
       </header>
 
-      <Table headers={tableHeaders} variant="data">
+      <Table
+        headers={tableHeaders}
+        variant="data"
+        data={data.getRegistrations}
+        onSort={setSortedRegistrations}
+        defaultSortKey="createdAt"
+        defaultSortDirection="desc">
         {sortedRegistrations?.map((registration, index) => (
           <TableRow
             key={registration.id}
