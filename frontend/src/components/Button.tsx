@@ -29,7 +29,7 @@ const Button = ({
       disabled={disabled}
       {...props}>
       {icon && <Icon name={icon} color="white" />}
-      {children}
+      <span className={icon ? 'hidden md:inline' : ''}>{children}</span>
     </button>
   )
 }

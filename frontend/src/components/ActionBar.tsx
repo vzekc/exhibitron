@@ -65,7 +65,7 @@ const ActionBar = ({ children, className = '' }: ActionBarProps) => {
   return (
     <>
       <div
-        className={`sticky bottom-0 border-t border-gray-200 bg-white/95 p-4 pt-4 shadow-sm backdrop-blur-sm ${className}`}
+        className={`sticky bottom-0 mt-8 border-t border-gray-200 bg-white/95 p-4 pt-4 shadow-sm backdrop-blur-sm ${className}`}
         ref={buttonContainerRef}>
         {renderButtons()}
       </div>

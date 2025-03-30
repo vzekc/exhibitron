@@ -168,10 +168,10 @@ const NavBar = () => {
 
   return (
     <>
-      <nav className="fixed left-0 right-0 top-0 z-50 bg-white shadow-md">
-        <div className="mx-auto px-4">
+      <nav className="fixed left-0 right-0 top-0 z-50 w-screen bg-white shadow-md">
+        <div className="mx-auto w-full max-w-[100vw] overflow-x-hidden px-4">
           <div className="flex justify-between py-2">
-            <div className="flex items-center">
+            <div className="flex min-w-0 items-center">
               <MobileMenuButton />
               <div className="hidden items-center md:flex">
                 <ul className="flex">
@@ -198,7 +198,7 @@ const NavBar = () => {
                 </ul>
               </div>
             </div>
-            <ul className="flex items-center">
+            <ul className="flex min-w-0 items-center gap-2">
               {exhibitor ? (
                 <li className="mr-3 hidden md:block">
                   <DropdownMenu
@@ -238,14 +238,14 @@ const NavBar = () => {
                   <Button onClick={handleLogin}>Login</Button>
                 </li>
               )}
-              <li className="mr-3">
+              <li>
                 <Link
                   to="/bookmarks"
                   className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100">
                   <Icon name={hasBookmarks ? 'bookmarked' : 'bookmark'} alt="Bookmarks" />
                 </Link>
               </li>
-              <li>
+              <li className="shrink-0">
                 <SearchTableNumber />
               </li>
             </ul>

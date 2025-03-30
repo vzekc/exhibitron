@@ -59,18 +59,20 @@ const Exhibitor = () => {
   }
 
   return (
-    <article className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-      <ExhibitorCard exhibitor={exhibitor} />
-      {exhibits && exhibits.length > 0 && (
-        <div className="mt-8">
-          <h2 className="mb-4 text-xl font-semibold text-gray-900">Exponate</h2>
-          <ChipContainer>
-            {exhibits?.map((exhibit, index: number) => (
-              <ExhibitChip key={index} exhibit={exhibit} />
-            ))}
-          </ChipContainer>
-        </div>
-      )}
+    <>
+      <article className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
+        <ExhibitorCard exhibitor={exhibitor} />
+        {exhibits && exhibits.length > 0 && (
+          <div className="mt-8">
+            <h2 className="mb-4 text-xl font-semibold text-gray-900">Exponate</h2>
+            <ChipContainer>
+              {exhibits?.map((exhibit, index: number) => (
+                <ExhibitChip key={index} exhibit={exhibit} />
+              ))}
+            </ChipContainer>
+          </div>
+        )}
+      </article>
       {operator?.canSwitchExhibitor && exhibitor?.id !== operator?.id && (
         <ActionBar>
           <Button onClick={handleSwitchExhibitor} variant="secondary" icon="become">
@@ -78,7 +80,7 @@ const Exhibitor = () => {
           </Button>
         </ActionBar>
       )}
-    </article>
+    </>
   )
 }
 

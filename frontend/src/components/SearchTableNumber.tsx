@@ -34,10 +34,12 @@ const SearchTableNumber = () => {
   }
 
   return (
-    <form onSubmit={handleSearchSubmit} className="flex">
-      <div className="flex">
+    <form onSubmit={handleSearchSubmit} className="flex min-w-0 shrink-0">
+      <div className="flex min-w-0">
         {isMobileDevice() && (
-          <button onClick={scanQrCode} className="border border-gray-300 bg-gray-100 px-2 py-1">
+          <button
+            onClick={scanQrCode}
+            className="shrink-0 border border-gray-300 bg-gray-100 px-2 py-1">
             <Icon name="scan-qr-code" alt="Scan QR Code" />
           </button>
         )}
@@ -47,9 +49,9 @@ const SearchTableNumber = () => {
           onChange={handleSearchChange}
           placeholder="Tisch #"
           maxLength={3}
-          className="w-20 border border-gray-300 px-2 py-1"
+          className="w-14 min-w-0 shrink border border-gray-300 px-2 py-1"
         />
-        <button type="submit" className="border border-gray-300 bg-gray-100 px-2 py-1">
+        <button type="submit" className="shrink-0 border border-gray-300 bg-gray-100 px-2 py-1">
           <Icon name="search-table" alt="Search Table" />
         </button>
       </div>

@@ -9,7 +9,7 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <main className="pb-8">
+      <main>
         <ErrorBoundary
           fallback={
             <p className="p-4 text-red-600">Irgendwas ist schief gegangen - Versuch's noch mal!</p>
@@ -17,7 +17,7 @@ const App = () => {
           {element}
         </ErrorBoundary>
       </main>
-      <footer className="border-t border-gray-200 bg-white">
+      <footer>
         <BuildInfo />
       </footer>
     </div>
