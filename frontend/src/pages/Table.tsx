@@ -8,6 +8,8 @@ import ExhibitCard from '@components/ExhibitCard.tsx'
 import { useBreadcrumb } from '@contexts/BreadcrumbContext.ts'
 import ExhibitChip from '@components/ExhibitChip.tsx'
 import ChipContainer from '@components/ChipContainer.tsx'
+import ActionBar from '@components/ActionBar.tsx'
+import Button from '@components/Button.tsx'
 
 const GET_TABLE = graphql(
   `
@@ -133,18 +135,22 @@ const Table = () => {
       return <></>
     } else if (!exhibitor) {
       return (
-        <button onClick={handleClaimTable.bind(null, tableNumber)} type="submit">
-          Tisch {tableNumber} belegen
-        </button>
+        <ActionBar>
+          <Button onClick={handleClaimTable.bind(null, tableNumber)}>
+            Tisch {tableNumber} belegen
+          </Button>
+        </ActionBar>
       )
     } else if (
       !onThisTableExhibits?.length &&
       (currentUser.id === exhibitor.user.id || currentUser.user.isAdministrator)
     ) {
       return (
-        <button onClick={handleReleaseTable.bind(null, tableNumber)} type="submit">
-          Tisch {tableNumber} freigeben
-        </button>
+        <ActionBar>
+          <Button variant="danger" onClick={handleReleaseTable.bind(null, tableNumber)}>
+            Tisch {tableNumber} freigeben
+          </Button>
+        </ActionBar>
       )
     } else {
       return <></>
