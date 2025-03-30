@@ -4,10 +4,12 @@ type Exhibitor {
   topic: String
   exhibits: [Exhibit!]
   tables: [Table!]
+  canSwitchExhibitor: Boolean!
 }
 
 extend type Mutation {
   updateExhibitor(id: Int!, topic: String): Exhibitor
+  switchExhibitor(exhibitorId: Int!): Exhibitor
 }
 
 extend type Query {

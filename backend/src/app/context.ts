@@ -43,6 +43,7 @@ export type Context = {
   session: FastifySessionObject
   exhibition: Exhibition
   exhibitor: Exhibitor | null
+  canSwitchExhibitor: boolean
 }
 
 export const createContext = async (request: FastifyRequest) => {
@@ -75,6 +76,7 @@ export const createContext = async (request: FastifyRequest) => {
     user: request.user,
     exhibition,
     exhibitor,
+    canSwitchExhibitor: !!request.session.canSwitchExhibitor,
   }
   logger.debug('createContext', context)
   return context

@@ -28,6 +28,7 @@ declare module '@fastify/jwt' {
 declare module '@fastify/session' {
   interface FastifySessionObject {
     userId?: number
+    canSwitchExhibitor?: boolean
     redirectUrl?: string
     registrationToken?: string
   }

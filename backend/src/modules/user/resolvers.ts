@@ -45,10 +45,12 @@ export const userMutations: MutationResolvers<Context> = {
       })
     }
     session.userId = user.id
+    session.canSwitchExhibitor = user.isAdministrator
     return user
   },
   logout: async (_, _args, { session }) => {
     session.userId = undefined
+    session.canSwitchExhibitor = undefined
     return true
   },
   requestPasswordReset: async (_, { email, resetUrl }, { db }) => {

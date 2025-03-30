@@ -2,10 +2,13 @@ import { useLocation, useParams } from 'react-router-dom'
 import { useBreadcrumb } from '@contexts/BreadcrumbContext.ts'
 import ExhibitorCard from '@components/ExhibitorCard.tsx'
 import { graphql } from 'gql.tada'
-import { useQuery } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client'
 import { useEffect } from 'react'
 import ExhibitChip from '@components/ExhibitChip.tsx'
 import ChipContainer from '@components/ChipContainer.tsx'
+import { useExhibitor } from '@contexts/ExhibitorContext.ts'
+import ActionBar from '@components/ActionBar.tsx'
+import Button from '@components/Button.tsx'
 
 const GET_EXHIBITOR = graphql(
   `
@@ -21,6 +24,14 @@ const GET_EXHIBITOR = graphql(
   [ExhibitChip.fragment, ExhibitorCard.fragment],
 )
 
+const SWITCH_EXHIBITOR = graphql(`
+  mutation SwitchExhibitor($exhibitorId: Int!) {
+    switchExhibitor(exhibitorId: $exhibitorId) {
+      id
+    }
+  }
+`)
+
 const Exhibitor = () => {
   const { id } = useParams<{ id: string }>()
   const { data } = useQuery(GET_EXHIBITOR, {
@@ -34,11 +45,18 @@ const Exhibitor = () => {
       setDetailName(location.pathname, name)
     }
   }, [location.pathname, data, setDetailName])
+  const { exhibitor: operator, reloadExhibitor } = useExhibitor()
+  const [switchExhibitor] = useMutation(SWITCH_EXHIBITOR)
 
   if (!data || !id || !data?.getExhibitor) return null
 
   const exhibitor = data.getExhibitor
-  const exhibits = exhibitor.exhibits
+  const { exhibits, user } = exhibitor
+
+  const handleSwitchExhibitor = async () => {
+    await switchExhibitor({ variables: { exhibitorId: exhibitor.id } })
+    await reloadExhibitor()
+  }
 
   return (
     <article className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
@@ -52,6 +70,13 @@ const Exhibitor = () => {
             ))}
           </ChipContainer>
         </div>
+      )}
+      {operator?.canSwitchExhibitor && exhibitor?.id !== operator?.id && (
+        <ActionBar>
+          <Button onClick={handleSwitchExhibitor} variant="secondary" icon="become">
+            Become {user.nickname || user.fullName}
+          </Button>
+        </ActionBar>
       )}
     </article>
   )

@@ -74,6 +74,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
         throw new AuthError('Invalid email address or password')
       }
       request.session.userId = user.id
+      request.session.canSwitchExhibitor = user.isAdministrator
     },
   )
 

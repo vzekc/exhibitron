@@ -9,6 +9,7 @@ export const fetchCurrentExhibitor = async () => {
         getCurrentExhibitor {
           id
           topic
+          canSwitchExhibitor
           user {
             id
             email

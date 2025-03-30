@@ -1,6 +1,7 @@
 import { Context } from '../../app/context.js'
 import { ExhibitorResolvers, MutationResolvers, QueryResolvers } from '../../generated/graphql.js'
 import { QueryOrder, wrap } from '@mikro-orm/core'
+import { GraphQLError } from 'graphql'
 
 export const exhibitorQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2345
@@ -21,6 +22,21 @@ export const exhibitorMutations: MutationResolvers<Context> = {
     await db.em.persist(updatedExhibitor).flush()
     return updatedExhibitor
   },
+  // @ts-expect-error ts2322
+  switchExhibitor: async (_, { exhibitorId }, { session, db }) => {
+    if (!session.canSwitchExhibitor) {
+      throw new GraphQLError('You must be an administrator to use this feature', {
+        extensions: {
+          code: 'FORBIDDEN',
+          http: { status: 403 },
+        },
+      })
+    }
+    const newExhibitor = await db.exhibitor.findOneOrFail({ id: exhibitorId })
+    session.userId = newExhibitor.user.id
+    // The session.canSwitchExhibitor is not set here, so that we can still switch back users
+    return newExhibitor
+  },
 }
 
 export const exhibitorTypeResolvers: ExhibitorResolvers = {
@@ -28,6 +44,7 @@ export const exhibitorTypeResolvers: ExhibitorResolvers = {
   exhibits: async (exhibitor, _, { db }) =>
     db.exhibit.find({ exhibitor }, { orderBy: { title: QueryOrder.ASC } }),
   tables: async (exhibitor, _, { db }) => db.table.find({ exhibitor }),
+  canSwitchExhibitor: async (exhibitor, _, { canSwitchExhibitor }) => !!canSwitchExhibitor,
 }
 
 export const exhibitorResolvers = {
