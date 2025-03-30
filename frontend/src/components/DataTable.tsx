@@ -1,9 +1,10 @@
 import { ReactNode, useState, useEffect } from 'react'
 
-type DataTableHeader = {
+type DataTableHeader<T> = {
   key?: string
   content: ReactNode
   onClick?: () => void
+  getValue?: (data: T) => string
   className?: string
   sortDirection?: 'asc' | 'desc' | null
   sortable?: boolean
@@ -11,7 +12,7 @@ type DataTableHeader = {
 }
 
 interface DataTableProps<T extends { id: string | number; [key: string]: unknown }> {
-  headers: Array<DataTableHeader>
+  headers: Array<DataTableHeader<T>>
   children: ReactNode
   className?: string
   onRowClick?: (index: number) => void
@@ -43,11 +44,14 @@ export const DataTable = <T extends { id: string | number; [key: string]: unknow
     const sorter = (data: T[]) =>
       [...data].sort((a, b) => {
         for (const sortConfig of sortHistory) {
-          const historyValueA = String(a[sortConfig.key]).toLowerCase()
-          const historyValueB = String(b[sortConfig.key]).toLowerCase()
+          const header = headers.find((h) => (h.sortKey || h.key) === sortConfig.key)
+          const getValue = header?.getValue
 
-          if (historyValueA !== historyValueB) {
-            if (historyValueA < historyValueB) {
+          const valueA = getValue ? getValue(a) : String(a[sortConfig.key]).toLowerCase()
+          const valueB = getValue ? getValue(b) : String(b[sortConfig.key]).toLowerCase()
+
+          if (valueA !== valueB) {
+            if (valueA < valueB) {
               return sortConfig.direction === 'asc' ? -1 : 1
             }
             return sortConfig.direction === 'asc' ? 1 : -1

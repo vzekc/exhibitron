@@ -30,7 +30,10 @@ const Exhibitors = () => {
     const savedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY)
     return (savedLayout as 'kacheln' | 'tabelle') || 'kacheln'
   })
-  type Exhibitors = NonNullable<NonNullable<typeof data>['getCurrentExhibition']>['exhibitors']
+  type Exhibitor = NonNullable<
+    NonNullable<NonNullable<typeof data>['getCurrentExhibition']>['exhibitors']
+  >[number]
+  type Exhibitors = Exhibitor[]
   const [exhibitors, setExhibitors] = useState<Exhibitors | null>([])
 
   useEffect(() => {
@@ -38,7 +41,12 @@ const Exhibitors = () => {
   }, [layout])
 
   const tableHeaders = [
-    { key: 'name', content: 'Name', sortable: true },
+    {
+      key: 'name',
+      content: 'Name',
+      sortable: true,
+      getValue: (exhibitor: Exhibitor) => exhibitor.user.nickname || exhibitor.user.fullName,
+    },
     { key: 'topic', content: 'Thema', sortable: true },
   ]
 
@@ -52,7 +60,9 @@ const Exhibitors = () => {
     if (data?.getCurrentExhibition?.exhibitors) {
       setExhibitors(
         [...data.getCurrentExhibition.exhibitors].sort((a, b) => {
-          return a.user.fullName.localeCompare(b.user.fullName)
+          return (a.user.nickname || a.user.fullName).localeCompare(
+            b.user.nickname || b.user.fullName,
+          )
         }),
       )
     }
