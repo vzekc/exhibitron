@@ -110,12 +110,8 @@ const NavBar = () => {
   const isActivePath = (path: string) => currentPath === path
 
   useEffect(() => {
-    // Only process if we haven't already and the login parameter exists
     if (!processedLoginParam && searchParams.has('login')) {
-      // Mark as processed to prevent repeated processing
       setProcessedLoginParam(true)
-
-      // Redirect to login page with current path as redirectUrl
       navigate(`/login?redirectUrl=${encodeURIComponent(location.pathname + location.search)}`, {
         replace: true,
       })
@@ -128,7 +124,6 @@ const NavBar = () => {
   }
 
   const handleLogin = () => {
-    // Store current path in redirectUrl
     navigate(`/login?redirectUrl=${encodeURIComponent(location.pathname + location.search)}`)
   }
 
@@ -146,55 +141,83 @@ const NavBar = () => {
     }
   }, [])
 
-  const desktopNavItems = [
-    <MenuItem
-      key="start"
-      to="/"
-      isActive={isActivePath('/')}
-      onClick={() => setIsMobileMenuOpen(false)}>
-      Start
-    </MenuItem>,
-    <MenuItem
-      key="exhibit"
-      to="/exhibit"
-      isActive={isActivePath('/exhibit')}
-      onClick={() => setIsMobileMenuOpen(false)}>
-      Exponate
-    </MenuItem>,
-    <MenuItem
-      key="exhibitor"
-      to="/exhibitor"
-      isActive={isActivePath('/exhibitor')}
-      onClick={() => setIsMobileMenuOpen(false)}>
-      Mitwirkende
-    </MenuItem>,
-    <MenuItem
-      key="schedule"
-      to="/schedule"
-      isActive={isActivePath('/schedule')}
-      onClick={() => setIsMobileMenuOpen(false)}>
-      Zeitplan
-    </MenuItem>,
-    <MenuItem
-      key="table"
-      to="/table"
-      isActive={isActivePath('/table')}
-      onClick={() => setIsMobileMenuOpen(false)}>
-      Tische
-    </MenuItem>,
+  // Common navigation items used in both mobile and desktop
+  const commonNavItems = [
+    { to: '/', label: 'Start' },
+    { to: '/exhibit', label: 'Exponate' },
+    { to: '/exhibitor', label: 'Mitwirkende' },
+    { to: '/schedule', label: 'Zeitplan' },
+    { to: '/table', label: 'Tische' },
   ]
 
-  const adminNavItems = exhibitor?.user.isAdministrator
-    ? [
-        <DropdownMenu key="admin" label={<MenuItem hasDropdown>Administration</MenuItem>}>
-          <MenuItem to="/admin/registration">Anmeldungen</MenuItem>
-          <MenuItem to="/admin/page">Seiten</MenuItem>
-          <MenuItem to="/admin/tableLabels">Tisch-Labels</MenuItem>
-        </DropdownMenu>,
-      ]
-    : []
+  // Common user menu items
+  const commonUserMenuItems = [
+    { to: '/user/account', label: 'Konto' },
+    { to: '/user/profile', label: 'Profil' },
+    { to: '/user/exhibit', label: 'Deine Exponate' },
+    { to: '/user/exhibitorInfo', label: 'Infos für Mitwirkende' },
+    { to: 'https://www.classic-computing.de/cc2025faq', label: 'FAQ' },
+    { to: '/user/help', label: 'Hilfe' },
+    { type: 'divider' },
+    { type: 'logout', label: 'Logout' },
+  ]
 
-  const userNavItems = exhibitor
+  // Common admin menu items
+  const commonAdminMenuItems = [
+    { to: '/admin/registration', label: 'Anmeldungen' },
+    { to: '/admin/page', label: 'Seiten' },
+    { to: '/admin/tableLabels', label: 'Tisch-Labels' },
+  ]
+
+  const renderUserMenuItem = (item: (typeof commonUserMenuItems)[0], onClose?: () => void) => {
+    if (item.type === 'divider') {
+      return <hr key="divider" className="my-1 border-gray-200" />
+    }
+    if (item.type === 'logout') {
+      return (
+        <MenuItem
+          key="logout"
+          onClick={(e) => {
+            handleLogout(e)
+            onClose?.()
+          }}>
+          {item.label}
+        </MenuItem>
+      )
+    }
+    return (
+      <MenuItem key={item.to} to={item.to} onClick={() => onClose?.()}>
+        {item.label}
+      </MenuItem>
+    )
+  }
+
+  // Desktop navigation items
+  const desktopNavItems = [
+    ...commonNavItems.map((item) => (
+      <MenuItem
+        key={item.to}
+        to={item.to}
+        isActive={isActivePath(item.to)}
+        onClick={() => setIsMobileMenuOpen(false)}>
+        {item.label}
+      </MenuItem>
+    )),
+    ...(exhibitor?.user.isAdministrator
+      ? [
+          <DropdownMenu key="admin" label={<MenuItem hasDropdown>Administration</MenuItem>}>
+            {commonAdminMenuItems.map((item) => (
+              <MenuItem key={item.to} to={item.to}>
+                {item.label}
+              </MenuItem>
+            ))}
+          </DropdownMenu>,
+        ]
+      : []),
+  ]
+
+  // User navigation items for desktop
+  const desktopUserNavItems = exhibitor
     ? [
         <DropdownMenu
           key="user"
@@ -203,14 +226,7 @@ const NavBar = () => {
               <Icon name="user" alt="User Menu" />
             </div>
           }>
-          <MenuItem to="/user/account">Konto</MenuItem>
-          <MenuItem to="/user/profile">Profil</MenuItem>
-          <MenuItem to="/user/exhibit">Deine Exponate</MenuItem>
-          <MenuItem to="/user/exhibitorInfo">Infos für Mitwirkende</MenuItem>
-          <MenuItem to="https://www.classic-computing.de/cc2025faq">FAQ</MenuItem>
-          <MenuItem to="/user/help">Hilfe</MenuItem>
-          <hr className="my-1 border-gray-200" />
-          <MenuItem onClick={handleLogout}>Logout</MenuItem>
+          {commonUserMenuItems.map((item) => renderUserMenuItem(item))}
         </DropdownMenu>,
       ]
     : [
@@ -254,11 +270,11 @@ const NavBar = () => {
             <div className="flex min-w-0 items-center">
               <MobileMenuButton />
               <div className="hidden items-center md:flex">
-                <NavList items={[...desktopNavItems, ...adminNavItems]} />
+                <NavList items={desktopNavItems} />
               </div>
             </div>
             <ul className="flex min-w-0 items-center gap-2">
-              {userNavItems}
+              <div className="hidden md:block">{desktopUserNavItems}</div>
               <li>
                 <Link
                   to="/bookmarks"
@@ -288,42 +304,24 @@ const NavBar = () => {
             </div>
             <div className="flex-1 overflow-y-auto px-4 py-4">
               <ul className="space-y-2">
-                {desktopNavItems.map((item, index) => (
-                  <li key={index}>{item}</li>
+                {commonNavItems.map((item) => (
+                  <li key={item.to}>
+                    <MenuItem
+                      to={item.to}
+                      isActive={isActivePath(item.to)}
+                      onClick={() => setIsMobileMenuOpen(false)}>
+                      {item.label}
+                    </MenuItem>
+                  </li>
                 ))}
               </ul>
               {exhibitor ? (
                 <div className="mt-6 border-t border-gray-200 pt-4">
                   <h3 className="mb-2 text-sm font-semibold text-gray-500">Benutzer</h3>
                   <ul className="space-y-2">
-                    <MenuItem to="/user/account" onClick={() => setIsMobileMenuOpen(false)}>
-                      Konto
-                    </MenuItem>
-                    <MenuItem to="/user/profile" onClick={() => setIsMobileMenuOpen(false)}>
-                      Profil
-                    </MenuItem>
-                    <MenuItem to="/user/exhibit" onClick={() => setIsMobileMenuOpen(false)}>
-                      Deine Exponate
-                    </MenuItem>
-                    <MenuItem to="/user/exhibitorInfo" onClick={() => setIsMobileMenuOpen(false)}>
-                      Infos für Mitwirkende
-                    </MenuItem>
-                    <MenuItem
-                      to="https://www.classic-computing.de/cc2025faq"
-                      onClick={() => setIsMobileMenuOpen(false)}>
-                      FAQ
-                    </MenuItem>
-                    <MenuItem to="/user/help" onClick={() => setIsMobileMenuOpen(false)}>
-                      Hilfe
-                    </MenuItem>
-                    <hr className="my-1 border-gray-200" />
-                    <MenuItem
-                      onClick={(e) => {
-                        handleLogout(e)
-                        setIsMobileMenuOpen(false)
-                      }}>
-                      Logout
-                    </MenuItem>
+                    {commonUserMenuItems.map((item) =>
+                      renderUserMenuItem(item, () => setIsMobileMenuOpen(false)),
+                    )}
                   </ul>
                 </div>
               ) : (
@@ -342,15 +340,14 @@ const NavBar = () => {
                 <div className="mt-6 border-t border-gray-200 pt-4">
                   <h3 className="mb-2 text-sm font-semibold text-gray-500">Administration</h3>
                   <ul className="space-y-2">
-                    <MenuItem to="/admin/registration" onClick={() => setIsMobileMenuOpen(false)}>
-                      Anmeldungen
-                    </MenuItem>
-                    <MenuItem to="/admin/page" onClick={() => setIsMobileMenuOpen(false)}>
-                      Seiten
-                    </MenuItem>
-                    <MenuItem to="/admin/tableLabels" onClick={() => setIsMobileMenuOpen(false)}>
-                      Tisch-Labels
-                    </MenuItem>
+                    {commonAdminMenuItems.map((item) => (
+                      <MenuItem
+                        key={item.to}
+                        to={item.to}
+                        onClick={() => setIsMobileMenuOpen(false)}>
+                        {item.label}
+                      </MenuItem>
+                    ))}
                   </ul>
                 </div>
               )}
@@ -358,8 +355,7 @@ const NavBar = () => {
           </div>
         </div>
       </nav>
-      <div className="h-[120px]" />{' '}
-      {/* Spacer to prevent content from being hidden under fixed navbar */}
+      <div className="h-[120px]" />
     </>
   )
 }

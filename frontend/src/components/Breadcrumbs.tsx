@@ -47,9 +47,13 @@ const Breadcrumbs = () => {
             <li key={item.path} className="flex items-center">
               {index > 0 && <span className="mx-2 text-gray-500">/</span>}
               {isLast ? (
-                <span className="text-gray-500">{getLabel(item.path)}</span>
+                <span className="overflow-hidden text-ellipsis whitespace-nowrap text-gray-500">
+                  {getLabel(item.path)}
+                </span>
               ) : (
-                <Link to={item.path} className="text-blue-600">
+                <Link
+                  to={item.path}
+                  className="overflow-hidden text-ellipsis whitespace-nowrap text-blue-600">
                   {getLabel(item.path)}
                 </Link>
               )}
