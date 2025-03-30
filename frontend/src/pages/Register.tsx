@@ -259,7 +259,7 @@ const Register = () => {
                 <div className="space-y-2">
                   <div className="flex items-center">
                     <FormInput type="checkbox" {...register('setupHelper')} className="mr-2" />
-                    <span>Ich unterstütze beim Aufbau der CC 2024 am Donnerstag</span>
+                    <span>Ich unterstütze beim Aufbau der CC 2025 am Donnerstag</span>
                   </div>
                   <div className="flex items-center">
                     <FormInput
