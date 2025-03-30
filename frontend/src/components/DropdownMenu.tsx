@@ -1,6 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react'
 
-const DropdownMenu = ({ label, children }: { label: string; children: React.ReactNode }) => {
+const DropdownMenu = ({
+  label,
+  children,
+}: {
+  label: string | React.ReactNode
+  children: React.ReactNode
+}) => {
   const detailsRef = useRef<HTMLDetailsElement>(null)
   const [isOpen, setIsOpen] = useState(false)
 
@@ -36,21 +42,25 @@ const DropdownMenu = ({ label, children }: { label: string; children: React.Reac
     }
   }, [])
 
-  const handleToggle = () => {
-    setIsOpen(!isOpen)
+  const handleToggle = (e: React.MouseEvent) => {
+    e.preventDefault()
+    const details = detailsRef.current
+    if (details) {
+      if (details.hasAttribute('open')) {
+        details.removeAttribute('open')
+      } else {
+        details.setAttribute('open', '')
+      }
+      setIsOpen(!isOpen)
+    }
   }
 
   return (
-    <details ref={detailsRef} className="relative" onToggle={handleToggle}>
-      <summary className="flex cursor-pointer items-center bg-white px-3 py-2">
-        {label}
-        <svg
-          className="ml-1 h-5 w-5 text-gray-400"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+    <details ref={detailsRef} className="relative">
+      <summary
+        className="flex cursor-pointer list-none items-center bg-white"
+        onClick={handleToggle}>
+        <div onClick={(e) => e.preventDefault()}>{label}</div>
       </summary>
       <ul className="absolute right-0 z-40 w-48 border border-gray-200 bg-white py-1 shadow">
         {children}

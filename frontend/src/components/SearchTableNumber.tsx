@@ -46,7 +46,8 @@ const SearchTableNumber = () => {
           value={searchQuery}
           onChange={handleSearchChange}
           placeholder="Tisch #"
-          className="border border-gray-300 px-2 py-1"
+          maxLength={3}
+          className="w-20 border border-gray-300 px-2 py-1"
         />
         <button type="submit" className="border border-gray-300 bg-gray-100 px-2 py-1">
           <Icon name="search-table" alt="Search Table" />
