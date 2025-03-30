@@ -4,7 +4,7 @@ import ExhibitorChip from './ExhibitorChip.tsx'
 import TableChip from './TableChip.tsx'
 import ServerHtmlContent from './ServerHtmlContent'
 import PageHeading from './PageHeading'
-import Table, { TableRow, TableCell } from './Table'
+import { KeyValueTable, TableRow, TableCell } from './Table'
 import Article from './Article'
 import Card from '@components/Card.tsx'
 
@@ -71,14 +71,14 @@ const ExhibitCard = ({ id }: { id: number }) => {
             )}
             {hasAttributes && (
               <div style={{ flex: 1 }}>
-                <Table headers={['Attribut', 'Wert']} variant="keyValue">
+                <KeyValueTable headers={['Attribut', 'Wert']}>
                   {attributes.map((attr, index) => (
                     <TableRow key={index}>
                       <TableCell>{attr.name}</TableCell>
                       <TableCell>{attr.value}</TableCell>
                     </TableRow>
                   ))}
-                </Table>
+                </KeyValueTable>
               </div>
             )}
           </div>

@@ -1,6 +1,6 @@
 import { useQuery, gql } from '@apollo/client'
 import { useNavigate } from 'react-router-dom'
-import { Table, TableRow, TableCell } from '@components/Table'
+import { KeyValueTable, TableRow, TableCell } from '@components/Table'
 import Card from '@components/Card.tsx'
 import PageHeading from '@components/PageHeading.tsx'
 
@@ -34,14 +34,14 @@ const PageList = () => {
     <>
       <PageHeading>Editierbare Seiten</PageHeading>
       <Card>
-        <Table headers={['Name', 'Titel']} variant="keyValue">
+        <KeyValueTable headers={['Name', 'Titel']}>
           {pages.map((page) => (
             <TableRow key={page.key} onClick={() => navigate(`/admin/page/${page.key}`)}>
               <TableCell>{page.key}</TableCell>
               <TableCell>{page.title}</TableCell>
             </TableRow>
           ))}
-        </Table>
+        </KeyValueTable>
       </Card>
     </>
   )

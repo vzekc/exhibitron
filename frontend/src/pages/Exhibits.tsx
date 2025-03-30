@@ -3,7 +3,7 @@ import { useQuery } from '@apollo/client'
 import ChipContainer from '@components/ChipContainer.tsx'
 import ExhibitChip from '@components/ExhibitChip.tsx'
 import ToggleButton from '@components/ToggleButton.tsx'
-import { Table, TableRow, TableCell } from '@components/Table.tsx'
+import { DataTable, TableRow, TableCell } from '@components/Table.tsx'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -27,6 +27,8 @@ const Exhibits = () => {
     return (savedLayout as 'kacheln' | 'tabelle') || 'kacheln'
   })
   const navigate = useNavigate()
+  type Exhibits = NonNullable<typeof data>['getExhibits']
+  const [exhibits, setExhibits] = useState<Exhibits | null>(null)
 
   useEffect(() => {
     localStorage.setItem(LAYOUT_STORAGE_KEY, layout)
@@ -46,9 +48,15 @@ const Exhibits = () => {
     navigate(`/exhibit/${exhibitId}`)
   }
 
+  const handleSort = (sorter: (data: NonNullable<Exhibits>) => NonNullable<Exhibits>) => {
+    if (data?.getExhibits) {
+      setExhibits(sorter(data?.getExhibits))
+    }
+  }
+
   return (
     <article>
-      <div className="mb-6">
+      <div className="flex justify-end pb-3">
         <ToggleButton
           option1="Kacheln"
           option2="Tabelle"
@@ -63,15 +71,15 @@ const Exhibits = () => {
           ))}
         </ChipContainer>
       ) : (
-        <Table headers={tableHeaders} data={data.getExhibits}>
-          {data.getExhibits.map((exhibit, index) => (
+        <DataTable headers={tableHeaders} onSort={handleSort} defaultSortKey="title">
+          {exhibits?.map((exhibit, index) => (
             <TableRow key={exhibit.id} index={index} onClick={() => handleRowClick(exhibit.id)}>
               <TableCell>{exhibit.title}</TableCell>
               <TableCell>{exhibit.exhibitor.user.fullName}</TableCell>
               <TableCell>{exhibit.table?.number || '-'}</TableCell>
             </TableRow>
           ))}
-        </Table>
+        </DataTable>
       )}
     </article>
   )

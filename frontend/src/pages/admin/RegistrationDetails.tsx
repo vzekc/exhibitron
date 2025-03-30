@@ -11,7 +11,7 @@ import PageHeading from '../../components/PageHeading'
 import ActionBar from '@components/ActionBar'
 import Button from '@components/Button'
 import RegistrationStatusChip from '@components/RegistrationStatusChip.tsx'
-import { Table, TableRow, TableCell } from '@components/Table'
+import { KeyValueTable, TableRow, TableCell } from '@components/Table'
 
 type ConfirmAction = {
   title: string
@@ -216,7 +216,7 @@ const RegistrationDetails = () => {
         {/* Section 3: Additional Data */}
         <section className="rounded-lg bg-white p-6 shadow">
           <h2 className="mb-4 text-lg font-medium text-gray-900">Zusätzliche Daten</h2>
-          <Table headers={['Feld', 'Wert']} variant="keyValue">
+          <KeyValueTable headers={['Feld', 'Wert']}>
             {Object.entries(registration.data || {})
               .filter(([, v]) => !!v)
               .map(([key, value]) => (
@@ -225,7 +225,7 @@ const RegistrationDetails = () => {
                   <TableCell>{formatValue(key, value as string | number | boolean)}</TableCell>
                 </TableRow>
               ))}
-          </Table>
+          </KeyValueTable>
         </section>
       </form>
 

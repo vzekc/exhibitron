@@ -7,7 +7,7 @@ import { graphql } from 'gql.tada'
 import PageHeading from '@components/PageHeading.tsx'
 import ActionBar from '@components/ActionBar.tsx'
 import Button from '@components/Button.tsx'
-import { Table, TableRow, TableCell } from '@components/Table.tsx'
+import { DataTable, TableRow, TableCell } from '@components/Table.tsx'
 import Card from '@components/Card.tsx'
 
 const GET_REGISTRATIONS = graphql(`
@@ -137,9 +137,8 @@ const RegistrationList = () => {
         </p>
       </header>
 
-      <Table
+      <DataTable
         headers={tableHeaders}
-        variant="data"
         onSort={handleSort}
         defaultSortKey="createdAt"
         defaultSortDirection="desc">
@@ -159,7 +158,7 @@ const RegistrationList = () => {
             ))}
           </TableRow>
         ))}
-      </Table>
+      </DataTable>
 
       <ActionBar>
         <Button onClick={handleDownload}>Daten als CSV herunterladen</Button>
