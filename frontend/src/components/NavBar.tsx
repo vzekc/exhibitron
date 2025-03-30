@@ -222,8 +222,16 @@ const NavBar = () => {
         <DropdownMenu
           key="user"
           label={
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200">
-              <Icon name="user" alt="User Menu" />
+            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-md bg-gray-100 hover:bg-gray-200">
+              {exhibitor?.user?.profileImage ? (
+                <img
+                  src={`/api/user/${exhibitor.user.id}/image/profile`}
+                  alt="User Menu"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <Icon name="user" alt="User Menu" />
+              )}
             </div>
           }>
           {commonUserMenuItems.map((item) => renderUserMenuItem(item))}

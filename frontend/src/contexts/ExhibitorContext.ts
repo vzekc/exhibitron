@@ -16,6 +16,7 @@ export const fetchCurrentExhibitor = async () => {
             fullName
             isAdministrator
             nickname
+            profileImage
             contacts {
               email
               mastodon
