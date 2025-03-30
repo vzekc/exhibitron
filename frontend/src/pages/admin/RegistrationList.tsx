@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Papa from 'papaparse'
 import { downloadCSV, formatValue } from './utils'
 import { useNavigate } from 'react-router-dom'
@@ -82,15 +82,14 @@ const StatusChip = ({ status }: { status: string }) => {
 const RegistrationList = () => {
   const { data } = useQuery(GET_REGISTRATIONS)
   type Registrations = NonNullable<typeof data>['getRegistrations']
-  const [sortedRegistrations, setSortedRegistrations] = useState<Registrations>([])
+  const [sortedRegistrations, setSortedRegistrations] = useState<Registrations | null>(null)
   const navigate = useNavigate()
 
-  // Initialize sorted data when data changes
-  useEffect(() => {
+  const handleSort = (sorter: (data: NonNullable<Registrations>) => NonNullable<Registrations>) => {
     if (data?.getRegistrations) {
-      setSortedRegistrations(data.getRegistrations)
+      setSortedRegistrations(sorter(data?.getRegistrations))
     }
-  }, [data])
+  }
 
   const generateCSV = (registrations: Registrations) => {
     if (!registrations) {
@@ -141,8 +140,7 @@ const RegistrationList = () => {
       <Table
         headers={tableHeaders}
         variant="data"
-        data={data.getRegistrations}
-        onSort={setSortedRegistrations}
+        onSort={handleSort}
         defaultSortKey="createdAt"
         defaultSortDirection="desc">
         {sortedRegistrations?.map((registration, index) => (

@@ -2,6 +2,10 @@ import { graphql } from 'gql.tada'
 import { useQuery } from '@apollo/client'
 import ChipContainer from '@components/ChipContainer.tsx'
 import ExhibitChip from '@components/ExhibitChip.tsx'
+import ToggleButton from '@components/ToggleButton.tsx'
+import { Table, TableRow, TableCell } from '@components/Table.tsx'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const GET_EXHIBITION = graphql(
   `
@@ -14,19 +18,61 @@ const GET_EXHIBITION = graphql(
   [ExhibitChip.fragment],
 )
 
+const LAYOUT_STORAGE_KEY = 'exhibits_layout_preference'
+
 const Exhibits = () => {
   const { data } = useQuery(GET_EXHIBITION)
+  const [layout, setLayout] = useState<'kacheln' | 'tabelle'>(() => {
+    const savedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY)
+    return (savedLayout as 'kacheln' | 'tabelle') || 'kacheln'
+  })
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    localStorage.setItem(LAYOUT_STORAGE_KEY, layout)
+  }, [layout])
+
   if (!data?.getExhibits) {
     return <p>loading...</p>
   }
 
+  const tableHeaders = [
+    { key: 'title', content: 'Titel', sortable: true },
+    { key: 'exhibitor', content: 'Aussteller', sortable: true },
+    { key: 'table', content: 'Tisch', sortable: true },
+  ]
+
+  const handleRowClick = (exhibitId: number) => {
+    navigate(`/exhibit/${exhibitId}`)
+  }
+
   return (
     <article>
-      <ChipContainer>
-        {data?.getExhibits?.map((exhibit, index: number) => (
-          <ExhibitChip key={index} exhibit={exhibit} />
-        ))}
-      </ChipContainer>
+      <div className="mb-6">
+        <ToggleButton
+          option1="Kacheln"
+          option2="Tabelle"
+          defaultOption={layout === 'kacheln' ? 'Kacheln' : 'Tabelle'}
+          onChange={(value) => setLayout(value.toLowerCase() as 'kacheln' | 'tabelle')}
+        />
+      </div>
+      {layout === 'kacheln' ? (
+        <ChipContainer>
+          {data?.getExhibits?.map((exhibit, index: number) => (
+            <ExhibitChip key={index} exhibit={exhibit} />
+          ))}
+        </ChipContainer>
+      ) : (
+        <Table headers={tableHeaders} data={data.getExhibits}>
+          {data.getExhibits.map((exhibit, index) => (
+            <TableRow key={exhibit.id} index={index} onClick={() => handleRowClick(exhibit.id)}>
+              <TableCell>{exhibit.title}</TableCell>
+              <TableCell>{exhibit.exhibitor.user.fullName}</TableCell>
+              <TableCell>{exhibit.table?.number || '-'}</TableCell>
+            </TableRow>
+          ))}
+        </Table>
+      )}
     </article>
   )
 }

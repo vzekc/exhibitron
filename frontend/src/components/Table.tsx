@@ -1,6 +1,5 @@
-import React, { ReactNode, useState, useEffect, useRef } from 'react'
+import React, { ReactNode, useState, useEffect } from 'react'
 
-// Define types for the two table variants
 type DataTableHeader = {
   key?: string
   content: ReactNode
@@ -20,9 +19,8 @@ interface TableProps<T extends { id: string | number; [key: string]: unknown }> 
   onRowClick?: (index: number) => void
   variant?: 'data' | 'keyValue'
   maxHeight?: string
-  data?: T[]
-  onSort?: (sortedData: T[]) => void
-  defaultSortKey?: string
+  onSort: (sorter: (data: T[]) => T[]) => void
+  defaultSortKey: string
   defaultSortDirection?: 'asc' | 'desc'
 }
 
@@ -32,97 +30,48 @@ export const Table = <T extends { id: string | number; [key: string]: unknown }>
   className = '',
   variant = 'data',
   maxHeight,
-  data,
   onSort,
   defaultSortKey,
   defaultSortDirection = 'asc',
 }: TableProps<T>) => {
-  const [sortConfig, setSortConfig] = useState<{
+
+  type SortConfig = {
     key: string
     direction: 'asc' | 'desc'
-  } | null>(defaultSortKey ? { key: defaultSortKey, direction: defaultSortDirection } : null)
+  }
 
-  // Store the history of sort columns with their directions in order of most recent to oldest
-  const sortHistory = useRef<Array<{ key: string; direction: 'asc' | 'desc' }>>([])
+  const [sortHistory, setSortHistory] = useState<SortConfig[]>([ { key: defaultSortKey, direction: defaultSortDirection } ])
 
-  // For KeyValue tables, headers should be a tuple of [key, value] labels
   const isKeyValueTable = variant === 'keyValue'
 
-  // Handle sorting when sortConfig changes
   useEffect(() => {
-    if (!data || !onSort) return
-
-    // If no sort config, maintain original order
-    if (!sortConfig) {
-      onSort([...data])
-      return
-    }
-
-    // Create a copy of the data and sort it
-    const sortedData = [...data].sort((a, b) => {
-      // Convert values to lowercase strings for case-insensitive comparison
-      const valueA = String(a[sortConfig!.key]).toLowerCase()
-      const valueB = String(b[sortConfig!.key]).toLowerCase()
-
-      // First compare by the current sort key
-      if (valueA !== valueB) {
-        if (valueA < valueB) {
-          return sortConfig!.direction === 'asc' ? -1 : 1
-        }
-        return sortConfig!.direction === 'asc' ? 1 : -1
-      }
-
-      // If values are equal, use the sort history as tiebreakers
-      for (const historySort of sortHistory.current) {
-        if (historySort.key === sortConfig!.key) continue // Skip the current sort key
-
-        const historyValueA = String(a[historySort.key]).toLowerCase()
-        const historyValueB = String(b[historySort.key]).toLowerCase()
+    const sorter = (data: T[]) => [...data].sort((a, b) => {
+      for (const sortConfig of sortHistory) {
+        const historyValueA = String(a[sortConfig.key]).toLowerCase()
+        const historyValueB = String(b[sortConfig.key]).toLowerCase()
 
         if (historyValueA !== historyValueB) {
           if (historyValueA < historyValueB) {
-            return historySort.direction === 'asc' ? -1 : 1
+            return sortConfig.direction === 'asc' ? -1 : 1
           }
-          return historySort.direction === 'asc' ? 1 : -1
+          return sortConfig.direction === 'asc' ? 1 : -1
         }
       }
-
       return 0
     })
+    onSort(sorter)
+  }, [sortHistory])
 
-    onSort(sortedData)
-  }, [sortConfig, data, onSort])
-
-  const handleSort = (key: string) => {
-    setSortConfig((current) => {
-      if (current?.key === key) {
-        // If clicking the same column, just toggle direction
-        const newDirection = current.direction === 'asc' ? 'desc' : 'asc'
-
-        // Update the direction in history
-        const historyIndex = sortHistory.current.findIndex((h) => h.key === key)
-        if (historyIndex >= 0) {
-          sortHistory.current[historyIndex].direction = newDirection
-        }
-
-        return {
-          key,
-          direction: newDirection,
-        }
+  const handleSort = (clickedOnKey: string) => {
+    let columnSortConfig = sortHistory.find((h) => h.key === clickedOnKey)
+    if (columnSortConfig) {
+      if (columnSortConfig === sortHistory[0]) {
+        columnSortConfig.direction = columnSortConfig.direction === 'asc' ? 'desc' : 'asc'
       }
-
-      // If clicking a new column:
-      // 1. Remove it from history if it was there
-      // 2. Add it to the front of history with its direction
-      // 3. Set it as the new sort key
-      sortHistory.current = sortHistory.current.filter((h) => h.key !== key)
-      sortHistory.current.unshift({ key, direction: 'asc' })
-
-      return {
-        key,
-        direction: 'asc',
-      }
-    })
+    } else {
+      columnSortConfig = { key: clickedOnKey, direction: 'asc' }
+    }
+    setSortHistory([columnSortConfig, ...sortHistory.filter(h => h.key !== clickedOnKey)])
   }
 
   // Create the table headers based on the variant
@@ -138,6 +87,7 @@ export const Table = <T extends { id: string | number; [key: string]: unknown }>
       )
     } else if (!isKeyValueTable && Array.isArray(headers)) {
       // Data table variant with sortable headers
+      const sortConfig = sortHistory[0]
       return (
         <tr>
           {(headers as Array<DataTableHeader>).map((header, index) => (
