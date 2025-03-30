@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Icon from './Icon'
-import { Html5QrcodeScanner } from 'html5-qrcode'
+import { Html5Qrcode } from 'html5-qrcode'
 
 const isMobileDevice = (): boolean => {
   // @ts-expect-error ts2339
@@ -15,20 +15,18 @@ const SearchTableNumber = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    let scanner: Html5QrcodeScanner | null = null
+    let scanner: Html5Qrcode | null = null
 
     if (isScanning) {
-      scanner = new Html5QrcodeScanner(
-        'reader',
+      scanner = new Html5Qrcode('reader')
+
+      void scanner.start(
+        { facingMode: 'environment' },
         {
           fps: 10,
           qrbox: { width: 250, height: 250 },
           aspectRatio: 1.0,
         },
-        false,
-      )
-
-      scanner.render(
         (decodedText) => {
           try {
             const url = new URL(decodedText)
@@ -44,7 +42,7 @@ const SearchTableNumber = () => {
             }
           } catch (error) {
             // Ignore invalid URLs
-            console.log('Invalid QR code:', decodedText, 'error:', error)
+            console.log('error parsing QR code:', error)
           }
           setIsScanning(false)
         },
@@ -65,7 +63,7 @@ const SearchTableNumber = () => {
 
     return () => {
       if (scanner) {
-        void scanner.clear()
+        void scanner.stop()
       }
     }
   }, [isScanning, navigate])
@@ -129,12 +127,7 @@ const SearchTableNumber = () => {
           <div
             className="relative w-full max-w-md rounded-lg bg-white p-4"
             onClick={(e) => e.stopPropagation()}>
-            <button
-              onClick={handleClose}
-              className="absolute right-2 top-2 rounded-full bg-white p-1 text-gray-500 hover:bg-gray-100">
-              <Icon name="close" alt="Close" />
-            </button>
-            <div id="reader" className="w-full" />
+            <div id="reader" className="aspect-square w-full" style={{ minHeight: '300px' }} />
           </div>
         </div>
       )}
