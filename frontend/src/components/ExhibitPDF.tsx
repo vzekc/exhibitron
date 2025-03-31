@@ -308,7 +308,7 @@ interface GeneratePDFParams {
  * @returns A promise that resolves when the PDF is generated and downloaded
  */
 export const generateAndDownloadPDF = async (params: GeneratePDFParams): Promise<void> => {
-  const { id, client, url: qrUrl } = params
+  const { id, client } = params
 
   const result = await client.query({
     query: GET_EXHIBIT,
@@ -322,48 +322,12 @@ export const generateAndDownloadPDF = async (params: GeneratePDFParams): Promise
   }
 
   // Load images
-  let mainImageBase64 = ''
-  let headerLogoBase64 = ''
-  let footerLogoBase64 = ''
-  let qrCodeBase64 = ''
-
-  // Load logos
-  const headerLogoUrl = '/cc-logo.svg'
-  const footerLogoUrl = '/vzekc-logo.svg'
-
-  const fullHeaderLogoUrl = headerLogoUrl.startsWith('/')
-    ? `${window.location.origin}${headerLogoUrl}`
-    : headerLogoUrl
-  const fullFooterLogoUrl = footerLogoUrl.startsWith('/')
-    ? `${window.location.origin}${footerLogoUrl}`
-    : footerLogoUrl
-
-  try {
-    headerLogoBase64 = await getImageDataViaCanvas(fullHeaderLogoUrl)
-    footerLogoBase64 = await getImageDataViaCanvas(fullFooterLogoUrl)
-  } catch (error) {
-    console.error('Failed to load logos:', error)
-  }
-
-  // Main image
-  if (exhibit.mainImage) {
-    const imageUrl = `/api/exhibit/${id}/image/main`
-    const fullUrl = imageUrl.startsWith('/') ? `${window.location.origin}${imageUrl}` : imageUrl
-    try {
-      mainImageBase64 = await getImageDataViaCanvas(fullUrl)
-    } catch (error) {
-      console.error('Failed to load main image:', error)
-    }
-  }
-
-  // Generate QR code if URL is provided
-  if (qrUrl) {
-    try {
-      qrCodeBase64 = await generateQRCode(qrUrl)
-    } catch (error) {
-      console.error('Failed to generate QR code:', error)
-    }
-  }
+  const mainImageBase64 = exhibit.mainImage
+    ? await getImageDataViaCanvas(`${window.location.origin}/api/exhibit/${id}/image/main`)
+    : ''
+  const headerLogoBase64 = await getImageDataViaCanvas(`${window.location.origin}/cc-logo.svg`)
+  const footerLogoBase64 = await getImageDataViaCanvas(`${window.location.origin}/vzekc-logo.svg`)
+  const qrCodeBase64 = await generateQRCode(`${window.location.origin}/exhibit/${id}`)
 
   // Create the document element
   const pdfDocument = (

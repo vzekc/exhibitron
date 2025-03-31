@@ -304,13 +304,11 @@ const ExhibitEditor = () => {
     try {
       setIsPdfGenerating(true)
 
-      // Get the current full URL for the QR code
-      const currentUrl = window.location.href
+      const exhibitId = parseInt(id!)
 
       await generateAndDownloadPDF({
-        id: parseInt(id!),
+        id: exhibitId,
         client: apolloClient,
-        url: currentUrl,
       })
     } catch (error) {
       console.error('Error generating PDF:', error)
