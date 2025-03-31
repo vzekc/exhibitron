@@ -15,6 +15,7 @@ const GET_EXHIBIT = graphql(
         id
         title
         description
+        descriptionExtension
         table {
           number
         }
@@ -41,6 +42,11 @@ const ExhibitCard = ({ id }: { id: number }) => {
   const attributes = exhibit.attributes || []
   const hasAttributes = attributes.length > 0
   const hasMainImage = exhibit.mainImage !== null
+
+  const notEmpty = (str: string | null) => str && str !== '<p></p>' && str
+
+  const description = notEmpty(exhibit.description)
+  const descriptionExtension = notEmpty(exhibit.descriptionExtension)
 
   return (
     <section>
@@ -80,12 +86,12 @@ const ExhibitCard = ({ id }: { id: number }) => {
           </div>
         </Card>
       )}
-      {exhibit.description && exhibit.description !== '<p></p>' && (
+      {(description || descriptionExtension) && (
         <Article>
-          <ServerHtmlContent html={exhibit.description} />
+          {description && <ServerHtmlContent html={description} />}
+          {descriptionExtension && <ServerHtmlContent html={descriptionExtension} />}
         </Article>
       )}
-
       {exhibit.table && (
         <div className="mt-3">
           <TableChip number={exhibit.table.number} />
