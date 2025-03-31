@@ -7,11 +7,12 @@ import { useBreadcrumb } from '@contexts/BreadcrumbContext.ts'
 import { graphql } from 'gql.tada'
 import { useQuery, useMutation, useApolloClient } from '@apollo/client'
 import useMandatoryParams from '@utils/useMandatoryParams.ts'
-import PageHeading from '../../components/PageHeading'
+import PageHeading from '@components/PageHeading'
 import ActionBar from '@components/ActionBar'
 import Button from '@components/Button'
 import RegistrationStatusChip from '@components/RegistrationStatusChip.tsx'
 import { KeyValueTable, TableRow, TableCell } from '@components/Table'
+import LoadInProgress from '@components/LoadInProgress'
 
 type ConfirmAction = {
   title: string
@@ -96,7 +97,7 @@ const RegistrationDetails = () => {
   }, [data, setDetailName])
 
   if (!data?.getRegistration) {
-    return <div>Laden...</div>
+    return <LoadInProgress />
   }
 
   const handleStatusChange = async (status: string) => {

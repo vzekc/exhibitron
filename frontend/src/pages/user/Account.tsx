@@ -5,6 +5,7 @@ import Confirm from '@components/Confirm.tsx'
 import PageHeading from '@components/PageHeading.tsx'
 import { FormSection, FormFieldGroup, FormLabel, SectionLabel } from '@components/Form.tsx'
 import Button from '@components/Button.tsx'
+import LoadInProgress from '@components/LoadInProgress'
 
 const Account = () => {
   const { exhibitor } = useExhibitor()
@@ -25,7 +26,7 @@ const Account = () => {
   }, [showResetMessage])
 
   if (!exhibitor) {
-    return <div>Loading...</div>
+    return <LoadInProgress />
   }
 
   const handlePasswordResetRequest = async () => {

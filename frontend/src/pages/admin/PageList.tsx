@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { KeyValueTable, TableRow, TableCell } from '@components/Table'
 import Card from '@components/Card.tsx'
 import PageHeading from '@components/PageHeading.tsx'
+import LoadInProgress from '@components/LoadInProgress'
 
 const GET_CURRENT_EXHIBITION = gql`
   query GetCurrentExhibition {
@@ -25,7 +26,7 @@ const PageList = () => {
   const { loading, error, data } = useQuery(GET_CURRENT_EXHIBITION)
   const navigate = useNavigate()
 
-  if (loading) return <div>Loading...</div>
+  if (loading) return <LoadInProgress />
   if (error) return <div>Error: {error.message}</div>
 
   const pages: Page[] = data.getCurrentExhibition.pages

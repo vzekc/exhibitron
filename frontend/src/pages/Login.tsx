@@ -4,8 +4,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useApolloClient, useLazyQuery, useMutation } from '@apollo/client'
 import { useExhibitor } from '@contexts/ExhibitorContext.ts'
 import { graphql } from 'gql.tada'
-import PageHeading from '../components/PageHeading'
-import '../styles/auth.css'
+import PageHeading from '@components/PageHeading'
+import '@styles/auth.css'
 import { ExhibitorProvider } from '@contexts/ExhibitorProvider.tsx'
 
 type Inputs = {

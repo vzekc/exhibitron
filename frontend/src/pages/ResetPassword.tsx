@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation } from '@apollo/client'
 import { graphql } from 'gql.tada'
-import PageHeading from '../components/PageHeading'
-import '../styles/auth.css'
+import PageHeading from '@components/PageHeading'
+import '@styles/auth.css'
 
 const RESET_PASSWORD = graphql(`
   mutation ResetPassword($token: String!, $password: String!) {

@@ -15,6 +15,7 @@ import PageHeading from '@components/PageHeading.tsx'
 import { FormSection, FormFieldGroup, FormLabel, SectionLabel, Input } from '@components/Form.tsx'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { generateAndDownloadPDF } from '@components/ExhibitPDF.tsx'
+import LoadInProgress from '@components/LoadInProgress'
 
 type Attribute = {
   name: string
@@ -308,7 +309,7 @@ const ExhibitEditor = () => {
 
   if (!isNew) {
     if (exhibitLoading) {
-      return <p>Lade Exponat...</p>
+      return <LoadInProgress />
     }
 
     if (exhibitError) {

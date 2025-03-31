@@ -8,6 +8,7 @@ import { FragmentOf } from 'gql.tada'
 import TableInfoPanel from './seatingPlan/TableInfo'
 import ExhibitorChip from './ExhibitorChip'
 import ExhibitChip from './ExhibitChip'
+import LoadInProgress from './LoadInProgress'
 
 const GET_TABLES = graphql(
   `
@@ -467,7 +468,7 @@ export const SeatingPlan: React.FC = () => {
   }, [])
 
   if (!tablesData) {
-    return <div className="seating-plan">Loading...</div>
+    return <LoadInProgress />
   }
 
   const selectedTableInfo = selectedTable ? tables.get(selectedTable) : null

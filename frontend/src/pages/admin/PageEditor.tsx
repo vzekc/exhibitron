@@ -5,6 +5,7 @@ import ContentEditable from 'react-contenteditable'
 import TextEditor, { TextEditorHandle } from '@components/TextEditor.tsx'
 import { useUnsavedChangesWarning } from '@hooks/useUnsavedChangesWarning.tsx'
 import Button from '@components/Button.tsx'
+import LoadInProgress from '@components/LoadInProgress'
 
 const GET_PAGE = gql`
   query GetPage($key: String!) {
@@ -89,7 +90,7 @@ const PageEditor = () => {
     editorRef.current?.resetEditState()
   }
 
-  if (loading) return <div>Loading...</div>
+  if (loading) return <LoadInProgress />
   if (error) return <div>Error: {error.message}</div>
 
   return (

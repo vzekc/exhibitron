@@ -5,6 +5,7 @@ import { useExhibitor } from '@contexts/ExhibitorContext.ts'
 import Article from './Article'
 import ServerHtmlContent from './ServerHtmlContent'
 import PageHeading from './PageHeading'
+import LoadInProgress from './LoadInProgress'
 
 const GET_CURRENT_EXHIBITION = gql`
   query GetCurrentExhibition {
@@ -27,7 +28,7 @@ const Page: React.FC<PageProps> = ({ pageKey }) => {
   const { loading, error, data } = useQuery(GET_CURRENT_EXHIBITION)
   const { exhibitor } = useExhibitor()
 
-  if (loading) return <div>Lade...</div>
+  if (loading) return <LoadInProgress />
   if (error) return <div>Fehler: {error.message}</div>
 
   const page = data.getCurrentExhibition.pages.find((page: { key: string }) => page.key === pageKey)

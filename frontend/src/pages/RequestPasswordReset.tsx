@@ -1,8 +1,8 @@
 import { useForm } from 'react-hook-form'
 import { useState } from 'react'
 import { requestPasswordReset } from '@utils/requestPasswordReset.ts'
-import PageHeading from '../components/PageHeading'
-import '../styles/auth.css'
+import PageHeading from '@components/PageHeading'
+import '@styles/auth.css'
 
 type Inputs = {
   email: string

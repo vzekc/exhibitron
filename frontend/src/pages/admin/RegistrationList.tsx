@@ -9,6 +9,7 @@ import ActionBar from '@components/ActionBar.tsx'
 import Button from '@components/Button.tsx'
 import { DataTable, TableRow, TableCell } from '@components/Table.tsx'
 import Card from '@components/Card.tsx'
+import LoadInProgress from '@components/LoadInProgress'
 
 const GET_REGISTRATIONS = graphql(`
   query GetRegistrations {
@@ -117,7 +118,7 @@ const RegistrationList = () => {
   }
 
   if (!data?.getRegistrations) {
-    return <p>Loading...</p>
+    return <LoadInProgress />
   }
 
   const tableHeaders = tableColumns.map((column) => ({

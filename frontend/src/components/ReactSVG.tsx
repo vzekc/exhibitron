@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import axios from 'axios'
+import LoadInProgress from './LoadInProgress'
 
 interface ReactSVGProps {
   src: string
@@ -172,7 +173,7 @@ export const ReactSVG: React.FC<ReactSVGProps> = ({
   }
 
   if (!svgContent || !parsedSvg) {
-    return <div className="svg-loading">Loading SVG...</div>
+    return <LoadInProgress />
   }
 
   // Create a React element from the SVG

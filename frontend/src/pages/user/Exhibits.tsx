@@ -6,6 +6,7 @@ import ChipContainer from '@components/ChipContainer.tsx'
 import PageHeading from '@components/PageHeading.tsx'
 import ActionBar from '@components/ActionBar.tsx'
 import Button from '@components/Button.tsx'
+import LoadInProgress from '@components/LoadInProgress'
 
 const GET_MY_EXHIBITS = graphql(
   `
@@ -25,7 +26,7 @@ const UserExhibits = () => {
   const { data } = useQuery(GET_MY_EXHIBITS)
 
   if (!data?.getCurrentExhibitor?.exhibits) {
-    return <p>loading...</p>
+    return <LoadInProgress />
   }
   const { exhibits } = data.getCurrentExhibitor
 

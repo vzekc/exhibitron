@@ -5,12 +5,12 @@ import { graphql } from 'gql.tada'
 
 import { useSearchParams } from 'react-router-dom'
 import Modal from '@components/Modal.tsx'
-import { RetroHeader } from '../components/RetroHeader'
-import { FormField } from '../components/FormField'
-import { FormFieldset } from '../components/FormFieldset'
-import { FormInput } from '../components/FormInput'
-import { FormSelect } from '../components/FormSelect'
-import { FormTextarea } from '../components/FormTextarea'
+import { RetroHeader } from '@components/RetroHeader'
+import { FormField } from '@components/FormField'
+import { FormFieldset } from '@components/FormFieldset'
+import { FormInput } from '@components/FormInput'
+import { FormSelect } from '@components/FormSelect'
+import { FormTextarea } from '@components/FormTextarea'
 
 type Inputs = {
   name: string

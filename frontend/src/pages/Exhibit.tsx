@@ -10,6 +10,7 @@ import { useExhibitor } from '@contexts/ExhibitorContext.ts'
 import Confirm from '@components/Confirm'
 import Button from '@components/Button'
 import ActionBar from '@components/ActionBar'
+import LoadInProgress from '@components/LoadInProgress'
 
 const GET_DATA = graphql(`
   query GetExhibit($id: Int!) {
@@ -66,7 +67,7 @@ const Exhibit = () => {
   }, [data, setDetailName, location])
 
   if (loading) {
-    return <p>Lade Exponat...</p>
+    return <LoadInProgress />
   }
 
   if (error) {

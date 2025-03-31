@@ -1,4 +1,4 @@
-import '../styles/fonts/press-start-2p.css'
+import '@styles/fonts/press-start-2p.css'
 
 export const RetroHeader = () => {
   return (
