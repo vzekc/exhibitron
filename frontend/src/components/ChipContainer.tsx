@@ -7,6 +7,7 @@ interface CardContainerProps {
 const ChipContainer = ({ children }: CardContainerProps) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const [marginLeft, setMarginLeft] = useState(0)
+  const [isVisible, setIsVisible] = useState(false)
 
   // In order to center the content, we need to calculate the width of the first row and
   // set the left margin based on that width.  I could not achieve the same result
@@ -41,13 +42,17 @@ const ChipContainer = ({ children }: CardContainerProps) => {
     const margin = (containerRect.width - contentWidth) / 2
 
     setMarginLeft(margin)
+    setIsVisible(true)
   }, [children]) // Only recalculate when children change
 
   return (
     <div
       ref={containerRef}
       className="flex flex-wrap justify-start gap-4 overflow-hidden"
-      style={{ marginLeft: `${marginLeft}px` }}>
+      style={{
+        marginLeft: `${marginLeft}px`,
+        visibility: isVisible ? 'visible' : 'hidden',
+      }}>
       {children}
     </div>
   )
