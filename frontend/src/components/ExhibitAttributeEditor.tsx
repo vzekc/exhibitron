@@ -141,7 +141,7 @@ const DraggableAttributeItem = ({
       </div>
 
       {/* Attribute name (displayed as label) */}
-      <div className="min-w-[120px] flex-shrink-0 font-medium">{attr.name}</div>
+      <div className="min-w-[180px] flex-shrink-0 font-medium">{attr.name}</div>
 
       {/* Value input */}
       <div className="flex-grow">
