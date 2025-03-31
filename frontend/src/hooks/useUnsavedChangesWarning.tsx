@@ -64,24 +64,12 @@ export const useUnsavedChangesWarning = (hasUnsavedChanges: boolean) => {
       }
     }
 
-    const handleVisibilityChange = async () => {
-      if (document.visibilityState === 'hidden' && hasUnsavedChanges) {
-        const confirmed = await showConfirmDialog()
-        if (!confirmed) {
-          // Prevent the page from unloading
-          window.history.pushState(null, '', window.location.href)
-        }
-      }
-    }
-
     window.addEventListener('beforeunload', handleBeforeUnload)
     document.addEventListener('click', handleClick, true)
-    document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload)
       document.removeEventListener('click', handleClick, true)
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [hasUnsavedChanges, navigate])
 }
