@@ -278,6 +278,18 @@ const ExhibitEditor = () => {
       setValue('descriptionExtension', savedDescriptionExtension!)
       setValue('attributes', (savedAttributes as Attribute[]) || [])
     }
+
+    // Reset form state and text editor states
+    reset({
+      title: data.title,
+      table: data.table,
+      description: currentDescription,
+      descriptionExtension: currentDescriptionExtension,
+      attributes: validAttributes,
+      mainImage: watch('mainImage'),
+    })
+    descriptionEditorRef.current?.resetEditState()
+    descriptionExtensionEditorRef.current?.resetEditState()
   }
 
   const handleDelete = async () => {
