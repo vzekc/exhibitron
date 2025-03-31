@@ -4,6 +4,8 @@ import { MutationResolvers, QueryResolvers, UserResolvers } from '../../generate
 import { requireAdmin } from '../../db.js'
 import { wrap } from '@mikro-orm/core'
 import { ProfileImage } from './entity.js'
+import { sendEmail } from '../common/sendEmail.js'
+import { makeVisitorContactEmail } from '../registration/emails.js'
 
 export const userQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2322
@@ -68,6 +70,20 @@ export const userMutations: MutationResolvers<Context> = {
     }
     wrap(user).assign(input)
     return user
+  },
+  sendVisitorEmail: async (_, { userId, message }, { db, exhibition }) => {
+    const user = await db.user.findOneOrFail({ id: userId })
+    if (!user.allowEmailContact) {
+      throw new Error('User has not allowed email contact')
+    }
+    await sendEmail(
+      makeVisitorContactEmail(
+        user.email,
+        `Nachricht von einem Besucher der ${exhibition.title}`,
+        message,
+      ),
+    )
+    return true
   },
 }
 

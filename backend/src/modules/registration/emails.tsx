@@ -79,3 +79,15 @@ export const makePasswordResetEmail = (email: string, resetUrl: string) => ({
     </article>,
   ),
 })
+
+export const makeVisitorContactEmail = (email: string, subject: string, message: string) => ({
+  to: [email],
+  subject,
+  body: makeEmailBody(
+    <article>
+      <h1>{subject}</h1>
+      <p>Du hast eine Nachricht von einem Besucher erhalten. Hier ist die Nachricht:</p>
+      <pre>{message}</pre>
+    </article>,
+  ),
+})

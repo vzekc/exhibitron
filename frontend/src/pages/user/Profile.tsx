@@ -26,6 +26,7 @@ type Inputs = {
   mastodon: string
   phone: string
   website: string
+  allowEmailContact: boolean
 }
 
 const GET_USER_PROFILE = graphql(`
@@ -37,6 +38,7 @@ const GET_USER_PROFILE = graphql(`
         id
         fullName
         bio
+        allowEmailContact
         contacts {
           email
           mastodon
@@ -55,6 +57,7 @@ const UPDATE_USER_PROFILE = graphql(`
       id
       fullName
       bio
+      allowEmailContact
       contacts {
         email
         mastodon
@@ -98,9 +101,13 @@ const Profile = () => {
   }, [navigate])
 
   const updateProfile: SubmitHandler<Inputs> = async (inputs) => {
-    const { fullName, bio, topic, ...contacts } = inputs
+    const { fullName, bio, topic, allowEmailContact, ...contacts } = inputs
     await updateUserProfile({
-      variables: { input: { fullName, bio, contacts }, exhibitorId: exhibitor!.id, topic },
+      variables: {
+        input: { fullName, bio, contacts, allowEmailContact },
+        exhibitorId: exhibitor!.id,
+        topic,
+      },
     })
     await reloadExhibitor()
     reset(inputs)
@@ -119,6 +126,7 @@ const Profile = () => {
         mastodon: newUser?.contacts?.mastodon || '',
         phone: newUser?.contacts?.phone || '',
         website: newUser?.contacts?.website || '',
+        allowEmailContact: newUser?.allowEmailContact || false,
       })
       setProfileImage(newUser?.profileImage as number | null)
     }
@@ -189,6 +197,25 @@ const Profile = () => {
                     <FormLabel>Über mich</FormLabel>
                     <TextArea rows={4} {...register('bio')} error={errors.bio?.message} />
                   </FormFieldGroup>
+                </FormSection>
+
+                <FormSection>
+                  <SectionLabel>Kontakt über Website</SectionLabel>
+
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="allowEmailContact"
+                      {...register('allowEmailContact')}
+                      className="text-primary-600 focus:ring-primary-500 h-4 w-4 rounded border-gray-300"
+                    />
+                    <FormLabel htmlFor="allowEmailContact">Kontaktformular aktivieren</FormLabel>
+                  </div>
+                  <p className="mt-4 text-sm text-gray-500">
+                    Wenn Du das Kontaktformular aktivierst, können Besucher Dich über die Website
+                    kontaktieren. Eingegebene Nachrichten werden an Deine hinterlegte Email-Adresse
+                    gesendet, ohne dass Du sie auf der Website veröffentlichen musst.
+                  </p>
                 </FormSection>
 
                 <FormSection>

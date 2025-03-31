@@ -21,7 +21,7 @@ const ContactInfo = ({ contacts }: ContactInfoProps) => {
 
   return (
     <div>
-      <h3 className="mb-2 text-sm font-medium text-gray-900">Kontakt</h3>
+      <h3 className="mb-2 text-sm font-medium text-gray-900">Kontaktinformationen</h3>
       <div className="space-y-1 text-sm text-gray-600">
         {email && (
           <div className="flex items-center gap-2">

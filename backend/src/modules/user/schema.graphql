@@ -21,6 +21,7 @@ type User {
   isAdministrator: Boolean
   nickname: String
   profileImage: Int
+  allowEmailContact: Boolean!
 }
 
 input UpdateUserProfileInput {
@@ -28,6 +29,7 @@ input UpdateUserProfileInput {
   bio: String
   contacts: ContactsInput
   nickname: String
+  allowEmailContact: Boolean
 }
 
 extend type Mutation {
@@ -36,6 +38,7 @@ extend type Mutation {
   requestPasswordReset(email: String!, resetUrl: String!): Boolean
   resetPassword(password: String!, token: String!): Boolean
   updateUserProfile(input: UpdateUserProfileInput!): User
+  sendVisitorEmail(userId: Int!, message: String!): Boolean
 }
 
 extend type Query {

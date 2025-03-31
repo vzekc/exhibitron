@@ -46,7 +46,7 @@ export class ProfileImage extends BaseEntity {
 
 @Entity({ repository: () => UserRepository })
 export class User extends BaseEntity<
-  'password' | 'isAdministrator' | 'fullName' | 'bio' | 'contacts'
+  'password' | 'isAdministrator' | 'fullName' | 'bio' | 'contacts' | 'allowEmailContact'
 > {
   // for automatic inference via `em.getRepository(User)`
   [EntityRepositoryType]?: UserRepository
@@ -77,6 +77,9 @@ export class User extends BaseEntity<
 
   @Property()
   isAdministrator: boolean = false
+
+  @Property()
+  allowEmailContact: boolean = false
 
   @OneToOne(() => ProfileImage, (image) => image.user)
   profileImage?: ProfileImage
