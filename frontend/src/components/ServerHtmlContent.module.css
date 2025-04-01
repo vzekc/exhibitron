@@ -79,12 +79,20 @@
   border-radius: 3px;
 }
 
+:global(.dark) .serverHtmlContent code {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
 .serverHtmlContent pre {
   background-color: rgba(0, 0, 0, 0.05);
   padding: 1em;
   border-radius: 4px;
   overflow-x: auto;
   margin: 1em 0;
+}
+
+:global(.dark) .serverHtmlContent pre {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .serverHtmlContent pre code {
@@ -99,9 +107,17 @@
   border-left: 4px solid rgba(0, 0, 0, 0.1);
 }
 
+:global(.dark) .serverHtmlContent blockquote {
+  border-left-color: rgba(255, 255, 255, 0.2);
+}
+
 /* Horizontal rule */
 .serverHtmlContent hr {
   border: none;
   border-top: 1px solid rgba(0, 0, 0, 0.1);
   margin: 2em 0;
+}
+
+:global(.dark) .serverHtmlContent hr {
+  border-top-color: rgba(255, 255, 255, 0.2);
 }

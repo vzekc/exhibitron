@@ -102,7 +102,7 @@ const SearchTableNumber = () => {
           {isMobileDevice() && (
             <button
               onClick={scanQrCode}
-              className="shrink-0 border border-gray-300 bg-gray-100 px-2 py-1">
+              className="shrink-0 border border-gray-300 bg-gray-100 px-2 py-1 hover:bg-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600">
               <Icon name="scan-qr-code" alt="Scan QR Code" />
             </button>
           )}
@@ -112,9 +112,11 @@ const SearchTableNumber = () => {
             onChange={handleSearchChange}
             placeholder="Tisch #"
             maxLength={3}
-            className="w-14 min-w-0 shrink border border-gray-300 px-2 py-1"
+            className="w-14 min-w-0 shrink border border-gray-300 bg-white px-2 py-1 text-gray-900 placeholder-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
           />
-          <button type="submit" className="shrink-0 border border-gray-300 bg-gray-100 px-2 py-1">
+          <button
+            type="submit"
+            className="shrink-0 border border-gray-300 bg-gray-100 px-2 py-1 hover:bg-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600">
             <Icon name="search-table" alt="Search Table" />
           </button>
         </div>
@@ -125,7 +127,7 @@ const SearchTableNumber = () => {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
           onClick={handleClose}>
           <div
-            className="relative w-full max-w-md rounded-lg bg-white p-4"
+            className="relative w-full max-w-md rounded-lg bg-white p-4 dark:bg-gray-800"
             onClick={(e) => e.stopPropagation()}>
             <div id="reader" className="aspect-square w-full" style={{ minHeight: '300px' }} />
           </div>

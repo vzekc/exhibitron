@@ -10,11 +10,11 @@ const TableChip = ({ number }: TableChipProps) => {
     <Card to={`/table/${number}`} className="mb-3 w-40">
       <div className="flex items-center gap-4">
         <div className="flex-shrink-0">
-          <div className="flex h-[50px] w-[50px] items-center justify-center rounded-md bg-gray-100">
-            <Icon name="table" alt="Table" className="h-6 w-6 text-gray-400" />
+          <div className="flex h-[50px] w-[50px] items-center justify-center rounded-md bg-gray-100 dark:bg-gray-700">
+            <Icon name="table" alt="Table" className="h-6 w-6 text-gray-400 dark:text-gray-500" />
           </div>
         </div>
-        <div className="text-4xl font-medium">{number}</div>
+        <div className="text-4xl font-medium text-gray-900 dark:text-gray-100">{number}</div>
       </div>
     </Card>
   )

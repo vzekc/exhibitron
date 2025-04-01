@@ -65,7 +65,7 @@ const ActionBar = ({ children, className = '' }: ActionBarProps) => {
   return (
     <>
       <div
-        className={`sticky bottom-0 mt-8 border-t border-gray-200 bg-white/95 p-4 pt-4 shadow-sm backdrop-blur-sm ${className}`}
+        className={`sticky bottom-0 mt-8 border-t border-gray-200 bg-white/95 p-4 pt-4 shadow-sm backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800/95 ${className}`}
         ref={buttonContainerRef}>
         {renderButtons()}
       </div>
@@ -73,7 +73,7 @@ const ActionBar = ({ children, className = '' }: ActionBarProps) => {
       {showFloatingButtons && (
         <div
           ref={floatingButtonsRef}
-          className="fixed bottom-4 right-4 z-50 flex gap-2 rounded-lg bg-white/95 p-4 shadow-2xl ring-1 ring-black/5 backdrop-blur-sm transition-all duration-300 ease-in-out">
+          className="fixed bottom-4 right-4 z-50 flex gap-2 rounded-lg bg-white/95 p-4 shadow-2xl ring-1 ring-black/5 backdrop-blur-sm transition-all duration-300 ease-in-out dark:bg-gray-800/95 dark:ring-white/5">
           {renderButtons()}
         </div>
       )}

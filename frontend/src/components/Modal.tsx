@@ -31,14 +31,14 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title }) => {
       ref={dialogRef}
       onClose={onClose}
       onClick={handleClickOutside}
-      className="mx-auto w-full max-w-lg rounded-lg p-0 backdrop:bg-gray-800/50">
+      className="mx-auto w-full max-w-lg rounded-lg bg-white p-0 backdrop:bg-gray-800/50 dark:bg-gray-800">
       <article className="w-full p-0">
-        <header className="flex items-center justify-between border-b border-gray-200 p-4">
-          <h3 className="text-xl font-bold text-gray-800">{title}</h3>
+        <header className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
+          <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">{title}</h3>
           <button
             aria-label="Close"
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700">
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"

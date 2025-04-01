@@ -78,7 +78,7 @@ const ExhibitorCard = ({ exhibitor }: { exhibitor: FragmentOf<typeof EXHIBITOR_F
         <div className="flex flex-col gap-4">
           {bio && (
             <div
-              className="prose prose-sm max-w-none text-gray-700"
+              className="prose prose-sm prose-headings:text-gray-900 dark:prose-headings:text-gray-100 prose-a:text-blue-600 dark:prose-a:text-blue-400 max-w-none text-gray-700 dark:text-gray-300"
               dangerouslySetInnerHTML={{ __html: bio }}
             />
           )}
@@ -98,22 +98,21 @@ const ExhibitorCard = ({ exhibitor }: { exhibitor: FragmentOf<typeof EXHIBITOR_F
       <Modal
         isOpen={isContactModalOpen}
         onClose={() => setIsContactModalOpen(false)}
-        title="Kontakt">
+        title="Nachricht senden">
         <div className="space-y-4">
-          <p className="text-gray-700">
-            Hier kannst Du {nickname || fullName} eine Nachricht senden. Denk daran, Deine eigenen
-            Kontakinformationen für eine Antwort hinzuzufügen.
+          <p className="text-gray-700 dark:text-gray-300">
+            Deine Nachricht wird per Email an {fullName} weitergeleitet.
           </p>
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
+            className="w-full rounded-md border border-gray-300 bg-white p-2 text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+            rows={5}
             placeholder="Deine Nachricht..."
-            className="w-full rounded-md border border-gray-300 p-2"
-            rows={6}
           />
-          <div className="flex justify-end">
+          <div className="flex justify-end border-t border-gray-200 pt-4 dark:border-gray-700">
             <Button onClick={handleSendMessage} disabled={!message.trim()}>
-              Nachricht senden
+              Senden
             </Button>
           </div>
         </div>
@@ -124,13 +123,12 @@ const ExhibitorCard = ({ exhibitor }: { exhibitor: FragmentOf<typeof EXHIBITOR_F
         onClose={() => setShowConfirmation(false)}
         title="Nachricht gesendet">
         <div className="space-y-4">
-          <p className="text-gray-700">
-            Deine Nachricht wurde erfolgreich gesendet. {nickname || fullName} wird sich bei Dir
-            melden, wenn Interesse besteht.
+          <p className="text-gray-700 dark:text-gray-300">
+            Deine Nachricht wurde erfolgreich an {fullName} weitergeleitet.
           </p>
-          <div className="flex justify-end">
+          <div className="flex justify-end border-t border-gray-200 pt-4 dark:border-gray-700">
             <Button onClick={() => setShowConfirmation(false)} variant="secondary">
-              Schließen
+              OK
             </Button>
           </div>
         </div>

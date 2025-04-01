@@ -81,8 +81,8 @@ export const DataTable = <T extends { id: string | number; [key: string]: unknow
       <div
         className="flex-grow overflow-auto"
         style={maxHeight ? { maxHeight } : { height: 'calc(100vh - 200px)' }}>
-        <table className={`min-w-full divide-y divide-gray-200 ${className}`}>
-          <thead className="sticky top-0 z-10 bg-gray-50">
+        <table className={`min-w-full divide-y divide-gray-200 dark:divide-gray-700 ${className}`}>
+          <thead className="sticky top-0 z-10 bg-gray-50 dark:bg-gray-800">
             <tr>
               {headers.map((header, index) => (
                 <th
@@ -92,15 +92,17 @@ export const DataTable = <T extends { id: string | number; [key: string]: unknow
                       ? () => handleSort(header.sortKey || header.key || '')
                       : header.onClick
                   }
-                  className={`px-4 pt-3 text-left text-sm font-medium text-gray-500 ${
-                    header.sortable || header.onClick ? 'cursor-pointer hover:bg-gray-100' : ''
+                  className={`px-4 pt-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400 ${
+                    header.sortable || header.onClick
+                      ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
+                      : ''
                   } ${header.className || ''}`}>
                   <div className="flex items-center gap-2">
                     {header.content}
                     {header.sortable && (
                       <div className="ml-2 flex flex-col">
                         <svg
-                          className={`h-5 w-5 ${sortConfig?.key === (header.sortKey || header.key) && sortConfig?.direction === 'asc' ? 'text-black' : 'text-gray-200'}`}
+                          className={`h-5 w-5 ${sortConfig?.key === (header.sortKey || header.key) && sortConfig?.direction === 'asc' ? 'text-black dark:text-white' : 'text-gray-200 dark:text-gray-600'}`}
                           viewBox="0 0 24 24"
                           fill="currentColor"
                           stroke="currentColor"
@@ -108,7 +110,7 @@ export const DataTable = <T extends { id: string | number; [key: string]: unknow
                           <path d="M7 14l5-5 5 5z" />
                         </svg>
                         <svg
-                          className={`-mt-2 h-5 w-5 ${sortConfig?.key === (header.sortKey || header.key) && sortConfig?.direction === 'desc' ? 'text-black' : 'text-gray-200'}`}
+                          className={`-mt-2 h-5 w-5 ${sortConfig?.key === (header.sortKey || header.key) && sortConfig?.direction === 'desc' ? 'text-black dark:text-white' : 'text-gray-200 dark:text-gray-600'}`}
                           viewBox="0 0 24 24"
                           fill="currentColor"
                           stroke="currentColor"
@@ -122,7 +124,9 @@ export const DataTable = <T extends { id: string | number; [key: string]: unknow
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">{children}</tbody>
+          <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-900">
+            {children}
+          </tbody>
         </table>
       </div>
     </div>

@@ -8,7 +8,7 @@ interface CardProps {
 }
 
 const Card = ({ children, to, className = '' }: CardProps) => (
-  <div className={`rounded-lg bg-white p-4 shadow-md ${className}`}>
+  <div className={`rounded-lg bg-white p-4 shadow-md dark:bg-gray-800 ${className}`}>
     {to ? (
       <Link to={to} className="block h-full w-full">
         {children}

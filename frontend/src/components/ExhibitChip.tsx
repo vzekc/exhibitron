@@ -43,12 +43,12 @@ const ExhibitChip = ({ exhibit, noTable, noExhibitor, url = '/exhibit' }: Exhibi
               loading="lazy"
             />
           ) : (
-            <div className="h-[100px] w-[100px] rounded-md bg-gray-100" />
+            <div className="h-[100px] w-[100px] rounded-md bg-gray-100 dark:bg-gray-700" />
           )}
         </div>
         <div className="flex flex-grow flex-col">
-          <div className="font-medium">{exhibit.title}</div>
-          <div className="mt-auto flex justify-between text-sm text-gray-600">
+          <div className="font-medium text-gray-900 dark:text-gray-100">{exhibit.title}</div>
+          <div className="mt-auto flex justify-between text-sm text-gray-600 dark:text-gray-400">
             {!noExhibitor && <div>{user.nickname || user.fullName}</div>}
             {exhibit.table && !noTable && <div>Tisch {exhibit.table.number}</div>}
           </div>

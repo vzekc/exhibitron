@@ -71,11 +71,15 @@ const Exhibit = () => {
   }
 
   if (error) {
-    return <p>Fehler beim Laden des Exponats: {error.message}</p>
+    return (
+      <p className="p-4 text-red-600 dark:text-red-400">
+        Fehler beim Laden des Exponats: {error.message}
+      </p>
+    )
   }
 
   if (!data?.getExhibit) {
-    return <p>Exponat nicht gefunden</p>
+    return <p className="p-4 text-gray-600 dark:text-gray-400">Exponat nicht gefunden</p>
   }
 
   const exhibit = data?.getExhibit
@@ -97,7 +101,7 @@ const Exhibit = () => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 rounded-lg bg-white dark:bg-gray-800">
       <ExhibitCard id={exhibit.id} />
       <ActionBar>
         <Button

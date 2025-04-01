@@ -11,8 +11,10 @@ export const TableRow: React.FC<TableRowProps> = ({ children, onClick, className
   return (
     <tr
       onClick={onClick}
-      className={`${className} ${onClick ? 'cursor-pointer hover:bg-gray-50' : ''} ${
-        index !== undefined && index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+      className={`${className} ${onClick ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700' : ''} ${
+        index !== undefined && index % 2 === 0
+          ? 'bg-white dark:bg-gray-900'
+          : 'bg-gray-50 dark:bg-gray-800'
       }`}>
       {children}
     </tr>
@@ -26,7 +28,8 @@ interface TableCellProps {
 
 export const TableCell: React.FC<TableCellProps> = ({ children, className = '' }) => {
   return (
-    <td className={`whitespace-nowrap px-4 py-4 text-base text-gray-900 ${className}`}>
+    <td
+      className={`whitespace-nowrap px-4 py-4 text-base text-gray-900 dark:text-gray-100 ${className}`}>
       {children}
     </td>
   )

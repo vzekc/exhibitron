@@ -21,7 +21,7 @@ const ProfileSection = ({
     <div className="flex flex-col gap-4">
       <div className="flex items-start gap-4">
         <div className="flex-shrink-0">
-          <div className="flex h-[150px] w-[150px] items-center justify-center rounded-md bg-gray-100">
+          <div className="flex h-[150px] w-[150px] items-center justify-center rounded-md bg-gray-100 dark:bg-gray-700">
             {profileImage ? (
               <img
                 src={`/api/user/${userId}/image/profile`}
@@ -29,16 +29,20 @@ const ProfileSection = ({
                 className="h-full w-full rounded-md object-cover"
               />
             ) : (
-              <Icon name="user" alt="User" className="h-12 w-12 text-gray-400" />
+              <Icon name="user" alt="User" className="h-12 w-12 text-gray-400 dark:text-gray-500" />
             )}
           </div>
         </div>
         <div className="min-w-0 flex-1">
-          <h2 className="truncate text-xl font-semibold text-gray-900">{displayName}</h2>
-          {nickname && <p className="truncate text-sm text-gray-600">{fullName}</p>}
+          <h2 className="truncate text-xl font-semibold text-gray-900 dark:text-gray-100">
+            {displayName}
+          </h2>
+          {nickname && (
+            <p className="truncate text-sm text-gray-600 dark:text-gray-400">{fullName}</p>
+          )}
         </div>
       </div>
-      {topic && <p className="text-lg text-gray-700">{topic}</p>}
+      {topic && <p className="text-lg text-gray-700 dark:text-gray-300">{topic}</p>}
     </div>
   )
 }

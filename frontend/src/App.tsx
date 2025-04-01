@@ -8,11 +8,13 @@ const App = () => {
   const element = useRoutes(routes)
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <main>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <main className="text-gray-900 dark:text-gray-100">
         <ErrorBoundary
           fallback={
-            <p className="p-4 text-red-600">Irgendwas ist schief gegangen - Versuch's noch mal!</p>
+            <p className="p-4 text-red-600 dark:text-red-400">
+              Irgendwas ist schief gegangen - Versuch's noch mal!
+            </p>
           }>
           {element}
         </ErrorBoundary>

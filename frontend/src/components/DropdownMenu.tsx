@@ -70,7 +70,7 @@ const DropdownMenu = ({
     <>
       <details ref={detailsRef} className="relative">
         <summary
-          className="flex cursor-pointer list-none items-center bg-white"
+          className="flex cursor-pointer list-none items-center bg-transparent"
           onClick={handleToggle}>
           <div onClick={(e) => e.preventDefault()}>{label}</div>
         </summary>
@@ -79,7 +79,7 @@ const DropdownMenu = ({
         createPortal(
           <ul
             ref={dropdownRef}
-            className="fixed z-[60] w-48 border border-gray-200 bg-white py-1 shadow"
+            className="fixed z-[60] w-48 border border-gray-200 bg-white py-1 shadow-lg dark:border-gray-700 dark:bg-gray-800"
             style={{
               top: `${dropdownPosition.top}px`,
               left: `${dropdownPosition.left}px`,

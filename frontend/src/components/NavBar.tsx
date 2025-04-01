@@ -41,8 +41,10 @@ const MenuItem = ({
   isActive,
   hasDropdown,
 }: MenuItemProps) => {
-  const baseClasses = 'block rounded px-3 py-2 text-xl hover:bg-gray-100'
-  const activeClasses = isActive ? 'font-bold text-blue-600' : 'text-gray-700'
+  const baseClasses = 'block rounded px-3 py-2 text-xl hover:bg-gray-100 dark:hover:bg-gray-700'
+  const activeClasses = isActive
+    ? 'font-bold text-blue-600 dark:text-blue-400'
+    : 'text-gray-700 dark:text-gray-300'
   const combinedClasses = `${baseClasses} ${activeClasses} ${className}`
 
   const content = (
@@ -51,7 +53,7 @@ const MenuItem = ({
         {children}
         {hasDropdown && (
           <svg
-            className="ml-1 h-5 w-5 text-gray-400"
+            className="ml-1 h-5 w-5 text-gray-400 dark:text-gray-500"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor">
@@ -171,7 +173,7 @@ const NavBar = () => {
 
   const renderUserMenuItem = (item: (typeof commonUserMenuItems)[0], onClose?: () => void) => {
     if (item.type === 'divider') {
-      return <hr key="divider" className="my-1 border-gray-200" />
+      return <hr key="divider" className="my-1 border-gray-200 dark:border-gray-700" />
     }
     if (item.type === 'logout') {
       return (
@@ -222,15 +224,20 @@ const NavBar = () => {
         <DropdownMenu
           key="user"
           label={
-            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-md bg-gray-100 hover:bg-gray-200">
+            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600">
               {exhibitor?.user?.profileImage ? (
                 <img
                   src={`/api/user/${exhibitor.user.id}/image/profile`}
                   alt="User Menu"
                   className="h-full w-full object-cover"
+                  style={{ imageRendering: 'auto' }}
                 />
               ) : (
-                <Icon name="user" alt="User Menu" />
+                <Icon
+                  name="user"
+                  alt="User Menu"
+                  className="h-6 w-6 text-gray-600 dark:text-gray-400"
+                />
               )}
             </div>
           }>
@@ -246,7 +253,7 @@ const NavBar = () => {
   const MobileMenuButton = () => (
     <button
       onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-      className="inline-flex items-center justify-center rounded-md p-2 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 md:hidden">
+      className="inline-flex items-center justify-center rounded-md p-2 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 md:hidden dark:text-gray-300 dark:hover:bg-gray-700">
       <span className="sr-only">Open main menu</span>
       {!isMobileMenuOpen ? (
         <svg className="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -272,7 +279,7 @@ const NavBar = () => {
 
   return (
     <>
-      <nav className="fixed left-0 right-0 top-0 z-50 w-screen bg-white shadow-md">
+      <nav className="fixed left-0 right-0 top-0 z-50 w-screen bg-white shadow-md dark:bg-gray-800">
         <div className="mx-auto w-full max-w-[100vw] overflow-x-hidden px-4">
           <div className="flex justify-between py-2">
             <div className="flex min-w-0 items-center">
@@ -286,7 +293,7 @@ const NavBar = () => {
               <li>
                 <Link
                   to="/bookmarks"
-                  className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100">
+                  className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
                   <Icon name={hasBookmarks ? 'bookmarked' : 'bookmark'} alt="Bookmarks" />
                 </Link>
               </li>
@@ -295,19 +302,19 @@ const NavBar = () => {
               </li>
             </ul>
           </div>
-          <div className="border-t border-gray-200 py-2">
+          <div className="border-t border-gray-200 py-2 dark:border-gray-700">
             <Breadcrumbs />
           </div>
         </div>
 
         {/* Mobile menu */}
         <div
-          className={`fixed inset-0 z-40 transform bg-white transition-transform duration-300 ease-in-out md:hidden ${
+          className={`fixed inset-0 z-40 transform bg-white transition-transform duration-300 ease-in-out md:hidden dark:bg-gray-800 ${
             isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
           }`}>
           <div className="flex h-full flex-col">
-            <div className="flex items-center justify-between border-b border-gray-200 px-4 py-4">
-              <h2 className="text-xl font-semibold">Menu</h2>
+            <div className="flex items-center justify-between border-b border-gray-200 px-4 py-4 dark:border-gray-700">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Menu</h2>
               <MobileMenuButton />
             </div>
             <div className="flex-1 overflow-y-auto px-4 py-4">
@@ -324,8 +331,10 @@ const NavBar = () => {
                 ))}
               </ul>
               {exhibitor ? (
-                <div className="mt-6 border-t border-gray-200 pt-4">
-                  <h3 className="mb-2 text-sm font-semibold text-gray-500">Benutzer</h3>
+                <div className="mt-6 border-t border-gray-200 pt-4 dark:border-gray-700">
+                  <h3 className="mb-2 text-sm font-semibold text-gray-500 dark:text-gray-400">
+                    Benutzer
+                  </h3>
                   <ul className="space-y-2">
                     {commonUserMenuItems.map((item) =>
                       renderUserMenuItem(item, () => setIsMobileMenuOpen(false)),
@@ -333,7 +342,7 @@ const NavBar = () => {
                   </ul>
                 </div>
               ) : (
-                <div className="mt-6 border-t border-gray-200 pt-4">
+                <div className="mt-6 border-t border-gray-200 pt-4 dark:border-gray-700">
                   <Button
                     onClick={() => {
                       handleLogin()
@@ -345,8 +354,10 @@ const NavBar = () => {
                 </div>
               )}
               {exhibitor?.user.isAdministrator && (
-                <div className="mt-6 border-t border-gray-200 pt-4">
-                  <h3 className="mb-2 text-sm font-semibold text-gray-500">Administration</h3>
+                <div className="mt-6 border-t border-gray-200 pt-4 dark:border-gray-700">
+                  <h3 className="mb-2 text-sm font-semibold text-gray-500 dark:text-gray-400">
+                    Administration
+                  </h3>
                   <ul className="space-y-2">
                     {commonAdminMenuItems.map((item) => (
                       <MenuItem

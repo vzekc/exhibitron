@@ -21,8 +21,10 @@ const ContactInfo = ({ contacts }: ContactInfoProps) => {
 
   return (
     <div>
-      <h3 className="mb-2 text-sm font-medium text-gray-900">Kontaktinformationen</h3>
-      <div className="space-y-1 text-sm text-gray-600">
+      <h3 className="mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+        Kontaktinformationen
+      </h3>
+      <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
         {email && (
           <div className="flex items-center gap-2">
             <span className="font-medium">Email:</span>
@@ -30,7 +32,7 @@ const ContactInfo = ({ contacts }: ContactInfoProps) => {
               rel="noopener noreferrer"
               target="_blank"
               href={`mailto:${email}`}
-              className="text-blue-600 hover:text-blue-800 hover:underline">
+              className="text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300">
               {email}
             </a>
           </div>
@@ -42,7 +44,7 @@ const ContactInfo = ({ contacts }: ContactInfoProps) => {
               rel="noopener noreferrer"
               target="_blank"
               href={`tel:${phone}`}
-              className="text-blue-600 hover:text-blue-800 hover:underline">
+              className="text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300">
               {phone}
             </a>
           </div>
@@ -54,7 +56,7 @@ const ContactInfo = ({ contacts }: ContactInfoProps) => {
               rel="noopener noreferrer"
               target="_blank"
               href={mastodonUrl(mastodon)}
-              className="text-blue-600 hover:text-blue-800 hover:underline">
+              className="text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300">
               {mastodon}
             </a>
           </div>
@@ -66,7 +68,7 @@ const ContactInfo = ({ contacts }: ContactInfoProps) => {
               rel="noopener noreferrer"
               target="_blank"
               href={website}
-              className="text-blue-600 hover:text-blue-800 hover:underline">
+              className="text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300">
               {website}
             </a>
           </div>
