@@ -156,6 +156,7 @@ const Table = () => {
       return <></>
     }
   }
+
   if (!exhibitor) {
     return (
       <article>
@@ -164,16 +165,26 @@ const Table = () => {
       </article>
     )
   }
+
   if (!onThisTableExhibits?.length && !onAnyTableExhibits?.length) {
-    return <ExhibitorCard exhibitor={exhibitor} />
+    return (
+      <article>
+        <ExhibitorCard exhibitor={exhibitor} />
+        <OtherExhibits
+          exhibits={otherExhibitorExhibits}
+          title={`Exponate von ${exhibitor.user.nickname}`}
+        />
+      </article>
+    )
   }
+
   if (onThisTableExhibits?.length) {
     return (
       <article>
         <OneOrMoreExhibits exhibits={onThisTableExhibits} />
         <OtherExhibits
           exhibits={otherExhibitorExhibits}
-          title={`Andere Exponate von ${exhibitor.user.fullName}`}
+          title={`Weitere Exponate von ${exhibitor.user.fullName}`}
         />
       </article>
     )

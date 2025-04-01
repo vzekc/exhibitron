@@ -1,18 +1,41 @@
 import { getBookmarks } from '@utils/bookmarks.ts'
+import { graphql } from 'gql.tada'
+import { useQuery } from '@apollo/client'
 import ChipContainer from '@components/ChipContainer.tsx'
 import ExhibitChip from '@components/ExhibitChip.tsx'
-import { FragmentOf } from 'gql.tada'
+import LoadInProgress from '@components/LoadInProgress'
 
-type ExhibitCardItem = FragmentOf<typeof ExhibitChip.fragment>
+const GET_CURRENT_EXHIBITION = graphql(
+  `
+    query GetCurrentExhibition {
+      getCurrentExhibition {
+        id
+        exhibits {
+          ...ExhibitCard
+        }
+      }
+    }
+  `,
+  [ExhibitChip.fragment],
+)
 
 const Bookmarks = () => {
-  const bookmarks = getBookmarks().exhibits as ExhibitCardItem[]
+  const { data } = useQuery(GET_CURRENT_EXHIBITION)
+  const bookmarks = getBookmarks()
+
+  if (!data?.getCurrentExhibition?.exhibits) {
+    return <LoadInProgress />
+  }
+
+  const exhibits = data.getCurrentExhibition.exhibits.filter((exhibit) =>
+    bookmarks.exhibits.some((bookmark) => bookmark.id === exhibit.id),
+  )
 
   return (
     <article>
-      {bookmarks.length ? (
+      {exhibits.length ? (
         <ChipContainer>
-          {bookmarks.map((exhibit, index: number) => (
+          {exhibits.map((exhibit, index: number) => (
             <ExhibitChip key={index} exhibit={exhibit} />
           ))}
         </ChipContainer>

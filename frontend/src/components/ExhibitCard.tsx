@@ -25,6 +25,9 @@ const GET_EXHIBIT = graphql(
         }
         mainImage
         exhibitor {
+          tables {
+            number
+          }
           ...ExhibitorChip
         }
       }
@@ -48,12 +51,23 @@ const ExhibitCard = ({ id }: { id: number }) => {
   const description = notEmpty(exhibit.description)
   const descriptionExtension = notEmpty(exhibit.descriptionExtension)
 
+  const tableNumbers = (
+    exhibit.table ? [exhibit.table.number] : exhibit.exhibitor.tables?.map((table) => table.number)
+  )?.sort()
+
   return (
     <section>
       <Card className="mb-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <PageHeading>{exhibit.title}</PageHeading>
-          <ExhibitorChip exhibitor={exhibit.exhibitor} />
+          <div className="flex flex-wrap items-center justify-between">
+            <ExhibitorChip exhibitor={exhibit.exhibitor} />
+            {tableNumbers?.map((tableNumber) => (
+              <div className="ml-4 mt-3">
+                <TableChip number={tableNumber} />
+              </div>
+            ))}
+          </div>
         </div>
       </Card>
       {(hasMainImage || hasAttributes) && (
@@ -91,11 +105,6 @@ const ExhibitCard = ({ id }: { id: number }) => {
           {description && <ServerHtmlContent html={description} />}
           {descriptionExtension && <ServerHtmlContent html={descriptionExtension} />}
         </Article>
-      )}
-      {exhibit.table && (
-        <div className="mt-3">
-          <TableChip number={exhibit.table.number} />
-        </div>
       )}
     </section>
   )

@@ -4,24 +4,22 @@ type Item = {
 
 type Bookmarks = {
   exhibits: Item[]
-  exhibitors: Item[]
 }
 
 export const getBookmarks = (): Bookmarks => {
   const bookmarksString = localStorage.getItem('bookmarks')
   if (bookmarksString) {
     const bookmarks = JSON.parse(bookmarksString)
-    if (bookmarks.exhibits && bookmarks.exhibitors) {
+    if (bookmarks.exhibits) {
       return bookmarks
     }
   }
   return {
     exhibits: [],
-    exhibitors: [],
   }
 }
 
-type BookmarkType = 'exhibits' | 'exhibitors'
+type BookmarkType = 'exhibits'
 
 export const addBookmark = (type: BookmarkType, item: Item) => {
   const bookmarks = getBookmarks()

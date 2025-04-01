@@ -29,7 +29,11 @@ const ProfileSection = ({
                 className="h-full w-full rounded-md object-cover"
               />
             ) : (
-              <Icon name="user" alt="User" className="h-12 w-12 text-gray-400 dark:text-gray-500" />
+              <Icon
+                name="user"
+                alt="User"
+                className="h-10 h-[60px] w-10 w-[60px] text-gray-400 opacity-15 dark:text-gray-500"
+              />
             )}
           </div>
         </div>
