@@ -20,6 +20,7 @@ import ImageUploader from '@components/ImageUploader.tsx'
 
 type Inputs = {
   fullName: string
+  nickname: string
   topic: string
   bio: string
   email: string
@@ -37,6 +38,7 @@ const GET_USER_PROFILE = graphql(`
       user {
         id
         fullName
+        nickname
         bio
         allowEmailContact
         contacts {
@@ -56,6 +58,7 @@ const UPDATE_USER_PROFILE = graphql(`
     updateUserProfile(input: $input) {
       id
       fullName
+      nickname
       bio
       allowEmailContact
       contacts {
@@ -101,10 +104,10 @@ const Profile = () => {
   }, [navigate])
 
   const updateProfile: SubmitHandler<Inputs> = async (inputs) => {
-    const { fullName, bio, topic, allowEmailContact, ...contacts } = inputs
+    const { fullName, nickname, bio, topic, allowEmailContact, ...contacts } = inputs
     await updateUserProfile({
       variables: {
-        input: { fullName, bio, contacts, allowEmailContact },
+        input: { fullName, nickname, bio, contacts, allowEmailContact },
         exhibitorId: exhibitor!.id,
         topic,
       },
@@ -120,6 +123,7 @@ const Profile = () => {
       const newUser = data.getCurrentExhibitor!.user
       reset({
         fullName: newUser?.fullName || '',
+        nickname: newUser?.nickname || '',
         topic: data.getCurrentExhibitor?.topic || '',
         bio: newUser?.bio || '',
         email: newUser?.contacts?.email || '',
@@ -181,10 +185,16 @@ const Profile = () => {
                 <FormSection>
                   <SectionLabel>Persönliche Informationen</SectionLabel>
                   <FormFieldGroup>
-                    <FormLabel>Angezeigter Name</FormLabel>
+                    <FormLabel>Nickname</FormLabel>
                     <Input
                       type="text"
-                      {...register('fullName', { required: true })}
+                      {...register('nickname', { required: true })}
+                      error={errors.nickname?.message}
+                    />
+                    <FormLabel>Name</FormLabel>
+                    <Input
+                      type="text"
+                      {...register('fullName', { required: false })}
                       error={errors.fullName?.message}
                     />
                     <FormLabel>Thema meiner Ausstellung</FormLabel>
