@@ -247,7 +247,7 @@ const TableInfoPanel: React.FC<TableInfoPanelProps> = ({
 
   return (
     <div
-      className="table-info-panel fixed z-50 max-w-[400px] overflow-hidden rounded-t-xl bg-green-100 shadow-lg md:relative md:rounded-lg"
+      className="table-info-panel fixed z-50 max-w-[400px] overflow-hidden rounded-t-xl bg-gray-100 shadow-lg md:relative md:rounded-lg"
       style={style}
       ref={measureRef}>
       <div className="overflow-y-auto p-4">
