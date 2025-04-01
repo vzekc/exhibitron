@@ -199,6 +199,7 @@ const ImageUploader = ({
                   <p className="font-medium text-white drop-shadow-md">Zum Ersetzen loslassen</p>
                 ) : (
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation()
                       handleDeleteImage()
@@ -256,7 +257,7 @@ const ImageUploader = ({
       <Confirm
         isOpen={showDeleteImageConfirm}
         title={title ? `${title} löschen` : 'Bild löschen'}
-        message={`Möchtest Du das ${title ? title.toLowerCase() : 'bild'} wirklich löschen?`}
+        message={`Möchtest Du das ${title ? title.toLowerCase() : 'Bild'} wirklich löschen?`}
         confirm="Löschen"
         cancel="Abbrechen"
         onConfirm={handleConfirmDeleteImage}

@@ -121,9 +121,11 @@ const DraggableAttributeItem = ({
   return (
     <div
       ref={ref}
-      className={`flex items-center space-x-4 rounded p-2 ${isDragging ? 'bg-gray-100' : 'bg-white'} mb-2 border border-gray-200`}>
+      className={`flex items-center space-x-4 rounded p-2 ${
+        isDragging ? 'bg-gray-100 dark:bg-gray-700' : 'bg-white dark:bg-gray-800'
+      } mb-2 border border-gray-200 dark:border-gray-600`}>
       {/* Drag handle */}
-      <div className="flex-shrink-0 cursor-move text-gray-400">
+      <div className="flex-shrink-0 cursor-move text-gray-400 dark:text-gray-500">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -141,7 +143,9 @@ const DraggableAttributeItem = ({
       </div>
 
       {/* Attribute name (displayed as label) */}
-      <div className="min-w-[180px] flex-shrink-0 font-medium">{attr.name}</div>
+      <div className="min-w-[180px] flex-shrink-0 font-medium text-gray-900 dark:text-gray-100">
+        {attr.name}
+      </div>
 
       {/* Value input */}
       <div className="flex-grow">
@@ -149,15 +153,20 @@ const DraggableAttributeItem = ({
           type="text"
           value={attr.value}
           onChange={(e) => handleAttributeValueChange(index, e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.currentTarget.blur()
+            }
+          }}
           placeholder="Wert"
-          className="w-full rounded border border-gray-300 p-2"
+          className="w-full rounded border border-gray-300 bg-white p-2 text-gray-900 placeholder-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
         />
       </div>
 
       {/* Remove button */}
       <button
         onClick={() => handleRemoveAttribute(index)}
-        className="flex-shrink-0 p-2 text-red-500 hover:text-red-700"
+        className="flex-shrink-0 p-2 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
         aria-label="Entfernen">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -262,9 +271,9 @@ const ExhibitAttributeEditor = ({ attributes, onChange }: ExhibitAttributeEditor
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="rounded-lg bg-white p-2">
+      <div className="rounded-lg bg-white p-2 dark:bg-gray-800">
         {attributes.length === 0 ? (
-          <p className="mb-4 italic text-gray-500">Keine Attribute vorhanden</p>
+          <p className="mb-4 italic text-gray-500 dark:text-gray-400">Keine Attribute vorhanden</p>
         ) : (
           <div className="mb-4">
             {attributes.map((attr, index) => (
@@ -281,7 +290,7 @@ const ExhibitAttributeEditor = ({ attributes, onChange }: ExhibitAttributeEditor
         )}
 
         {showAddAttributeInput ? (
-          <div className="mb-4 rounded border border-gray-200 p-3">
+          <div className="mb-4 rounded border border-gray-200 bg-white p-3 dark:border-gray-600 dark:bg-gray-800">
             <ExhibitAttributeSelector
               options={availableAttributes}
               onSelect={handleSelectAttribute}
@@ -290,7 +299,7 @@ const ExhibitAttributeEditor = ({ attributes, onChange }: ExhibitAttributeEditor
             <div className="mt-2 flex justify-end">
               <button
                 onClick={() => setShowAddAttributeInput(false)}
-                className="rounded bg-gray-300 px-3 py-1 text-sm text-gray-700 hover:bg-gray-400">
+                className="rounded bg-gray-300 px-3 py-1 text-sm text-gray-700 hover:bg-gray-400 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500">
                 Abbrechen
               </button>
             </div>

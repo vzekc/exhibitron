@@ -1,0 +1,12 @@
+---
+description: 
+globs: *.ts,*.tsx
+alwaysApply: false
+---
+# No error conversion
+
+I don't want try/catch error handling unless there is a specific reason (i.e. a library throws an error as part of the normal execution flow).  If a library can be configured so that it does not throw errors, but instead returns a special value for certain abnormal conditions, do so (i.e. axios and the status validation option)
+
+# Don't use semicolons
+
+Don't end statements with semicolons unless required by the Typescript parser.

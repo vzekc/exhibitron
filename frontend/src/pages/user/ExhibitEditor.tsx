@@ -360,7 +360,7 @@ const ExhibitEditor = () => {
                   <select
                     value={watch('table') || ''}
                     onChange={handleTableChange}
-                    className="mt-1 block w-full rounded-md border border-gray-300 bg-gray-50 p-2 shadow-sm focus:border-blue-500 focus:bg-white focus:ring-blue-500">
+                    className="mt-1 block w-full rounded-md border border-gray-300 bg-gray-50 p-2 text-gray-900 shadow-sm focus:border-blue-500 focus:bg-white focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:border-blue-400 dark:focus:bg-gray-700 dark:focus:ring-blue-400">
                     <option value="">Kein Tisch zugewiesen</option>
                     {tables.map((number) => (
                       <option key={number} value={number}>
@@ -434,6 +434,7 @@ const ExhibitEditor = () => {
             </Button>
             {!isNew && (
               <Button
+                type="button"
                 onClick={handlePdfClick}
                 disabled={isPdfGenerating || isDirty}
                 variant="secondary"
@@ -443,7 +444,7 @@ const ExhibitEditor = () => {
               </Button>
             )}
             {!isNew && (
-              <Button onClick={() => setShowDeleteConfirm(true)} variant="danger">
+              <Button type="button" onClick={() => setShowDeleteConfirm(true)} variant="danger">
                 Löschen
               </Button>
             )}

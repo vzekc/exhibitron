@@ -2,10 +2,10 @@ import { forwardRef } from 'react'
 
 // Common input styles used across forms
 const inputStyles =
-  'mt-1 block w-full rounded-md border border-gray-300 bg-gray-50 p-2 shadow-sm focus:border-blue-500 focus:bg-white focus:ring-blue-500'
+  'mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-2 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:bg-white dark:focus:bg-gray-700 focus:ring-blue-500 dark:focus:ring-blue-400'
 
 // Common section styles
-const sectionStyles = 'rounded-lg bg-white p-6 shadow-sm'
+const sectionStyles = 'rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm'
 
 interface FormSectionProps {
   children: React.ReactNode
@@ -32,7 +32,7 @@ interface FormLabelProps {
 
 export const FormLabel = ({ htmlFor, children }: FormLabelProps) => (
   <label htmlFor={htmlFor} className="block">
-    <span className="block text-sm font-medium text-gray-700">{children}</span>
+    <span className="block text-sm font-medium text-gray-700 dark:text-gray-300">{children}</span>
   </label>
 )
 
@@ -42,7 +42,9 @@ interface SectionLabelProps {
 }
 
 export const SectionLabel = ({ htmlFor, children }: SectionLabelProps) => (
-  <label htmlFor={htmlFor} className="mb-3 block text-2xl font-bold text-gray-800">
+  <label
+    htmlFor={htmlFor}
+    className="mb-3 block text-2xl font-bold text-gray-800 dark:text-gray-100">
     {children}
   </label>
 )
@@ -52,7 +54,7 @@ interface FormErrorProps {
 }
 
 export const FormError = ({ children }: FormErrorProps) => (
-  <p className="mt-1 text-sm text-red-600">{children}</p>
+  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{children}</p>
 )
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {

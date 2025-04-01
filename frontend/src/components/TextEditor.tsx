@@ -9,6 +9,7 @@ import {
 } from 'react'
 import deepEqual from 'fast-deep-equal'
 import 'quill/dist/quill.snow.css'
+import './TextEditor.css' // Add custom dark mode styles
 
 // No type declarations for quill exist
 const Font = Quill.import('formats/font')
@@ -147,7 +148,7 @@ const TextEditor = forwardRef<TextEditorHandle, TextEditorProps>(
     return (
       <div
         ref={containerRef}
-        className="overflow-hidden rounded-md border border-gray-300 bg-white shadow-sm">
+        className="overflow-hidden rounded-md border border-gray-300 bg-white shadow-sm dark:border-gray-600 dark:bg-gray-800">
         {/* Quill editor will be inserted here */}
       </div>
     )

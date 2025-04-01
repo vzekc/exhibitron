@@ -1,0 +1,73 @@
+/* Dark mode styles for Quill editor */
+:root[class~='dark'] .ql-toolbar.ql-snow {
+  border-color: rgb(75, 85, 99); /* gray-600 */
+  background-color: rgb(31, 41, 55); /* gray-800 */
+}
+
+:root[class~='dark'] .ql-container.ql-snow {
+  border-color: rgb(75, 85, 99); /* gray-600 */
+}
+
+:root[class~='dark'] .ql-editor {
+  color: rgb(243, 244, 246); /* gray-100 */
+  background-color: rgb(31, 41, 55); /* gray-800 */
+}
+
+:root[class~='dark'] .ql-toolbar.ql-snow .ql-picker {
+  color: rgb(243, 244, 246); /* gray-100 */
+}
+
+:root[class~='dark'] .ql-toolbar.ql-snow .ql-stroke {
+  stroke: rgb(243, 244, 246); /* gray-100 */
+}
+
+:root[class~='dark'] .ql-toolbar.ql-snow .ql-fill {
+  fill: rgb(243, 244, 246); /* gray-100 */
+}
+
+:root[class~='dark'] .ql-toolbar.ql-snow button:hover .ql-stroke,
+:root[class~='dark'] .ql-toolbar.ql-snow .ql-picker-label:hover .ql-stroke {
+  stroke: rgb(96, 165, 250); /* blue-400 */
+}
+
+:root[class~='dark'] .ql-toolbar.ql-snow button:hover .ql-fill,
+:root[class~='dark'] .ql-toolbar.ql-snow .ql-picker-label:hover .ql-fill {
+  fill: rgb(96, 165, 250); /* blue-400 */
+}
+
+:root[class~='dark'] .ql-toolbar.ql-snow .ql-picker-options {
+  background-color: rgb(31, 41, 55); /* gray-800 */
+  border-color: rgb(75, 85, 99); /* gray-600 */
+}
+
+:root[class~='dark'] .ql-snow .ql-tooltip {
+  background-color: rgb(31, 41, 55); /* gray-800 */
+  border-color: rgb(75, 85, 99); /* gray-600 */
+  color: rgb(243, 244, 246); /* gray-100 */
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+:root[class~='dark'] .ql-snow .ql-tooltip input[type='text'] {
+  background-color: rgb(55, 65, 81); /* gray-700 */
+  border-color: rgb(75, 85, 99); /* gray-600 */
+  color: rgb(243, 244, 246); /* gray-100 */
+}
+
+:root[class~='dark'] .ql-snow a {
+  color: rgb(96, 165, 250); /* blue-400 */
+}
+
+:root[class~='dark'] .ql-snow .ql-picker.ql-expanded .ql-picker-options {
+  border-color: rgb(75, 85, 99); /* gray-600 */
+}
+
+:root[class~='dark'] .ql-snow .ql-picker-label {
+  border-color: rgb(75, 85, 99); /* gray-600 */
+}
+
+/* Code block styling */
+:root[class~='dark'] .ql-snow .ql-editor pre.ql-syntax {
+  background-color: rgb(17, 24, 39); /* gray-900 */
+  color: rgb(243, 244, 246); /* gray-100 */
+  border: 1px solid rgb(75, 85, 99); /* gray-600 */
+}

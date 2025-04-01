@@ -101,23 +101,25 @@ export const ExhibitAttributeSelector = ({ options, onSelect, onCreateNew }: Com
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
         placeholder="Attribut auswählen oder neu erstellen"
-        className="w-full rounded border border-gray-300 p-2"
+        className="w-full rounded border border-gray-300 bg-white p-2 text-gray-900 placeholder-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
       />
 
       {showDropdown && !showConfirmation && (
-        <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded border border-gray-300 bg-white shadow-lg">
+        <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded border border-gray-300 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-700">
           {filteredOptions.length > 0 ? (
             filteredOptions.map((option) => (
               <div
                 key={option.id}
-                className="cursor-pointer p-2 hover:bg-gray-100"
+                className="cursor-pointer p-2 text-gray-900 hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-600"
                 onMouseDown={() => handleSelect(option.name)} // Use mousedown to fire before blur
               >
                 {option.name}
               </div>
             ))
           ) : (
-            <div className="p-2 italic text-gray-500">Keine passenden Attribute gefunden</div>
+            <div className="p-2 italic text-gray-500 dark:text-gray-400">
+              Keine passenden Attribute gefunden
+            </div>
           )}
         </div>
       )}
@@ -131,12 +133,16 @@ export const ExhibitAttributeSelector = ({ options, onSelect, onCreateNew }: Com
             }
           }}
           tabIndex={-1}>
-          <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-lg">
-            <h3 className="mb-3 text-lg font-semibold">Neues Attribut anlegen</h3>
-            <p className="mb-4">Willst Du das Attribut "{inputValue}" erstellen?</p>
+          <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-lg dark:bg-gray-800">
+            <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-100">
+              Neues Attribut anlegen
+            </h3>
+            <p className="mb-4 text-gray-700 dark:text-gray-300">
+              Willst Du das Attribut "{inputValue}" erstellen?
+            </p>
             <div className="flex justify-end space-x-2">
               <button
-                className="rounded bg-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-400"
+                className="rounded bg-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-400 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
                 onClick={handleCancelCreate}>
                 Abbrechen
               </button>
