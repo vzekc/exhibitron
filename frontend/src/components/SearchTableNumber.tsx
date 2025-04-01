@@ -6,7 +6,7 @@ import { Html5Qrcode } from 'html5-qrcode'
 const isMobileDevice = (): boolean => {
   // @ts-expect-error ts2339
   const userAgent = navigator.userAgent || navigator.vendor || window.opera
-  return /android|iPad|iPhone|iPod/.test(userAgent.toLowerCase())
+  return /android|ipad|iphone|ipod/.test(userAgent.toLowerCase())
 }
 
 const SearchTableNumber = () => {
