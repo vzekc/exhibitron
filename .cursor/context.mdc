@@ -1,0 +1,12 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Project rules
+
+in this project, always apply the following rules when making changes to the codebase or suggest them
+
+ - no try/catch unless unavoidable
+ - conform to prettier style rules from .prettierrc.json

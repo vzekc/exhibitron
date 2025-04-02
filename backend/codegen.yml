@@ -1,12 +1,12 @@
 overwrite: true
 schema:
-  - "src/modules/**/*.graphql"
-  - "src/schema.graphql"
+  - 'src/modules/**/*.graphql'
+  - 'src/schema.graphql'
 generates:
   src/generated/graphql.ts:
     plugins:
-      - "typescript"
-      - "typescript-resolvers"
+      - 'typescript'
+      - 'typescript-resolvers'
   src/generated/combined-schema.graphql:
     plugins:
-      - "schema-ast"
+      - 'schema-ast'
