@@ -250,6 +250,7 @@ export const registerServerSideHtmlRoutes = async (app: FastifyInstance): Promis
 
     // Skip browser detection for API requests and non-HTML requests
     if (!isHtmlRequest || isApiRequest) {
+      console.log('isHtmlRequest:', isHtmlRequest, ' isApiRequest:', isApiRequest)
       return
     }
 
