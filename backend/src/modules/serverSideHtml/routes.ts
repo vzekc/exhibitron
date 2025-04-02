@@ -241,30 +241,13 @@ const servePageHtml = async (reply: FastifyReply, htmlContent: string) => {
 export const registerServerSideHtmlRoutes = async (app: FastifyInstance): Promise<void> => {
   const db = await initORM()
 
-  // Add browser detection middleware
+  // Browser detection middleware for home page redirection
   app.addHook('onRequest', async (request, reply) => {
     const userAgent = request.headers['user-agent'] || ''
     const accept = request.headers.accept
-    const isHtmlRequest = accept?.includes('text/html')
-    const isApiRequest = request.url.startsWith('/api/') || request.url.startsWith('/auth/')
 
-    // Skip browser detection for API requests and non-HTML requests
-    if (!isHtmlRequest || isApiRequest) {
-      console.log('isHtmlRequest:', isHtmlRequest, ' isApiRequest:', isApiRequest)
-      return
-    }
-
-    // For HTML requests, check if the browser is modern enough
-    if (!isModernBrowser(userAgent, accept)) {
-      // For the root path, redirect to the server-side home page
-      if (request.url === '/') {
-        return reply.redirect('/home.html')
-      }
-      // For other paths, ensure they end with .html
-      if (!request.url.endsWith('.html')) {
-        const path = request.url.replace(/\/$/, '') // Remove trailing slash if present
-        return reply.redirect(`${path}.html`)
-      }
+    if (request.url === '/' && !isModernBrowser(userAgent, accept)) {
+      return reply.redirect('/home.html')
     }
   })
 
