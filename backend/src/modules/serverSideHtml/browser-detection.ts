@@ -8,32 +8,32 @@ export const isModernBrowser = (userAgent: string, accept: string | undefined): 
   // Check for common modern browser engines
   const modernEngines = [
     // Modern Chromium-based browsers
-    'Chrome/[6-9]\\d',
-    'Chrome/[1-9]\\d{2}',
+    /Chrome\/[6-9]\d/,
+    /Chrome\/[1-9]\d{2}/,
     // Modern Firefox
-    'Firefox/[6-9]\\d',
-    'Firefox/[1-9]\\d{2}',
+    /Firefox\/[6-9]\\d/,
+    /Firefox\/[1-9]\\d{2}/,
     // Modern Safari
-    'Version/1[1-9]',
-    'Version/[2-9]\\d',
+    /Version\/1[1-9]/,
+    /Version\/[2-9]\d/,
     // Modern Edge (Chromium-based)
-    'Edg/',
+    /Edg\//,
     // Modern Opera
-    'OPR/',
+    /OPR\//,
     // iOS/iPadOS
-    'iOS/1[3-9]',
-    'iOS/[2-9]\\d',
+    /iOS\/1[3-9]/,
+    /iOS\/[2-9]\d/,
   ]
 
   // Check if it's a known modern browser
-  const isKnownModern = modernEngines.some((pattern) => new RegExp(pattern).test(userAgent))
-  if (isKnownModern) {
-    console.log('Detected known modern browser engine')
+  const matchesModern = modernEngines.find((pattern) => pattern.test(userAgent))
+  if (matchesModern) {
+    console.log(`Detected known modern browser engine ${userAgent} ${matchesModern}`)
     return true
   }
 
   // Check Accept header for HTML support
-  const hasHtmlSupport = accept?.includes('text/html')
+  const hasHtmlSupport = !accept || !accept.includes('text/html')
   if (!hasHtmlSupport) {
     console.log('No HTML support detected in Accept header')
     return false
