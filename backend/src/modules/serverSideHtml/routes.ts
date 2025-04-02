@@ -21,13 +21,6 @@ const serverContentPageHtml = async ({ db, exhibition }: GeneratePageHtmlContext
   return page.content?.html || ''
 }
 
-const compareExhibitors = (a: Exhibitor, b: Exhibitor) => {
-  const nameA = a.user.fullName.toLowerCase()
-  const nameB = b.user.fullName.toLowerCase()
-
-  return nameA.localeCompare(nameB)
-}
-
 const makeExhibitorLink = (exhibitor: Exhibitor) =>
   `<a href="/exhibitor/${exhibitor.id}.html">${exhibitor.user.fullName}${exhibitor.user.nickname ? ' (' + exhibitor.user.nickname + ')' : ''}</a>`
 
@@ -83,6 +76,7 @@ const exhibitorsHtml = async ({ db, exhibition, request }: GeneratePageHtmlConte
       populate: ['user', 'exhibits'],
       limit: ITEMS_PER_PAGE,
       offset,
+      orderBy: { user: { fullName: 'asc' } },
     }),
     db.exhibitor.count({ exhibition }),
   ])
@@ -91,7 +85,6 @@ const exhibitorsHtml = async ({ db, exhibition, request }: GeneratePageHtmlConte
   const paginationControls = makePaginationControls(page, totalPages, '/exhibitors.html')
 
   const exhibitorsList = exhibitors
-    .sort(compareExhibitors)
     .map((exhibitor) => {
       return `<div>
       <h2>${makeExhibitorLink(exhibitor)}</h2>
@@ -120,6 +113,7 @@ const exhibitsHtml = async ({ db, exhibition, request }: GeneratePageHtmlContext
       populate: ['exhibitor', 'exhibitor.user', 'mainImage', 'mainImage.image'],
       limit: ITEMS_PER_PAGE,
       offset,
+      orderBy: { title: 'asc' },
     }),
     db.exhibit.count({ exhibition }),
   ])
@@ -128,7 +122,6 @@ const exhibitsHtml = async ({ db, exhibition, request }: GeneratePageHtmlContext
   const paginationControls = makePaginationControls(page, totalPages, '/exhibits.html')
 
   const exhibitsList = exhibits
-    .sort(compareExhibits)
     .map((exhibit) => {
       return `<div>
       <h2>${makeExhibitLink(exhibit)}</h2>
@@ -200,10 +193,12 @@ const exhibitorHtml = async ({ db, exhibition, request }: GeneratePageHtmlContex
     } else {
       return `<hr/>
         <form method="POST">
-          <label for="message">Direktkontakt (Kontaktinformation für Rückantwort nicht vergessen!):</label>
-          <br/>
-          <textarea id="message" name="message" rows="10" cols="50"></textarea>
-          <br/>
+          <p>
+            <label for="message">Direktkontakt (Kontaktinformation für Rückantwort nicht vergessen!):</label>
+          </p>
+          <p>
+            <textarea id="message" name="message" rows="10" cols="50"></textarea>
+          </p>
           <button type="submit">Absenden</button>
         </form>`
     }
