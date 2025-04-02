@@ -1,6 +1,7 @@
 export const isModernBrowser = (userAgent: string, accept: string | undefined): boolean => {
   // If no User-Agent is provided, assume it's a basic browser/crawler
   if (!userAgent) {
+    console.log('No User-Agent provided, assuming basic browser')
     return false
   }
 
@@ -27,12 +28,14 @@ export const isModernBrowser = (userAgent: string, accept: string | undefined): 
   // Check if it's a known modern browser
   const isKnownModern = modernEngines.some((pattern) => new RegExp(pattern).test(userAgent))
   if (isKnownModern) {
+    console.log('Detected known modern browser engine')
     return true
   }
 
   // Check Accept header for HTML support
   const hasHtmlSupport = accept?.includes('text/html')
   if (!hasHtmlSupport) {
+    console.log('No HTML support detected in Accept header')
     return false
   }
 
@@ -60,6 +63,7 @@ export const isModernBrowser = (userAgent: string, accept: string | undefined): 
   )
 
   if (isBasicBrowser) {
+    console.log('Detected basic browser')
     return false
   }
 
@@ -78,5 +82,6 @@ export const isModernBrowser = (userAgent: string, accept: string | undefined): 
     'Chromium',
   ].some((pattern) => new RegExp(pattern).test(userAgent))
 
+  console.log('Modern features detected:', hasModernFeatures)
   return hasModernFeatures
 }
