@@ -212,6 +212,7 @@ const exhibitorHtml = async ({ db, exhibition, request }: GeneratePageHtmlContex
   const { user, tables, exhibits } = exhibitor
   return `<div>
     <h2>${user.fullName}${user.nickname ? ' (' + user.nickname + ')' : ''}</h2>
+    ${exhibitor.topic ? '<p>' + exhibitor.topic + '</p>' : ''}
     ${user.profileImage ? `<img src="/api/user/${user.id}/image/profile" alt="${user.fullName}" />` : ''}
     ${user.bio ? '<p>' + user.bio + '</p>' : ''}
     ${tables.length ? '<p>Tische: ' + tables.map((table) => table.number).join(', ') + '</p>' : ''}
