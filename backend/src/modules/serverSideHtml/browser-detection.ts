@@ -33,9 +33,9 @@ export const isModernBrowser = (userAgent: string, accept: string | undefined): 
   }
 
   // Check Accept header for HTML support
-  const hasHtmlSupport = !accept || !accept.includes('text/html')
+  const hasHtmlSupport = !accept || accept.includes('text/html')
   if (!hasHtmlSupport) {
-    console.log('No HTML support detected in Accept header')
+    console.log(`No HTML support detected in Accept header "${accept || 'not set'}"`)
     return false
   }
 
