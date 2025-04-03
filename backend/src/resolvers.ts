@@ -7,6 +7,7 @@ import { tableResolvers } from './modules/table/resolvers.js'
 import { registrationResolvers } from './modules/registration/resolvers.js'
 import { pageResolvers } from './modules/page/resolvers.js'
 import { exhibitAttributeResolvers } from './modules/exhibitAttribute/resolvers.js'
+import { youtubeResolvers } from './modules/youtube/resolver.js'
 import { mergeResolvers } from '@graphql-tools/merge'
 import { Resolvers } from './generated/graphql.js'
 
@@ -20,6 +21,7 @@ const resolvers: Resolvers = mergeResolvers([
   registrationResolvers,
   pageResolvers,
   exhibitAttributeResolvers,
+  youtubeResolvers,
 ])
 
 export default resolvers
