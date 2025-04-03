@@ -48,14 +48,16 @@ export const exhibitorsHtml = async ({ db, exhibition, request }: GeneratePageHt
     </form>
   `
 
-  const exhibitorsList = exhibitors
-    .map((exhibitor) => {
-      return `<div>
-      <h2>${makeExhibitorLink(exhibitor)}</h2>
-      ${exhibitor.topic ? '<p>' + exhibitor.topic + '</p>' : ''}
-    </div>`
-    })
-    .join('')
+  const exhibitorsList = exhibitors.length
+    ? exhibitors
+        .map((exhibitor) => {
+          return `<div>
+                    <h2>${makeExhibitorLink(exhibitor)}</h2>
+                    ${exhibitor.topic ? '<p>' + exhibitor.topic + '</p>' : ''}
+                  </div>`
+        })
+        .join('')
+    : '<p>Keine Aussteller gefunden.</p>'
 
   return `${searchForm}${paginationControls}${exhibitorsList}${paginationControls}`
 }

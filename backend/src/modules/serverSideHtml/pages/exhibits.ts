@@ -40,23 +40,25 @@ export const exhibitsHtml = async ({ db, exhibition, request }: GeneratePageHtml
     </form>
   `
 
-  const exhibitsList = exhibits.map(async (exhibit) => {
-    let mainImageHtml = ''
-    if (exhibit.mainImage) {
-      const dimensions = await ensureTransformedImage(
-        db.em,
-        exhibit.mainImage.image.id,
-        'htmlThumbnail',
-      )
-      mainImageHtml = `<img src="/api/images/${exhibit.mainImage.image.slug}/htmlSmall" width="${dimensions.width}" height="${dimensions.height}" alt="${exhibit.title}" /><br/>`
-    }
-    return `<div>
-      <h2>${makeExhibitLink(exhibit)}</h2>
-      ${mainImageHtml}
-      <p>${makeExhibitorLink(exhibit.exhibitor)}</p>
-      <hr/>
-    </div>`
-  })
+  const exhibitsList = exhibits.length
+    ? exhibits.map(async (exhibit) => {
+        let mainImageHtml = ''
+        if (exhibit.mainImage) {
+          const dimensions = await ensureTransformedImage(
+            db.em,
+            exhibit.mainImage.image.id,
+            'htmlThumbnail',
+          )
+          mainImageHtml = `<img src="/api/images/${exhibit.mainImage.image.slug}/htmlSmall" width="${dimensions.width}" height="${dimensions.height}" alt="${exhibit.title}" /><br/>`
+        }
+        return `<div>
+                  <h2>${makeExhibitLink(exhibit)}</h2>
+                  ${mainImageHtml}
+                  <p>${makeExhibitorLink(exhibit.exhibitor)}</p>
+                  <hr/>
+                </div>`
+      })
+    : '<p>Keine Exponate gefunden.</p>'
   const exhibitsListHtml = (await Promise.all(exhibitsList)).join('')
 
   return `${searchForm}${paginationControls}${exhibitsListHtml}${paginationControls}`
