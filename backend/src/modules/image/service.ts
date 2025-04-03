@@ -19,9 +19,22 @@ export class ImageService {
     })
 
     // Handle format-specific transformations
+    let mimeType: string
     if (variantName.endsWith('Gif')) {
       // For GIF variants, always convert to GIF
       processedImage = processedImage.gif()
+      mimeType = 'image/gif'
+    } else if (variantName.endsWith('Html')) {
+      // For HTML variants, only use JPEG or GIF
+      if (metadata.format === 'gif' || metadata.format === 'png') {
+        // For lossless formats, convert to GIF
+        processedImage = processedImage.gif()
+        mimeType = 'image/gif'
+      } else {
+        // For lossy formats, convert to JPEG
+        processedImage = processedImage.jpeg({ quality: variant.quality ?? 90, progressive: true })
+        mimeType = 'image/jpeg'
+      }
     } else if (metadata.format === 'jpeg' || metadata.format === 'jpg') {
       // For JPEG source images, apply quality settings if specified
       const jpegOptions: sharp.JpegOptions = {
@@ -31,15 +44,19 @@ export class ImageService {
         jpegOptions.quality = variant.quality
       }
       processedImage = processedImage.jpeg(jpegOptions)
+      mimeType = 'image/jpeg'
     } else if (metadata.format === 'png') {
       // For PNG source images, maintain lossless format
       processedImage = processedImage.png()
+      mimeType = 'image/png'
     } else if (metadata.format === 'webp') {
       // For WebP source images, maintain format
       processedImage = processedImage.webp()
+      mimeType = 'image/webp'
     } else {
       // Default to JPEG for unknown formats
       processedImage = processedImage.jpeg({ quality: variant.quality ?? 90, progressive: true })
+      mimeType = 'image/jpeg'
     }
 
     const processedBuffer = await processedImage.toBuffer()
@@ -51,13 +68,7 @@ export class ImageService {
       height: dimensions.height!,
       variantName,
       originalImage: image,
-      mimeType: variantName.endsWith('Gif')
-        ? 'image/gif'
-        : metadata.format === 'png'
-          ? 'image/png'
-          : metadata.format === 'webp'
-            ? 'image/webp'
-            : 'image/jpeg',
+      mimeType,
     })
 
     return variantStorage
