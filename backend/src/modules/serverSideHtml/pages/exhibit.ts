@@ -4,7 +4,7 @@ import { ensureTransformedImage } from '../../image/transformation.js'
 export const exhibitHtml = async ({ db }: GeneratePageHtmlContext, id: number) => {
   const exhibit = await db.exhibit.findOneOrFail(
     { id },
-    { populate: ['exhibitor', 'exhibitor.user', 'mainImage', 'mainImage.image'] },
+    { populate: ['exhibitor', 'exhibitor.user', 'mainImage', 'mainImage.image', 'table'] },
   )
 
   const makeExhibitAttributesTable = () => {
@@ -39,7 +39,7 @@ export const exhibitHtml = async ({ db }: GeneratePageHtmlContext, id: number) =
   return `<div>
     <h2>${exhibit.title}</h2>
     <p>${makeExhibitorLink(exhibit.exhibitor)}</p>
-    ${exhibit.table?.number ? '<p>Tisch ' + exhibit.table.number + '</p>' : ''}
+    ${exhibit.table ? '<p>Tisch ' + exhibit.table.number + '</p>' : ''}
     ${mainImageHtml}
     ${(exhibit.attributes?.length && makeExhibitAttributesTable()) || ''}
     <p>${descriptionHtml}</p>

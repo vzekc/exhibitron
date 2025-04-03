@@ -5,7 +5,7 @@ import {
   makePaginationControls,
 } from '../utils.js'
 import { FilterQuery } from '@mikro-orm/core'
-import { Exhibitor } from '../../../modules/exhibitor/entity.js'
+import { Exhibitor } from '../../exhibitor/entity.js'
 
 export const exhibitorsHtml = async ({ db, exhibition, request }: GeneratePageHtmlContext) => {
   const page = parseInt((request.query as { page?: string }).page || '1')
@@ -25,7 +25,7 @@ export const exhibitorsHtml = async ({ db, exhibition, request }: GeneratePageHt
   const [exhibitors, total] = await Promise.all([
     db.exhibitor.findAll({
       where,
-      populate: ['user', 'exhibits'],
+      populate: ['user', 'exhibits', 'tables'],
       limit: ITEMS_PER_PAGE,
       offset,
       orderBy: { user: { fullName: 'asc' } },
@@ -52,7 +52,15 @@ export const exhibitorsHtml = async ({ db, exhibition, request }: GeneratePageHt
     ? exhibitors
         .map((exhibitor) => {
           return `<div>
-                    <h2>${makeExhibitorLink(exhibitor)}</h2>
+                    <h2>${makeExhibitorLink(exhibitor)}  ${
+                      exhibitor.tables.length
+                        ? 'Tisch(e): ' +
+                          exhibitor.tables
+                            .map((table) => table.number)
+                            .sort()
+                            .join(', ')
+                        : ''
+                    }</h2>
                     ${exhibitor.topic ? '<p>' + exhibitor.topic + '</p>' : ''}
                   </div>`
         })

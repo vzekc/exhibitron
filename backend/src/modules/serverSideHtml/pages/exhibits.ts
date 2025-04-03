@@ -22,7 +22,7 @@ export const exhibitsHtml = async ({ db, exhibition, request }: GeneratePageHtml
   const [exhibits, total] = await Promise.all([
     db.exhibit.findAll({
       where,
-      populate: ['exhibitor', 'exhibitor.user', 'mainImage', 'mainImage.image'],
+      populate: ['exhibitor', 'exhibitor.user', 'mainImage', 'mainImage.image', 'table'],
       limit: ITEMS_PER_PAGE,
       offset,
       orderBy: { title: 'asc' },
@@ -52,7 +52,7 @@ export const exhibitsHtml = async ({ db, exhibition, request }: GeneratePageHtml
           mainImageHtml = `<img src="/api/images/${exhibit.mainImage.image.slug}/htmlSmall" width="${dimensions.width}" height="${dimensions.height}" alt="${exhibit.title}" /><br/>`
         }
         return `<div>
-                  <h2>${makeExhibitLink(exhibit)}</h2>
+                  <h2>${makeExhibitLink(exhibit)} ${exhibit.table ? 'Tisch ' + exhibit.table.number : ''}</h2>
                   ${mainImageHtml}
                   <p>${makeExhibitorLink(exhibit.exhibitor)}</p>
                   <hr/>
