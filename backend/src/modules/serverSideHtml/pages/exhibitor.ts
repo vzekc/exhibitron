@@ -1,8 +1,8 @@
 import { GeneratePageHtmlContext, makeExhibitLink } from '../utils.js'
-import { ensureTransformedImage } from '../../../modules/image/transformation.js'
-import { sendEmail } from '../../../modules/common/sendEmail.js'
-import { makeVisitorContactEmail } from '../../../modules/registration/emails.jsx'
-import { Exhibit } from '../../../modules/exhibit/entity.js'
+import { ensureTransformedImage } from '../../image/transformation.js'
+import { sendEmail } from '../../common/sendEmail.js'
+import { makeVisitorContactEmail } from '../../registration/emails.js'
+import { Exhibit } from '../../exhibit/entity.js'
 
 const compareExhibits = (a: Exhibit, b: Exhibit) => {
   const nameA = a.title.toLowerCase()
@@ -13,8 +13,11 @@ const compareExhibits = (a: Exhibit, b: Exhibit) => {
 
 export const exhibitorHtml = async (
   { db, exhibition, request }: GeneratePageHtmlContext,
-  id: number,
+  id?: number,
 ) => {
+  if (!id) {
+    throw new Error('ID parameter is required for exhibitor page')
+  }
   const exhibitor = await db.exhibitor.findOneOrFail(
     { id },
     { populate: ['user', 'exhibits', 'tables', 'user.profileImage', 'user.profileImage.image'] },

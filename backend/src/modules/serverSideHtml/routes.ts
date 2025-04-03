@@ -1,4 +1,4 @@
-import { FastifyInstance, FastifyReply, RouteHandlerMethod } from 'fastify'
+import { FastifyInstance, FastifyReply, RouteHandlerMethod, HTTPMethods } from 'fastify'
 import { initORM } from '../../db.js'
 import iconv from 'iconv-lite'
 import { isModernBrowser } from './browser-detection.js'
@@ -9,6 +9,7 @@ import { exhibitorsHtml } from './pages/exhibitors.js'
 import { exhibitsHtml } from './pages/exhibits.js'
 import { exhibitHtml } from './pages/exhibit.js'
 import { exhibitorHtml } from './pages/exhibitor.js'
+import { GeneratePageHtmlContext } from './utils.js'
 
 const servePageHtml = async (reply: FastifyReply, htmlContent: string) => {
   // Convert UTF-8 to ISO-8859-1 using iconv-lite
@@ -18,6 +19,15 @@ const servePageHtml = async (reply: FastifyReply, htmlContent: string) => {
     .code(200)
     .header('Content-Type', 'text/html; charset=ISO-8859-1')
     .send(iso88591Content)
+}
+
+type RouteHandler = (context: GeneratePageHtmlContext, id?: number) => Promise<string>
+
+type RouteConfig = {
+  path: string
+  handler: RouteHandler
+  methods?: HTTPMethods[]
+  hasIdParam?: boolean
 }
 
 export const registerServerSideHtmlRoutes = async (app: FastifyInstance): Promise<void> => {
@@ -33,38 +43,43 @@ export const registerServerSideHtmlRoutes = async (app: FastifyInstance): Promis
     }
   })
 
-  app.get(`/home.html`, async (request, reply) => {
-    const exhibition = request.apolloContext.exhibition
-    return servePageHtml(reply, await homeHtml({ request, exhibition, db }))
-  })
+  const routes: RouteConfig[] = [
+    { path: '/home.html', handler: homeHtml },
+    { path: '/schedule.html', handler: scheduleHtml },
+    { path: '/exhibitors.html', handler: exhibitorsHtml },
+    { path: '/exhibits.html', handler: exhibitsHtml },
+    { path: '/exhibit/:id.html', handler: exhibitHtml, hasIdParam: true },
+    {
+      path: '/exhibitor/:id.html',
+      handler: exhibitorHtml,
+      hasIdParam: true,
+      methods: ['GET', 'POST'],
+    },
+  ]
 
-  app.get(`/schedule.html`, async (request, reply) => {
-    const exhibition = request.apolloContext.exhibition
-    return servePageHtml(reply, await scheduleHtml({ request, exhibition, db }))
-  })
+  for (const route of routes) {
+    const handler: RouteHandlerMethod = async (request, reply) => {
+      const exhibition = request.apolloContext.exhibition
+      const context = { request, exhibition, db }
 
-  app.get('/exhibitors.html', async (request, reply) => {
-    const exhibition = request.apolloContext.exhibition
-    return servePageHtml(reply, await exhibitorsHtml({ request, exhibition, db }))
-  })
+      if (route.hasIdParam) {
+        const id = (request.params as { id: string }).id
+        const parsedId = parseInt(id, 10)
+        if (isNaN(parsedId)) {
+          return reply.code(400).send('Invalid ID parameter')
+        }
+        return servePageHtml(reply, await route.handler(context, parsedId))
+      }
 
-  app.get('/exhibits.html', async (request, reply) => {
-    const exhibition = request.apolloContext.exhibition
-    return servePageHtml(reply, await exhibitsHtml({ request, exhibition, db }))
-  })
+      return servePageHtml(reply, await route.handler(context))
+    }
 
-  app.get('/exhibit/:id.html', async (request, reply) => {
-    const exhibition = request.apolloContext.exhibition
-    const { id } = request.params as { id: number }
-    return servePageHtml(reply, await exhibitHtml({ request, exhibition, db }, id))
-  })
-
-  const exhibitorHandler: RouteHandlerMethod = async (request, reply) => {
-    const exhibition = request.apolloContext.exhibition
-    const { id } = request.params as { id: number }
-    return servePageHtml(reply, await exhibitorHtml({ request, exhibition, db }, id))
+    for (const method of route.methods || ['GET']) {
+      app.route({
+        method,
+        url: route.path,
+        handler,
+      })
+    }
   }
-
-  app.get('/exhibitor/:id.html', exhibitorHandler)
-  app.post('/exhibitor/:id.html', exhibitorHandler)
 }
