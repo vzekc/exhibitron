@@ -8,11 +8,36 @@ type ContactInfoProps = {
   }
 }
 
-const mastodonUrl = (mastodon: string) => {
+const mastodonUrl = (mastodon: string | null | undefined) => {
+  if (!mastodon) return ''
   const [, username, instance] = mastodon.match(/@([^@]+)@(.*)/) || []
   if (username && instance) {
     return `https://${instance}/@${username}`
   }
+  return mastodon // Fallback to original URL if parsing fails
+}
+
+type ContactLinkProps = {
+  label: string
+  href: string
+  children: React.ReactNode
+  value?: string | null
+}
+
+const ContactLink = ({ label, href, children, value }: ContactLinkProps) => {
+  if (!value) return null
+  return (
+    <div className="flex items-center gap-2">
+      <span className="font-medium">{label}:</span>
+      <a
+        rel="noopener noreferrer"
+        target="_blank"
+        href={href}
+        className="text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300">
+        {children}
+      </a>
+    </div>
+  )
 }
 
 const ContactInfo = ({ contacts }: ContactInfoProps) => {
@@ -26,66 +51,21 @@ const ContactInfo = ({ contacts }: ContactInfoProps) => {
         Kontaktinformationen
       </h3>
       <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
-        {email && (
-          <div className="flex items-center gap-2">
-            <span className="font-medium">Email:</span>
-            <a
-              rel="noopener noreferrer"
-              target="_blank"
-              href={`mailto:${email}`}
-              className="text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300">
-              {email}
-            </a>
-          </div>
-        )}
-        {phone && (
-          <div className="flex items-center gap-2">
-            <span className="font-medium">Telefon:</span>
-            <a
-              rel="noopener noreferrer"
-              target="_blank"
-              href={`tel:${phone}`}
-              className="text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300">
-              {phone}
-            </a>
-          </div>
-        )}
-        {mastodon && (
-          <div className="flex items-center gap-2">
-            <span className="font-medium">Mastodon:</span>
-            <a
-              rel="noopener noreferrer"
-              target="_blank"
-              href={mastodonUrl(mastodon)}
-              className="text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300">
-              {mastodon}
-            </a>
-          </div>
-        )}
-        {website && (
-          <div className="flex items-center gap-2">
-            <span className="font-medium">Website:</span>
-            <a
-              rel="noopener noreferrer"
-              target="_blank"
-              href={website}
-              className="text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300">
-              {website}
-            </a>
-          </div>
-        )}
-        {youtube && (
-          <div className="flex items-center gap-2">
-            <span className="font-medium">YouTube:</span>
-            <a
-              rel="noopener noreferrer"
-              target="_blank"
-              href={youtube}
-              className="text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400 dark:hover:text-blue-300">
-              {youtube.replace(/.*\//, '')}
-            </a>
-          </div>
-        )}
+        <ContactLink label="Email" href={`mailto:${email}`} value={email}>
+          {email}
+        </ContactLink>
+        <ContactLink label="Telefon" href={`tel:${phone}`} value={phone}>
+          {phone}
+        </ContactLink>
+        <ContactLink label="Mastodon" href={mastodonUrl(mastodon)} value={mastodon}>
+          {mastodon}
+        </ContactLink>
+        <ContactLink label="Website" href={`${website}`} value={website}>
+          {website}
+        </ContactLink>
+        <ContactLink label="YouTube" href={`${youtube}`} value={youtube}>
+          {youtube?.replace(/.*\//, '')}
+        </ContactLink>
       </div>
     </div>
   )
