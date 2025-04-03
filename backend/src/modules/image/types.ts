@@ -14,8 +14,8 @@ export const IMAGE_VARIANTS = {
     maxHeight: 300,
   },
   htmlThumbnail: {
-    maxWidth: 150,
-    maxHeight: 150,
+    maxWidth: 75,
+    maxHeight: 75,
     quality: 85,
   },
   htmlSmall: {

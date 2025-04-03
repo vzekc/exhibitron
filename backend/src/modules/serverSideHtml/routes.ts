@@ -8,6 +8,8 @@ import { Exhibit } from '../exhibit/entity.js'
 import { sendEmail } from '../common/sendEmail.js'
 import { makeVisitorContactEmail } from '../registration/emails.js'
 import { isModernBrowser } from './browser-detection.js'
+import { ensureTransformedImage } from '../image/transformation.js'
+import { ImageVariantName } from '../image/types.js'
 
 type GeneratePageHtmlContext = {
   db: Services
@@ -121,18 +123,44 @@ const exhibitsHtml = async ({ db, exhibition, request }: GeneratePageHtmlContext
   const totalPages = Math.ceil(total / ITEMS_PER_PAGE)
   const paginationControls = makePaginationControls(page, totalPages, '/exhibits.html')
 
-  const exhibitsList = exhibits
-    .map((exhibit) => {
-      return `<div>
+  const exhibitsList = exhibits.map(async (exhibit) => {
+    let mainImageHtml = ''
+    if (exhibit.mainImage) {
+      const dimensions = await ensureTransformedImage(
+        db.em,
+        exhibit.mainImage.image.id,
+        'htmlThumbnail',
+      )
+      mainImageHtml = `<img src="/api/images/${exhibit.mainImage.image.slug}/htmlSmall" width="${dimensions.width}" height="${dimensions.height}" alt="${exhibit.title}" /><br/>`
+    }
+    return `<div>
       <h2>${makeExhibitLink(exhibit)}</h2>
-      ${exhibit.mainImage ? `<img src="/api/images/${exhibit.mainImage.image.slug}/htmlThumbnail" alt="${exhibit.title}" /><br/>` : ''}
+      ${mainImageHtml}
       <p>${makeExhibitorLink(exhibit.exhibitor)}</p>
       <hr/>
     </div>`
-    })
-    .join('')
+  })
+  const exhibitsListHtml = (await Promise.all(exhibitsList)).join('')
 
-  return `${paginationControls}${exhibitsList}${paginationControls}`
+  return `${paginationControls}${exhibitsListHtml}${paginationControls}`
+}
+
+const transformImageUrls = async (html: string, db: Services, variantName: ImageVariantName) => {
+  const imageRegex = /<img src="\/api\/images\/([^"]+)"([^>]*)>/g
+  let transformedHtml = html
+  let match
+
+  while ((match = imageRegex.exec(html)) !== null) {
+    const [fullMatch, imageSlug, existingAttributes] = match
+    const image = await db.image.findOneOrFail({ slug: imageSlug })
+    const dimensions = await ensureTransformedImage(db.em, image.id, variantName)
+
+    const newAttributes = existingAttributes.replace(/(width|height)="[^"]*"/g, '')
+    const newImgTag = `<img src="/api/images/${imageSlug}/${variantName}" width="${dimensions.width}" height="${dimensions.height}"${newAttributes}>`
+    transformedHtml = transformedHtml.replace(fullMatch, newImgTag)
+  }
+
+  return transformedHtml
 }
 
 const exhibitHtml = async ({ db }: GeneratePageHtmlContext, id: number) => {
@@ -156,27 +184,34 @@ const exhibitHtml = async ({ db }: GeneratePageHtmlContext, id: number) => {
     </table>`
   }
 
-  const transformImageUrls = (html: string) => {
-    return html.replace(/<img src="\/api\/images\/([^"]+)"/g, '<img src="/api/images/$1/htmlLarge"')
+  let descriptionHtml = ''
+  if (exhibit.description?.html) {
+    descriptionHtml = await transformImageUrls(exhibit.description.html, db, 'htmlLarge')
+  }
+  if (exhibit.descriptionExtension?.html) {
+    descriptionHtml += await transformImageUrls(exhibit.descriptionExtension.html, db, 'htmlLarge')
+  }
+
+  let mainImageHtml = ''
+  if (exhibit.mainImage) {
+    const dimensions = await ensureTransformedImage(db.em, exhibit.mainImage.image.id, 'htmlSmall')
+    mainImageHtml = `<img src="/api/images/${exhibit.mainImage.image.slug}/htmlSmall" width="${dimensions.width}" height="${dimensions.height}" alt="${exhibit.title}" />`
   }
 
   return `<div>
     <h2>${exhibit.title}</h2>
     <p>${makeExhibitorLink(exhibit.exhibitor)}</p>
     ${exhibit.table?.number ? '<p>Tisch ' + exhibit.table.number + '</p>' : ''}
-    ${exhibit.mainImage ? `<img src="/api/images/${exhibit.mainImage.image.slug}/htmlSmall" alt="${exhibit.title}" />` : ''}
+    ${mainImageHtml}
     ${(exhibit.attributes?.length && makeExhibitAttributesTable()) || ''}
-    <p>
-      ${exhibit.description?.html ? transformImageUrls(exhibit.description.html) : ''}
-      ${exhibit.descriptionExtension?.html ? transformImageUrls(exhibit.descriptionExtension.html) : ''}
-    </p>
+    <p>${descriptionHtml}</p>
   </div>`
 }
 
 const exhibitorHtml = async ({ db, exhibition, request }: GeneratePageHtmlContext, id: number) => {
   const exhibitor = await db.exhibitor.findOneOrFail(
     { id },
-    { populate: ['user', 'exhibits', 'tables'] },
+    { populate: ['user', 'exhibits', 'tables', 'user.profileImage', 'user.profileImage.image'] },
   )
 
   const makeEmailContactElements = async () => {
@@ -205,10 +240,15 @@ const exhibitorHtml = async ({ db, exhibition, request }: GeneratePageHtmlContex
   }
 
   const { user, tables, exhibits } = exhibitor
+  let profileImageHtml = ''
+  if (user.profileImage) {
+    const dimensions = await ensureTransformedImage(db.em, user.profileImage.image.id, 'htmlSmall')
+    profileImageHtml = `<img src="/api/images/${user.profileImage.image.slug}/htmlSmall" width="${dimensions.width}" height="${dimensions.height}" alt="${user.fullName}" />`
+  }
   return `<div>
     <h2>${user.fullName}${user.nickname ? ' (' + user.nickname + ')' : ''}</h2>
     ${exhibitor.topic ? '<p>' + exhibitor.topic + '</p>' : ''}
-    ${user.profileImage ? `<img src="/api/user/${user.id}/image/profile" alt="${user.fullName}" />` : ''}
+    ${profileImageHtml}
     ${user.bio ? '<p>' + user.bio + '</p>' : ''}
     ${tables.length ? '<p>Tische: ' + tables.map((table) => table.number).join(', ') + '</p>' : ''}
     ${exhibits.length ? '<p>Exponate:<p><ul><li>' + [...exhibits].sort(compareExhibits).map(makeExhibitLink).join('</li><li>') + '</li></ul>' : ''}

@@ -8,6 +8,7 @@ export class ImageService {
 
   async generateVariant(image: ImageStorage, variantName: ImageVariantName): Promise<ImageVariant> {
     const variant = IMAGE_VARIANTS[variantName]
+    await this.em.populate(image, ['data'])
     const sharpInstance = sharp(image.data)
 
     // Basic resize operation
