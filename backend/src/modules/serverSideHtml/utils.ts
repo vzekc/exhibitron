@@ -10,6 +10,7 @@ export type GeneratePageHtmlContext = {
   db: Services
   exhibition: Exhibition
   request: FastifyRequest
+  gifSuffix: string
 }
 
 export const ITEMS_PER_PAGE = 10
@@ -67,6 +68,7 @@ export const transformImageUrls = async (
   html: string,
   db: Services,
   variantName: ImageVariantName,
+  gifSuffix: string,
 ) => {
   const imageRegex = /<img src="\/api\/images\/([^"]+)"([^>]*)>/g
   let transformedHtml = html
@@ -75,10 +77,10 @@ export const transformImageUrls = async (
   while ((match = imageRegex.exec(html)) !== null) {
     const [fullMatch, imageSlug, existingAttributes] = match
     const image = await db.image.findOneOrFail({ slug: imageSlug })
-    const dimensions = await ensureTransformedImage(db.em, image.id, variantName)
+    const dimensions = await ensureTransformedImage(db.em, image.id, `${variantName}${gifSuffix}`)
 
     const newAttributes = existingAttributes.replace(/(width|height)="[^"]*"/g, '')
-    const newImgTag = `<img src="/api/images/${imageSlug}/${variantName}" width="${dimensions.width}" height="${dimensions.height}"${newAttributes}>`
+    const newImgTag = `<img src="/api/images/${imageSlug}/${variantName}${gifSuffix}" width="${dimensions.width}" height="${dimensions.height}"${newAttributes}>`
     transformedHtml = transformedHtml.replace(fullMatch, newImgTag)
   }
 

@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyReply, RouteHandlerMethod, HTTPMethods } from 'fastify'
 import { initORM } from '../../db.js'
 import iconv from 'iconv-lite'
-import { isModernBrowser } from './browser-detection.js'
+import { isModernBrowser, isLegacyBrowser } from './browser-detection.js'
 import { makeMenuHtml } from './utils.js'
 import { homeHtml } from './pages/home.js'
 import { scheduleHtml } from './pages/schedule.js'
@@ -78,7 +78,9 @@ export const registerServerSideHtmlRoutes = async (app: FastifyInstance): Promis
   for (const route of routes) {
     const handler: RouteHandlerMethod = async (request, reply) => {
       const exhibition = request.apolloContext.exhibition
-      const context = { request, exhibition, db }
+      const userAgent = request.headers['user-agent'] || ''
+      const gifSuffix = isLegacyBrowser(userAgent) ? 'Gif' : ''
+      const context = { request, exhibition, db, gifSuffix }
 
       if (route.hasIdParam) {
         const id = (request.params as { id: string }).id

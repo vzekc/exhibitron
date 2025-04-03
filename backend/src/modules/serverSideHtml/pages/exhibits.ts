@@ -9,7 +9,12 @@ import { ensureTransformedImage } from '../../image/transformation.js'
 import { FilterQuery } from '@mikro-orm/core'
 import { Exhibit } from '../../../modules/exhibit/entity.js'
 
-export const exhibitsHtml = async ({ db, exhibition, request }: GeneratePageHtmlContext) => {
+export const exhibitsHtml = async ({
+  db,
+  exhibition,
+  request,
+  gifSuffix,
+}: GeneratePageHtmlContext) => {
   const page = parseInt((request.query as { page?: string }).page || '1')
   const searchTerm = (request.query as { q?: string }).q || ''
   const offset = (page - 1) * ITEMS_PER_PAGE
@@ -47,9 +52,9 @@ export const exhibitsHtml = async ({ db, exhibition, request }: GeneratePageHtml
           const dimensions = await ensureTransformedImage(
             db.em,
             exhibit.mainImage.image.id,
-            'htmlThumbnail',
+            `htmlThumbnail${gifSuffix}`,
           )
-          mainImageHtml = `<img src="/api/images/${exhibit.mainImage.image.slug}/htmlSmall" width="${dimensions.width}" height="${dimensions.height}" alt="${exhibit.title}" /><br/>`
+          mainImageHtml = `<img src="/api/images/${exhibit.mainImage.image.slug}/htmlSmall${gifSuffix}" width="${dimensions.width}" height="${dimensions.height}" alt="${exhibit.title}" /><br/>`
         }
         return `<div>
                   <h2>${makeExhibitLink(exhibit)} ${exhibit.table ? 'Tisch ' + exhibit.table.number : ''}</h2>

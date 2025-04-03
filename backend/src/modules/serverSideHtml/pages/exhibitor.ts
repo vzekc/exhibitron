@@ -12,7 +12,7 @@ const compareExhibits = (a: Exhibit, b: Exhibit) => {
 }
 
 export const exhibitorHtml = async (
-  { db, exhibition, request }: GeneratePageHtmlContext,
+  { db, exhibition, request, gifSuffix }: GeneratePageHtmlContext,
   id: number,
 ) => {
   const exhibitor = await db.exhibitor.findOneOrFail(
@@ -48,8 +48,12 @@ export const exhibitorHtml = async (
   const { user, tables, exhibits } = exhibitor
   let profileImageHtml = ''
   if (user.profileImage) {
-    const dimensions = await ensureTransformedImage(db.em, user.profileImage.image.id, 'htmlSmall')
-    profileImageHtml = `<img src="/api/images/${user.profileImage.image.slug}/htmlSmall" width="${dimensions.width}" height="${dimensions.height}" alt="${user.fullName}" />`
+    const dimensions = await ensureTransformedImage(
+      db.em,
+      user.profileImage.image.id,
+      `htmlSmall${gifSuffix}`,
+    )
+    profileImageHtml = `<img src="/api/images/${user.profileImage.image.slug}/htmlSmall${gifSuffix}" width="${dimensions.width}" height="${dimensions.height}" alt="${user.fullName}" />`
   }
   return `<div>
     <h2>${user.fullName}${user.nickname ? ' (' + user.nickname + ')' : ''}</h2>

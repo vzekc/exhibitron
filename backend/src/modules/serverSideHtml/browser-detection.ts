@@ -85,3 +85,9 @@ export const isModernBrowser = (userAgent: string, accept: string | undefined): 
   console.log('Modern features detected:', hasModernFeatures)
   return hasModernFeatures
 }
+
+export const isLegacyBrowser = (userAgent: string): boolean => {
+  const legacyBrowserPattern =
+    /^(NCSA_Mosaic|Cello|MacWeb|SlipKnot|IBM-WebExplorer|ViolaWWW|Arena)[/\s]/
+  return legacyBrowserPattern.test(userAgent)
+}
