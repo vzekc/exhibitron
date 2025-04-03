@@ -24,12 +24,14 @@ export const makePaginationControls = (
   currentPage: number,
   totalPages: number,
   baseUrl: string,
+  searchTerm?: string,
 ) => {
   if (totalPages <= 1) return ''
 
   const makePageLink = (page: number, text: string) => {
     if (page === currentPage) return `<strong>${text}</strong>`
-    return `<a href="${baseUrl}?page=${page}">${text}</a>`
+    const searchParam = searchTerm ? `&q=${encodeURIComponent(searchTerm)}` : ''
+    return `<a href="${baseUrl}?page=${page}${searchParam}">${text}</a>`
   }
 
   const controls = []
