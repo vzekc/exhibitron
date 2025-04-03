@@ -21,14 +21,32 @@ const servePageHtml = async (reply: FastifyReply, htmlContent: string) => {
     .send(iso88591Content)
 }
 
-type RouteHandler = (context: GeneratePageHtmlContext, id?: number) => Promise<string>
+type RouteHandlerWithoutId = (context: GeneratePageHtmlContext) => Promise<string>
+type RouteHandlerWithId = (context: GeneratePageHtmlContext, id: number) => Promise<string>
 
-type RouteConfig = {
+type RouteConfigWithoutId = {
   path: string
-  handler: RouteHandler
+  handler: RouteHandlerWithoutId
   methods?: HTTPMethods[]
-  hasIdParam?: boolean
+  hasIdParam?: false
 }
+
+type RouteConfigWithId = {
+  path: string
+  handler: RouteHandlerWithId
+  methods?: HTTPMethods[]
+  hasIdParam: true
+}
+
+type RouteConfig = RouteConfigWithoutId | RouteConfigWithId
+
+const createRoute = <T extends RouteConfig>(
+  config: T,
+): T & { methods: HTTPMethods[]; hasIdParam: boolean } => ({
+  methods: ['GET'],
+  hasIdParam: false,
+  ...config,
+})
 
 export const registerServerSideHtmlRoutes = async (app: FastifyInstance): Promise<void> => {
   const db = await initORM()
@@ -43,19 +61,19 @@ export const registerServerSideHtmlRoutes = async (app: FastifyInstance): Promis
     }
   })
 
-  const routes: RouteConfig[] = [
-    { path: '/home.html', handler: homeHtml },
-    { path: '/schedule.html', handler: scheduleHtml },
-    { path: '/exhibitors.html', handler: exhibitorsHtml },
-    { path: '/exhibits.html', handler: exhibitsHtml },
-    { path: '/exhibit/:id.html', handler: exhibitHtml, hasIdParam: true },
-    {
+  const routes = [
+    createRoute({ path: '/home.html', handler: homeHtml }),
+    createRoute({ path: '/schedule.html', handler: scheduleHtml }),
+    createRoute({ path: '/exhibitors.html', handler: exhibitorsHtml }),
+    createRoute({ path: '/exhibits.html', handler: exhibitsHtml }),
+    createRoute({ path: '/exhibit/:id.html', handler: exhibitHtml, hasIdParam: true }),
+    createRoute({
       path: '/exhibitor/:id.html',
       handler: exhibitorHtml,
       hasIdParam: true,
       methods: ['GET', 'POST'],
-    },
-  ]
+    }),
+  ] as const
 
   for (const route of routes) {
     const handler: RouteHandlerMethod = async (request, reply) => {
@@ -69,12 +87,12 @@ export const registerServerSideHtmlRoutes = async (app: FastifyInstance): Promis
           return reply.code(400).send('Invalid ID parameter')
         }
         return servePageHtml(reply, await route.handler(context, parsedId))
+      } else {
+        return servePageHtml(reply, await route.handler(context))
       }
-
-      return servePageHtml(reply, await route.handler(context))
     }
 
-    for (const method of route.methods || ['GET']) {
+    for (const method of route.methods) {
       app.route({
         method,
         url: route.path,

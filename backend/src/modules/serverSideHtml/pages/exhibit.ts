@@ -1,10 +1,7 @@
 import { GeneratePageHtmlContext, makeExhibitorLink, transformImageUrls } from '../utils.js'
 import { ensureTransformedImage } from '../../image/transformation.js'
 
-export const exhibitHtml = async ({ db }: GeneratePageHtmlContext, id?: number) => {
-  if (!id) {
-    throw new Error('ID parameter is required for exhibit page')
-  }
+export const exhibitHtml = async ({ db }: GeneratePageHtmlContext, id: number) => {
   const exhibit = await db.exhibit.findOneOrFail(
     { id },
     { populate: ['exhibitor', 'exhibitor.user', 'mainImage', 'mainImage.image'] },

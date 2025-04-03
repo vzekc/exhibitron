@@ -13,11 +13,8 @@ const compareExhibits = (a: Exhibit, b: Exhibit) => {
 
 export const exhibitorHtml = async (
   { db, exhibition, request }: GeneratePageHtmlContext,
-  id?: number,
+  id: number,
 ) => {
-  if (!id) {
-    throw new Error('ID parameter is required for exhibitor page')
-  }
   const exhibitor = await db.exhibitor.findOneOrFail(
     { id },
     { populate: ['user', 'exhibits', 'tables', 'user.profileImage', 'user.profileImage.image'] },
