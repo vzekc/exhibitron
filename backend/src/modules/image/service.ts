@@ -10,6 +10,7 @@ export class ImageService {
     const variant = IMAGE_VARIANTS[variantName]
     await this.em.populate(image, ['data'])
     const sharpInstance = sharp(image.data)
+    const metadata = await sharpInstance.metadata()
 
     // Basic resize operation
     let processedImage = sharpInstance.resize(variant.maxWidth, variant.maxHeight, {
@@ -17,20 +18,28 @@ export class ImageService {
       fit: 'inside',
     })
 
-    // Only apply quality settings for HTML variants
-    if ('quality' in variant) {
-      processedImage = processedImage.flatten({ background: { r: 255, g: 255, b: 255 } }).jpeg({
-        quality: variant.quality,
+    // Handle format-specific transformations
+    if (variantName.endsWith('Gif')) {
+      // For GIF variants, always convert to GIF
+      processedImage = processedImage.gif()
+    } else if (metadata.format === 'jpeg' || metadata.format === 'jpg') {
+      // For JPEG source images, apply quality settings if specified
+      const jpegOptions: sharp.JpegOptions = {
         progressive: true,
-      })
+      }
+      if ('quality' in variant) {
+        jpegOptions.quality = variant.quality
+      }
+      processedImage = processedImage.jpeg(jpegOptions)
+    } else if (metadata.format === 'png') {
+      // For PNG source images, maintain lossless format
+      processedImage = processedImage.png()
+    } else if (metadata.format === 'webp') {
+      // For WebP source images, maintain format
+      processedImage = processedImage.webp()
     } else {
-      // For non-HTML variants, maintain original format and quality
-      processedImage = processedImage
-        .flatten({ background: { r: 255, g: 255, b: 255 } })
-        .toFormat(sharp.format.jpeg, {
-          quality: 100,
-          progressive: true,
-        })
+      // Default to JPEG for unknown formats
+      processedImage = processedImage.jpeg({ quality: variant.quality ?? 90, progressive: true })
     }
 
     const processedBuffer = await processedImage.toBuffer()
@@ -42,6 +51,13 @@ export class ImageService {
       height: dimensions.height!,
       variantName,
       originalImage: image,
+      mimeType: variantName.endsWith('Gif')
+        ? 'image/gif'
+        : metadata.format === 'png'
+          ? 'image/png'
+          : metadata.format === 'webp'
+            ? 'image/webp'
+            : 'image/jpeg',
     })
 
     return variantStorage

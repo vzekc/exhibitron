@@ -24,6 +24,9 @@ export class ImageVariant extends BaseEntity {
   @Property()
   variantName!: string
 
+  @Property()
+  mimeType!: string
+
   @ManyToOne(() => ImageStorage)
   originalImage!: ImageStorage
 }

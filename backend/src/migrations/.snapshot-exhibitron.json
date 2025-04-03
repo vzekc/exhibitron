@@ -515,6 +515,16 @@
           "length": 255,
           "mappedType": "string"
         },
+        "mime_type": {
+          "name": "mime_type",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
         "original_image_id": {
           "name": "original_image_id",
           "type": "int",

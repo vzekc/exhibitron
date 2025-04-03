@@ -2,9 +2,10 @@ export type ImageVariant = {
   maxWidth: number
   maxHeight: number
   quality?: number
+  format?: 'gif'
 }
 
-export const IMAGE_VARIANTS = {
+export const IMAGE_VARIANTS: Record<string, ImageVariant> = {
   thumbnail: {
     maxWidth: 150,
     maxHeight: 150,
@@ -27,6 +28,21 @@ export const IMAGE_VARIANTS = {
     maxWidth: 800,
     maxHeight: 600,
     quality: 90,
+  },
+  htmlThumbnailGif: {
+    maxWidth: 75,
+    maxHeight: 75,
+    format: 'gif',
+  },
+  htmlSmallGif: {
+    maxWidth: 400,
+    maxHeight: 300,
+    format: 'gif',
+  },
+  htmlLargeGif: {
+    maxWidth: 800,
+    maxHeight: 600,
+    format: 'gif',
   },
 } as const
 

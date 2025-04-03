@@ -22,7 +22,14 @@ export async function registerImageRoutes(app: FastifyInstance) {
           image,
           variant as keyof typeof IMAGE_VARIANTS,
         )
-        reply.header('Content-Type', 'image/jpeg')
+
+        // Set the correct MIME type based on the variant
+        const mimeType =
+          IMAGE_VARIANTS[variant as keyof typeof IMAGE_VARIANTS].format === 'gif'
+            ? 'image/gif'
+            : 'image/jpeg'
+
+        reply.header('Content-Type', mimeType)
         reply.header('Content-Disposition', `inline; filename="${image.filename}"`)
         return variantImage.data
       }
