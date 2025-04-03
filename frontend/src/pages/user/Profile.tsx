@@ -2,7 +2,7 @@ import { useForm, SubmitHandler } from 'react-hook-form'
 import { useExhibitor } from '@contexts/ExhibitorContext.ts'
 import { useEffect, useState, useRef } from 'react'
 import { graphql } from 'gql.tada'
-import { useApolloClient, useMutation, useQuery } from '@apollo/client'
+import { useApolloClient, useMutation, useQuery, useLazyQuery } from '@apollo/client'
 import Modal from '@components/Modal.tsx'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import ActionBar from '@components/ActionBar.tsx'
@@ -27,7 +27,20 @@ type Inputs = {
   mastodon: string
   phone: string
   website: string
+  youtube: string
   allowEmailContact: boolean
+}
+
+type YouTubeChannel = {
+  id: string
+  title: string
+  description: string
+  thumbnailUrl: string
+  channelUrl: string
+}
+
+type LookupYouTubeChannelsResult = {
+  lookupYouTubeChannels: YouTubeChannel[]
 }
 
 const GET_USER_PROFILE = graphql(`
@@ -46,6 +59,7 @@ const GET_USER_PROFILE = graphql(`
           mastodon
           phone
           website
+          youtube
         }
         profileImage
       }
@@ -66,10 +80,23 @@ const UPDATE_USER_PROFILE = graphql(`
         mastodon
         phone
         website
+        youtube
       }
     }
     updateExhibitor(id: $exhibitorId, topic: $topic) {
       id
+    }
+  }
+`)
+
+const LOOKUP_YOUTUBE_CHANNELS = graphql(`
+  query LookupYouTubeChannels($query: String!) {
+    lookupYouTubeChannels(query: $query) {
+      id
+      title
+      description
+      thumbnailUrl
+      channelUrl
     }
   }
 `)
@@ -90,11 +117,15 @@ const Profile = () => {
 
   const { data, refetch } = useQuery(GET_USER_PROFILE)
   const [updateUserProfile] = useMutation(UPDATE_USER_PROFILE)
+  const [lookupYouTubeChannels] = useLazyQuery<LookupYouTubeChannelsResult>(LOOKUP_YOUTUBE_CHANNELS)
   const apolloClient = useApolloClient()
   const [searchParams] = useSearchParams()
   const [welcome, setWelcome] = useState(searchParams.has('welcome'))
   const navigate = useNavigate()
   const [profileImage, setProfileImage] = useState<number | null>(null)
+  const [youtubeSearchQuery, setYoutubeSearchQuery] = useState('')
+  const [youtubeSearchResults, setYoutubeSearchResults] = useState<YouTubeChannel[]>([])
+  const [isSearching, setIsSearching] = useState(false)
 
   const websiteValue = watch('website')
   const websiteFocusedRef = useRef(false)
@@ -102,6 +133,39 @@ const Profile = () => {
   useEffect(() => {
     navigate(window.location.pathname, { replace: true })
   }, [navigate])
+
+  const handleYoutubeSearch = async (query: string) => {
+    if (!query.trim()) {
+      setYoutubeSearchResults([])
+      return
+    }
+
+    setIsSearching(true)
+    try {
+      const { data } = await lookupYouTubeChannels({ variables: { query } })
+      if (data?.lookupYouTubeChannels) {
+        setYoutubeSearchResults(data.lookupYouTubeChannels)
+      }
+    } catch (error) {
+      console.error('Error searching YouTube channels:', error)
+    } finally {
+      setIsSearching(false)
+    }
+  }
+
+  useEffect(() => {
+    const debounceTimeout = setTimeout(() => {
+      handleYoutubeSearch(youtubeSearchQuery)
+    }, 500)
+
+    return () => clearTimeout(debounceTimeout)
+  }, [youtubeSearchQuery])
+
+  const selectYoutubeChannel = (channel: YouTubeChannel) => {
+    setValue('youtube', channel.channelUrl, { shouldDirty: true })
+    setYoutubeSearchQuery('')
+    setYoutubeSearchResults([])
+  }
 
   const updateProfile: SubmitHandler<Inputs> = async (inputs) => {
     const { fullName, nickname, bio, topic, allowEmailContact, ...contacts } = inputs
@@ -130,6 +194,7 @@ const Profile = () => {
         mastodon: newUser?.contacts?.mastodon || '',
         phone: newUser?.contacts?.phone || '',
         website: newUser?.contacts?.website || '',
+        youtube: newUser?.contacts?.youtube || '',
         allowEmailContact: newUser?.allowEmailContact || false,
       })
       setProfileImage(newUser?.profileImage as number | null)
@@ -284,6 +349,53 @@ const Profile = () => {
                       })}
                       error={errors.phone?.message}
                     />
+
+                    <FormLabel>YouTube</FormLabel>
+                    <div className="space-y-2">
+                      <Input
+                        type="text"
+                        placeholder="YouTube-Kanal suchen..."
+                        value={youtubeSearchQuery}
+                        onChange={(e) => setYoutubeSearchQuery(e.target.value)}
+                        className="mb-2"
+                      />
+                      {isSearching && <div className="text-sm text-gray-500">Suche...</div>}
+                      {youtubeSearchResults.length > 0 && (
+                        <div className="mt-2 space-y-2">
+                          {youtubeSearchResults.map((channel) => (
+                            <button
+                              key={channel.id}
+                              type="button"
+                              onClick={() => selectYoutubeChannel(channel)}
+                              className="flex w-full items-center gap-2 rounded-lg border border-gray-200 p-2 text-left hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800">
+                              <div className="relative h-12 w-12 flex-shrink-0">
+                                <img
+                                  src={channel.thumbnailUrl}
+                                  alt={channel.title}
+                                  className="h-12 w-12 rounded-full object-cover"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement
+                                    target.style.display = 'none'
+                                  }}
+                                />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="truncate font-medium">{channel.title}</div>
+                                <div className="truncate text-sm text-gray-500">
+                                  {channel.description}
+                                </div>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      <Input
+                        type="text"
+                        {...register('youtube')}
+                        readOnly
+                        className="mt-2 bg-gray-50 dark:bg-gray-800"
+                      />
+                    </div>
                   </FormFieldGroup>
                 </FormSection>
               </div>

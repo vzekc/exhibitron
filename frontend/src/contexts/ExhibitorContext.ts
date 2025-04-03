@@ -22,6 +22,7 @@ export const fetchCurrentExhibitor = async () => {
               mastodon
               phone
               website
+              youtube
             }
           }
         }

@@ -23,6 +23,7 @@ const EXHIBITOR_FRAGMENT = graphql(`
         phone
         mastodon
         website
+        youtube
       }
     }
   }

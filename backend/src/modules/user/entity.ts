@@ -25,6 +25,9 @@ export class Contacts {
 
   @Property()
   website?: string
+
+  @Property()
+  youtube?: string
 }
 
 @Entity()

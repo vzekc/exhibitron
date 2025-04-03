@@ -26,15 +26,21 @@ export class YouTubeService {
       const channelDetail = channelDetails.find((detail) => detail.id === item.id.channelId)
       const customUrl = channelDetail?.snippet.customUrl
       const handle = channelDetail?.brandingSettings?.channel?.handle
-
+      let channelUrl = `https://youtube.com/channel/${item.id.channelId}`
+      if (handle) {
+        channelUrl = `https://youtube.com/@${handle}`
+      } else if (customUrl?.startsWith('@')) {
+        channelUrl = `https://youtube.com/${customUrl}`
+      } else if (customUrl) {
+        channelUrl = `https://youtube.com/c/${customUrl}`
+      }
       return {
         id: item.id.channelId,
         title: item.snippet.title,
         description: item.snippet.description,
         publishedAt: item.snippet.publishedAt,
         thumbnailUrl: item.snippet.thumbnails.default.url,
-        customUrl: customUrl ? `https://youtube.com/c/${customUrl}` : undefined,
-        handleUrl: handle ? `https://youtube.com/@${handle}` : undefined,
+        channelUrl,
       }
     })
   }

@@ -3,6 +3,7 @@ type Contacts {
   mastodon: String
   phone: String
   website: String
+  youtube: String
 }
 
 input ContactsInput {
@@ -10,6 +11,7 @@ input ContactsInput {
   mastodon: String
   phone: String
   website: String
+  youtube: String
 }
 
 type User {

@@ -4,8 +4,7 @@ type YouTubeChannel {
   description: String!
   publishedAt: String!
   thumbnailUrl: String!
-  customUrl: String
-  handleUrl: String
+  channelUrl: String
 }
 
 type YouTubeThumbnails {
