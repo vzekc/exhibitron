@@ -5,6 +5,7 @@ import * as orm from './app/orm.js'
 import * as session from './app/session.js'
 import * as graphql from './app/graphql.js'
 import fastifyMultipart from '@fastify/multipart'
+import fastifyAccepts from '@fastify/accepts'
 import fastifyFormbody from '@fastify/formbody' // Add this import
 import { errorHandler } from './modules/common/errors.js'
 import { registerUserRoutes } from './modules/user/routes.js'
@@ -51,6 +52,7 @@ export async function createApp({
     },
   })
   await app.register(fastifyFormbody)
+  await app.register(fastifyAccepts)
 
   await oidc.register(app)
   await orm.register(app, !!migrate)

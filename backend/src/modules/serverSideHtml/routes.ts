@@ -53,10 +53,7 @@ export const registerServerSideHtmlRoutes = async (app: FastifyInstance): Promis
 
   // Browser detection middleware for home page redirection
   app.addHook('onRequest', async (request, reply) => {
-    const userAgent = request.headers['user-agent'] || ''
-    const accept = request.headers.accept
-
-    if (request.url === '/' && !isModernBrowser(userAgent, accept)) {
+    if (request.url === '/' && !isModernBrowser(request)) {
       return reply.redirect('/home.html')
     }
   })
