@@ -16,6 +16,12 @@ export class Exhibition extends BaseEntity {
   @Property()
   hostMatch!: string
 
+  @Property()
+  startDate!: Date
+
+  @Property()
+  endDate!: Date
+
   @OneToMany(() => Table, (table) => table.exhibition)
   tables: Collection<Table> = new Collection<Table>(this)
 

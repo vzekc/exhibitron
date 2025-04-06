@@ -1,0 +1,42 @@
+scalar DateTime
+
+type Presentation {
+  id: Int!
+  title: String!
+  startTime: DateTime
+  endTime: DateTime
+  exhibition: Exhibition!
+  room: Room
+  exhibitors: [Exhibitor!]
+  description: String
+}
+
+extend type Query {
+  getPresentation(id: Int!): Presentation
+  getPresentations(exhibitionId: Int!): [Presentation!]
+}
+
+extend type Mutation {
+  createPresentation(input: CreatePresentationInput!): Presentation!
+  updatePresentation(id: Int!, input: UpdatePresentationInput!): Presentation!
+  deletePresentation(id: Int!): Boolean!
+}
+
+input CreatePresentationInput {
+  title: String!
+  startTime: DateTime
+  endTime: DateTime
+  exhibitionId: Int!
+  roomId: Int
+  exhibitorIds: [Int!]
+  description: String
+}
+
+input UpdatePresentationInput {
+  title: String
+  startTime: DateTime
+  endTime: DateTime
+  roomId: Int
+  exhibitorIds: [Int!]
+  description: String
+}
