@@ -36,8 +36,7 @@ export const roomMutations: MutationResolvers<Context> = {
   },
 }
 
-export const roomTypeResolvers: RoomResolvers = {
-}
+export const roomTypeResolvers: RoomResolvers = {}
 
 export const roomResolvers = {
   Query: roomQueries,

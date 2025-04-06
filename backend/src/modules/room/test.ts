@@ -1,26 +1,7 @@
-import { expect, describe } from 'vitest'
+import { describe, expect } from 'vitest'
 import { graphql } from 'gql.tada'
-import { ExecuteOperationFunction, graphqlTest, login, Session } from '../../test/server.js'
-
-const createRoom = async (
-  graphqlRequest: ExecuteOperationFunction,
-  input: { name: string; capacity?: number },
-  session: Session,
-) => {
-  const result = await graphqlRequest(
-    graphql(`
-      mutation CreateRoom($name: String!, $capacity: Int) {
-        createRoom(input: { name: $name, capacity: $capacity }) {
-          id
-        }
-      }
-    `),
-    input,
-    session,
-  )
-  expect(result.errors).toBeUndefined()
-  return result.data!.createRoom!.id
-}
+import { graphqlTest, login } from '../../test/server.js'
+import { createRoom } from '../../test/utils.js'
 
 describe('room', () => {
   graphqlTest('list all rooms', async (graphqlRequest) => {
@@ -56,11 +37,7 @@ describe('room', () => {
 
   graphqlTest('room CRUD operations', async (graphqlRequest) => {
     const admin = await login('admin@example.com')
-    const roomId = await createRoom(
-      graphqlRequest,
-      { name: 'Test Room', capacity: 50 },
-      admin,
-    )
+    const roomId = await createRoom(graphqlRequest, { name: 'Test Room', capacity: 50 }, admin)
 
     // Test updating room
     {

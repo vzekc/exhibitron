@@ -3,6 +3,8 @@ import { initORM } from '../db.js'
 import config from '../mikro-orm.config.js'
 import { TestSeeder } from '../seeders/TestSeeder.js'
 import { execSync } from 'child_process'
+import { ExecuteOperationFunction, Session } from './server.js'
+import { graphql } from 'gql.tada'
 
 const generateRandomString = (length: number): string => {
   const characters = 'abcdefghijklmnopqrstuvwxyz0123456789'
@@ -74,3 +76,23 @@ expect.extend({
     }
   },
 })
+
+export const createRoom = async (
+  graphqlRequest: ExecuteOperationFunction,
+  input: { name: string; capacity?: number },
+  session: Session,
+) => {
+  const result = await graphqlRequest(
+    graphql(`
+      mutation CreateRoom($name: String!, $capacity: Int) {
+        createRoom(input: { name: $name, capacity: $capacity }) {
+          id
+        }
+      }
+    `),
+    input,
+    session,
+  )
+  expect(result.errors).toBeUndefined()
+  return result.data!.createRoom!.id
+}

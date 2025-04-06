@@ -1,6 +1,23 @@
 import { expect, describe } from 'vitest'
 import { graphql } from 'gql.tada'
 import { ExecuteOperationFunction, graphqlTest, login, Session } from '../../test/server.js'
+import { createRoom } from '../../test/utils.js'
+
+const getCurrentExhibitor = async (graphqlRequest: ExecuteOperationFunction, session: Session) => {
+  const result = await graphqlRequest(
+    graphql(`
+      query GetCurrentExhibitor {
+        getCurrentExhibitor {
+          id
+        }
+      }
+    `),
+    {},
+    session,
+  )
+  expect(result.errors).toBeUndefined()
+  return result.data!.getCurrentExhibitor!.id
+}
 
 const createPresentation = async (
   graphqlRequest: ExecuteOperationFunction,
@@ -89,7 +106,12 @@ describe('presentation', () => {
 
   graphqlTest('presentation CRUD operations', async (graphqlRequest) => {
     const admin = await login('admin@example.com')
-    const exhibitor = await login('daffy@example.com')
+    const user = await login('daffy@example.com')
+    const otherUser = await login('donald@example.com')
+
+    // Get exhibitors for users
+    const exhibitor = await getCurrentExhibitor(graphqlRequest, user)
+    const otherExhibitor = await getCurrentExhibitor(graphqlRequest, otherUser)
 
     // Create a room first
     const roomId = await createRoom(
@@ -157,7 +179,7 @@ describe('presentation', () => {
           startTime: '2024-01-01T14:00:00Z',
           endTime: '2024-01-01T15:00:00Z',
           roomId,
-          exhibitorIds: [1, 2], // Add another exhibitor
+          exhibitorIds: [exhibitor, otherExhibitor],
           description: '<p>Updated presentation description</p>',
         },
         admin,
@@ -165,7 +187,9 @@ describe('presentation', () => {
       expect(result.errors).toBeUndefined()
       expect(result.data!.updatePresentation!.title).toBe('Updated Presentation')
       expect(result.data!.updatePresentation!.exhibitors).toHaveLength(2)
-      expect(result.data!.updatePresentation!.description).toBe('<p>Updated presentation description</p>')
+      expect(result.data!.updatePresentation!.description).toBe(
+        '<p>Updated presentation description</p>',
+      )
     }
 
     // Test updating presentation as exhibitor
@@ -180,7 +204,7 @@ describe('presentation', () => {
           }
         `),
         { id: presentationId, title: 'Exhibitor Updated Title' },
-        exhibitor,
+        user,
       )
       expect(result.errors).toBeUndefined()
       expect(result.data!.updatePresentation!.title).toBe('Exhibitor Updated Title')

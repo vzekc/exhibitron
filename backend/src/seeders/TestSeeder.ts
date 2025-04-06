@@ -16,8 +16,8 @@ export class TestSeeder extends Seeder {
       key: 'cc2025',
       title: 'Classic Computing 2025',
       hostMatch: 'localhost|2025\\.classic-computing\\.de',
-      startDate: "2025-09-11",
-      endDate: "2025-09-14",
+      startDate: '2025-09-11',
+      endDate: '2025-09-14',
     })
 
     const rooms = [
@@ -129,7 +129,9 @@ export class TestSeeder extends Seeder {
       em.create(Presentation, {
         ...presentation,
         exhibition,
-        exhibitors: [await em.getRepository(Exhibitor).findOneOrFail({ user: { nickname: 'daffy' } })],
+        exhibitors: [
+          await em.getRepository(Exhibitor).findOneOrFail({ user: { nickname: 'daffy' } }),
+        ],
       })
     }
   }

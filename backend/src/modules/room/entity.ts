@@ -1,10 +1,11 @@
 import { Entity, EntityRepositoryType, ManyToOne, Property } from '@mikro-orm/core'
 import { BaseEntity } from '../common/base.entity.js'
 import { Exhibition } from '../exhibition/entity.js'
+import { RoomRepository } from './repository.js'
 
 @Entity()
 export class Room extends BaseEntity {
-  [EntityRepositoryType]?: any
+  [EntityRepositoryType]?: RoomRepository
 
   @Property()
   name!: string
@@ -14,4 +15,4 @@ export class Room extends BaseEntity {
 
   @ManyToOne(() => Exhibition)
   exhibition!: Exhibition
-} 
+}

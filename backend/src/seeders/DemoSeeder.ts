@@ -15,6 +15,8 @@ export class DemoSeeder extends Seeder {
       key: 'cc2025',
       title: 'Classic Computing 2025',
       hostMatch: 'localhost|2025\\.classic-computing\\.de',
+      startDate: '2025-09-11',
+      endDate: '2025-09-14',
     })
 
     for (let number = 1; number <= 10; number++) {
