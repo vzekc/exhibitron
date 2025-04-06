@@ -197,6 +197,26 @@
           "nullable": false,
           "length": 255,
           "mappedType": "string"
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "end_date": {
+          "name": "end_date",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
         }
       },
       "name": "exhibition",
@@ -860,6 +880,235 @@
     },
     {
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "capacity": {
+          "name": "capacity",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
+        "exhibition_id": {
+          "name": "exhibition_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        }
+      },
+      "name": "room",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "room_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "room_exhibition_id_foreign": {
+          "constraintName": "room_exhibition_id_foreign",
+          "columnNames": ["exhibition_id"],
+          "localTableName": "public.room",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.exhibition",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {
+        "registration_status": {
+          "name": "registration_status",
+          "schema": "public",
+          "items": ["approved", "inProgress", "new", "rejected"]
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "start_time": {
+          "name": "start_time",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "end_time": {
+          "name": "end_time",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "exhibition_id": {
+          "name": "exhibition_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "room_id": {
+          "name": "room_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
+        "description_id": {
+          "name": "description_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        }
+      },
+      "name": "presentation",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "presentation_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "presentation_exhibition_id_foreign": {
+          "constraintName": "presentation_exhibition_id_foreign",
+          "columnNames": ["exhibition_id"],
+          "localTableName": "public.presentation",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.exhibition",
+          "updateRule": "cascade"
+        },
+        "presentation_room_id_foreign": {
+          "constraintName": "presentation_room_id_foreign",
+          "columnNames": ["room_id"],
+          "localTableName": "public.presentation",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.room",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        },
+        "presentation_description_id_foreign": {
+          "constraintName": "presentation_description_id_foreign",
+          "columnNames": ["description_id"],
+          "localTableName": "public.presentation",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.document",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {
+        "registration_status": {
+          "name": "registration_status",
+          "schema": "public",
+          "items": ["approved", "inProgress", "new", "rejected"]
+        }
+      }
+    },
+    {
+      "columns": {
         "sid": {
           "name": "sid",
           "type": "varchar(255)",
@@ -1440,6 +1689,68 @@
           "referencedColumnNames": ["id"],
           "referencedTableName": "public.exhibitor",
           "deleteRule": "set null",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {
+        "registration_status": {
+          "name": "registration_status",
+          "schema": "public",
+          "items": ["approved", "inProgress", "new", "rejected"]
+        }
+      }
+    },
+    {
+      "columns": {
+        "presentation_id": {
+          "name": "presentation_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "exhibitor_id": {
+          "name": "exhibitor_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        }
+      },
+      "name": "presentation_exhibitors",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "presentation_exhibitors_pkey",
+          "columnNames": ["presentation_id", "exhibitor_id"],
+          "composite": true,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "presentation_exhibitors_presentation_id_foreign": {
+          "constraintName": "presentation_exhibitors_presentation_id_foreign",
+          "columnNames": ["presentation_id"],
+          "localTableName": "public.presentation_exhibitors",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.presentation",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        },
+        "presentation_exhibitors_exhibitor_id_foreign": {
+          "constraintName": "presentation_exhibitors_exhibitor_id_foreign",
+          "columnNames": ["exhibitor_id"],
+          "localTableName": "public.presentation_exhibitors",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.exhibitor",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },

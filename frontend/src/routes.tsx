@@ -27,6 +27,7 @@ import SetupExhibitor from './pages/SetupExhibitor.tsx'
 import ProtectedRoute from '@components/ProtectedRoute.tsx'
 import AdminProtectedRoute from '@components/AdminProtectedRoute.tsx'
 import { ExhibitorProvider } from '@contexts/ExhibitorProvider.tsx'
+import ScheduleAdmin from './pages/admin/ScheduleAdmin.tsx'
 
 const routes: RouteObject[] = [
   { path: '/register', element: <Register /> },
@@ -75,6 +76,7 @@ const routes: RouteObject[] = [
           { path: 'page', element: <PageList /> },
           { path: 'page/:key', element: <PageEditor /> },
           { path: 'tableLabels', element: <TableLabels /> },
+          { path: 'schedule', element: <ScheduleAdmin /> },
         ],
       },
       { path: '/table', element: <Tables /> },
