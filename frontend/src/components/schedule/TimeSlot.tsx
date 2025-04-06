@@ -11,13 +11,13 @@ interface TimeSlotProps {
   onDrop: (sessionId: string, roomId: string, timestamp: number) => void
 }
 
-export const TimeSlot: React.FC<TimeSlotProps> = ({ 
-  roomId, 
-  timestamp, 
-  height, 
+export const TimeSlot: React.FC<TimeSlotProps> = ({
+  roomId,
+  timestamp,
+  height,
   isHourStart,
   sessions,
-  onDrop 
+  onDrop,
 }) => {
   // Check if this timeslot would cause an overlap
   const canDropHere = (draggedSession: Session) => {
@@ -25,10 +25,10 @@ export const TimeSlot: React.FC<TimeSlotProps> = ({
     const newEndTime = timestamp + duration
 
     // Don't allow dropping if it would create an overlap
-    return !sessions.some(existingSession => {
+    return !sessions.some((existingSession) => {
       // Skip the session being dragged
       if (existingSession.id === draggedSession.id) return false
-      
+
       // Only check sessions in the same room
       if (existingSession.roomId !== roomId) return false
 
@@ -43,28 +43,29 @@ export const TimeSlot: React.FC<TimeSlotProps> = ({
     })
   }
 
-  const [{ isOver, canDrop }, dropRef] = useDrop({
-    accept: 'SESSION',
-    canDrop: (item: Session) => canDropHere(item),
-    drop: (item: Session) => onDrop(item.id, roomId, timestamp),
-    collect: (monitor) => ({
-      isOver: !!monitor.isOver(),
-      canDrop: !!monitor.canDrop()
-    })
-  }, [roomId, timestamp, sessions])
+  const [{ isOver, canDrop }, dropRef] = useDrop(
+    {
+      accept: 'SESSION',
+      canDrop: (item: Session) => canDropHere(item),
+      drop: (item: Session) => {
+        console.log(
+          `[${item.id}] Dropped onto ${roomId} at ${new Date(timestamp).toLocaleTimeString()}`,
+        )
+        onDrop(item.id, roomId, timestamp)
+      },
+      collect: (monitor) => ({
+        isOver: !!monitor.isOver(),
+        canDrop: !!monitor.canDrop(),
+      }),
+    },
+    [roomId, timestamp, sessions],
+  )
 
   return (
     <div
-      ref={dropRef}
+      ref={dropRef as unknown as React.RefObject<HTMLDivElement>}
       style={{ height: `${height}px` }}
-      className={`
-        relative
-        ${isHourStart ? 'border-t border-gray-300' : ''}
-        ${isOver && canDrop ? 'bg-blue-100 bg-opacity-50' : ''}
-        ${!isOver && canDrop ? 'bg-blue-50 bg-opacity-25' : ''}
-        ${isOver && !canDrop ? 'bg-red-100 bg-opacity-50' : ''}
-        transition-colors duration-100
-      `}
+      className={`relative ${isHourStart ? 'border-t border-gray-300' : ''} ${isOver && canDrop ? 'bg-blue-200' : ''} ${isOver && !canDrop ? 'bg-red-100 bg-opacity-50' : ''} transition-colors duration-100`}
     />
   )
-} 
+}

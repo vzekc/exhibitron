@@ -17,4 +17,4 @@ export interface TimeSlot {
   timestamp: number
   minutes: number
   isHourStart: boolean
-} 
+}

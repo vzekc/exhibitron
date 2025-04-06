@@ -389,13 +389,58 @@ const ScheduleAdmin: React.FC = () => {
 
   const { loading, error, data } = useQuery(GET_SCHEDULE_DATA)
   const [createRoom] = useMutation(CREATE_ROOM, {
-    refetchQueries: [GET_SCHEDULE_DATA]
+    refetchQueries: [GET_SCHEDULE_DATA],
   })
   const [createPresentation] = useMutation(CREATE_PRESENTATION, {
-    refetchQueries: [GET_SCHEDULE_DATA]
+    refetchQueries: [GET_SCHEDULE_DATA],
   })
   const [updatePresentation] = useMutation(UPDATE_PRESENTATION, {
-    refetchQueries: [GET_SCHEDULE_DATA]
+    optimisticResponse: ({ id, input }) => {
+      const session = sessions.find((s) => s.id === id.toString())
+      return {
+        __typename: 'Mutation',
+        updatePresentation: {
+          __typename: 'Presentation',
+          id: id,
+          title: session?.title ?? '',
+          startTime: input.startTime,
+          endTime: input.endTime,
+          room: input.roomId
+            ? {
+                __typename: 'Room',
+                id: input.roomId,
+              }
+            : null,
+          exhibitors: [
+            {
+              __typename: 'Exhibitor',
+              id: 0,
+              user: {
+                __typename: 'User',
+                id: 0,
+                fullName: session?.presenter ?? '',
+              },
+            },
+          ],
+        },
+      }
+    },
+    update(cache, { data }) {
+      const existingData = cache.readQuery({ query: GET_SCHEDULE_DATA })
+      if (!existingData?.getPresentations) return
+
+      cache.writeQuery({
+        query: GET_SCHEDULE_DATA,
+        data: {
+          ...existingData,
+          getPresentations: existingData.getPresentations.map((presentation) =>
+            presentation.id === data?.updatePresentation.id
+              ? data.updatePresentation
+              : presentation,
+          ),
+        },
+      })
+    },
   })
 
   const handleAddRoom = async (name: string, capacity?: number) => {
@@ -442,8 +487,12 @@ const ScheduleAdmin: React.FC = () => {
     setIsAddPresentationModalOpen(false)
   }
 
-  const handleSessionReschedule = async (sessionId: string, newRoomId: string, newStartTime: number) => {
-    const session = sessions.find(s => s.id === sessionId)
+  const handleSessionReschedule = async (
+    sessionId: string,
+    newRoomId: string,
+    newStartTime: number,
+  ) => {
+    const session = sessions.find((s) => s.id === sessionId)
     if (!session) return
 
     const duration = session.endTime - session.startTime
@@ -455,9 +504,9 @@ const ScheduleAdmin: React.FC = () => {
         input: {
           roomId: parseInt(newRoomId),
           startTime: new Date(newStartTime).toISOString(),
-          endTime: new Date(newEndTime).toISOString()
-        }
-      }
+          endTime: new Date(newEndTime).toISOString(),
+        },
+      },
     })
   }
 
