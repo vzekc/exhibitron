@@ -1,13 +1,9 @@
 import React from 'react'
+import { useDrag } from 'react-dnd'
+import type { Session } from './types'
 
 interface SessionCardProps {
-  session: {
-    id: string
-    title: string
-    startTime: number
-    endTime: number
-    presenter: string
-  }
+  session: Session
   timeSlotHeight: number
 }
 
@@ -16,15 +12,28 @@ export const SessionCard: React.FC<SessionCardProps> = ({ session, timeSlotHeigh
   const numberOfSlots = durationInMinutes / 15 // 15 minutes per slot
   const height = numberOfSlots * timeSlotHeight
 
+  const [{ isDragging }, dragRef] = useDrag({
+    type: 'SESSION',
+    item: session,
+    collect: (monitor) => ({
+      isDragging: !!monitor.isDragging()
+    })
+  }, [session])
+
   return (
     <div
-      className="absolute z-10 overflow-hidden rounded bg-blue-100 px-2 py-1 text-sm"
+      ref={dragRef}
+      className={`
+        absolute z-10 overflow-hidden rounded bg-blue-100 px-2 py-1 text-sm cursor-move
+        ${isDragging ? 'opacity-50' : ''}
+        transition-opacity duration-200
+      `}
       style={{
         height: `${height}px`,
-        width: '156px',
+        width: '142px'
       }}>
-      <div className="truncate font-medium">{session.title}</div>
-      <div className="text-xs truncate text-gray-600">{session.presenter}</div>
+      <div className="font-medium truncate">{session.title}</div>
+      <div className="text-xs text-gray-600 truncate">{session.presenter}</div>
     </div>
   )
 }

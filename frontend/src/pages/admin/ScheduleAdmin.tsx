@@ -94,6 +94,26 @@ const CREATE_PRESENTATION = graphql(`
   }
 `)
 
+const UPDATE_PRESENTATION = graphql(`
+  mutation UpdatePresentation($id: Int!, $input: UpdatePresentationInput!) {
+    updatePresentation(id: $id, input: $input) {
+      id
+      title
+      startTime
+      endTime
+      room {
+        id
+      }
+      exhibitors {
+        id
+        user {
+          fullName
+        }
+      }
+    }
+  }
+`)
+
 interface AddRoomModalProps {
   isOpen: boolean
   onClose: () => void
@@ -369,10 +389,13 @@ const ScheduleAdmin: React.FC = () => {
 
   const { loading, error, data } = useQuery(GET_SCHEDULE_DATA)
   const [createRoom] = useMutation(CREATE_ROOM, {
-    refetchQueries: [GET_SCHEDULE_DATA],
+    refetchQueries: [GET_SCHEDULE_DATA]
   })
   const [createPresentation] = useMutation(CREATE_PRESENTATION, {
-    refetchQueries: [GET_SCHEDULE_DATA],
+    refetchQueries: [GET_SCHEDULE_DATA]
+  })
+  const [updatePresentation] = useMutation(UPDATE_PRESENTATION, {
+    refetchQueries: [GET_SCHEDULE_DATA]
   })
 
   const handleAddRoom = async (name: string, capacity?: number) => {
@@ -417,6 +440,25 @@ const ScheduleAdmin: React.FC = () => {
       },
     })
     setIsAddPresentationModalOpen(false)
+  }
+
+  const handleSessionReschedule = async (sessionId: string, newRoomId: string, newStartTime: number) => {
+    const session = sessions.find(s => s.id === sessionId)
+    if (!session) return
+
+    const duration = session.endTime - session.startTime
+    const newEndTime = newStartTime + duration
+
+    await updatePresentation({
+      variables: {
+        id: parseInt(sessionId),
+        input: {
+          roomId: parseInt(newRoomId),
+          startTime: new Date(newStartTime).toISOString(),
+          endTime: new Date(newEndTime).toISOString()
+        }
+      }
+    })
   }
 
   if (loading) return <LoadInProgress />
@@ -470,6 +512,7 @@ const ScheduleAdmin: React.FC = () => {
               startHour={START_HOUR}
               endHour={END_HOUR}
               timeSlotMinutes={TIME_SLOT_MINUTES}
+              onSessionReschedule={handleSessionReschedule}
             />
           </div>
         </div>
