@@ -2,12 +2,11 @@ type Room {
   id: Int!
   name: String!
   capacity: Int
-  exhibition: Exhibition!
 }
 
 extend type Query {
   getRoom(id: Int!): Room
-  getRooms(exhibitionId: Int!): [Room!]
+  getRooms: [Room!]
 }
 
 extend type Mutation {
@@ -19,10 +18,9 @@ extend type Mutation {
 input CreateRoomInput {
   name: String!
   capacity: Int
-  exhibitionId: Int!
 }
 
 input UpdateRoomInput {
   name: String
   capacity: Int
-} 
+}

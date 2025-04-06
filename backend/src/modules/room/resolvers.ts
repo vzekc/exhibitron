@@ -3,26 +3,22 @@ import { RoomResolvers, QueryResolvers, MutationResolvers } from '../../generate
 import { requireAdmin } from '../../db.js'
 
 export const roomQueries: QueryResolvers<Context> = {
-  // @ts-expect-error ts2322
   getRoom: async (_, { id }, { db }) => db.room.findOneOrFail({ id }),
-  // @ts-expect-error ts2322
-  getRooms: async (_, { exhibitionId }, { db }) => db.room.find({ exhibition: exhibitionId }),
+  getRooms: async (_, _args, { db, exhibition }) => db.room.find({ exhibition }),
 }
 
 export const roomMutations: MutationResolvers<Context> = {
-  // @ts-expect-error ts2345
-  createRoom: async (_, { input }, { db, user }) => {
+  createRoom: async (_, { input }, { db, user, exhibition }) => {
     requireAdmin(user)
     const room = db.room.create({
       name: input.name,
       capacity: input.capacity,
-      exhibition: input.exhibitionId,
+      exhibition,
     })
-    db.em.persist(room)
+    await db.em.persist(room).flush()
     return room
   },
 
-  // @ts-expect-error ts2345
   updateRoom: async (_, { id, input }, { db, user }) => {
     requireAdmin(user)
     const room = await db.room.findOneOrFail({ id })
@@ -35,13 +31,12 @@ export const roomMutations: MutationResolvers<Context> = {
   deleteRoom: async (_, { id }, { db, user }) => {
     requireAdmin(user)
     const room = await db.room.findOneOrFail({ id })
-    db.em.persist(room)
+    db.em.remove(room)
     return true
   },
 }
 
 export const roomTypeResolvers: RoomResolvers = {
-  exhibition: async (room, _, { db }) => db.exhibition.findOneOrFail({ id: room.exhibition.id }),
 }
 
 export const roomResolvers = {

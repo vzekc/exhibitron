@@ -8,18 +8,18 @@ export const presentationQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2345
   getPresentation: async (_, { id }, { db }) => db.presentation.findOneOrFail({ id }),
   // @ts-expect-error ts2345
-  getPresentations: async (_, { exhibitionId }, { db }) => db.presentation.find({ exhibition: exhibitionId }),
+  getPresentations: async (_, _args, { db, exhibition }) => db.presentation.find({ exhibition }),
 }
 
 export const presentationMutations: MutationResolvers<Context> = {
   // @ts-expect-error ts2345
-  createPresentation: async (_, { input }, { db, user }) => {
+  createPresentation: async (_, { input }, { db, user, exhibition }) => {
     requireAdmin(user)
     const presentation = db.presentation.create({
       title: input.title,
       startTime: input.startTime,
       endTime: input.endTime,
-      exhibition: input.exhibitionId,
+      exhibition,
       room: input.roomId,
     })
 
@@ -73,7 +73,6 @@ export const presentationMutations: MutationResolvers<Context> = {
 }
 
 export const presentationTypeResolvers: PresentationResolvers = {
-  exhibition: async (presentation, _, { db }) => db.exhibition.findOneOrFail({ id: presentation.exhibition.id }),
   room: async (presentation, _, { db }) => presentation.room ? db.room.findOneOrFail({ id: presentation.room.id }) : null,
   exhibitors: async (presentation, _, { db }) => db.exhibitor.find({ presentations: presentation }),
   description: (presentation) => {

@@ -7,6 +7,8 @@ import { Exhibitor } from '../modules/exhibitor/entity.js'
 import { Exhibit } from '../modules/exhibit/entity.js'
 import { Page } from '../modules/page/entity.js'
 import { Document } from '../modules/document/entity.js'
+import { Room } from '../modules/room/entity.js'
+import { Presentation } from '../modules/presentation/entity.js'
 
 export class TestSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {
@@ -14,7 +16,22 @@ export class TestSeeder extends Seeder {
       key: 'cc2025',
       title: 'Classic Computing 2025',
       hostMatch: 'localhost|2025\\.classic-computing\\.de',
+      startDate: "2025-09-11",
+      endDate: "2025-09-14",
     })
+
+    const rooms = [
+      { name: 'Main Hall', capacity: 100 },
+      { name: 'Workshop Room', capacity: 50 },
+      { name: 'Lecture Hall', capacity: 200 },
+    ]
+
+    for (const room of rooms) {
+      em.create(Room, {
+        ...room,
+        exhibition,
+      })
+    }
 
     const documentRepository = em.getRepository(Document)
 
@@ -92,5 +109,28 @@ export class TestSeeder extends Seeder {
         exhibits?.forEach((props) => em.create(Exhibit, { ...props, exhibitor, exhibition }))
       }),
     )
+
+    const presentations = [
+      {
+        title: 'The Evolution of Classic Computers',
+        startTime: new Date('2025-09-11T10:00:00'),
+        endTime: new Date('2025-09-11T11:00:00'),
+        room: await em.getRepository(Room).findOneOrFail({ name: 'Main Hall' }),
+      },
+      {
+        title: 'Hands-on Workshop: Building a Retro Computer',
+        startTime: new Date('2025-09-12T14:00:00'),
+        endTime: new Date('2025-09-12T16:00:00'),
+        room: await em.getRepository(Room).findOneOrFail({ name: 'Workshop Room' }),
+      },
+    ]
+
+    for (const presentation of presentations) {
+      em.create(Presentation, {
+        ...presentation,
+        exhibition,
+        exhibitors: [await em.getRepository(Exhibitor).findOneOrFail({ user: { nickname: 'daffy' } })],
+      })
+    }
   }
 }
