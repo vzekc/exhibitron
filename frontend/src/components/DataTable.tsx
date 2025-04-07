@@ -22,7 +22,7 @@ interface DataTableProps<T extends { id: string | number; [key: string]: unknown
   defaultSortDirection?: 'asc' | 'desc'
 }
 
-export const DataTable = <T extends { id: string | number; [key: string]: unknown }>({
+const DataTable = <T extends { id: string | number; [key: string]: unknown }>({
   headers,
   children,
   className = '',

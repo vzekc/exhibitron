@@ -4,9 +4,9 @@ import { graphql } from 'gql.tada'
 import { useMutation, useApolloClient } from '@apollo/client'
 import { useExhibitor } from '@contexts/ExhibitorContext.ts'
 import Card from '@components/Card.tsx'
-import { FormField } from '@components/FormField'
-import { FormFieldset } from '@components/FormFieldset'
-import { FormInput } from '@components/FormInput'
+import FormField from '@components/FormField'
+import FormFieldset from '@components/FormFieldset'
+import FormInput from '@components/FormInput'
 
 const SET_PASSWORD = graphql(`
   mutation SetPassword($token: String!, $password: String!) {
@@ -147,7 +147,7 @@ const SetupExhibitor = () => {
     <Card className="mx-auto max-w-3xl">
       <h2 className="mb-6 text-2xl font-bold text-gray-900">Neues Kennwort setzen</h2>
       <form onSubmit={handlePasswordSubmit} className="space-y-6">
-        <FormFieldset title="Kennwort">
+        <FormFieldset legend="Kennwort">
           <FormField label="Kennwort" error={error || undefined}>
             <FormInput
               type="password"

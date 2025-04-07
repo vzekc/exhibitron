@@ -6,7 +6,7 @@ interface FormFieldProps {
   children: ReactNode
 }
 
-export const FormField = ({ label, error, children }: FormFieldProps) => {
+const FormField = ({ label, error, children }: FormFieldProps) => {
   return (
     <div className="mb-4">
       {label && <label className="mb-1 block text-sm font-medium text-gray-700">{label}</label>}
@@ -15,3 +15,5 @@ export const FormField = ({ label, error, children }: FormFieldProps) => {
     </div>
   )
 }
+
+export default FormField

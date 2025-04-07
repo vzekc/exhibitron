@@ -5,12 +5,12 @@ import { graphql } from 'gql.tada'
 
 import { useSearchParams } from 'react-router-dom'
 import Modal from '@components/Modal.tsx'
-import { RetroHeader } from '@components/RetroHeader'
-import { FormField } from '@components/FormField'
-import { FormFieldset } from '@components/FormFieldset'
-import { FormInput } from '@components/FormInput'
-import { FormSelect } from '@components/FormSelect'
-import { FormTextarea } from '@components/FormTextarea'
+import RetroHeader from '@components/RetroHeader'
+import FormField from '@components/FormField'
+import FormFieldset from '@components/FormFieldset'
+import FormInput from '@components/FormInput'
+import FormSelect from '@components/FormSelect'
+import FormTextarea from '@components/FormTextarea'
 
 type Inputs = {
   name: string
@@ -158,7 +158,7 @@ const Register = () => {
               </p>
             </div>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              <FormFieldset title="Persönliche Informationen">
+              <FormFieldset legend="Persönliche Informationen">
                 <FormField label="Name" error={errors.name?.message}>
                   <FormInput
                     type="text"
@@ -202,7 +202,7 @@ const Register = () => {
                 </FormField>
               </FormFieldset>
 
-              <FormFieldset title="Ausstellung">
+              <FormFieldset legend="Ausstellung">
                 <FormField label="Hauptthema meiner Ausstellung" error={errors.topic?.message}>
                   <FormSelect
                     {...register('topic', {
@@ -236,7 +236,7 @@ const Register = () => {
                 )}
               </FormFieldset>
 
-              <FormFieldset title="Teilnahme">
+              <FormFieldset legend="Teilnahme">
                 <FormField>
                   <div className="space-y-2">
                     <div className="flex items-center">
@@ -255,7 +255,7 @@ const Register = () => {
                 </FormField>
               </FormFieldset>
 
-              <FormFieldset title="Unterstützung">
+              <FormFieldset legend="Unterstützung">
                 <div className="space-y-2">
                   <div className="flex items-center">
                     <FormInput type="checkbox" {...register('setupHelper')} className="mr-2" />
@@ -283,7 +283,7 @@ const Register = () => {
                 </div>
               </FormFieldset>
 
-              <FormFieldset title="Tische">
+              <FormFieldset legend="Tische">
                 <FormField
                   label="Gewünschte Anzahl Tische (je 165cm x 80cm)"
                   error={errors.tables?.message}>
@@ -302,7 +302,7 @@ const Register = () => {
                 </FormField>
               </FormFieldset>
 
-              <FormFieldset title="Mitteilungen">
+              <FormFieldset legend="Mitteilungen">
                 <FormField label="Mitteilung ans Orga-Team:">
                   <FormTextarea rows={5} {...register('message')} />
                 </FormField>

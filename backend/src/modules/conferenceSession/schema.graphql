@@ -1,0 +1,40 @@
+scalar DateTime
+
+type ConferenceSession {
+  id: Int!
+  title: String!
+  startTime: DateTime
+  endTime: DateTime
+  room: Room
+  exhibitors: [Exhibitor!]
+  description: String
+}
+
+extend type Query {
+  getConferenceSession(id: Int!): ConferenceSession
+  getConferenceSessions: [ConferenceSession!]
+}
+
+extend type Mutation {
+  createConferenceSession(input: CreateConferenceSessionInput!): ConferenceSession!
+  updateConferenceSession(id: Int!, input: UpdateConferenceSessionInput!): ConferenceSession!
+  deleteConferenceSession(id: Int!): Boolean!
+}
+
+input CreateConferenceSessionInput {
+  title: String!
+  startTime: DateTime
+  endTime: DateTime
+  roomId: Int
+  exhibitorIds: [Int!]
+  description: String
+}
+
+input UpdateConferenceSessionInput {
+  title: String
+  startTime: DateTime
+  endTime: DateTime
+  roomId: Int
+  exhibitorIds: [Int!]
+  description: String
+}

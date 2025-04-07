@@ -44,7 +44,6 @@ const TextEditor = forwardRef<TextEditorHandle, TextEditorProps>(
         getHTML: () => {
           if (!quillRef.current) return ''
           const html = quillRef.current.getSemanticHTML().replaceAll(/&nbsp;/g, ' ')
-          console.log('html', html)
           return html
         },
         resetEditState: () => {

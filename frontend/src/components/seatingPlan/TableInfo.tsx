@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Button from '../Button'
-import { ExhibitorSelector } from '../ExhibitorSelector'
+import ExhibitorSelector from '../ExhibitorSelector'
 import ChipContainer from '../ChipContainer'
 import ExhibitorChip from '../ExhibitorChip'
 import ExhibitChip from '../ExhibitChip'

@@ -27,6 +27,9 @@ import SetupExhibitor from './pages/SetupExhibitor.tsx'
 import ProtectedRoute from '@components/ProtectedRoute.tsx'
 import AdminProtectedRoute from '@components/AdminProtectedRoute.tsx'
 import { ExhibitorProvider } from '@contexts/ExhibitorProvider.tsx'
+import SessionEditorPage from './pages/admin/SessionEditorPage.tsx'
+import Schedule from './pages/Schedule.tsx'
+import Session from './pages/Session.tsx'
 
 const routes: RouteObject[] = [
   { path: '/register', element: <Register /> },
@@ -47,7 +50,8 @@ const routes: RouteObject[] = [
       { path: '/exhibit/:id', element: <Exhibit /> },
       { path: '/exhibitor', element: <Exhibitors /> },
       { path: '/exhibitor/:id', element: <Exhibitor /> },
-      { path: '/schedule', element: <Page pageKey="schedule" /> },
+      { path: '/schedule', element: <Schedule /> },
+      { path: '/session/:id', element: <Session /> },
       { path: '/bookmarks', element: <Bookmarks /> },
       { path: '/table/:number', element: <Table /> },
       // Protected user routes
@@ -75,13 +79,15 @@ const routes: RouteObject[] = [
           { path: 'page', element: <PageList /> },
           { path: 'page/:key', element: <PageEditor /> },
           { path: 'tableLabels', element: <TableLabels /> },
+          { path: 'session/new', element: <SessionEditorPage /> },
+          { path: 'session/:id', element: <SessionEditorPage /> },
         ],
       },
       { path: '/table', element: <Tables /> },
       { path: '/setupExhibitor', element: <SetupExhibitor /> },
-      { path: '/*', element: <NotFound /> },
     ],
   },
+  { path: '*', element: <NotFound /> },
 ]
 
 export default routes

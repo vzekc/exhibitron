@@ -41,6 +41,7 @@ extend type Mutation {
   resetPassword(password: String!, token: String!): Boolean
   updateUserProfile(input: UpdateUserProfileInput!): User
   sendVisitorEmail(userId: Int!, message: String!): Boolean
+  deleteUser(id: Int!): Boolean
 }
 
 extend type Query {
@@ -50,4 +51,5 @@ extend type Query {
   getUsers: [User!]
   getTokenEmail(token: String!): String
   isForumUser(email: String!): Boolean
+  getDeleteToken(id: Int!): String
 }

@@ -1,6 +1,6 @@
 import '@styles/fonts/press-start-2p.css'
 
-export const RetroHeader = () => {
+const RetroHeader = () => {
   return (
     <header className="relative mb-10 overflow-hidden bg-[#F7C55F] py-6">
       <div className="container mx-auto px-4">
@@ -26,3 +26,5 @@ export const RetroHeader = () => {
     </header>
   )
 }
+
+export default RetroHeader

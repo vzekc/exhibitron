@@ -18,6 +18,10 @@ import { Document } from './modules/document/entity.js'
 import { DocumentRepository } from './modules/document/repository.js'
 import { ImageStorage } from './modules/image/entity.js'
 import { ImageRepository } from './modules/image/repository.js'
+import { Room } from './modules/room/entity.js'
+import { RoomRepository } from './modules/room/repository.js'
+import { ConferenceSession } from './modules/conferenceSession/entity.js'
+import { ConferenceSessionRepository } from './modules/conferenceSession/repository.js'
 
 export interface Services {
   dbName?: string
@@ -33,6 +37,8 @@ export interface Services {
   page: EntityRepository<Page>
   document: DocumentRepository
   exhibitAttribute: ExhibitAttributeRepository
+  room: RoomRepository
+  conferenceSession: ConferenceSessionRepository
 }
 
 let cache: Services
@@ -65,6 +71,8 @@ export async function initORM(options?: Options): Promise<Services> {
     page: orm.em.getRepository(Page),
     document: orm.em.getRepository(Document),
     exhibitAttribute: orm.em.getRepository(ExhibitAttribute),
+    room: orm.em.getRepository(Room),
+    conferenceSession: orm.em.getRepository(ConferenceSession),
   })
 }
 

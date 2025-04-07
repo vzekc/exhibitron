@@ -10,13 +10,7 @@ interface ReactSVGProps {
   onError?: (error: string) => void
 }
 
-export const ReactSVG: React.FC<ReactSVGProps> = ({
-  src,
-  className = '',
-  onLoad,
-  onClick,
-  onError,
-}) => {
+const ReactSVG: React.FC<ReactSVGProps> = ({ src, className = '', onLoad, onClick, onError }) => {
   const [svgContent, setSvgContent] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [parsedSvg, setParsedSvg] = useState<{

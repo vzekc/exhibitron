@@ -5,7 +5,7 @@ interface ExhibitorSelectorProps {
   onSelect: (exhibitorId: number) => void
 }
 
-export const ExhibitorSelector = ({ options, onSelect }: ExhibitorSelectorProps) => {
+const ExhibitorSelector = ({ options, onSelect }: ExhibitorSelectorProps) => {
   const [inputValue, setInputValue] = useState('')
   const [showDropdown, setShowDropdown] = useState(false)
   const [showAbove, setShowAbove] = useState(false)
@@ -130,3 +130,5 @@ export const ExhibitorSelector = ({ options, onSelect }: ExhibitorSelectorProps)
     </div>
   )
 }
+
+export default ExhibitorSelector

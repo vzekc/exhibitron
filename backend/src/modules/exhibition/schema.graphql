@@ -3,6 +3,8 @@ type Exhibition {
   id: Int!
   key: String!
   title: String!
+  startDate: DateTime!
+  endDate: DateTime!
   tables: [Table!]
   exhibitors: [Exhibitor!]
   exhibits: [Exhibit!]

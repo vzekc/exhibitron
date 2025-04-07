@@ -1,9 +1,10 @@
-import { Collection, Entity, ManyToOne, OneToMany, Property } from '@mikro-orm/core'
+import { Collection, Entity, ManyToOne, OneToMany, ManyToMany, Property } from '@mikro-orm/core'
 import { User } from '../user/entity.js'
 import { Exhibition } from '../exhibition/entity.js'
 import { BaseEntity } from '../common/base.entity.js'
 import { Exhibit } from '../exhibit/entity.js'
 import { Table } from '../table/entity.js'
+import { ConferenceSession } from '../conferenceSession/entity.js'
 
 @Entity()
 export class Exhibitor extends BaseEntity {
@@ -21,4 +22,7 @@ export class Exhibitor extends BaseEntity {
 
   @OneToMany({ mappedBy: 'exhibitor' })
   tables = new Collection<Table>(this)
+
+  @ManyToMany(() => ConferenceSession, (conferenceSession) => conferenceSession.exhibitors)
+  conferenceSessions = new Collection<ConferenceSession>(this)
 }

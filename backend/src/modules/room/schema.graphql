@@ -1,0 +1,26 @@
+type Room {
+  id: Int!
+  name: String!
+  capacity: Int
+}
+
+extend type Query {
+  getRoom(id: Int!): Room
+  getRooms: [Room!]
+}
+
+extend type Mutation {
+  createRoom(input: CreateRoomInput!): Room!
+  updateRoom(id: Int!, input: UpdateRoomInput!): Room!
+  deleteRoom(id: Int!): Boolean!
+}
+
+input CreateRoomInput {
+  name: String!
+  capacity: Int
+}
+
+input UpdateRoomInput {
+  name: String
+  capacity: Int
+}

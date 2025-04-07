@@ -1,15 +1,17 @@
-import { ReactNode } from 'react'
+import React from 'react'
 
 interface FormFieldsetProps {
-  title?: string
-  children: ReactNode
+  legend: string
+  children: React.ReactNode
 }
 
-export const FormFieldset = ({ title, children }: FormFieldsetProps) => {
+const FormFieldset: React.FC<FormFieldsetProps> = ({ legend, children }) => {
   return (
-    <fieldset className="mb-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-      {title && <h3 className="mb-4 text-lg font-semibold text-gray-900">{title}</h3>}
-      <div className="space-y-4">{children}</div>
+    <fieldset className="rounded-lg border border-gray-200 p-4">
+      <legend className="text-md px-2 font-medium font-semibold text-gray-700">{legend}</legend>
+      {children}
     </fieldset>
   )
 }
+
+export default FormFieldset
