@@ -1,9 +1,17 @@
-import type { Session } from '@components/schedule/types'
+export interface Session {
+  id: string
+  title: string
+  startTime: Date
+  endTime: Date
+  room: string
+  presenters: string[]
+}
 
 export function generateICalContent(
   sessions: Session[],
   exhibitionName: string,
   exhibitionKey: string,
+  baseUrl: string,
 ): string {
   const now = new Date()
   const icalContent = [
@@ -18,14 +26,7 @@ export function generateICalContent(
   sessions.forEach((session) => {
     const startDate = new Date(session.startTime)
     const endDate = new Date(session.endTime)
-    const sessionUrl = `${window.location.origin}/session/${session.id}`
-    const description = [
-      session.presenter ? `Mit: ${session.presenter}` : '',
-      `Raum: ${session.roomId}`,
-    ]
-      .filter(Boolean)
-      .join('\\n')
-
+    const sessionUrl = `${baseUrl}/session/${session.id}`
     const summary = `[${exhibitionKey}] ${session.title}`
 
     icalContent.push(
@@ -35,7 +36,8 @@ export function generateICalContent(
       `DTSTART:${startDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
       `DTEND:${endDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
       `SUMMARY:${summary}`,
-      `DESCRIPTION:${description}`,
+      `DESCRIPTION:${session.presenters.join(', ')}`,
+      `LOCATION:${session.room}`,
       `URL:${sessionUrl}`,
       'END:VEVENT',
     )
@@ -43,16 +45,4 @@ export function generateICalContent(
 
   icalContent.push('END:VCALENDAR')
   return icalContent.join('\r\n')
-}
-
-export function downloadICalFile(content: string, filename: string) {
-  const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.setAttribute('download', filename)
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
 }

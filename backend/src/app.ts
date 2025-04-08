@@ -12,6 +12,7 @@ import { registerUserRoutes } from './modules/user/routes.js'
 import { registerImageRoutes } from './modules/image/routes.js'
 import { registerExhibitImageRoutes } from './modules/exhibit/routes.js'
 import { registerServerSideHtmlRoutes } from './modules/serverSideHtml/routes.js'
+import { registerScheduleRoutes } from './modules/schedule/routes.js'
 
 const registerErrorHandler = (app: FastifyInstance) => {
   // register global error handler to process 404 errors from `findOneOrFail` calls
@@ -67,6 +68,7 @@ export async function createApp({
   await registerUserRoutes(app)
   await registerImageRoutes(app)
   await registerExhibitImageRoutes(app)
+  await registerScheduleRoutes(app)
 
   return app
 }
