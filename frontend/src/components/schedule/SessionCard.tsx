@@ -45,7 +45,7 @@ const SessionCard: React.FC<SessionCardProps> = ({ session, timeSlotHeight, onDo
   return (
     <div
       ref={dragRef as unknown as React.RefObject<HTMLDivElement>}
-      className={`absolute inset-x-1 z-10 ${exhibitor?.user.isAdministrator ? 'cursor-move' : 'cursor-pointer'} overflow-hidden rounded px-2 py-1 text-sm ${isDragging ? 'hidden' : ''} `}
+      className={`absolute inset-x-1 z-10 ${exhibitor?.user.isAdministrator ? 'cursor-move' : 'cursor-pointer'} overflow-hidden rounded px-2 ${durationInMinutes === 15 ? 'py-0 leading-none' : 'py-1'} text-sm ${isDragging ? 'hidden' : ''} `}
       style={{
         height: `${height}px`,
         backgroundColor: 'rgb(219 234 254)',
@@ -54,8 +54,12 @@ const SessionCard: React.FC<SessionCardProps> = ({ session, timeSlotHeight, onDo
       }}
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}>
-      <div className="font-medium">{session.title}</div>
-      <div className="text-xs truncate text-gray-600">{session.presenter}</div>
+      <div className={`font-medium ${durationInMinutes === 15 ? '-mt-0.5 mb-0' : ''}`}>
+        {session.title}
+      </div>
+      <div className={`text-xs truncate text-gray-600 ${durationInMinutes === 15 ? '-mt-1' : ''}`}>
+        {session.presenter}
+      </div>
     </div>
   )
 }
