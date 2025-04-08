@@ -42,8 +42,12 @@ export const exhibitQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2345
   getExhibit: async (_, { id }, { db }) => db.exhibit.findOneOrFail({ id }),
   // @ts-expect-error ts2345
-  getExhibits: async (_, _args, { db }) =>
-    db.exhibit.findAll({ orderBy: { title: QueryOrder.ASC } }),
+  getExhibits: async (_, _args, { db, exhibition }) =>
+    db.exhibit
+      .find({ exhibition }, { orderBy: { title: QueryOrder.ASC } })
+      .then((exhibits) =>
+        exhibits.sort((a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase())),
+      ),
 }
 
 export const exhibitMutations: MutationResolvers<Context> = {

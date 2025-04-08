@@ -30,9 +30,9 @@ const Exhibitors = () => {
     if (data?.getCurrentExhibition?.exhibitors) {
       setExhibitors(
         [...data.getCurrentExhibition.exhibitors].sort((a, b) => {
-          return (a.user.nickname || a.user.fullName).localeCompare(
-            b.user.nickname || b.user.fullName,
-          )
+          return (a.user.nickname || a.user.fullName)
+            .toLowerCase()
+            .localeCompare((b.user.nickname || b.user.fullName).toLowerCase())
         }),
       )
     }
