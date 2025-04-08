@@ -28,6 +28,12 @@ const SessionCard: React.FC<SessionCardProps> = ({ session, timeSlotHeight, onDo
     canDrag: () => exhibitor?.user.isAdministrator ?? false,
   })
 
+  const handleClick = () => {
+    if (!exhibitor?.user.isAdministrator) {
+      navigate(`/session/${session.id}`)
+    }
+  }
+
   const handleDoubleClick = () => {
     if (exhibitor?.user.isAdministrator) {
       onDoubleClick?.(session)
@@ -46,6 +52,7 @@ const SessionCard: React.FC<SessionCardProps> = ({ session, timeSlotHeight, onDo
         opacity: isDragging ? 0.2 : 1,
         border: '1px solid rgba(0, 0, 0, 0.05)',
       }}
+      onClick={handleClick}
       onDoubleClick={handleDoubleClick}>
       <div className="font-medium">{session.title}</div>
       <div className="text-xs truncate text-gray-600">{session.presenter}</div>
