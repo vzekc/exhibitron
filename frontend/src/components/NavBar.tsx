@@ -16,6 +16,7 @@ interface MenuItemProps {
   className?: string
   isActive?: boolean
   hasDropdown?: boolean
+  newTab?: boolean
 }
 
 interface NavListProps {
@@ -40,6 +41,7 @@ const MenuItem = ({
   className = '',
   isActive,
   hasDropdown,
+  newTab,
 }: MenuItemProps) => {
   const baseClasses = 'block rounded px-3 py-2 text-xl hover:bg-gray-100 dark:hover:bg-gray-700'
   const activeClasses = isActive
@@ -66,14 +68,24 @@ const MenuItem = ({
 
   if (to) {
     return (
-      <Link to={to} className={combinedClasses} onClick={onClick}>
+      <Link
+        to={to}
+        className={combinedClasses}
+        onClick={onClick}
+        target={newTab ? '_blank' : undefined}
+        rel={newTab ? 'noopener noreferrer' : undefined}>
         {content}
       </Link>
     )
   }
 
   return (
-    <a href="#" className={combinedClasses} onClick={onClick}>
+    <a
+      href="#"
+      className={combinedClasses}
+      onClick={onClick}
+      target={newTab ? '_blank' : undefined}
+      rel={newTab ? 'noopener noreferrer' : undefined}>
       {content}
     </a>
   )
@@ -187,8 +199,13 @@ const NavBar = () => {
         </MenuItem>
       )
     }
+    if (!item.to) return null
     return (
-      <MenuItem key={item.to} to={item.to} onClick={() => onClose?.()}>
+      <MenuItem
+        key={item.to}
+        to={item.to}
+        onClick={() => onClose?.()}
+        newTab={item.to.startsWith('http')}>
         {item.label}
       </MenuItem>
     )
