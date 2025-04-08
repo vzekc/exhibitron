@@ -7,6 +7,10 @@ import LoadInProgress from '@components/LoadInProgress'
 import Card from '@components/Card'
 import ServerHtmlContent from '@components/ServerHtmlContent'
 import { KeyValueTable, TableRow, TableCell } from '@components/Table'
+import { useExhibitor } from '@contexts/ExhibitorContext'
+import ActionBar from '@components/ActionBar'
+import Button from '@components/Button'
+import { useNavigate } from 'react-router-dom'
 
 const GET_SESSION = graphql(`
   query GetSession($id: Int!) {
@@ -34,6 +38,8 @@ const GET_SESSION = graphql(`
 const Session = () => {
   const { id } = useParams()
   const { setDetailName } = useBreadcrumb()
+  const { exhibitor } = useExhibitor()
+  const navigate = useNavigate()
   const { loading, error, data } = useQuery(GET_SESSION, {
     variables: { id: parseInt(id ?? '0') },
     skip: !id,
@@ -55,6 +61,9 @@ const Session = () => {
   const presenters = session.exhibitors
     ?.map((exhibitor) => exhibitor.user.nickname || exhibitor.user.fullName)
     .join(', ')
+
+  const isPresenter = exhibitor && session.exhibitors?.some((e) => e.id === exhibitor.id)
+  const canEdit = exhibitor?.user.isAdministrator || isPresenter
 
   return (
     <div className="container mx-auto p-4">
@@ -110,6 +119,14 @@ const Session = () => {
           </div>
         )}
       </Card>
+
+      {canEdit && (
+        <ActionBar>
+          <Button onClick={() => navigate(`/session/${id}/edit`)} icon="edit">
+            Bearbeiten
+          </Button>
+        </ActionBar>
+      )}
     </div>
   )
 }

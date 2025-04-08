@@ -14,6 +14,7 @@ import TextEditor, { TextEditorHandle } from '@components/TextEditor'
 import ActionBar from '@components/ActionBar'
 import { Exhibitor } from '../../types/exhibitor'
 import { useExhibitor } from '@contexts/ExhibitorContext'
+import { useUnsavedChangesWarning } from '@hooks/useUnsavedChangesWarning'
 
 const GET_SCHEDULE_DATA = graphql(`
   query GetScheduleData {
@@ -147,6 +148,7 @@ const SessionEditor: React.FC<SessionEditorProps> = ({
   const [durationMinutes, setDurationMinutes] = useState<number>(30)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [description, setDescription] = useState<string>('')
+  const [isTextEdited, setIsTextEdited] = useState(false)
 
   const [createConferenceSession] = useMutation(CREATE_PRESENTATION, {
     refetchQueries: ['GetScheduleData'],
@@ -206,6 +208,47 @@ const SessionEditor: React.FC<SessionEditorProps> = ({
       resetForm()
     }
   }, [sessionToEdit, initialStartTime, initialRoomId])
+
+  // Track unsaved changes
+  const hasChanges = useMemo(() => {
+    if (!sessionToEdit) {
+      return (
+        conferenceSessionTitle.trim() !== '' ||
+        selectedRoomId !== '' ||
+        selectedExhibitorIds.length > 0 ||
+        selectedDate !== '' ||
+        selectedTime !== '' ||
+        durationMinutes !== 30 ||
+        description !== '' ||
+        isTextEdited
+      )
+    }
+
+    const startDate = new Date(sessionToEdit.startTime)
+    return (
+      conferenceSessionTitle !== sessionToEdit.title ||
+      selectedRoomId !== sessionToEdit.roomId ||
+      JSON.stringify(selectedExhibitorIds) !== JSON.stringify(sessionToEdit.exhibitorIds) ||
+      selectedDate !== startDate.toISOString().split('T')[0] ||
+      selectedTime !==
+        startDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) ||
+      durationMinutes !== (sessionToEdit.endTime - sessionToEdit.startTime) / (1000 * 60) ||
+      description !== (sessionToEdit.description ?? '') ||
+      isTextEdited
+    )
+  }, [
+    conferenceSessionTitle,
+    selectedRoomId,
+    selectedExhibitorIds,
+    selectedDate,
+    selectedTime,
+    durationMinutes,
+    description,
+    isTextEdited,
+    sessionToEdit,
+  ])
+
+  useUnsavedChangesWarning(hasChanges)
 
   const rooms = useMemo(
     () =>
@@ -538,7 +581,11 @@ const SessionEditor: React.FC<SessionEditorProps> = ({
               </FormFieldset>
 
               <FormFieldset legend="Beschreibung">
-                <TextEditor ref={textEditorRef} defaultValue={description} />
+                <TextEditor
+                  ref={textEditorRef}
+                  defaultValue={description}
+                  onEditStateChange={(edited) => setIsTextEdited(edited)}
+                />
               </FormFieldset>
             </div>
 

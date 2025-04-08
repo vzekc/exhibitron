@@ -30,6 +30,7 @@ import { ExhibitorProvider } from '@contexts/ExhibitorProvider.tsx'
 import SessionEditorPage from './pages/admin/SessionEditorPage.tsx'
 import Schedule from './pages/Schedule.tsx'
 import Session from './pages/Session.tsx'
+import PresenterSessionEditorPage from './pages/PresenterSessionEditorPage.tsx'
 
 const routes: RouteObject[] = [
   { path: '/register', element: <Register /> },
@@ -52,6 +53,7 @@ const routes: RouteObject[] = [
       { path: '/exhibitor/:id', element: <Exhibitor /> },
       { path: '/schedule', element: <Schedule /> },
       { path: '/session/:id', element: <Session /> },
+      { path: '/session/:id/edit', element: <PresenterSessionEditorPage /> },
       { path: '/bookmarks', element: <Bookmarks /> },
       { path: '/table/:number', element: <Table /> },
       // Protected user routes
