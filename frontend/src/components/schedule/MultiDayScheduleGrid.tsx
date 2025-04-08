@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import { DndProvider, useDrop } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import SessionCard from './SessionCard'
@@ -35,9 +35,66 @@ const RoomColumn: React.FC<RoomColumnProps> = ({
 }) => {
   const columnRef = useRef<HTMLDivElement>(null)
   const hourHeight = timeSlotHeight * 4 // 4 slots per hour
+  const [hasConflict, setHasConflict] = useState(false)
+
+  const hasSessionOverlap = (
+    roomId: string,
+    startTime: number,
+    endTime: number,
+    excludeSessionId?: string,
+  ) => {
+    const roomSessions = sessions.filter((session) => session.roomId === roomId)
+    return roomSessions.some((session) => {
+      if (session.id === excludeSessionId) return false
+      return (
+        (startTime >= session.startTime && startTime < session.endTime) ||
+        (endTime > session.startTime && endTime <= session.endTime) ||
+        (startTime <= session.startTime && endTime >= session.endTime)
+      )
+    })
+  }
 
   const [{ isOver }, dropRef] = useDrop({
     accept: 'SESSION',
+    hover: (item: DraggedSession, monitor) => {
+      const clientOffset = monitor.getClientOffset()
+      if (!clientOffset || !columnRef.current) return
+
+      const columnRect = columnRef.current.getBoundingClientRect()
+      const relativeY = clientOffset.y - columnRect.top - item.grabOffset
+
+      // Calculate the time based on the hover position
+      const minutesFromStart = Math.round(relativeY / (hourHeight / 60) / 15) * 15
+      const hoverDate = new Date(day)
+      hoverDate.setHours(startHour + Math.floor(minutesFromStart / 60))
+      hoverDate.setMinutes(minutesFromStart % 60)
+      hoverDate.setSeconds(0)
+      hoverDate.setMilliseconds(0)
+
+      const duration = item.endTime - item.startTime
+
+      // Check for conflicts at both the start and end of the session
+      const sessionHeight = (duration / (1000 * 60)) * (hourHeight / 60) // height in pixels
+      const topEdge = relativeY
+      const bottomEdge = relativeY + sessionHeight
+
+      // Convert pixel positions back to timestamps
+      const topTime = new Date(day)
+      topTime.setHours(startHour + Math.floor(((topEdge / hourHeight) * 60) / 60))
+      topTime.setMinutes(Math.floor((topEdge / hourHeight) * 60) % 60)
+      topTime.setSeconds(0)
+      topTime.setMilliseconds(0)
+
+      const bottomTime = new Date(day)
+      bottomTime.setHours(startHour + Math.floor(((bottomEdge / hourHeight) * 60) / 60))
+      bottomTime.setMinutes(Math.floor((bottomEdge / hourHeight) * 60) % 60)
+      bottomTime.setSeconds(0)
+      bottomTime.setMilliseconds(0)
+
+      const conflict = hasSessionOverlap(room.id, topTime.getTime(), bottomTime.getTime(), item.id)
+      setHasConflict(conflict)
+    },
+    canDrop: () => !hasConflict,
     drop: (item: DraggedSession, monitor) => {
       const clientOffset = monitor.getClientOffset()
       if (!clientOffset || !columnRef.current) return
@@ -66,7 +123,9 @@ const RoomColumn: React.FC<RoomColumnProps> = ({
         dropRef(node)
         columnRef.current = node
       }}
-      className={`relative border-r border-gray-200 last:border-r-0 ${isOver ? 'bg-blue-50' : ''}`}>
+      className={`relative border-r border-gray-200 last:border-r-0 ${
+        isOver ? (hasConflict ? 'bg-red-50' : 'bg-blue-50') : ''
+      }`}>
       {/* Time slots */}
       {timeSlots.map((slot) => {
         const slotTimestamp = new Date(day)
@@ -189,8 +248,37 @@ const MultiDayScheduleGrid: React.FC<MultiDayScheduleGridProps> = ({
     return sessions.filter((session) => session.roomId === roomId)
   }
 
+  const hasSessionOverlap = (
+    roomId: string,
+    startTime: number,
+    endTime: number,
+    excludeSessionId?: string,
+  ) => {
+    const roomSessions = getSessionsForRoom(roomId)
+    return roomSessions.some((session) => {
+      if (session.id === excludeSessionId) return false
+      return (
+        (startTime >= session.startTime && startTime < session.endTime) ||
+        (endTime > session.startTime && endTime <= session.endTime) ||
+        (startTime <= session.startTime && endTime >= session.endTime)
+      )
+    })
+  }
+
   const handleDrop = async (sessionId: string, roomId: string, timestamp: number) => {
     if (onSessionReschedule) {
+      const session = sessions.find((s) => s.id === sessionId)
+      if (!session) return
+
+      const duration = session.endTime - session.startTime
+      const newEndTime = timestamp + duration
+
+      // Check for overlaps
+      if (hasSessionOverlap(roomId, timestamp, newEndTime, sessionId)) {
+        // TODO: Show error message to user
+        return
+      }
+
       await onSessionReschedule(sessionId, roomId, timestamp)
     }
   }
