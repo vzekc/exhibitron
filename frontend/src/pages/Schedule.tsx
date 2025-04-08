@@ -211,7 +211,6 @@ const Schedule = () => {
     endDate: (data.getCurrentExhibition?.endDate as string) ?? '',
   }
 
-  console.log('isAdministrator', exhibitor?.user.isAdministrator, exhibitor)
   return (
     <>
       <div className="min-h-screen bg-gray-50">

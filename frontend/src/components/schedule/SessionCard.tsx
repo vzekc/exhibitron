@@ -1,5 +1,5 @@
-import React from 'react'
-import { useDrag } from 'react-dnd'
+import React, { useRef } from 'react'
+import { useDrag, DragSourceMonitor } from 'react-dnd'
 import type { Session } from './types'
 import { useExhibitor } from '@contexts/ExhibitorContext'
 import { useNavigate } from 'react-router-dom'
@@ -10,22 +10,38 @@ interface SessionCardProps {
   onDoubleClick?: (session: Session) => void
 }
 
+interface DraggedSession extends Session {
+  grabOffset: number
+}
+
 const SessionCard: React.FC<SessionCardProps> = ({ session, timeSlotHeight, onDoubleClick }) => {
   const { exhibitor } = useExhibitor()
   const navigate = useNavigate()
+  const cardRef = useRef<HTMLDivElement>(null)
   const durationInMinutes = (session.endTime - session.startTime) / (1000 * 60)
   const numberOfSlots = durationInMinutes / 15 // 15 minutes per slot
   const height = numberOfSlots * timeSlotHeight
 
-  const [{ isDragging }, dragRef] = useDrag({
+  const [{ isDragging }, dragRef] = useDrag<DraggedSession, unknown, { isDragging: boolean }>({
     type: 'SESSION',
-    item: () => {
-      return session
+    item: (monitor: DragSourceMonitor) => {
+      const clientOffset = monitor.getClientOffset()
+      if (!clientOffset || !cardRef.current) return { ...session, grabOffset: 0 }
+
+      const cardRect = cardRef.current.getBoundingClientRect()
+      return {
+        ...session,
+        grabOffset: clientOffset.y - cardRect.top,
+      }
     },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
     canDrag: () => exhibitor?.user.isAdministrator ?? false,
+    previewOptions: {
+      anchorX: 0,
+      anchorY: 0,
+    },
   })
 
   const handleClick = () => {
@@ -44,7 +60,10 @@ const SessionCard: React.FC<SessionCardProps> = ({ session, timeSlotHeight, onDo
 
   return (
     <div
-      ref={dragRef as unknown as React.RefObject<HTMLDivElement>}
+      ref={(node) => {
+        dragRef(node)
+        cardRef.current = node
+      }}
       className={`absolute inset-x-1 z-10 ${exhibitor?.user.isAdministrator ? 'cursor-move' : 'cursor-pointer'} overflow-hidden rounded px-2 ${durationInMinutes === 15 ? 'py-0 leading-none' : 'py-1'} text-sm ${isDragging ? 'hidden' : ''} `}
       style={{
         height: `${height}px`,

@@ -1,10 +1,118 @@
-import React, { useMemo } from 'react'
-import { DndProvider } from 'react-dnd'
+import React, { useMemo, useRef } from 'react'
+import { DndProvider, useDrop } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import SessionCard from './SessionCard'
 import { TimeSlot } from './TimeSlot'
 import RoomHeader from './RoomHeader'
 import type { Session, Room, TimeSlot as TimeSlotType } from './types'
+
+interface DraggedSession extends Session {
+  grabOffset: number
+}
+
+interface RoomColumnProps {
+  room: Room
+  day: Date
+  timeSlots: TimeSlotType[]
+  sessions: Session[]
+  startHour: number
+  timeSlotHeight: number
+  onDrop: (sessionId: string, roomId: string, timestamp: number) => void
+  onSessionCreate?: (roomId: string, startTime: number) => void
+  onSessionEdit?: (session: Session) => void
+}
+
+const RoomColumn: React.FC<RoomColumnProps> = ({
+  room,
+  day,
+  timeSlots,
+  sessions,
+  startHour,
+  timeSlotHeight,
+  onDrop,
+  onSessionCreate,
+  onSessionEdit,
+}) => {
+  const columnRef = useRef<HTMLDivElement>(null)
+  const hourHeight = timeSlotHeight * 4 // 4 slots per hour
+
+  const [{ isOver }, dropRef] = useDrop({
+    accept: 'SESSION',
+    drop: (item: DraggedSession, monitor) => {
+      const clientOffset = monitor.getClientOffset()
+      if (!clientOffset || !columnRef.current) return
+
+      const columnRect = columnRef.current.getBoundingClientRect()
+      const relativeY = clientOffset.y - columnRect.top - item.grabOffset
+
+      // Calculate the time based on the drop position
+      const minutesFromStart = Math.round(relativeY / (hourHeight / 60) / 15) * 15
+      const dropDate = new Date(day)
+      dropDate.setHours(startHour + Math.floor(minutesFromStart / 60))
+      dropDate.setMinutes(minutesFromStart % 60)
+      dropDate.setSeconds(0)
+      dropDate.setMilliseconds(0)
+
+      onDrop(item.id, room.id, dropDate.getTime())
+    },
+    collect: (monitor) => ({
+      isOver: !!monitor.isOver(),
+    }),
+  })
+
+  return (
+    <div
+      ref={(node) => {
+        dropRef(node)
+        columnRef.current = node
+      }}
+      className={`relative border-r border-gray-200 last:border-r-0 ${isOver ? 'bg-blue-50' : ''}`}>
+      {/* Time slots */}
+      {timeSlots.map((slot) => {
+        const slotTimestamp = new Date(day)
+        slotTimestamp.setHours(Math.floor(slot.minutes / 60))
+        slotTimestamp.setMinutes(slot.minutes % 60)
+        slotTimestamp.setSeconds(0)
+        slotTimestamp.setMilliseconds(0)
+
+        return (
+          <TimeSlot
+            key={`${room.id}-${slotTimestamp.getTime()}`}
+            roomId={room.id}
+            timestamp={slotTimestamp.getTime()}
+            height={timeSlotHeight}
+            isHourStart={slot.isHourStart}
+            sessions={sessions}
+            onDoubleClick={onSessionCreate}
+          />
+        )
+      })}
+      {/* Sessions */}
+      {sessions
+        .filter((session) => session.roomId === room.id)
+        .map((session) => {
+          const startTime = new Date(session.startTime)
+          const minutesFromStart =
+            startTime.getHours() * 60 + startTime.getMinutes() - startHour * 60
+
+          return (
+            <div
+              key={session.id}
+              className="absolute inset-x-2"
+              style={{
+                top: `${minutesFromStart * (hourHeight / 60)}px`,
+              }}>
+              <SessionCard
+                session={session}
+                timeSlotHeight={timeSlotHeight}
+                onDoubleClick={onSessionEdit}
+              />
+            </div>
+          )
+        })}
+    </div>
+  )
+}
 
 interface MultiDayScheduleGridProps {
   rooms: Room[]
@@ -146,56 +254,19 @@ const MultiDayScheduleGrid: React.FC<MultiDayScheduleGridProps> = ({
                       gridTemplateColumns: `repeat(${rooms.length}, minmax(150px, 1fr))`,
                       height: `${HOUR_HEIGHT * (endHour - startHour)}px`,
                     }}>
-                    {/* Room columns with hour lines */}
                     {rooms.map((room) => (
-                      <div
+                      <RoomColumn
                         key={room.id}
-                        className="relative border-r border-gray-200 last:border-r-0">
-                        {/* Time slots */}
-                        {timeSlots.map((slot) => {
-                          const slotTimestamp = new Date(day)
-                          slotTimestamp.setHours(Math.floor(slot.minutes / 60))
-                          slotTimestamp.setMinutes(slot.minutes % 60)
-                          slotTimestamp.setSeconds(0)
-                          slotTimestamp.setMilliseconds(0)
-
-                          return (
-                            <TimeSlot
-                              key={`${room.id}-${slotTimestamp.getTime()}`}
-                              roomId={room.id}
-                              timestamp={slotTimestamp.getTime()}
-                              height={SLOT_HEIGHT}
-                              isHourStart={slot.isHourStart}
-                              sessions={getSessionsForDay(day)}
-                              onDrop={handleDrop}
-                              onDoubleClick={onSessionCreate}
-                            />
-                          )
-                        })}
-                        {/* Sessions */}
-                        {getSessionsForDay(day)
-                          .filter((session) => session.roomId === room.id)
-                          .map((session) => {
-                            const startTime = new Date(session.startTime)
-                            const minutesFromStart =
-                              startTime.getHours() * 60 + startTime.getMinutes() - startHour * 60
-
-                            return (
-                              <div
-                                key={session.id}
-                                className="absolute inset-x-2"
-                                style={{
-                                  top: `${minutesFromStart * (HOUR_HEIGHT / 60)}px`,
-                                }}>
-                                <SessionCard
-                                  session={session}
-                                  timeSlotHeight={SLOT_HEIGHT}
-                                  onDoubleClick={onSessionEdit}
-                                />
-                              </div>
-                            )
-                          })}
-                      </div>
+                        room={room}
+                        day={day}
+                        timeSlots={timeSlots}
+                        sessions={getSessionsForDay(day)}
+                        startHour={startHour}
+                        timeSlotHeight={SLOT_HEIGHT}
+                        onDrop={handleDrop}
+                        onSessionCreate={onSessionCreate}
+                        onSessionEdit={onSessionEdit}
+                      />
                     ))}
                   </div>
                 </div>
