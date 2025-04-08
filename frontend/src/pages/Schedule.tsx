@@ -10,6 +10,7 @@ import { useExhibitor } from '@contexts/ExhibitorContext'
 import type { Session } from '@components/schedule/types'
 import Button from '@components/Button'
 import ActionBar from '@components/ActionBar'
+import { generateICalContent, downloadICalFile } from '@utils/ical'
 
 const START_HOUR = 9
 const END_HOUR = 22
@@ -39,6 +40,8 @@ const GET_SCHEDULE_DATA = graphql(`
     }
     getCurrentExhibition {
       id
+      key
+      title
       startDate
       endDate
       exhibitors {
@@ -170,6 +173,13 @@ const Schedule = () => {
     })
   }
 
+  const handleDownloadICal = () => {
+    if (!data?.getConferenceSessions || !data?.getCurrentExhibition) return
+    const { title, key } = data.getCurrentExhibition
+    const icalContent = generateICalContent(sessions, title, key)
+    downloadICalFile(icalContent, `${key}-zeitplan.ics`)
+  }
+
   if (loading) return <LoadInProgress />
   if (error) return <div className="text-red-600">Error: {error.message}</div>
   if (!data) return <div className="text-red-600">No data available</div>
@@ -215,7 +225,12 @@ const Schedule = () => {
     <>
       <div className="min-h-screen bg-gray-50">
         <div className="relative z-0 p-4">
-          <h1 className="mb-6 text-2xl font-bold">Zeitplan</h1>
+          <div className="mb-6 flex items-center justify-between">
+            <h1 className="text-2xl font-bold">Zeitplan</h1>
+            <Button icon="schedule" onClick={handleDownloadICal}>
+              Zeitplan exportieren
+            </Button>
+          </div>
           <div>
             <MultiDayScheduleGrid
               rooms={rooms}
