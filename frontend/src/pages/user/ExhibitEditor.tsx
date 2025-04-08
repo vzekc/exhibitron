@@ -238,58 +238,28 @@ const ExhibitEditor = () => {
       .map(({ name, value }) => ({ name, value }))
 
     await apolloClient.resetStore()
-    if (isNew) {
-      const result = await createExhibit({
-        variables: {
-          title: data.title,
-          description: currentDescription,
-          descriptionExtension: currentDescriptionExtension,
-          table: data.table || null,
-          attributes: validAttributes.length > 0 ? validAttributes : undefined,
-        },
-      })
-      const {
-        id: savedId,
-        description: savedDescription,
-        descriptionExtension: savedDescriptionExtension,
-        attributes: savedAttributes,
-      } = result.data!.createExhibit!
-      navigate(`/user/exhibit/${savedId}`)
-      setValue('description', savedDescription!)
-      setValue('descriptionExtension', savedDescriptionExtension!)
-      setValue('attributes', (savedAttributes as Attribute[]) || [])
-    } else {
-      const result = await updateExhibit({
-        variables: {
-          id: Number(id),
-          title: data.title,
-          description: currentDescription,
-          descriptionExtension: currentDescriptionExtension,
-          table: data.table || null,
-          attributes: validAttributes.length > 0 ? validAttributes : undefined,
-        },
-      })
-      const {
-        description: savedDescription,
-        descriptionExtension: savedDescriptionExtension,
-        attributes: savedAttributes,
-      } = result.data!.updateExhibit!
-      setValue('description', savedDescription!)
-      setValue('descriptionExtension', savedDescriptionExtension!)
-      setValue('attributes', (savedAttributes as Attribute[]) || [])
-    }
-
-    // Reset form state and text editor states
-    reset({
+    const variables = {
       title: data.title,
-      table: data.table,
       description: currentDescription,
       descriptionExtension: currentDescriptionExtension,
-      attributes: validAttributes,
-      mainImage: watch('mainImage'),
-    })
-    descriptionEditorRef.current?.resetEditState()
-    descriptionExtensionEditorRef.current?.resetEditState()
+      table: data.table || null,
+      attributes: validAttributes.length > 0 ? validAttributes : undefined,
+    }
+    if (isNew) {
+      const result = await createExhibit({ variables })
+      if (result.errors) {
+        await showMessage('Fehler', 'Fehler beim Erstellen des Exponats')
+        return
+      }
+      navigate(`/exhibit/${result.data?.createExhibit!.id}`)
+    } else {
+      const result = await updateExhibit({ variables: { id: Number(id), ...variables } })
+      if (result.errors) {
+        await showMessage('Fehler', 'Fehler beim Aktualisieren des Exponats')
+        return
+      }
+      navigate(`/exhibit/${id}`)
+    }
   }
 
   const handleDelete = async () => {
