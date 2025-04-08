@@ -42,7 +42,7 @@ const UserExhibits = () => {
 
       <ChipContainer>
         {exhibits?.map((exhibit, index: number) => (
-          <ExhibitChip key={index} exhibit={exhibit} noExhibitor url="/user/exhibit" />
+          <ExhibitChip key={index} exhibit={exhibit} noExhibitor url="/exhibit" />
         ))}
       </ChipContainer>
 

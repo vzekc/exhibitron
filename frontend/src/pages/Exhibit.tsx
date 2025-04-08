@@ -11,6 +11,7 @@ import Confirm from '@components/Confirm'
 import Button from '@components/Button'
 import ActionBar from '@components/ActionBar'
 import LoadInProgress from '@components/LoadInProgress'
+import { generateAndDownloadPDF } from '@components/ExhibitPDF.tsx'
 
 const GET_DATA = graphql(`
   query GetExhibit($id: Int!) {
@@ -46,6 +47,7 @@ const Exhibit = () => {
   })
   const [deleteExhibit] = useMutation(DELETE_EXHIBIT)
   const location = useLocation()
+  const [isPdfGenerating, setIsPdfGenerating] = useState(false)
 
   const handleBookmark = () => {
     if (!data!.getExhibit) {
@@ -100,6 +102,25 @@ const Exhibit = () => {
     navigate('/exhibit')
   }
 
+  const handlePdfClick = async () => {
+    if (isPdfGenerating) return
+
+    try {
+      setIsPdfGenerating(true)
+
+      const exhibitId = parseInt(id!)
+
+      await generateAndDownloadPDF({
+        id: exhibitId,
+        client: apolloClient,
+      })
+    } catch (error) {
+      console.error('Error generating PDF:', error)
+    } finally {
+      setIsPdfGenerating(false)
+    }
+  }
+
   return (
     <div className="space-y-4 rounded-lg bg-white dark:bg-gray-800">
       <ExhibitCard id={exhibit.id} />
@@ -111,9 +132,20 @@ const Exhibit = () => {
           {bookmarked ? 'Lesezeichen' : 'Lesezeichen'}
         </Button>
         {canEdit && (
-          <Button onClick={handleEdit} variant="secondary" icon="edit">
-            Bearbeiten
-          </Button>
+          <>
+            <Button onClick={handleEdit} variant="secondary" icon="edit">
+              Bearbeiten
+            </Button>
+            <Button
+              type="button"
+              onClick={handlePdfClick}
+              disabled={isPdfGenerating}
+              variant="secondary"
+              icon="pdf"
+              title="Als PDF anzeigen">
+              PDF
+            </Button>
+          </>
         )}
         {canEdit && (
           <Button onClick={handleDelete} variant="danger" icon="delete">

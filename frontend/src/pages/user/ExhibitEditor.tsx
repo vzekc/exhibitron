@@ -14,7 +14,6 @@ import ActionBar from '@components/ActionBar.tsx'
 import PageHeading from '@components/PageHeading.tsx'
 import { FormSection, FormFieldGroup, FormLabel, SectionLabel, Input } from '@components/Form.tsx'
 import { useForm, SubmitHandler } from 'react-hook-form'
-import { generateAndDownloadPDF } from '@components/ExhibitPDF.tsx'
 import LoadInProgress from '@components/LoadInProgress'
 
 type Attribute = {
@@ -143,7 +142,6 @@ const ExhibitEditor = () => {
   const apolloClient = useApolloClient()
   const isNew = id === 'new'
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [isPdfGenerating, setIsPdfGenerating] = useState(false)
   const descriptionEditorRef = useRef<TextEditorHandle>(null)
   const descriptionExtensionEditorRef = useRef<TextEditorHandle>(null)
 
@@ -268,25 +266,6 @@ const ExhibitEditor = () => {
     navigate('/user/exhibit')
   }
 
-  const handlePdfClick = async () => {
-    if (isPdfGenerating) return
-
-    try {
-      setIsPdfGenerating(true)
-
-      const exhibitId = parseInt(id!)
-
-      await generateAndDownloadPDF({
-        id: exhibitId,
-        client: apolloClient,
-      })
-    } catch (error) {
-      console.error('Error generating PDF:', error)
-    } finally {
-      setIsPdfGenerating(false)
-    }
-  }
-
   if (!isNew) {
     if (exhibitLoading) {
       return <LoadInProgress />
@@ -402,17 +381,6 @@ const ExhibitEditor = () => {
             <Button type="submit" disabled={!isDirty || !watch('title').trim()}>
               {isNew ? 'Erstellen' : 'Speichern'}
             </Button>
-            {!isNew && (
-              <Button
-                type="button"
-                onClick={handlePdfClick}
-                disabled={isPdfGenerating || isDirty}
-                variant="secondary"
-                icon="pdf"
-                title="Als PDF speichern (Shift+Klick öffnet im Browser)">
-                PDF
-              </Button>
-            )}
             {!isNew && (
               <Button type="button" onClick={() => setShowDeleteConfirm(true)} variant="danger">
                 Löschen
