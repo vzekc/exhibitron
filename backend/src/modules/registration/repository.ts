@@ -42,7 +42,7 @@ export class RegistrationRepository extends EntityRepository<Registration> {
         fullName: registration.name,
         isAdministrator: false,
       })
-      userRepository.createPasswordResetToken(user, Date.now() + 7 * 24 * 60 * 60 * 1000)
+      userRepository.createPasswordResetToken(user, registration.exhibition.endDate.getTime())
       completeProfileUrl = `${siteUrl}/setupExhibitor?registrationToken=${user.passwordResetToken}`
       this.em.persist(user)
     }
