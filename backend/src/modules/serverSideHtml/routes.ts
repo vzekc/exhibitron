@@ -10,10 +10,16 @@ import { exhibitsHtml } from './pages/exhibits.js'
 import { exhibitHtml } from './pages/exhibit.js'
 import { exhibitorHtml } from './pages/exhibitor.js'
 import { GeneratePageHtmlContext } from './utils.js'
+import { readFile } from 'fs/promises'
+import { join } from 'path'
 
-const servePageHtml = async (reply: FastifyReply, htmlContent: string) => {
+const servePageHtml = async (
+  reply: FastifyReply,
+  htmlContent: string,
+  context: GeneratePageHtmlContext,
+) => {
   // Convert UTF-8 to ISO-8859-1 using iconv-lite
-  const iso88591Content = iconv.encode(makeMenuHtml() + htmlContent, 'ISO-8859-1')
+  const iso88591Content = iconv.encode(makeMenuHtml(context) + htmlContent, 'ISO-8859-1')
 
   return reply
     .code(200)
@@ -51,6 +57,13 @@ const createRoute = <T extends RouteConfig>(
 export const registerServerSideHtmlRoutes = async (app: FastifyInstance): Promise<void> => {
   const db = await initORM()
 
+  // Add route for logo
+  app.get('/vzekc-logo.gif', async (_, reply) => {
+    const logoPath = join(process.cwd(), 'vzekc-logo.gif')
+    const logoBuffer = await readFile(logoPath)
+    return reply.code(200).header('Content-Type', 'image/gif').send(logoBuffer)
+  })
+
   // Browser detection middleware for home page redirection
   app.addHook('onRequest', async (request, reply) => {
     if (request.url === '/' && !isModernBrowser(request)) {
@@ -85,9 +98,9 @@ export const registerServerSideHtmlRoutes = async (app: FastifyInstance): Promis
         if (isNaN(parsedId)) {
           return reply.code(400).send('Invalid ID parameter')
         }
-        return servePageHtml(reply, await route.handler(context, parsedId))
+        return servePageHtml(reply, await route.handler(context, parsedId), context)
       } else {
-        return servePageHtml(reply, await route.handler(context))
+        return servePageHtml(reply, await route.handler(context), context)
       }
     }
 

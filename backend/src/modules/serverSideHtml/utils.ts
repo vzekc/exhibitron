@@ -87,8 +87,12 @@ export const transformImageUrls = async (
   return transformedHtml
 }
 
-export const makeMenuHtml = () => {
+export const makeMenuHtml = (context: GeneratePageHtmlContext) => {
   return `
+    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+      <img src="/vzekc-logo.gif" alt="Logo" width="40" height="40" style="margin-right: 20px;" />
+      <h1>${context.exhibition.title}</h1>
+    </div>
     <div>
       <a href="/home.html">Start</a> |
       <a href="/exhibits.html">Exponate</a> |
