@@ -288,7 +288,7 @@ export const SeatingPlan: React.FC = () => {
 
       if (horizontalPlacement === 'right') {
         // Calculate position for right placement - based on cursor position
-        const left = clickX - containerRect.left + 10 // 10px gap from cursor
+        const left = clickX - containerRect.left + 15 // 15px gap from cursor
 
         // Check if panel would go beyond the right edge
         if (left + panelWidth > containerRect.width) {
@@ -296,7 +296,7 @@ export const SeatingPlan: React.FC = () => {
           if (clickX - panelWidth - 5 >= containerRect.left) {
             position = {
               top,
-              right: viewportWidth - clickX - 5, // Position 5px to the left of the click
+              right: viewportWidth - clickX + 15, // Add 15px gap from cursor when placing on left
               placement: 'left' as const,
             }
           } else {
@@ -316,15 +316,15 @@ export const SeatingPlan: React.FC = () => {
         }
       } else {
         // Calculate position for left placement - based on cursor position
-        const right = viewportWidth - clickX - 10
+        const right = viewportWidth - clickX + 15 // Add 15px gap from cursor when placing on left
 
         // Check if panel would go beyond the left edge
         if (clickX - panelWidth - 5 < containerRect.left) {
           // If there's not enough space on left, try placing on right instead
-          if (clickX + panelWidth + 10 <= containerRect.right) {
+          if (clickX + panelWidth + 15 <= containerRect.right) {
             position = {
               top,
-              left: clickX - containerRect.left + 10,
+              left: clickX - containerRect.left + 15,
               placement: 'right' as const,
             }
           } else {
