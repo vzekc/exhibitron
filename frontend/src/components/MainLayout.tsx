@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom'
 import NavBar from './NavBar.tsx'
 import { ExhibitorProvider } from '@contexts/ExhibitorProvider.tsx'
 import { BreadcrumbProvider } from '@contexts/BreadcrumbProvider.tsx'
+import Footer from './Footer'
 
 const MainLayout = () => {
   return (
@@ -10,6 +11,7 @@ const MainLayout = () => {
       <BreadcrumbProvider>
         <NavBar />
         <Outlet />
+        <Footer />
       </BreadcrumbProvider>
     </ExhibitorProvider>
   )

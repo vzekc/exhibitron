@@ -11,6 +11,7 @@ import FormFieldset from '@components/FormFieldset'
 import FormInput from '@components/FormInput'
 import FormSelect from '@components/FormSelect'
 import FormTextarea from '@components/FormTextarea'
+import Footer from '@components/Footer'
 
 type Inputs = {
   name: string
@@ -325,37 +326,7 @@ const Register = () => {
     <div className="mx-auto max-w-4xl px-4 py-8">
       <RetroHeader />
       {content()}
-      <footer className="mt-12 border-t border-gray-200 pt-8">
-        <div className="flex flex-col items-center justify-between space-y-4 sm:flex-row sm:space-y-0">
-          <p className="text-sm text-gray-600">
-            Die Classic Computing 2025 ist eine Veranstaltung des{' '}
-            <a
-              href="https://vzekc.de"
-              target="_blank"
-              rel="noreferrer nofollow"
-              className="text-blue-600 hover:text-blue-800">
-              VzEkC e.V.
-            </a>
-          </p>
-          <div className="text-sm text-gray-600">
-            <a
-              href="https://classic-computing.de/impressum"
-              target="_blank"
-              rel="noreferrer nofollow"
-              className="text-blue-600 hover:text-blue-800">
-              Impressum
-            </a>{' '}
-            |{' '}
-            <a
-              href="https://forum.classic-computing.de/index.php?datenschutzerklaerung/"
-              target="_blank"
-              rel="noreferrer nofollow"
-              className="text-blue-600 hover:text-blue-800">
-              Datenschutz
-            </a>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }
