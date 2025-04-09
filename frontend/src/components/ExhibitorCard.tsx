@@ -4,6 +4,7 @@ import ContactInfo from './ContactInfo'
 import ProfileSection from './ProfileSection'
 import Button from './Button'
 import Modal from './Modal'
+import TableChip from './TableChip'
 import { useState } from 'react'
 import { useMutation } from '@apollo/client'
 
@@ -11,6 +12,9 @@ const EXHIBITOR_FRAGMENT = graphql(`
   fragment ExhibitorDetails on Exhibitor @_unmask {
     id
     topic
+    tables {
+      number
+    }
     user {
       id
       fullName
@@ -36,7 +40,7 @@ const SEND_VISITOR_EMAIL = graphql(`
 `)
 
 const ExhibitorCard = ({ exhibitor }: { exhibitor: FragmentOf<typeof EXHIBITOR_FRAGMENT> }) => {
-  const { topic, user } = exhibitor || {}
+  const { topic, user, tables } = exhibitor || {}
   const {
     id: userId,
     fullName,
@@ -68,13 +72,22 @@ const ExhibitorCard = ({ exhibitor }: { exhibitor: FragmentOf<typeof EXHIBITOR_F
   return (
     <Card className="w-full">
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <ProfileSection
-          userId={String(userId)}
-          fullName={fullName}
-          nickname={nickname}
-          profileImage={Boolean(profileImage)}
-          topic={topic}
-        />
+        <div className="relative">
+          <ProfileSection
+            userId={String(userId)}
+            fullName={fullName}
+            nickname={nickname}
+            profileImage={Boolean(profileImage)}
+            topic={topic}
+          />
+          {tables && tables.length > 0 && (
+            <div className="absolute right-0 top-0 flex flex-wrap gap-2">
+              {tables.map((table) => (
+                <TableChip key={table.number} number={table.number} />
+              ))}
+            </div>
+          )}
+        </div>
 
         <div className="flex flex-col gap-4">
           {bio && (

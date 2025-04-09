@@ -9,7 +9,6 @@ import ChipContainer from '@components/ChipContainer.tsx'
 import { useExhibitor } from '@contexts/ExhibitorContext.ts'
 import ActionBar from '@components/ActionBar.tsx'
 import Button from '@components/Button.tsx'
-import TableChip from '@components/TableChip.tsx'
 
 const GET_EXHIBITOR = graphql(
   `
@@ -62,8 +61,6 @@ const Exhibitor = () => {
     await reloadExhibitor()
   }
 
-  const tables = exhibitor.tables?.map((table) => table.number)?.sort()
-
   return (
     <>
       <article className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
@@ -74,18 +71,6 @@ const Exhibitor = () => {
             <ChipContainer>
               {exhibits?.map((exhibit, index: number) => (
                 <ExhibitChip key={index} exhibit={exhibit} />
-              ))}
-            </ChipContainer>
-          </div>
-        )}
-        {tables && tables.length > 0 && (
-          <div className="mt-8">
-            <h2 className="mb-4 text-xl font-semibold text-gray-900">
-              Tisch{tables.length > 1 ? 'e' : ''}
-            </h2>
-            <ChipContainer>
-              {tables?.map((tableNumber, index: number) => (
-                <TableChip key={index} number={tableNumber} />
               ))}
             </ChipContainer>
           </div>
