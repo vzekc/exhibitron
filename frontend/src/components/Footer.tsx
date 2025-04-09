@@ -1,6 +1,6 @@
 const Footer = () => {
   return (
-    <footer className="mx-4 mt-12 border-t border-gray-200 pt-8">
+    <footer className="mx-4 my-8 border-t border-gray-200 pt-8">
       <div className="flex flex-col items-center justify-between space-y-4 sm:flex-row sm:space-y-0">
         <p className="text-sm text-gray-600">
           Die Classic Computing 2025 ist eine Veranstaltung des{' '}
