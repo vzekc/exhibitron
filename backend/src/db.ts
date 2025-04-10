@@ -22,6 +22,8 @@ import { Room } from './modules/room/entity.js'
 import { RoomRepository } from './modules/room/repository.js'
 import { ConferenceSession } from './modules/conferenceSession/entity.js'
 import { ConferenceSessionRepository } from './modules/conferenceSession/repository.js'
+import { Host } from './modules/host/entity.js'
+import { HostRepository } from './modules/host/repository.js'
 
 export interface Services {
   dbName?: string
@@ -39,6 +41,7 @@ export interface Services {
   exhibitAttribute: ExhibitAttributeRepository
   room: RoomRepository
   conferenceSession: ConferenceSessionRepository
+  host: HostRepository
 }
 
 let cache: Services
@@ -73,6 +76,7 @@ export async function initORM(options?: Options): Promise<Services> {
     exhibitAttribute: orm.em.getRepository(ExhibitAttribute),
     room: orm.em.getRepository(Room),
     conferenceSession: orm.em.getRepository(ConferenceSession),
+    host: orm.em.getRepository(Host),
   })
 }
 

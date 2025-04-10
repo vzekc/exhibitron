@@ -1,0 +1,32 @@
+type Host {
+  id: Int!
+  name: String!
+  ipAddress: String!
+  exhibitor: Exhibitor
+  exhibit: Exhibit
+}
+
+extend type Exhibitor {
+  hosts: [Host!]!
+}
+
+extend type Exhibit {
+  host: Host
+}
+
+input HostInput {
+  ipAddress: String
+  exhibitorId: Int
+  exhibitId: Int
+}
+
+extend type Query {
+  getHost(name: String): Host
+  getHosts: [Host!]
+}
+
+extend type Mutation {
+  addHost(name: String!, input: HostInput!): Host!
+  updateHost(name: String!, input: HostInput!): Host!
+  deleteHost(name: String!): Boolean!
+}

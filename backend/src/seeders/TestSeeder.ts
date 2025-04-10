@@ -9,6 +9,7 @@ import { Page } from '../modules/page/entity.js'
 import { Document } from '../modules/document/entity.js'
 import { Room } from '../modules/room/entity.js'
 import { ConferenceSession } from '../modules/conferenceSession/entity.js'
+import { Host } from '../modules/host/entity.js'
 
 export class TestSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {
@@ -130,5 +131,19 @@ export class TestSeeder extends Seeder {
         ],
       })
     }
+
+    // Create hosts for testing
+    const daffyExhibitor = await em
+      .getRepository(Exhibitor)
+      .findOneOrFail({ user: { nickname: 'daffy' } })
+    const daffyExhibit = await em.getRepository(Exhibit).findOneOrFail({ id: 1001 })
+
+    em.create(Host, {
+      name: 'test-host',
+      ipAddress: '192.168.1.1',
+      exhibitor: daffyExhibitor,
+      exhibit: daffyExhibit,
+      exhibition,
+    })
   }
 }

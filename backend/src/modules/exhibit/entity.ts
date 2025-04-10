@@ -13,6 +13,7 @@ import { Exhibition } from '../exhibition/entity.js'
 import { Exhibitor } from '../exhibitor/entity.js'
 import { Document } from '../document/entity.js'
 import { ImageStorage } from '../image/entity.js'
+import { Host } from '../host/entity.js'
 
 @Entity()
 export class ExhibitImage extends BaseEntity {
@@ -59,4 +60,7 @@ export class Exhibit extends BaseEntity<'text' | 'table' | 'attributes'> {
 
   @OneToOne(() => ExhibitImage, (image) => image.exhibit, { nullable: true, orphanRemoval: true })
   mainImage?: ExhibitImage
+
+  @OneToOne(() => Host, { nullable: true })
+  hostname?: Host
 }

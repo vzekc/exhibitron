@@ -5,6 +5,7 @@ import { BaseEntity } from '../common/base.entity.js'
 import { Exhibit } from '../exhibit/entity.js'
 import { Table } from '../table/entity.js'
 import { ConferenceSession } from '../conferenceSession/entity.js'
+import { Host } from '../host/entity.js'
 
 @Entity()
 export class Exhibitor extends BaseEntity {
@@ -25,4 +26,7 @@ export class Exhibitor extends BaseEntity {
 
   @ManyToMany(() => ConferenceSession, (conferenceSession) => conferenceSession.exhibitors)
   conferenceSessions = new Collection<ConferenceSession>(this)
+
+  @OneToMany(() => Host, (hostname) => hostname.exhibitor)
+  hostnames = new Collection<Host>(this)
 }
