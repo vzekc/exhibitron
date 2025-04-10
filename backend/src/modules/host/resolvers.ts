@@ -30,6 +30,7 @@ export const hostMutations: MutationResolvers<Context> = {
         ? await db.exhibitor.findOneOrFail({ id: input.exhibitorId })
         : exhibitor,
       ipAddress: input.ipAddress || (await hostService.allocateIpAddress()),
+      services: input.services || [],
     })
 
     if (input.exhibitId) {

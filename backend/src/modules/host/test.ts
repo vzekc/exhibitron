@@ -1,7 +1,7 @@
 import { expect, describe } from 'vitest'
 import { graphql } from 'gql.tada'
 import { ExecuteOperationFunction, graphqlTest, login, Session } from '../../test/server.js'
-import { HostInput, Host } from '../../generated/graphql.js'
+import { HostInput, Host, WellKnownService } from '../../generated/graphql.js'
 
 const createHost = async (
   graphqlRequest: ExecuteOperationFunction,
@@ -15,6 +15,7 @@ const createHost = async (
           id
           name
           ipAddress
+          services
           exhibitor {
             id
           }
@@ -30,6 +31,7 @@ const createHost = async (
         ipAddress: input.ipAddress,
         exhibitorId: input.exhibitorId,
         exhibitId: input.exhibitId,
+        services: input.services,
       },
     },
     session,
@@ -79,19 +81,25 @@ describe('host', () => {
     const admin = await login('admin@example.com')
     const user = await login('daffy@example.com')
 
-    // Create a host as admin
+    // Create a host as admin with services
     const host = await createHost(
       graphqlRequest,
       {
         name: 'nu-host',
         ipAddress: '192.168.1.2',
+        services: [WellKnownService.Http, WellKnownService.Https, WellKnownService.Ssh],
       },
       admin,
     )
 
-    // Verify host was created
+    // Verify host was created with services
     expect(host.name).toBe('nu-host')
     expect(host.ipAddress).toBe('192.168.1.2')
+    expect(host.services).toEqual([
+      WellKnownService.Http,
+      WellKnownService.Https,
+      WellKnownService.Ssh,
+    ])
 
     // Try to update host as non-admin
     {
@@ -102,16 +110,20 @@ describe('host', () => {
               id
               name
               ipAddress
+              services
             }
           }
         `),
-        { name: 'nu-host', input: { ipAddress: '192.168.1.3' } as HostInput },
+        {
+          name: 'nu-host',
+          input: { ipAddress: '192.168.1.3', services: [WellKnownService.Http] } as HostInput,
+        },
         user,
       )
       expect(result.errors![0].message).toBe('Only administrators can set IP address or exhibitor')
     }
 
-    // Update host as admin
+    // Update host as admin with new services
     {
       const result = await graphqlRequest(
         graphql(`
@@ -120,14 +132,25 @@ describe('host', () => {
               id
               name
               ipAddress
+              services
             }
           }
         `),
-        { name: 'nu-host', input: { ipAddress: '192.168.1.3' } as HostInput },
+        {
+          name: 'nu-host',
+          input: {
+            ipAddress: '192.168.1.3',
+            services: [WellKnownService.Http, WellKnownService.Ftp],
+          } as HostInput,
+        },
         admin,
       )
       expect(result.errors).toBeUndefined()
       expect(result.data!.updateHost!.ipAddress).toBe('192.168.1.3')
+      expect(result.data!.updateHost!.services).toEqual([
+        WellKnownService.Http,
+        WellKnownService.Ftp,
+      ])
     }
 
     // Delete host

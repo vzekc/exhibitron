@@ -16,6 +16,9 @@ export class Exhibition extends BaseEntity {
   @Property()
   hostMatch!: string
 
+  @Property({ nullable: true })
+  dnsZone?: string
+
   @Property()
   startDate!: Date
 

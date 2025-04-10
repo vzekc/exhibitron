@@ -162,6 +162,7 @@ const NavBar = () => {
     { to: '/exhibitor', label: 'Mitwirkende' },
     { to: '/schedule', label: 'Zeitplan' },
     { to: '/table', label: 'Tische' },
+    { to: '/lan', label: 'LAN' },
   ]
 
   // Common user menu items

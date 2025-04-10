@@ -14,6 +14,9 @@ export class Host extends BaseEntity {
   @Unique()
   ipAddress?: string
 
+  @Property()
+  services: string[] = []
+
   @ManyToOne(() => Exhibition)
   exhibition!: Exhibition
 

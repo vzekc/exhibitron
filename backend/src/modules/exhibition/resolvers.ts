@@ -25,6 +25,7 @@ export const exhibitionTypeResolvers: ExhibitionResolvers = {
       ),
   tables: async (exhibition, _, { db }) => db.table.find({ exhibition }),
   pages: async (exhibition, _, { db }) => db.page.find({ exhibition }),
+  hosts: async (exhibition, _, { db }) => db.host.find({ exhibition }),
 }
 
 export const exhibitionResolvers = {

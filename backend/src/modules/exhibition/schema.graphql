@@ -5,9 +5,11 @@ type Exhibition {
   title: String!
   startDate: DateTime!
   endDate: DateTime!
+  dnsZone: String
   tables: [Table!]
   exhibitors: [Exhibitor!]
   exhibits: [Exhibit!]
+  hosts: [Host!]
   pages: [Page!]
 }
 

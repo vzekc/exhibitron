@@ -6,6 +6,15 @@ type Host {
   exhibit: Exhibit
   cpu: String
   os: String
+  services: [WellKnownService!]
+}
+
+enum WellKnownService {
+  http
+  https
+  ftp
+  ssh
+  telnet
 }
 
 extend type Exhibitor {
@@ -22,6 +31,7 @@ input HostInput {
   exhibitId: Int
   cpu: String
   os: String
+  services: [WellKnownService!]
 }
 
 extend type Query {

@@ -8,6 +8,7 @@ const breadcrumbMap: { [key: string]: string } = {
   '/table': 'Tische',
   '/schedule': 'Zeitplan',
   '/bookmarks': 'Lesezeichen',
+  '/lan': 'LAN',
   '/user/profile': 'Profil',
   '/user/account': 'Konto',
   '/user/exhibit': 'Deine Exponate',

@@ -144,6 +144,7 @@ export class TestSeeder extends Seeder {
       exhibitor: daffyExhibitor,
       exhibit: daffyExhibit,
       exhibition,
+      services: ['http'],
     })
   }
 }
