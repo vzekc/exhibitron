@@ -9,7 +9,8 @@
     "lint": "pnpm -r lint",
     "build": "pnpm --filter backend run generate && pnpm --filter frontend run build && pnpm --filter backend run build",
     "prettier": "prettier -w frontend/src backend/src",
-    "prepare": "husky"
+    "prepare": "husky",
+    "dev": "pnpm --parallel --filter backend run start:watch & pnpm --parallel --filter frontend run dev & pnpm --filter backend run watch-schema"
   },
   "keywords": [],
   "author": "",

@@ -162,6 +162,9 @@ importers:
       '@parcel/watcher':
         specifier: ^2.5.1
         version: 2.5.1
+      '@types/chokidar':
+        specifier: ^2.1.7
+        version: 2.1.7
       '@types/glob':
         specifier: ^8.1.0
         version: 8.1.0
@@ -189,6 +192,9 @@ importers:
       '@types/slug':
         specifier: ^5.0.9
         version: 5.0.9
+      chokidar:
+        specifier: ^3.5.3
+        version: 3.6.0
       eslint:
         specifier: ^9.21.0
         version: 9.21.0(jiti@2.4.2)
@@ -3396,6 +3402,13 @@ packages:
       '@types/connect': 3.4.38
       '@types/node': 22.13.9
     dev: false
+
+  /@types/chokidar@2.1.7:
+    resolution: {integrity: sha512-A7/MFHf6KF7peCzjEC1BBTF8jpmZTokb3vr/A0NxRGfwRLK3Ws+Hq6ugVn6cJIMfM6wkCak/aplWrxbTcu8oig==}
+    deprecated: This is a stub types definition. chokidar provides its own type definitions, so you do not need this installed.
+    dependencies:
+      chokidar: 3.6.0
+    dev: true
 
   /@types/connect@3.4.38:
     resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}

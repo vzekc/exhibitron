@@ -12,11 +12,10 @@
     "lint": "eslint src && tsc -b",
     "make-demo-db": "npx mikro-orm-esm migration:fresh --drop-db --seed DemoSeeder",
     "migration:up": "mikro-orm-esm migration:up",
-    "generate": "graphql-codegen && pnpm generate-graphql-types",
-    "generate:watch": "graphql-codegen --watch",
-    "generate-graphql-types": "gql.tada generate-output",
+    "generate": "graphql-codegen && gql.tada generate-output",
     "regenerate-thumbnails": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/scripts/regenerate-thumbnails.ts",
-    "recompute-dimensions": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/scripts/recompute-image-dimensions.ts"
+    "recompute-dimensions": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/scripts/recompute-image-dimensions.ts",
+    "watch-schema": "node --no-warnings=ExperimentalWarning --loader ts-node/esm scripts/watch-schema.ts"
   },
   "dependencies": {
     "@apollo/server": "^4.11.3",
@@ -93,6 +92,8 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.26.0",
-    "vitest": "^3.0.8"
+    "vitest": "^3.0.8",
+    "chokidar": "^3.5.3",
+    "@types/chokidar": "^2.1.7"
   }
 }

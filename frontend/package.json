@@ -9,10 +9,11 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "pnpm generate-graphql-types && node src/build/makeBuildInfo.js && tsc -b && vite build",
+    "make-build-info": "node src/build/makeBuildInfo.js",
+    "build": "pnpm generate-graphql-types && pnpm make-build-info && tsc -b && vite build",
     "lint": "eslint . && tsc -b",
     "preview": "vite preview",
-    "generate-graphql-types": "gql.tada generate-output --tsconfig tsconfig.app.json"
+    "generate": "gql.tada generate-output --tsconfig tsconfig.app.json && pnpm make-build-info"
   },
   "dependencies": {
     "@apollo/client": "^3.13.3",

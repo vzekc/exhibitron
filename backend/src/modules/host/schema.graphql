@@ -4,6 +4,8 @@ type Host {
   ipAddress: String!
   exhibitor: Exhibitor
   exhibit: Exhibit
+  cpu: String
+  os: String
 }
 
 extend type Exhibitor {
@@ -18,6 +20,8 @@ input HostInput {
   ipAddress: String
   exhibitorId: Int
   exhibitId: Int
+  cpu: String
+  os: String
 }
 
 extend type Query {
