@@ -408,3 +408,135 @@ graphqlTest('claim and release', async (graphqlRequest) => {
 
   expect(await getFreeTables()).toEqual(remainingFreeTables)
 })
+
+graphqlTest('verify transactional integrity of releaseTable', async (graphqlRequest) => {
+  const donald = await login('donald@example.com')
+  const daffy = await login('daffy@example.com')
+
+  // First, have donald claim a table
+  {
+    const result = await graphqlRequest(
+      graphql(`
+        mutation ClaimTable($number: Int!) {
+          claimTable(number: $number) {
+            id
+            number
+            exhibitor {
+              user {
+                id
+              }
+            }
+          }
+        }
+      `),
+      { number: 3 },
+      donald,
+    )
+    expect(result.errors).toBeUndefined()
+  }
+
+  // Create some exhibits for the table
+  {
+    const result = await graphqlRequest(
+      graphql(`
+        mutation CreateExhibit($title: String!, $table: Int) {
+          createExhibit(title: $title, table: $table) {
+            id
+            table {
+              number
+            }
+          }
+        }
+      `),
+      {
+        title: 'Test Exhibit 1',
+        table: 3,
+      },
+      donald,
+    )
+    expect(result.errors).toBeUndefined()
+  }
+
+  {
+    const result = await graphqlRequest(
+      graphql(`
+        mutation CreateExhibit($title: String!, $table: Int) {
+          createExhibit(title: $title, table: $table) {
+            id
+            table {
+              number
+            }
+          }
+        }
+      `),
+      {
+        title: 'Test Exhibit 2',
+        table: 3,
+      },
+      donald,
+    )
+    expect(result.errors).toBeUndefined()
+  }
+
+  // Verify the exhibits exist on the table
+  {
+    const result = await graphqlRequest(
+      graphql(`
+        query GetTable($number: Int!) {
+          getTable(number: $number) {
+            number
+            exhibits {
+              id
+              title
+            }
+          }
+        }
+      `),
+      { number: 3 },
+    )
+    expect(result.errors).toBeUndefined()
+    expect(result.data?.getTable?.exhibits).toHaveLength(2)
+  }
+
+  // Try to release the table as daffy (not owner or admin)
+  {
+    const result = await graphqlRequest(
+      graphql(`
+        mutation ReleaseTable($number: Int!) {
+          releaseTable(number: $number) {
+            id
+            number
+            exhibitor {
+              user {
+                id
+              }
+            }
+          }
+        }
+      `),
+      { number: 3 },
+      daffy,
+    )
+    expect(result.errors![0].message).toBe('Cannot release table claimed by another exhibitor')
+  }
+
+  // Verify that the exhibits are still assigned to the table (transaction was rolled back)
+  {
+    const result = await graphqlRequest(
+      graphql(`
+        query GetTable($number: Int!) {
+          getTable(number: $number) {
+            number
+            exhibits {
+              id
+              title
+            }
+          }
+        }
+      `),
+      { number: 3 },
+    )
+    expect(result.errors).toBeUndefined()
+    expect(result.data?.getTable?.exhibits).toHaveLength(2)
+  }
+})

@@ -76,6 +76,7 @@ export const graphqlTest = (
         if (response.statusCode !== 200) {
           logger.debug('GraphQL Error:', response.payload)
         }
+
         return result
       }
       await fn(executeOperation, app)

@@ -45,8 +45,8 @@ export const register = async (app: FastifyInstance) => {
     request.apolloContext = await createContext(request)
   })
 
-  // Commit or rollback the transaction
-  app.addHook('onResponse', async (request, reply) => {
+  // Commit or rollback the transaction before sending the response
+  app.addHook('onSend', async (request, reply) => {
     try {
       if (reply.statusCode >= 200 && reply.statusCode < 300) {
         await request.apolloContext.db.em.commit()
