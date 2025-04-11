@@ -5,10 +5,10 @@ import { readFileSync } from 'node:fs'
 import fastifyApollo from '@as-integrations/fastify'
 import * as path from 'node:path'
 import { Context, createContext, destroyContext } from './context.js'
-import { RequestContext } from '@mikro-orm/core'
 import { fileURLToPath } from 'node:url'
 import { initORM } from '../db.js'
 import { mutationLoggerPlugin } from '../plugins/mutationLogger.js'
+import { errorHandlerPlugin } from '../plugins/errorHandler.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -21,7 +21,8 @@ const createServer = async () =>
   new ApolloServer<Context>({
     typeDefs,
     resolvers,
-    plugins: [mutationLoggerPlugin()],
+    plugins: [mutationLoggerPlugin(), errorHandlerPlugin()],
+    includeStacktraceInErrorResponses: process.env.NODE_ENV !== 'production',
   })
 
 export const register = async (app: FastifyInstance) => {
@@ -34,16 +35,34 @@ export const register = async (app: FastifyInstance) => {
     context: async (request) => request.apolloContext,
   })
 
-  app.addHook('onRequest', (_request, _reply, done) => {
-    RequestContext.create(db.em, done)
+  // Start a transaction for each request
+  app.addHook('onRequest', async () => {
+    const db = await initORM()
+    await db.em.begin()
   })
 
   app.addHook('onRequest', async (request) => {
     request.apolloContext = await createContext(request)
   })
 
-  app.addHook('onResponse', async (request) => {
-    await destroyContext(request.apolloContext)
+  // Commit or rollback the transaction
+  app.addHook('onResponse', async (request, reply) => {
+    try {
+      if (reply.statusCode >= 200 && reply.statusCode < 300) {
+        await request.apolloContext.db.em.commit()
+      } else {
+        await request.apolloContext.db.em.rollback()
+      }
+    } finally {
+      await destroyContext(request.apolloContext)
+    }
+  })
+
+  app.addHook('onError', async (request) => {
+    // Rollback on error
+    if (request.apolloContext?.db) {
+      await request.apolloContext.db.em.rollback()
+    }
   })
 
   // shut down the connection when closing the app

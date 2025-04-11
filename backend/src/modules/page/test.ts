@@ -186,6 +186,9 @@ describe('page', () => {
       admin,
     )
 
+    // Add a small delay to ensure all operations are complete
+    await new Promise((resolve) => setTimeout(resolve, 100))
+
     // Verify the images were extracted and stored
     const em = RequestContext.getEntityManager()
     if (!em) throw new Error('Entity manager not available')

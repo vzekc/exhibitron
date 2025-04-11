@@ -1,4 +1,10 @@
-import { EntityManager, EntityRepository, MikroORM, Options } from '@mikro-orm/postgresql'
+import {
+  EntityRepository,
+  MikroORM,
+  Options,
+  RequestContext,
+  SqlEntityManager,
+} from '@mikro-orm/postgresql'
 import config from './mikro-orm.config.js'
 import { UserRepository } from './modules/user/repository.js'
 import { ExhibitRepository } from './modules/exhibit/repository.js'
@@ -28,7 +34,7 @@ import { HostRepository } from './modules/host/repository.js'
 export interface Services {
   dbName?: string
   orm: MikroORM
-  em: EntityManager
+  em: SqlEntityManager
   image: ImageRepository
   user: UserRepository
   exhibit: ExhibitRepository
@@ -44,40 +50,43 @@ export interface Services {
   host: HostRepository
 }
 
-let cache: Services
+let ormCache: MikroORM
 
 export async function initORM(options?: Options): Promise<Services> {
-  if (cache) {
-    return cache
-  }
-
   if (!options?.dbName && !process.env.DATABASE_URL) {
     throw new Error('Missing dbName and no DATABASE_URL in environment')
   }
-  const orm = await MikroORM.init({
-    ...config,
-    ...options,
-  })
 
-  // save to cache before returning
-  return (cache = {
+  // Only cache the ORM instance
+  if (!ormCache) {
+    ormCache = await MikroORM.init({
+      ...config,
+      ...options,
+    })
+  }
+
+  // Get the current transaction context or create a new one
+  const em = (RequestContext.getEntityManager() || ormCache.em) as SqlEntityManager
+
+  // Create services with the transaction-aware entity manager
+  return {
     dbName: options?.dbName || undefined,
-    orm,
-    em: orm.em,
-    image: orm.em.getRepository(ImageStorage),
-    user: orm.em.getRepository(User),
-    exhibit: orm.em.getRepository(Exhibit),
-    exhibitor: orm.em.getRepository(Exhibitor),
-    exhibition: orm.em.getRepository(Exhibition),
-    table: orm.em.getRepository(Table),
-    registration: orm.em.getRepository(Registration),
-    page: orm.em.getRepository(Page),
-    document: orm.em.getRepository(Document),
-    exhibitAttribute: orm.em.getRepository(ExhibitAttribute),
-    room: orm.em.getRepository(Room),
-    conferenceSession: orm.em.getRepository(ConferenceSession),
-    host: orm.em.getRepository(Host),
-  })
+    orm: ormCache,
+    em,
+    image: em.getRepository(ImageStorage),
+    user: em.getRepository(User),
+    exhibit: em.getRepository(Exhibit),
+    exhibitor: em.getRepository(Exhibitor),
+    exhibition: em.getRepository(Exhibition),
+    table: em.getRepository(Table),
+    registration: em.getRepository(Registration),
+    page: em.getRepository(Page),
+    document: em.getRepository(Document),
+    exhibitAttribute: em.getRepository(ExhibitAttribute),
+    room: em.getRepository(Room),
+    conferenceSession: em.getRepository(ConferenceSession),
+    host: em.getRepository(Host),
+  }
 }
 
 export const requireAdmin = (user: User | null) => {

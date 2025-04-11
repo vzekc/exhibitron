@@ -84,6 +84,5 @@ export const createContext = async (request: FastifyRequest) => {
 
 export const destroyContext = async (context: Context) => {
   logger.debug('destroyContext', context)
-  const { db } = context
-  await db.em.flush()
+  // No need to flush here as it's handled by the transaction
 }

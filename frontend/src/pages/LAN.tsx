@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@apollo/client'
 import { graphql, ResultOf } from 'gql.tada'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import PageHeading from '@components/PageHeading.tsx'
 import { DataTable, TableRow, TableCell } from '@components/Table.tsx'
 import Card from '@components/Card.tsx'
@@ -12,6 +12,7 @@ const GET_HOSTS = graphql(`
   query GetHosts {
     getCurrentExhibition {
       id
+      dnsZone
       hosts {
         id
         name
@@ -88,6 +89,15 @@ const LAN = () => {
     sortKey: column,
   }))
 
+  const getProtocol = (services: string[] | null | undefined) => {
+    if (!services) return null
+    return services.some((service) => service.toLowerCase() === 'https')
+      ? 'https'
+      : services.some((service) => service.toLowerCase() === 'http')
+        ? 'http'
+        : null
+  }
+
   return (
     <Card>
       <header className="mb-3">
@@ -117,9 +127,40 @@ const LAN = () => {
                     ))}
                   </ChipContainer>
                 ) : column === 'exhibitor' ? (
-                  host.exhibitor?.user.nickname || host.exhibitor?.user.fullName
+                  host.exhibitor && (
+                    <Link
+                      to={`/exhibitor/${host.exhibitor.id}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-blue-600 hover:text-blue-800">
+                      {host.exhibitor.user.nickname || host.exhibitor.user.fullName}
+                    </Link>
+                  )
                 ) : column === 'exhibit' ? (
-                  host.exhibit?.title
+                  host.exhibit && (
+                    <Link
+                      to={`/exhibit/${host.exhibit.id}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-blue-600 hover:text-blue-800">
+                      {host.exhibit.title}
+                    </Link>
+                  )
+                ) : column === 'name' ? (
+                  (() => {
+                    const protocol = getProtocol(host.services)
+                    if (protocol && data.getCurrentExhibition?.dnsZone) {
+                      return (
+                        <a
+                          href={`${protocol}://${host.name}.${data.getCurrentExhibition.dnsZone}`}
+                          onClick={(e) => e.stopPropagation()}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800">
+                          {host.name}
+                        </a>
+                      )
+                    }
+                    return host.name
+                  })()
                 ) : (
                   host[column]
                 )}

@@ -195,6 +195,9 @@ export class DocumentRepository extends EntityRepository<Document> {
       document.images.add(newImage)
     }
 
+    // Ensure all image processing is complete before persisting
+    await Promise.all(result.newImages.map((image) => entityManager.populate(image, ['image'])))
+
     await entityManager.persistAndFlush(document)
     return document
   }

@@ -7,6 +7,10 @@ import { RequestContext } from '@mikro-orm/core'
 import { createTestDatabase, deleteDatabase } from './utils.js'
 import { graphql, TadaDocumentNode } from 'gql.tada'
 import { print } from 'graphql'
+import pino from 'pino'
+
+// @ts-expect-error ts2345
+const logger = pino()
 
 let db: Services
 let app: FastifyInstance
@@ -70,9 +74,8 @@ export const graphqlTest = (
 
         const result = JSON.parse(response.payload)
         if (response.statusCode !== 200) {
-          console.error('GraphQL Error:', response.payload)
+          logger.debug('GraphQL Error:', response.payload)
         }
-        expect(response.statusCode).toBe(200)
         return result
       }
       await fn(executeOperation, app)

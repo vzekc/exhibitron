@@ -61,6 +61,6 @@ export class Exhibit extends BaseEntity<'text' | 'table' | 'attributes'> {
   @OneToOne(() => ExhibitImage, (image) => image.exhibit, { nullable: true, orphanRemoval: true })
   mainImage?: ExhibitImage
 
-  @OneToOne(() => Host, { nullable: true })
-  hostname?: Host
+  @OneToOne(() => Host, (host) => host.exhibit, { nullable: true })
+  host?: Host
 }

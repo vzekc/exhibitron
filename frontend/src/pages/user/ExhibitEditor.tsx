@@ -15,6 +15,10 @@ import PageHeading from '@components/PageHeading.tsx'
 import { FormSection, FormFieldGroup, FormLabel, SectionLabel, Input } from '@components/Form.tsx'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import LoadInProgress from '@components/LoadInProgress'
+import Icon from '@components/Icon'
+
+const WELL_KNOWN_SERVICES = ['ftp', 'http', 'https', 'ssh', 'telnet'] as const
+type WellKnownService = (typeof WELL_KNOWN_SERVICES)[number]
 
 type Attribute = {
   name: string
@@ -28,6 +32,8 @@ type ExhibitFormData = {
   descriptionExtension: string
   attributes: Attribute[]
   mainImage: number | null
+  hostName: string
+  hostServices: WellKnownService[]
 }
 
 const GET_DATA = graphql(`
@@ -50,6 +56,24 @@ const GET_DATA = graphql(`
         tables {
           number
         }
+      }
+      host {
+        name
+        ipAddress
+        services
+      }
+    }
+  }
+`)
+
+const GET_EXHIBIT_HOST = graphql(`
+  query GetExhibitHost($id: Int!) {
+    getExhibit(id: $id) {
+      id
+      host {
+        name
+        ipAddress
+        services
       }
     }
   }
@@ -84,6 +108,11 @@ const UPDATE_EXHIBIT = graphql(`
         value
       }
       mainImage
+      host {
+        name
+        ipAddress
+        services
+      }
     }
   }
 `)
@@ -115,6 +144,11 @@ const CREATE_EXHIBIT = graphql(`
         value
       }
       mainImage
+      host {
+        name
+        ipAddress
+        services
+      }
     }
   }
 `)
@@ -135,6 +169,32 @@ const DELETE_EXHIBIT = graphql(`
   }
 `)
 
+const ADD_HOST = graphql(`
+  mutation AddHost($name: String!, $input: HostInput!) {
+    addHost(name: $name, input: $input) {
+      name
+      ipAddress
+      services
+    }
+  }
+`)
+
+const UPDATE_HOST = graphql(`
+  mutation UpdateHost($name: String!, $input: HostInput!) {
+    updateHost(name: $name, input: $input) {
+      name
+      ipAddress
+      services
+    }
+  }
+`)
+
+const DELETE_HOST = graphql(`
+  mutation DeleteHost($name: String!) {
+    deleteHost(name: $name)
+  }
+`)
+
 const ExhibitEditor = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -142,6 +202,7 @@ const ExhibitEditor = () => {
   const apolloClient = useApolloClient()
   const isNew = id === 'new'
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showDeleteHostConfirm, setShowDeleteHostConfirm] = useState(false)
   const descriptionEditorRef = useRef<TextEditorHandle>(null)
   const descriptionExtensionEditorRef = useRef<TextEditorHandle>(null)
 
@@ -161,6 +222,8 @@ const ExhibitEditor = () => {
       descriptionExtension: '',
       attributes: [],
       mainImage: null,
+      hostName: '',
+      hostServices: [],
     },
   })
 
@@ -173,6 +236,11 @@ const ExhibitEditor = () => {
     skip: isNew,
   })
 
+  const { data: hostData, refetch: refetchHost } = useQuery(GET_EXHIBIT_HOST, {
+    variables: { id: Number(id) },
+    skip: isNew,
+  })
+
   const { data: tablesData } = useQuery(GET_MY_TABLES, {
     skip: !isNew,
   })
@@ -180,6 +248,22 @@ const ExhibitEditor = () => {
   const [updateExhibit] = useMutation(UPDATE_EXHIBIT)
   const [createExhibit] = useMutation(CREATE_EXHIBIT)
   const [deleteExhibit] = useMutation(DELETE_EXHIBIT)
+  const [addHost] = useMutation(ADD_HOST, {
+    onCompleted: () => {
+      setValue('hostName', '')
+      refetchHost()
+    },
+  })
+  const [updateHost] = useMutation(UPDATE_HOST, {
+    onCompleted: () => {
+      refetchHost()
+    },
+  })
+  const [deleteHost] = useMutation(DELETE_HOST, {
+    onCompleted: () => {
+      refetchHost()
+    },
+  })
 
   useEffect(() => {
     if (exhibitData?.getExhibit) {
@@ -192,6 +276,8 @@ const ExhibitEditor = () => {
         descriptionExtension: descriptionExtension || '',
         attributes: attributes || [],
         mainImage: mainImage as number | null,
+        hostName: exhibitData.getExhibit.host?.name || '',
+        hostServices: exhibitData.getExhibit.host?.services || [],
       })
       setDetailName(location.pathname, title || '')
     } else if (isNew) {
@@ -202,10 +288,22 @@ const ExhibitEditor = () => {
         descriptionExtension: '',
         attributes: [],
         mainImage: null,
+        hostName: '',
+        hostServices: [],
       })
       setDetailName(location.pathname, 'Neues Exponat')
     }
-  }, [exhibitData, setDetailName, isNew, reset])
+  }, [
+    exhibitData?.getExhibit?.title,
+    exhibitData?.getExhibit?.table,
+    exhibitData?.getExhibit?.description,
+    exhibitData?.getExhibit?.descriptionExtension,
+    exhibitData?.getExhibit?.attributes,
+    exhibitData?.getExhibit?.mainImage,
+    setDetailName,
+    isNew,
+    reset,
+  ])
 
   const handleTableChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
     setValue('table', e.target.value ? Number(e.target.value) : undefined, { shouldDirty: true })
@@ -264,6 +362,49 @@ const ExhibitEditor = () => {
     await deleteExhibit({ variables: { id: Number(id) } })
     await apolloClient.clearStore()
     navigate('/user/exhibit')
+  }
+
+  const handleAddHost = async () => {
+    const result = await addHost({
+      variables: {
+        name: watch('hostName'),
+        input: {
+          exhibitId: Number(id),
+          services: [],
+        },
+      },
+    })
+
+    if (result.errors) {
+      const errorMessage = result.errors[0]?.message || 'Fehler beim Anlegen des Hosts'
+      showMessage('Fehler', errorMessage, 'OK')
+      return
+    }
+  }
+
+  const handleDeleteHost = async (name: string) => {
+    await deleteHost({
+      variables: { name },
+    })
+  }
+
+  const handleServiceChange = async (service: WellKnownService, checked: boolean) => {
+    const host = hostData?.getExhibit?.host
+    if (!host || !host.services) return
+
+    const newServices = checked
+      ? [...host.services, service]
+      : host.services.filter((s) => s !== service)
+
+    await updateHost({
+      variables: {
+        name: host.name,
+        input: {
+          exhibitId: Number(id),
+          services: newServices,
+        },
+      },
+    })
   }
 
   if (!isNew) {
@@ -377,6 +518,99 @@ const ExhibitEditor = () => {
             />
           </FormSection>
 
+          {!isNew && (
+            <FormSection>
+              <SectionLabel>LAN</SectionLabel>
+              <FormFieldGroup>
+                {hostData?.getExhibit?.host ? (
+                  <>
+                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-6">
+                      <div className="w-[200px]">
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              setShowDeleteHostConfirm(true)
+                            }}
+                            className="mr-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700"
+                            title="Hostnamen löschen">
+                            <Icon name="x" color="white" className="h-4 w-4" />
+                          </button>
+                          <div className="flex-1">
+                            <FormLabel>Hostname</FormLabel>
+                            <div className="mt-1 text-gray-900 dark:text-gray-100">
+                              {hostData.getExhibit.host.name}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="w-[200px]">
+                        <FormLabel>IP-Adresse</FormLabel>
+                        <div className="mt-1 text-gray-900 dark:text-gray-100">
+                          {hostData.getExhibit.host.ipAddress}
+                        </div>
+                      </div>
+                      <div className="w-[300px]">
+                        <FormLabel>Dienste</FormLabel>
+                        <div className="mt-1 flex flex-wrap gap-2">
+                          {WELL_KNOWN_SERVICES.map((service) => (
+                            <label key={service} className="flex items-center gap-1">
+                              <input
+                                type="checkbox"
+                                checked={
+                                  hostData.getExhibit?.host?.services?.includes(service) ?? false
+                                }
+                                onChange={(e) => handleServiceChange(service, e.target.checked)}
+                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                              />
+                              <span className="text-sm">{service}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        if (watch('hostName').trim()) {
+                          handleAddHost()
+                        }
+                      }
+                    }}
+                    onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="text"
+                        value={watch('hostName')}
+                        onChange={(e) => setValue('hostName', e.target.value)}
+                        placeholder="hostname"
+                        className="flex-grow"
+                      />
+                      <Button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          if (watch('hostName').trim()) {
+                            handleAddHost()
+                          }
+                        }}
+                        disabled={!watch('hostName').trim()}>
+                        Anlegen
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </FormFieldGroup>
+            </FormSection>
+          )}
+
           <ActionBar>
             <Button type="submit" disabled={!isDirty || !watch('title').trim()}>
               {isNew ? 'Erstellen' : 'Speichern'}
@@ -398,6 +632,21 @@ const ExhibitEditor = () => {
         cancel="Abbrechen"
         onConfirm={handleDelete}
         onClose={() => setShowDeleteConfirm(false)}
+      />
+
+      <Confirm
+        isOpen={showDeleteHostConfirm}
+        title="Host löschen"
+        message={`Möchtest Du den Hostnamen "${hostData?.getExhibit?.host?.name}" löschen und die IP-Adresse freigeben?`}
+        confirm="Löschen"
+        cancel="Abbrechen"
+        onConfirm={() => {
+          if (hostData?.getExhibit?.host) {
+            handleDeleteHost(hostData.getExhibit.host.name)
+          }
+          setShowDeleteHostConfirm(false)
+        }}
+        onClose={() => setShowDeleteHostConfirm(false)}
       />
     </>
   )

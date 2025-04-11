@@ -1,21 +1,23 @@
-import { EntityManager } from '@mikro-orm/core'
+import { MikroORM } from '@mikro-orm/core'
 import { Session } from './entity.js'
 import * as fastifySession from '@fastify/session'
 import { FastifySessionObject } from '@fastify/session'
+import config from '../../mikro-orm.config.js'
 
 export class SessionStore implements fastifySession.SessionStore {
-  private em: EntityManager
+  private orm: MikroORM
 
-  constructor(em: EntityManager) {
-    this.em = em
+  constructor(orm: MikroORM) {
+    this.orm = orm
   }
 
   async get(
     sid: string,
     callback: (err: Error | null, session?: FastifySessionObject | null) => void,
   ) {
+    const em = this.orm.em.fork()
     try {
-      const session = await this.em.findOne(Session, { sid })
+      const session = await em.findOne(Session, { sid })
       if (session) {
         callback(null, session.sess)
       } else {
@@ -27,8 +29,9 @@ export class SessionStore implements fastifySession.SessionStore {
   }
 
   async set(sid: string, sess: FastifySessionObject, callback?: (err?: Error) => void) {
+    const em = this.orm.em.fork()
     try {
-      let session = await this.em.findOne(Session, { sid })
+      let session = await em.findOne(Session, { sid })
       const expire = sess.cookie.expires
         ? new Date(sess.cookie.expires)
         : new Date(Date.now() + 86400000) // Default to 1 day if not set
@@ -36,13 +39,13 @@ export class SessionStore implements fastifySession.SessionStore {
         session.sess = sess
         session.expire = expire
       } else {
-        session = this.em.create(Session, {
+        session = em.create(Session, {
           sid,
           sess,
           expire,
         })
       }
-      await this.em.persistAndFlush(session)
+      await em.persistAndFlush(session)
       callback?.()
     } catch (err) {
       callback?.(err as Error)
@@ -50,14 +53,29 @@ export class SessionStore implements fastifySession.SessionStore {
   }
 
   async destroy(sid: string, callback?: (err?: Error) => void) {
+    const em = this.orm.em.fork()
     try {
-      const session = await this.em.findOne(Session, { sid })
+      const session = await em.findOne(Session, { sid })
       if (session) {
-        await this.em.removeAndFlush(session)
+        await em.removeAndFlush(session)
       }
       callback?.()
     } catch (err) {
       callback?.(err as Error)
     }
   }
+}
+
+// Create a separate ORM instance for session management
+let sessionORM: MikroORM
+
+export async function createSessionStore() {
+  if (!sessionORM) {
+    sessionORM = await MikroORM.init({
+      ...config,
+      // Use a different connection name to avoid conflicts
+      name: 'session',
+    })
+  }
+  return new SessionStore(sessionORM)
 }

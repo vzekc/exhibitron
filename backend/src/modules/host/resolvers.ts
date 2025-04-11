@@ -1,12 +1,13 @@
 import { Context } from '../../app/context.js'
 import { HostInput, MutationResolvers, QueryResolvers } from '../../generated/graphql.js'
 import { Host } from './entity.js'
-import { wrap } from '@mikro-orm/core'
+import { UniqueConstraintViolationException, wrap } from '@mikro-orm/core'
 import { HostService } from './service.js'
+import { UniqueConstraintError, PermissionDeniedError } from '../common/errors.js'
 
 function validateHostInput(input: HostInput, user: Context['user']) {
   if ((input.ipAddress || input.exhibitorId) && !user?.isAdministrator) {
-    throw new Error('Only administrators can set IP address or exhibitor')
+    throw new PermissionDeniedError('Only administrators can set IP address or exhibitor')
   }
 }
 
@@ -20,25 +21,52 @@ export const hostQueries: QueryResolvers<Context> = {
 export const hostMutations: MutationResolvers<Context> = {
   // @ts-expect-error ts2345
   addHost: async (_parent, { name, input }, { db, user, exhibition, exhibitor }) => {
-    validateHostInput(input, user)
+    try {
+      validateHostInput(input, user)
 
-    const hostService = new HostService()
-    const host = db.em.create(Host, {
-      name,
-      exhibition,
-      exhibitor: input.exhibitorId
-        ? await db.exhibitor.findOneOrFail({ id: input.exhibitorId })
-        : exhibitor,
-      ipAddress: input.ipAddress || (await hostService.allocateIpAddress()),
-      services: input.services || [],
-    })
+      const hostService = new HostService()
+      const host = db.em.create(Host, {
+        name,
+        exhibition,
+        exhibitor: input.exhibitorId
+          ? await db.exhibitor.findOneOrFail({ id: input.exhibitorId })
+          : exhibitor,
+        ipAddress: input.ipAddress || (await hostService.allocateIpAddress()),
+        services: input.services || [],
+      })
 
-    if (input.exhibitId) {
-      host.exhibit = await db.exhibit.findOneOrFail({ id: input.exhibitId })
+      if (input.exhibitId) {
+        host.exhibit = await db.exhibit.findOneOrFail({ id: input.exhibitId })
+      }
+
+      await db.em.persist(host).flush()
+      return host
+    } catch (error) {
+      // Rollback any changes made to the database
+      db.em.clear()
+
+      // Check if it's a unique constraint violation
+      if (error instanceof UniqueConstraintViolationException) {
+        if (error.message.includes('host_name_unique')) {
+          throw new UniqueConstraintError(
+            `A host with the name "${name}" already exists`,
+            'name',
+            name,
+          )
+        }
+        if (error.message.includes('host_ip_address_unique')) {
+          // Get the actual IP address that caused the conflict from the error message
+          const ipMatch = error.message.match(/Key \(ip_address\)=\(([^)]+)\)/)
+          const conflictingIp = ipMatch ? ipMatch[1] : 'unknown'
+          throw new UniqueConstraintError(
+            `A host with the IP address "${conflictingIp}" already exists`,
+            'ipAddress',
+            conflictingIp,
+          )
+        }
+      }
+      throw error
     }
-
-    await db.em.persist(host).flush()
-    return host
   },
 
   // @ts-expect-error ts2322

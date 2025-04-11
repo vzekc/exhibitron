@@ -12,7 +12,7 @@ export class Host extends BaseEntity {
 
   @Property()
   @Unique()
-  ipAddress?: string
+  ipAddress!: string
 
   @Property()
   services: string[] = []

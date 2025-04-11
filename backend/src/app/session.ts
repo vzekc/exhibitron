@@ -1,11 +1,10 @@
 import 'dotenv/config'
 import fastifySession from '@fastify/session'
 import { FastifyInstance } from 'fastify'
-import { SessionStore } from '../modules/session/session-store.js'
-import { initORM } from '../db.js'
+import { createSessionStore } from '../modules/session/session-store.js'
 
 export const register = async (app: FastifyInstance) => {
-  const db = await initORM()
+  const sessionStore = await createSessionStore()
 
   const getSessionSecret = () => {
     const secret = process.env.SESSION_SECRET
@@ -17,7 +16,7 @@ export const register = async (app: FastifyInstance) => {
   }
 
   app.register(fastifySession, {
-    store: new SessionStore(db.em),
+    store: sessionStore,
     secret: getSessionSecret(),
     cookie: {
       secure: process.env.NODE_ENV === 'production',

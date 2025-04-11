@@ -198,6 +198,16 @@
           "length": 255,
           "mappedType": "string"
         },
+        "dns_zone": {
+          "name": "dns_zone",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
         "start_date": {
           "name": "start_date",
           "type": "timestamptz",
@@ -1785,6 +1795,15 @@
           "primary": false,
           "nullable": true,
           "mappedType": "json"
+        },
+        "hostname_id": {
+          "name": "hostname_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
         }
       },
       "name": "exhibit",
@@ -1802,6 +1821,14 @@
           "columnNames": ["description_extension_id"],
           "composite": false,
           "keyName": "exhibit_description_extension_id_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": ["hostname_id"],
+          "composite": false,
+          "keyName": "exhibit_hostname_id_unique",
           "constraint": true,
           "primary": false,
           "unique": true
@@ -1858,6 +1885,176 @@
           "localTableName": "public.exhibit",
           "referencedColumnNames": ["id"],
           "referencedTableName": "public.exhibitor",
+          "updateRule": "cascade"
+        },
+        "exhibit_hostname_id_foreign": {
+          "constraintName": "exhibit_hostname_id_foreign",
+          "columnNames": ["hostname_id"],
+          "localTableName": "public.exhibit",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.host",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {
+        "registration_status": {
+          "name": "registration_status",
+          "schema": "public",
+          "items": ["approved", "inProgress", "new", "rejected"]
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "ip_address": {
+          "name": "ip_address",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "services": {
+          "name": "services",
+          "type": "text[]",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "array"
+        },
+        "exhibition_id": {
+          "name": "exhibition_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "exhibitor_id": {
+          "name": "exhibitor_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
+        "exhibit_id": {
+          "name": "exhibit_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        }
+      },
+      "name": "host",
+      "schema": "public",
+      "indexes": [
+        {
+          "columnNames": ["name"],
+          "composite": false,
+          "keyName": "host_name_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": ["ip_address"],
+          "composite": false,
+          "keyName": "host_ip_address_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": ["exhibit_id"],
+          "composite": false,
+          "keyName": "host_exhibit_id_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "host_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "host_exhibition_id_foreign": {
+          "constraintName": "host_exhibition_id_foreign",
+          "columnNames": ["exhibition_id"],
+          "localTableName": "public.host",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.exhibition",
+          "updateRule": "cascade"
+        },
+        "host_exhibitor_id_foreign": {
+          "constraintName": "host_exhibitor_id_foreign",
+          "columnNames": ["exhibitor_id"],
+          "localTableName": "public.host",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.exhibitor",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        },
+        "host_exhibit_id_foreign": {
+          "constraintName": "host_exhibit_id_foreign",
+          "columnNames": ["exhibit_id"],
+          "localTableName": "public.host",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.exhibit",
+          "deleteRule": "set null",
           "updateRule": "cascade"
         }
       },

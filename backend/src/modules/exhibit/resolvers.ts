@@ -159,6 +159,8 @@ export const exhibitTypeResolvers: ExhibitResolvers = {
   exhibitor: async (exhibit, _, { db }) => db.exhibitor.findOneOrFail({ id: exhibit.exhibitor.id }),
   table: async (exhibit, _, { db }) =>
     exhibit.table ? db.table.findOneOrFail({ id: exhibit.table.id }) : null,
+  host: async (exhibit, _, { db }) =>
+    exhibit.host ? db.host.findOneOrFail({ id: exhibit.host.id }) : null,
   attributes: (exhibit) => {
     if (!exhibit.attributes) return null
 
