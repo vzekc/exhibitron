@@ -9,6 +9,16 @@ import { fileURLToPath } from 'node:url'
 import { initORM } from '../db.js'
 import { mutationLoggerPlugin } from '../plugins/mutationLogger.js'
 import { errorHandlerPlugin } from '../plugins/errorHandler.js'
+import { pino } from 'pino'
+
+const logger = pino({
+  transport: {
+    target: 'pino-pretty',
+    options: {
+      colorize: true,
+    },
+  },
+})
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -35,38 +45,77 @@ export const register = async (app: FastifyInstance) => {
     context: async (request) => request.apolloContext,
   })
 
-  // Start a transaction for each request
-  app.addHook('onRequest', async () => {
-    const db = await initORM()
-    await db.em.begin()
-  })
-
+  // Start a transaction and create context for each request
   app.addHook('onRequest', async (request) => {
-    request.apolloContext = await createContext(request)
+    logger.debug('Starting request transaction')
+    try {
+      await db.em.begin()
+      logger.debug('Transaction started successfully')
+      request.apolloContext = await createContext(request)
+      logger.debug('Context created with transaction')
+    } catch (error) {
+      logger.error({ error }, 'Failed to start transaction')
+      throw error
+    }
   })
 
   // Commit or rollback the transaction before sending the response
   app.addHook('onSend', async (request, reply) => {
+    logger.debug({ statusCode: reply.statusCode }, 'Handling response')
     try {
       if (reply.statusCode >= 200 && reply.statusCode < 300) {
-        await request.apolloContext.db.em.commit()
+        logger.debug('Committing transaction')
+        try {
+          await request.apolloContext.db.em.commit()
+          logger.debug('Transaction committed successfully')
+        } catch (error) {
+          logger.error({ error }, 'Failed to commit transaction')
+          // Don't throw here, just log the error
+        }
       } else {
-        await request.apolloContext.db.em.rollback()
+        logger.debug('Rolling back transaction due to error status')
+        try {
+          await request.apolloContext.db.em.rollback()
+          logger.debug('Transaction rolled back successfully')
+        } catch (error) {
+          logger.error({ error }, 'Failed to rollback transaction')
+          // Don't throw here, just log the error
+        }
       }
+    } catch (error) {
+      logger.error({ error }, 'Failed to handle transaction in onSend')
+      // Don't throw here, just log the error
     } finally {
-      await destroyContext(request.apolloContext)
+      logger.debug('Destroying context')
+      try {
+        await destroyContext(request.apolloContext)
+        logger.debug('Context destroyed')
+      } catch (error) {
+        logger.error({ error }, 'Failed to destroy context')
+        // Don't throw here, just log the error
+      }
     }
   })
 
-  app.addHook('onError', async (request) => {
+  app.addHook('onError', async (request, reply, error) => {
+    logger.error({ error }, 'Handling error')
     // Rollback on error
     if (request.apolloContext?.db) {
-      await request.apolloContext.db.em.rollback()
+      try {
+        logger.debug('Rolling back transaction due to error')
+        await request.apolloContext.db.em.rollback()
+        logger.debug('Transaction rolled back successfully')
+      } catch (rollbackError) {
+        logger.error({ rollbackError }, 'Failed to rollback transaction')
+        // Don't throw here, just log the error
+      }
     }
   })
 
   // shut down the connection when closing the app
   app.addHook('onClose', async () => {
+    logger.debug('Closing database connection')
     await db.orm.close()
+    logger.debug('Database connection closed')
   })
 }

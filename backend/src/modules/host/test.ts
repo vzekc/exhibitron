@@ -213,22 +213,22 @@ describe('host', () => {
     const admin = await login('admin@example.com')
 
     // Create multiple hosts without specifying IP addresses
-    const hosts = await Promise.all([
-      createHost(graphqlRequest, { name: 'auto-ip-host-1' }, admin),
-      createHost(graphqlRequest, { name: 'auto-ip-host-2' }, admin),
-      createHost(graphqlRequest, { name: 'auto-ip-host-3' }, admin),
-    ])
+    const hosts = [
+      await createHost(graphqlRequest, { name: 'auto-ip-host-1' }, admin),
+      await createHost(graphqlRequest, { name: 'auto-ip-host-2' }, admin),
+      await createHost(graphqlRequest, { name: 'auto-ip-host-3' }, admin),
+    ]
 
     // Verify each host has a unique IP address
-    const ipAddresses = new Set(hosts.map(host => host.ipAddress))
+    const ipAddresses = new Set(hosts.map((host) => host.ipAddress))
     expect(ipAddresses.size).toBe(3) // All IPs should be unique
 
     // Verify IP addresses are in the expected format (IPv4)
-    hosts.forEach(host => {
+    hosts.forEach((host) => {
       expect(host.ipAddress).toMatch(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/)
       // Verify each octet is between 0 and 255
       const octets = host.ipAddress.split('.').map(Number)
-      octets.forEach(octet => {
+      octets.forEach((octet) => {
         expect(octet).toBeGreaterThanOrEqual(0)
         expect(octet).toBeLessThanOrEqual(255)
       })
@@ -236,7 +236,7 @@ describe('host', () => {
 
     // Clean up
     await Promise.all(
-      hosts.map(host =>
+      hosts.map((host) =>
         graphqlRequest(
           graphql(`
             mutation DeleteHost($name: String!) {

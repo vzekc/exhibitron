@@ -251,17 +251,21 @@ const ExhibitEditor = () => {
   const [addHost] = useMutation(ADD_HOST, {
     onCompleted: () => {
       setValue('hostName', '')
-      refetchHost()
+      void refetchHost()
+    },
+    update: (cache) => {
+      // Invalidate the GET_HOSTS query to force a refetch
+      cache.evict({ fieldName: 'getCurrentExhibition' })
     },
   })
   const [updateHost] = useMutation(UPDATE_HOST, {
     onCompleted: () => {
-      refetchHost()
+      void refetchHost()
     },
   })
   const [deleteHost] = useMutation(DELETE_HOST, {
     onCompleted: () => {
-      refetchHost()
+      void refetchHost()
     },
   })
 
@@ -377,7 +381,7 @@ const ExhibitEditor = () => {
 
     if (result.errors) {
       const errorMessage = result.errors[0]?.message || 'Fehler beim Anlegen des Hosts'
-      showMessage('Fehler', errorMessage, 'OK')
+      await showMessage('Fehler', errorMessage, 'OK')
       return
     }
   }
@@ -385,6 +389,10 @@ const ExhibitEditor = () => {
   const handleDeleteHost = async (name: string) => {
     await deleteHost({
       variables: { name },
+      update: (cache) => {
+        // Invalidate the GET_HOSTS query to force a refetch
+        cache.evict({ fieldName: 'getCurrentExhibition' })
+      },
     })
   }
 
@@ -579,7 +587,7 @@ const ExhibitEditor = () => {
                         e.preventDefault()
                         e.stopPropagation()
                         if (watch('hostName').trim()) {
-                          handleAddHost()
+                          void handleAddHost()
                         }
                       }
                     }}
@@ -598,7 +606,7 @@ const ExhibitEditor = () => {
                           e.preventDefault()
                           e.stopPropagation()
                           if (watch('hostName').trim()) {
-                            handleAddHost()
+                            void handleAddHost()
                           }
                         }}
                         disabled={!watch('hostName').trim()}>
@@ -642,7 +650,7 @@ const ExhibitEditor = () => {
         cancel="Abbrechen"
         onConfirm={() => {
           if (hostData?.getExhibit?.host) {
-            handleDeleteHost(hostData.getExhibit.host.name)
+            void handleDeleteHost(hostData.getExhibit.host.name)
           }
           setShowDeleteHostConfirm(false)
         }}

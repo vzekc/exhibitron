@@ -2,4 +2,4 @@ temp/
 dist/
 sqlite.db
 src/generated/
-mutations.log
+*.log

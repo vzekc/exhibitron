@@ -30,6 +30,7 @@ import { ConferenceSession } from './modules/conferenceSession/entity.js'
 import { ConferenceSessionRepository } from './modules/conferenceSession/repository.js'
 import { Host } from './modules/host/entity.js'
 import { HostRepository } from './modules/host/repository.js'
+import { loadDatabaseFunctions } from './db/loader.js'
 
 export interface Services {
   dbName?: string
@@ -67,6 +68,9 @@ export async function initORM(options?: Options): Promise<Services> {
 
   // Get the current transaction context or create a new one
   const em = (RequestContext.getEntityManager() || ormCache.em) as SqlEntityManager
+
+  // Load database functions
+  await loadDatabaseFunctions(em)
 
   // Create services with the transaction-aware entity manager
   return {

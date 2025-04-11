@@ -3,6 +3,16 @@ import { HostInput, MutationResolvers, QueryResolvers } from '../../generated/gr
 import { Host } from './entity.js'
 import { UniqueConstraintViolationException, wrap } from '@mikro-orm/core'
 import { UniqueConstraintError, PermissionDeniedError } from '../common/errors.js'
+import { pino } from 'pino'
+
+const logger = pino({
+  transport: {
+    target: 'pino-pretty',
+    options: {
+      colorize: true,
+    },
+  },
+})
 
 function validateHostInput(input: HostInput, user: Context['user']) {
   if ((input.ipAddress || input.exhibitorId) && !user?.isAdministrator) {
@@ -20,26 +30,40 @@ export const hostQueries: QueryResolvers<Context> = {
 export const hostMutations: MutationResolvers<Context> = {
   // @ts-expect-error ts2345
   addHost: async (_parent, { name, input }, { db, user, exhibition, exhibitor }) => {
+    logger.debug('Starting addHost mutation')
     try {
       validateHostInput(input, user)
+      logger.debug('Input validated')
+
+      let hostExhibitor = exhibitor
+      if (input.exhibitId) {
+        logger.debug('Setting exhibit and exhibitor')
+        const exhibit = await db.exhibit.findOneOrFail({ id: input.exhibitId })
+        hostExhibitor = exhibit.exhibitor
+      }
 
       const host = db.em.create(Host, {
         name,
         exhibition,
         exhibitor: input.exhibitorId
           ? await db.exhibitor.findOneOrFail({ id: input.exhibitorId })
-          : exhibitor,
+          : hostExhibitor,
         ipAddress: input.ipAddress ?? undefined,
         services: input.services || [],
       })
+      logger.debug('Host entity created')
 
       if (input.exhibitId) {
+        logger.debug('Setting exhibit')
         host.exhibit = await db.exhibit.findOneOrFail({ id: input.exhibitId })
       }
 
+      logger.debug('Persisting host')
       await db.em.persist(host).flush()
+      logger.debug('Host persisted successfully')
       return host
     } catch (error) {
+      logger.error({ error }, 'Error in addHost mutation')
       // Check if it's a unique constraint violation
       if (error instanceof UniqueConstraintViolationException) {
         if (error.message.includes('host_name_unique')) {
@@ -66,6 +90,7 @@ export const hostMutations: MutationResolvers<Context> = {
 
   // @ts-expect-error ts2322
   updateHost: async (_parent, { name, input }, { db, user }) => {
+    logger.debug('Starting updateHost mutation')
     const host = await db.host.findOneOrFail({ name })
     validateHostInput(input, user)
 
@@ -81,6 +106,7 @@ export const hostMutations: MutationResolvers<Context> = {
   },
 
   deleteHost: async (_parent: unknown, { name }: { name: string }, { db }: Context) => {
+    logger.debug('Starting deleteHost mutation')
     const host = await db.host.findOneOrFail({ name })
     db.em.remove(host)
     await db.em.flush()
