@@ -2,7 +2,6 @@ import { Context } from '../../app/context.js'
 import { HostInput, MutationResolvers, QueryResolvers } from '../../generated/graphql.js'
 import { Host } from './entity.js'
 import { UniqueConstraintViolationException, wrap } from '@mikro-orm/core'
-import { HostService } from './service.js'
 import { UniqueConstraintError, PermissionDeniedError } from '../common/errors.js'
 
 function validateHostInput(input: HostInput, user: Context['user']) {
@@ -24,14 +23,13 @@ export const hostMutations: MutationResolvers<Context> = {
     try {
       validateHostInput(input, user)
 
-      const hostService = new HostService()
       const host = db.em.create(Host, {
         name,
         exhibition,
         exhibitor: input.exhibitorId
           ? await db.exhibitor.findOneOrFail({ id: input.exhibitorId })
           : exhibitor,
-        ipAddress: input.ipAddress || (await hostService.allocateIpAddress()),
+        ipAddress: input.ipAddress ?? undefined,
         services: input.services || [],
       })
 
@@ -42,9 +40,6 @@ export const hostMutations: MutationResolvers<Context> = {
       await db.em.persist(host).flush()
       return host
     } catch (error) {
-      // Rollback any changes made to the database
-      db.em.clear()
-
       // Check if it's a unique constraint violation
       if (error instanceof UniqueConstraintViolationException) {
         if (error.message.includes('host_name_unique')) {

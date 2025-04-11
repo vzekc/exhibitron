@@ -1,29 +1,3 @@
--- Create the pdns user with a password (replace 'your_password' with a secure password)
-CREATE USER pdns WITH PASSWORD '${PDNS_PASSWORD}';
-
--- Create the dns schema
-CREATE SCHEMA dns;
-
-SET search_path TO dns;
-\i schema/schema.pgsql.sql
-
--- Grant usage on the schema to pdns
-GRANT USAGE ON SCHEMA dns TO pdns;
-
--- Grant all privileges on the schema to pdns
-GRANT ALL PRIVILEGES ON SCHEMA dns TO pdns;
-
--- Grant all privileges on all tables in the dns schema to pdns
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA dns TO pdns;
-
--- Grant all privileges on all sequences in the dns schema to pdns
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA dns TO pdns;
-
--- Set the search path for the pdns user to include the dns schema first
-ALTER ROLE pdns SET search_path TO dns;
-
--- Grant connect to the database
-GRANT CONNECT ON DATABASE exhibitron TO pdns;
 
 -- Create the SOA maintenance function
 CREATE OR REPLACE FUNCTION dns.increment_soa_serial(domain_name text)
@@ -64,19 +38,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Grant execute permission on the function to pdns user
-GRANT EXECUTE ON FUNCTION dns.increment_soa_serial(text) TO pdns;
-
--- Create the host table in the public schema
-CREATE TABLE public.hosts (
-    id SERIAL PRIMARY KEY,
-    name TEXT NOT NULL UNIQUE,
-    ip_address INET NOT NULL UNIQUE,
-    host_info TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
 -- Function to get reverse DNS zone name from IP address
 CREATE OR REPLACE FUNCTION dns.get_reverse_zone(ip_address INET)
 RETURNS TEXT AS $$
@@ -100,20 +61,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Create the exhibitions table
-CREATE TABLE public.exhibitions (
-    id SERIAL PRIMARY KEY,
-    name TEXT NOT NULL UNIQUE,
-    dns_zone TEXT NOT NULL UNIQUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- Update the hosts table to include exhibition_id
-ALTER TABLE public.hosts
-    ADD COLUMN exhibition_id INTEGER NOT NULL REFERENCES public.exhibitions(id),
-    DROP CONSTRAINT hosts_name_key,
-    ADD CONSTRAINT hosts_name_exhibition_unique UNIQUE (name, exhibition_id);
 
 -- Function to get exhibition's DNS zone
 CREATE OR REPLACE FUNCTION dns.get_exhibition_zone(exhibition_id INTEGER)
@@ -243,16 +190,3 @@ CREATE TRIGGER sync_host_dns
     FOR EACH ROW
     EXECUTE FUNCTION dns.sync_host_dns();
 
--- Grant necessary permissions
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.hosts TO pdns;
-GRANT USAGE ON SEQUENCE public.hosts_id_seq TO pdns;
-GRANT EXECUTE ON FUNCTION dns.get_reverse_zone(INET) TO pdns;
-GRANT EXECUTE ON FUNCTION dns.sync_host_dns() TO pdns;
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.exhibitions TO pdns;
-GRANT USAGE ON SEQUENCE public.exhibitions_id_seq TO pdns;
-GRANT EXECUTE ON FUNCTION dns.get_exhibition_zone(INTEGER) TO pdns;
-
-insert into public.hosts(name, ip_address) values('test', '192.168.2.1');
-update public.hosts set ip_address = '10.1.1.2' WHERE name = 'test';
-
-select * from dns.records where type = 'SOA' or name like '%test%' order by id;
