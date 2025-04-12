@@ -17,7 +17,7 @@ let app: FastifyInstance
 
 beforeAll(async () => {
   db = await createTestDatabase()
-  app = await createApp({ migrate: false, logLevel: 'fatal' })
+  app = await createApp({ migrate: false, logLevel: 'fatal', orm: db.orm })
 })
 
 afterAll(async () => {

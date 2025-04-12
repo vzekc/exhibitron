@@ -1,4 +1,4 @@
-import { fastify, FastifyInstance } from 'fastify'
+import Fastify, { FastifyInstance } from 'fastify'
 import * as staticFiles from './app/static.js'
 import * as oidc from './app/oidc.js'
 import * as orm from './app/orm.js'
@@ -13,6 +13,8 @@ import { registerImageRoutes } from './modules/image/routes.js'
 import { registerExhibitImageRoutes } from './modules/exhibit/routes.js'
 import { registerServerSideHtmlRoutes } from './modules/serverSideHtml/routes.js'
 import { registerScheduleRoutes } from './modules/schedule/routes.js'
+import { MikroORM } from '@mikro-orm/core'
+import config from './mikro-orm.config.js'
 
 const registerErrorHandler = (app: FastifyInstance) => {
   // register global error handler to process 404 errors from `findOneOrFail` calls
@@ -20,19 +22,21 @@ const registerErrorHandler = (app: FastifyInstance) => {
 }
 
 export async function createApp({
-  migrate,
-  logLevel = 'INFO',
+  migrate = true,
+  logLevel = 'info',
+  orm: mikroOrm,
 }: {
   migrate?: boolean
   logLevel?: string
+  orm?: MikroORM
 } = {}) {
-  const app = fastify({
+  const app = Fastify({
     bodyLimit: 20 * 1024 * 1024, // 20 MB
     trustProxy: true,
     logger: {
       level: logLevel,
       transport: {
-        target: 'pino-pretty', // Pretty-print logs (for development)
+        target: 'pino-pretty',
         options: {
           colorize: true,
         },
@@ -46,7 +50,11 @@ export async function createApp({
     },
   })
 
-  // Register multipart plugin for file uploads
+  // Initialize MikroORM
+  const mikroORM = mikroOrm || (await MikroORM.init(config))
+  app.decorate('orm', mikroORM)
+
+  // Register plugins
   await app.register(fastifyMultipart, {
     limits: {
       fileSize: 10 * 1024 * 1024, // 10MB limit
@@ -57,7 +65,7 @@ export async function createApp({
 
   await oidc.register(app)
   await orm.register(app, !!migrate)
-  await session.register(app)
+  await session.register(app, mikroORM)
   await graphql.register(app)
 
   registerErrorHandler(app)
