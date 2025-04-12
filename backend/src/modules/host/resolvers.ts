@@ -1,7 +1,7 @@
 import { Context } from '../../app/context.js'
-import { HostInput, MutationResolvers, QueryResolvers } from '../../generated/graphql.js'
+import { MutationResolvers, QueryResolvers } from '../../generated/graphql.js'
 import { Host } from './entity.js'
-import { UniqueConstraintViolationException, wrap } from '@mikro-orm/core'
+import { UniqueConstraintViolationException, NotFoundError } from '@mikro-orm/core'
 import { UniqueConstraintError, PermissionDeniedError } from '../common/errors.js'
 import { pino } from 'pino'
 
@@ -14,12 +14,6 @@ const logger = pino({
   },
 })
 
-function validateHostInput(input: HostInput, user: Context['user']) {
-  if ((input.ipAddress || input.exhibitorId) && !user?.isAdministrator) {
-    throw new PermissionDeniedError('Only administrators can set IP address or exhibitor')
-  }
-}
-
 export const hostQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2345
   getHost: async (_parent, { name }, { db }) => db.host.findOneOrFail({ name }),
@@ -31,37 +25,45 @@ export const hostMutations: MutationResolvers<Context> = {
   // @ts-expect-error ts2345
   addHost: async (_parent, { name, input }, { db, user, exhibition, exhibitor }) => {
     logger.debug('Starting addHost mutation')
+    if ((input.ipAddress || input.exhibitorId) && !user?.isAdministrator) {
+      throw new PermissionDeniedError('Only administrators can set IP address or exhibitor')
+    }
+
+    logger.debug('Input validated')
+
+    let hostExhibitor = exhibitor
+    if (input.exhibitId) {
+      logger.debug('Setting exhibit and exhibitor')
+      const exhibit = await db.exhibit.findOneOrFail({ id: input.exhibitId })
+      if (exhibit.exhibitor !== exhibitor && !user?.isAdministrator) {
+        throw new PermissionDeniedError('Only the exhibitor of the exhibit can add a host')
+      }
+
+      hostExhibitor = exhibit.exhibitor
+    }
+
+    const host = db.em.create(Host, {
+      name,
+      exhibition,
+      exhibitor: input.exhibitorId
+        ? await db.exhibitor.findOneOrFail({ id: input.exhibitorId })
+        : hostExhibitor,
+      ipAddress: input.ipAddress ?? undefined,
+      services: input.services || [],
+    })
+    logger.debug('Host entity created')
+
+    if (input.exhibitId) {
+      logger.debug('Setting exhibit')
+      host.exhibit = await db.exhibit.findOneOrFail({ id: input.exhibitId })
+    }
+
+    logger.debug('Persisting host')
     try {
-      validateHostInput(input, user)
-      logger.debug('Input validated')
-
-      let hostExhibitor = exhibitor
-      if (input.exhibitId) {
-        logger.debug('Setting exhibit and exhibitor')
-        const exhibit = await db.exhibit.findOneOrFail({ id: input.exhibitId })
-        hostExhibitor = exhibit.exhibitor
-      }
-
-      const host = db.em.create(Host, {
-        name,
-        exhibition,
-        exhibitor: input.exhibitorId
-          ? await db.exhibitor.findOneOrFail({ id: input.exhibitorId })
-          : hostExhibitor,
-        ipAddress: input.ipAddress ?? undefined,
-        services: input.services || [],
-      })
-      logger.debug('Host entity created')
-
-      if (input.exhibitId) {
-        logger.debug('Setting exhibit')
-        host.exhibit = await db.exhibit.findOneOrFail({ id: input.exhibitId })
-      }
-
-      logger.debug('Persisting host')
       await db.em.persist(host).flush()
-      logger.debug('Host persisted successfully')
-      return host
+      logger.debug('Host persisted successfully', host)
+      // Reload the host to ensure all fields are properly populated
+      return await db.host.findOneOrFail({ name })
     } catch (error) {
       logger.error({ error }, 'Error in addHost mutation')
       // Check if it's a unique constraint violation
@@ -89,20 +91,27 @@ export const hostMutations: MutationResolvers<Context> = {
   },
 
   // @ts-expect-error ts2322
-  updateHost: async (_parent, { name, input }, { db, user }) => {
-    logger.debug('Starting updateHost mutation')
-    const host = await db.host.findOneOrFail({ name })
-    validateHostInput(input, user)
+  updateHostServices: async (_parent, { name, services }, { db, exhibitor, user }) => {
+    logger.debug('Starting updateHostServices mutation')
+    try {
+      const host = await db.host.findOneOrFail({ name })
 
-    const { exhibitId, ...rest } = input
-    wrap(host).assign(rest)
+      if (!user?.isAdministrator && host.exhibitor?.id !== exhibitor?.id) {
+        throw new PermissionDeniedError(
+          'Only administrators or the host exhibitor can update host services',
+        )
+      }
 
-    if (exhibitId) {
-      host.exhibit = await db.exhibit.findOneOrFail({ id: exhibitId })
+      host.services = services
+
+      await db.em.flush()
+      return host
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw new NotFoundError(`Host not found: ${name}`)
+      }
+      throw error
     }
-
-    await db.em.flush()
-    return host
   },
 
   deleteHost: async (_parent: unknown, { name }: { name: string }, { db }: Context) => {

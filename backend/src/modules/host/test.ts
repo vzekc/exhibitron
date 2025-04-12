@@ -71,18 +71,33 @@ describe('host', () => {
   })
 
   graphqlTest('try making updates without being logged in', async (graphqlRequest) => {
+    const admin = await login('admin@example.com')
+
+    // First create a host with a unique name and IP
+    await createHost(
+      graphqlRequest,
+      {
+        name: 'test-host-update-unauthorized',
+        ipAddress: '192.168.1.254',
+      },
+      admin,
+    )
+
+    // Then try to update it without being logged in
     const result = (await graphqlRequest(
       graphql(`
-        mutation UpdateHost($name: String!, $input: HostInput!) {
-          updateHost(name: $name, input: $input) {
+        mutation UpdateHostServices($name: String!, $services: [WellKnownService!]!) {
+          updateHostServices(name: $name, services: $services) {
             id
           }
         }
       `),
-      { name: 'test-host', input: { ipAddress: '192.168.1.1' } },
-    )) as GraphQLResponse<{ updateHost: { id: number } }>
+      { name: 'test-host-update-unauthorized', services: [WellKnownService.Http] },
+    )) as GraphQLResponse<{ updateHostServices: { id: number } }>
     expect(result.errors![0].extensions.code).toBe(ErrorCode.FORBIDDEN)
-    expect(result.errors![0].message).toBe('Only administrators can set IP address or exhibitor')
+    expect(result.errors![0].message).toBe(
+      'Only administrators or the host exhibitor can update host services',
+    )
   })
 
   graphqlTest('host CRUD operations', async (graphqlRequest) => {
@@ -113,8 +128,8 @@ describe('host', () => {
     {
       const result = (await graphqlRequest(
         graphql(`
-          mutation UpdateHost($name: String!, $input: HostInput!) {
-            updateHost(name: $name, input: $input) {
+          mutation UpdateHostServices($name: String!, $services: [WellKnownService!]!) {
+            updateHostServices(name: $name, services: $services) {
               id
               name
               ipAddress
@@ -124,20 +139,22 @@ describe('host', () => {
         `),
         {
           name: 'nu-host',
-          input: { ipAddress: '192.168.1.3', services: [WellKnownService.Http] } as HostInput,
+          services: [WellKnownService.Http],
         },
         user,
-      )) as GraphQLResponse<{ updateHost: Host }>
+      )) as GraphQLResponse<{ updateHostServices: Host }>
       expect(result.errors![0].extensions.code).toBe(ErrorCode.FORBIDDEN)
-      expect(result.errors![0].message).toBe('Only administrators can set IP address or exhibitor')
+      expect(result.errors![0].message).toBe(
+        'Only administrators or the host exhibitor can update host services',
+      )
     }
 
     // Update host as admin with new services
     {
       const result = (await graphqlRequest(
         graphql(`
-          mutation UpdateHost($name: String!, $input: HostInput!) {
-            updateHost(name: $name, input: $input) {
+          mutation UpdateHostServices($name: String!, $services: [WellKnownService!]!) {
+            updateHostServices(name: $name, services: $services) {
               id
               name
               ipAddress
@@ -147,16 +164,13 @@ describe('host', () => {
         `),
         {
           name: 'nu-host',
-          input: {
-            ipAddress: '192.168.1.3',
-            services: [WellKnownService.Http, WellKnownService.Ftp],
-          } as HostInput,
+          services: [WellKnownService.Http, WellKnownService.Ftp],
         },
         admin,
-      )) as GraphQLResponse<{ updateHost: Host }>
+      )) as GraphQLResponse<{ updateHostServices: Host }>
       expect(result.errors).toBeUndefined()
-      expect(result.data!.updateHost!.ipAddress).toBe('192.168.1.3')
-      expect(result.data!.updateHost!.services).toEqual([
+      expect(result.data!.updateHostServices!.ipAddress).toBe('192.168.1.2')
+      expect(result.data!.updateHostServices!.services).toEqual([
         WellKnownService.Http,
         WellKnownService.Ftp,
       ])
@@ -207,6 +221,23 @@ describe('host', () => {
     )) as GraphQLResponse<{ getHost: { id: number } }>
     expect(result.errors![0].extensions.code).toBe(ErrorCode.NOT_FOUND)
     expect(result.errors![0].message).toMatch(/^Host not found/)
+  })
+
+  graphqlTest('update nonexistent host', async (graphqlRequest) => {
+    const admin = await login('admin@example.com')
+    const result = (await graphqlRequest(
+      graphql(`
+        mutation UpdateHostServices($name: String!, $services: [WellKnownService!]!) {
+          updateHostServices(name: $name, services: $services) {
+            id
+          }
+        }
+      `),
+      { name: 'nonexistent-host', services: [WellKnownService.Http] },
+      admin,
+    )) as GraphQLResponse<{ updateHostServices: { id: number } }>
+    expect(result.errors![0].extensions.code).toBe(ErrorCode.NOT_FOUND)
+    expect(result.errors![0].message).toBe('Host not found: nonexistent-host')
   })
 
   graphqlTest('automatic IP address allocation', async (graphqlRequest) => {

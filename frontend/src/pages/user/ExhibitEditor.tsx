@@ -179,19 +179,19 @@ const ADD_HOST = graphql(`
   }
 `)
 
-const UPDATE_HOST = graphql(`
-  mutation UpdateHost($name: String!, $input: HostInput!) {
-    updateHost(name: $name, input: $input) {
+const DELETE_HOST = graphql(`
+  mutation DeleteHost($name: String!) {
+    deleteHost(name: $name)
+  }
+`)
+
+const UPDATE_HOST_SERVICES = graphql(`
+  mutation UpdateHostServices($name: String!, $services: [WellKnownService!]!) {
+    updateHostServices(name: $name, services: $services) {
       name
       ipAddress
       services
     }
-  }
-`)
-
-const DELETE_HOST = graphql(`
-  mutation DeleteHost($name: String!) {
-    deleteHost(name: $name)
   }
 `)
 
@@ -258,12 +258,12 @@ const ExhibitEditor = () => {
       cache.evict({ fieldName: 'getCurrentExhibition' })
     },
   })
-  const [updateHost] = useMutation(UPDATE_HOST, {
+  const [deleteHost] = useMutation(DELETE_HOST, {
     onCompleted: () => {
       void refetchHost()
     },
   })
-  const [deleteHost] = useMutation(DELETE_HOST, {
+  const [updateHostServices] = useMutation(UPDATE_HOST_SERVICES, {
     onCompleted: () => {
       void refetchHost()
     },
@@ -404,13 +404,10 @@ const ExhibitEditor = () => {
       ? [...host.services, service]
       : host.services.filter((s) => s !== service)
 
-    await updateHost({
+    await updateHostServices({
       variables: {
         name: host.name,
-        input: {
-          exhibitId: Number(id),
-          services: newServices,
-        },
+        services: newServices,
       },
     })
   }

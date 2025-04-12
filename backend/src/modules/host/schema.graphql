@@ -4,8 +4,6 @@ type Host {
   ipAddress: String!
   exhibitor: Exhibitor
   exhibit: Exhibit
-  cpu: String
-  os: String
   services: [WellKnownService!]
 }
 
@@ -29,8 +27,6 @@ input HostInput {
   ipAddress: String
   exhibitorId: Int
   exhibitId: Int
-  cpu: String
-  os: String
   services: [WellKnownService!]
 }
 
@@ -41,6 +37,6 @@ extend type Query {
 
 extend type Mutation {
   addHost(name: String!, input: HostInput!): Host!
-  updateHost(name: String!, input: HostInput!): Host!
+  updateHostServices(name: String!, services: [WellKnownService!]!): Host!
   deleteHost(name: String!): Boolean!
 }
