@@ -2,10 +2,9 @@ import 'dotenv/config'
 import fastifySession from '@fastify/session'
 import { FastifyInstance } from 'fastify'
 import { createSessionStore } from '../modules/session/session-store.js'
-import { MikroORM } from '@mikro-orm/core'
 
-export const register = async (app: FastifyInstance, orm: MikroORM) => {
-  const sessionStore = await createSessionStore(orm)
+export const register = async (app: FastifyInstance) => {
+  const sessionStore = await createSessionStore()
 
   const getSessionSecret = () => {
     const secret = process.env.SESSION_SECRET
@@ -16,7 +15,7 @@ export const register = async (app: FastifyInstance, orm: MikroORM) => {
     return 'oi31p2oi312po3i12p3n21be jn)@!(#d432bhjdbhbehbHJKHJG'
   }
 
-  await app.register(fastifySession, {
+  app.register(fastifySession, {
     store: sessionStore,
     secret: getSessionSecret(),
     cookie: {
