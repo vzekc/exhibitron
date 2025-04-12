@@ -98,6 +98,39 @@ const styles = StyleSheet.create({
     paddingLeft: '2mm',
     paddingRight: '2mm',
   },
+  ipNetworkParameters: {
+    position: 'absolute',
+    fontSize: 8,
+    color: '#4a4a4a',
+    textAlign: 'left',
+    whiteSpace: 'nowrap',
+    left: '-38mm',
+    width: '70mm',
+    bottom: '40mm',
+  },
+  ipAddressRange: {
+    position: 'absolute',
+    fontSize: 8,
+    color: '#4a4a4a',
+    textAlign: 'left',
+    whiteSpace: 'nowrap',
+    left: '-38mm',
+    width: '60mm',
+    bottom: '-3mm',
+  },
+  dnsZone: {
+    position: 'absolute',
+    fontSize: 8,
+    color: '#4a4a4a',
+    textAlign: 'center',
+    whiteSpace: 'nowrap',
+    left: '-36.5mm',
+    bottom: '-5mm',
+    transform: 'rotate(-90deg)',
+    transformOrigin: 'left bottom',
+    padding: '2mm',
+    width: '50mm',
+  },
 })
 
 const GET_TABLES = graphql(`
@@ -105,6 +138,7 @@ const GET_TABLES = graphql(`
     getCurrentExhibition {
       id
       title
+      dnsZone
       tables {
         id
         number
@@ -195,6 +229,11 @@ const TableLabelsPDFDocument = ({
               <View style={styles.textContainer}>
                 <Text style={styles.tableNumber}>{tableNumber}</Text>
                 <Text style={styles.eventName}>{exhibition.title}</Text>
+                <Text style={styles.ipNetworkParameters}>Gateway 10.0.0.1 DNS 10.0.0.2</Text>
+                <Text style={styles.ipAddressRange}>
+                  IP Range: 10.1.{tableNumber}.0-10.1.{tableNumber}.255
+                </Text>
+                <Text style={styles.dnsZone}>{exhibition.dnsZone}</Text>
               </View>
             </View>
           ))}

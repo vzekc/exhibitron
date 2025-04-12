@@ -409,6 +409,10 @@ const ExhibitEditor = () => {
         name: host.name,
         services: newServices,
       },
+      update: (cache) => {
+        // Invalidate the GET_HOSTS query to force a refetch
+        cache.evict({ fieldName: 'getCurrentExhibition' })
+      },
     })
   }
 
@@ -557,7 +561,9 @@ const ExhibitEditor = () => {
                           {hostData.getExhibit.host.ipAddress}
                         </div>
                       </div>
-                      <div className="w-[300px]">
+                      <div
+                        className="w-[300px]"
+                        title="Änderungen an den Diensten werden sofort übernommen">
                         <FormLabel>Dienste</FormLabel>
                         <div className="mt-1 flex flex-wrap gap-2">
                           {WELL_KNOWN_SERVICES.map((service) => (

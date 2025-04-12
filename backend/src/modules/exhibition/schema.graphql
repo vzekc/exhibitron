@@ -1,5 +1,6 @@
 type Exhibition {
   hostMatch: String!
+  isClientInLan: Boolean!
   id: Int!
   key: String!
   title: String!

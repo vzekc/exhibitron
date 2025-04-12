@@ -7,6 +7,7 @@ import { pino } from 'pino'
 import { User } from '../modules/user/entity.js'
 import { FastifySessionObject } from '@fastify/session'
 import { FastifyRequest } from 'fastify'
+import { isRequestFromLan } from '../misc/isRequestFromLan.js'
 
 const logger = pino()
 
@@ -64,6 +65,9 @@ export const createContext = async (request: FastifyRequest) => {
   const exhibition = await db.exhibition.findOneOrFail({
     id: hostToExhibitionId(await getHostMatchers(), request.hostname),
   })
+
+  const isClientInLan = isRequestFromLan(request)
+
   const exhibitor =
     request.user &&
     (await db.exhibitor.findOne({
@@ -77,6 +81,7 @@ export const createContext = async (request: FastifyRequest) => {
     exhibition,
     exhibitor,
     canSwitchExhibitor: !!request.session.canSwitchExhibitor,
+    isClientInLan,
   }
   logger.debug('createContext', context)
   return context

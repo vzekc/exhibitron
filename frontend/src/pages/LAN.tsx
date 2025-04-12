@@ -7,12 +7,14 @@ import { DataTable, TableRow, TableCell } from '@components/Table.tsx'
 import Card from '@components/Card.tsx'
 import LoadInProgress from '@components/LoadInProgress'
 import ChipContainer from '@components/ChipContainer.tsx'
+import { useExhibitor } from '@contexts/ExhibitorContext.ts'
 
 const GET_HOSTS = graphql(`
   query GetHosts {
     getCurrentExhibition {
       id
       dnsZone
+      isClientInLan
       hosts {
         id
         name
@@ -71,6 +73,7 @@ const LAN = () => {
   const { data } = useQuery(GET_HOSTS)
   const [sortedHosts, setSortedHosts] = useState<Host[] | null>(null)
   const navigate = useNavigate()
+  const { exhibitor } = useExhibitor()
 
   const handleSort = (sorter: (data: Host[]) => Host[]) => {
     if (data?.getCurrentExhibition?.hosts) {
@@ -89,7 +92,7 @@ const LAN = () => {
     sortKey: column,
   }))
 
-  const getProtocol = (services: string[] | null | undefined) => {
+  const getBrowserProtocol = (services: string[] | null | undefined) => {
     if (!services) return null
     return services.some((service) => service.toLowerCase() === 'https')
       ? 'https'
@@ -103,9 +106,17 @@ const LAN = () => {
       <header className="mb-3">
         <PageHeading>LAN-Übersicht</PageHeading>
         <p className="mt-2 text-base text-gray-700">
-          Hier findest Du eine Übersicht aller angemeldeten Hosts im LAN. Du kannst sie sortieren
-          und nach IP-Adressen filtern.
+          Hier findest Du eine Übersicht aller Hostnamen, die im Konferenz-LAN registriert wurden.
         </p>
+        {exhibitor && (
+          <p className="mt-2 text-base text-gray-700">
+            Wenn Du selbst einen Hostnamen für Dein Exponat benötigst, kannst Du diesen im
+            Exponat-Editor anlegen und dort auch auswählen, welche Dienste Du für Deinen Host
+            registrieren möchtest. Die Dienste werden dann automatisch in die Übersicht übernommen.
+            Wenn "http" oder "https" ausgewählt ist, wird der Hostname als Link angezeigt und
+            Besucher im Konferenz-LAN können direkt darauf zugreifen.
+          </p>
+        )}
       </header>
 
       <DataTable
@@ -146,8 +157,12 @@ const LAN = () => {
                   )
                 ) : column === 'name' ? (
                   (() => {
-                    const protocol = getProtocol(host.services)
-                    if (protocol && data.getCurrentExhibition?.dnsZone) {
+                    const protocol = getBrowserProtocol(host.services)
+                    if (
+                      data.getCurrentExhibition?.isClientInLan &&
+                      protocol &&
+                      data.getCurrentExhibition?.dnsZone
+                    ) {
                       return (
                         <a
                           href={`${protocol}://${host.name}.${data.getCurrentExhibition.dnsZone}`}
