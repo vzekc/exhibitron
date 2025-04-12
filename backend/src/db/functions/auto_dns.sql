@@ -98,12 +98,6 @@ BEGIN
         INSERT INTO dns.records (domain_id, name, type, content, ttl)
         VALUES (v_domain_id, NEW.name || '.' || v_zone, 'A', text(NEW.ip_address), 3600);
 
-        -- Insert HINFO record only if host_info is not null
-        IF NEW.host_info IS NOT NULL THEN
-            INSERT INTO dns.records (domain_id, name, type, content, ttl)
-            VALUES (v_domain_id, NEW.name || '.' || v_zone, 'HINFO', NEW.host_info, 3600);
-        END IF;
-
         -- Handle reverse DNS
         reverse_zone := dns.get_reverse_zone(NEW.ip_address);
         IF reverse_zone IS NOT NULL THEN

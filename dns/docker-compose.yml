@@ -16,6 +16,4 @@ services:
       - PDNS_API_KEY=${PDNS_API_KEY}
     volumes:
       - ./pdns.conf:/etc/powerdns/pdns.conf
-      - ./schema:/schema
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     restart: unless-stopped 
