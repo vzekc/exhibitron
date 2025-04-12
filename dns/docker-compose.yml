@@ -3,17 +3,17 @@ services:
     build: .
     container_name: powerdns
     ports:
-      - "5300:53/tcp"
-      - "5300:53/udp"
+      - "${PDNS_PORT}:53/tcp"
+      - "${PDNS_PORT}:53/udp"
       - "8081:8081"
     environment:
-      - PDNS_launch=gpgsql
-      - PDNS_gpgsql_host=host.docker.internal
-      - PDNS_gpgsql_port=5432
-      - PDNS_gpgsql_user=pdns
-      - PDNS_gpgsql_password=${PDNS_PASSWORD}
-      - PDNS_gpgsql_dbname=exhibitron
+      - PDNS_LAUNCH=gpgsql
+      - PDNS_GPGSQL_HOST=host.docker.internal
+      - PDNS_GPGSQL_PORT=5432
+      - PDNS_GPGSQL_USER=pdns
+      - PDNS_GPGSQL_PASSWORD=${PDNS_PASSWORD}
+      - PDNS_GPGSQL_DBNAME=exhibitron
       - PDNS_API_KEY=${PDNS_API_KEY}
     volumes:
-      - ./pdns.conf:/etc/powerdns/pdns.conf
-    restart: unless-stopped 
+      - ./pdns.conf.template:/etc/powerdns/pdns.conf.template
+    restart: unless-stopped

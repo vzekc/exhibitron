@@ -21,12 +21,12 @@ cache-ttl=20
 query-cache-ttl=20
 
 # Backend
-launch=gpgsql
-gpgsql-host=host.docker.internal
-gpgsql-port=5432
-gpgsql-user=pdns
-gpgsql-password=${PDNS_gpgsql_password}
-gpgsql-dbname=exhibitron
+launch=${PDNS_LAUNCH}
+gpgsql-host=${PDNS_GPGSQL_HOST}
+gpgsql-port=${PDNS_GPGSQL_PORT}
+gpgsql-user=${PDNS_GPGSQL_USER}
+gpgsql-password=${PDNS_GPGSQL_PASSWORD}
+gpgsql-dbname=${PDNS_GPGSQL_DBNAME}
 
 # Query handling
 allow-unsigned-autoprimary=yes

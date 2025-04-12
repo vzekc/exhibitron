@@ -1,6 +1,7 @@
 # PowerDNS Setup
 
-This directory contains the configuration for running PowerDNS with PostgreSQL backend.
+This directory contains the configuration for running PowerDNS with
+PostgreSQL backend.
 
 ## Prerequisites
 
@@ -11,18 +12,16 @@ This directory contains the configuration for running PowerDNS with PostgreSQL b
 
 ## Setup
 
-1. Create a `.env` file in this directory with your PostgreSQL password and API key:
+1. Create a `.env` file in this directory with your desired listening
+   port, PostgreSQL password and API key:
+
 ```
 PDNS_PASSWORD=your_password
 PDNS_API_KEY=your_api_key
+PDNS_PORT=5300
 ```
 
-2. Run the setup script to download the schema and set up the database:
-```bash
-./setup.sh
-```
-
-3. Start the PowerDNS container:
+2. Start the PowerDNS container:
 ```bash
 docker compose up -d
 ```
@@ -195,14 +194,10 @@ This approach is more efficient than manually reloading zones because:
 3. No manual intervention is required
 4. Changes are picked up within seconds
 
-Note: The SOA serial should follow the format YYYYMMDDnn where:
-- YYYYMMDD is the current date
-- nn is a two-digit sequence number for multiple changes on the same day
-
 ## Security Notes
 
 - AXFR (zone transfers) are disabled by default
 - Only localhost is allowed to perform AXFR
 - Make sure to set a strong PostgreSQL password
 - The `pdns` user has limited permissions only to the `dns` schema
-- The API is protected by an API key - keep it secure 
+- The API is protected by an API key - keep it secure
