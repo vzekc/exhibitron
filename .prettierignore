@@ -1,2 +1,3 @@
 frontend/src/generated/
 backend/src/generated/
+backend/src/migrations/.snapshot-exhibitron.json
