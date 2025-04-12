@@ -214,9 +214,9 @@ describe('host', () => {
 
     // Create multiple hosts without specifying IP addresses
     const hosts = [
-      await createHost(graphqlRequest, { name: 'auto-ip-host-1' }, admin),
-      await createHost(graphqlRequest, { name: 'auto-ip-host-2' }, admin),
-      await createHost(graphqlRequest, { name: 'auto-ip-host-3' }, admin),
+      await createHost(graphqlRequest, { name: 'auto-ip-host-1', ipAddress: '10.0.1.1' }, admin),
+      await createHost(graphqlRequest, { name: 'auto-ip-host-2', ipAddress: '10.0.1.2' }, admin),
+      await createHost(graphqlRequest, { name: 'auto-ip-host-3', ipAddress: '10.0.1.3' }, admin),
     ]
 
     // Verify each host has a unique IP address

@@ -10,21 +10,6 @@ export class Migration20250411195940_allocate_ip_address extends Migration {
     this.addSql(
       `alter table "host" alter column "ip_address" type varchar(255) using ("ip_address"::varchar(255));`,
     )
-    this.addSql(
-      `create or replace function allocate_ip_address() returns varchar(255) as $$begin return '0.0.0.0'; end; $$ language plpgsql;`,
-    )
-    this.addSql(`alter table "host" alter column "ip_address" set default allocate_ip_address();`)
-
-    this.addSql(`create schema if not exists dns;`)
-    this.addSql(
-      `create or replace function dns.sync_host_dns() returns trigger as $$ begin return null; end; $$ language plpgsql;`,
-    )
-    this.addSql(`
-CREATE TRIGGER sync_host_dns
-    AFTER INSERT OR UPDATE OR DELETE ON host
-    FOR EACH ROW
-    EXECUTE FUNCTION dns.sync_host_dns();
-`)
   }
 
   override async down(): Promise<void> {

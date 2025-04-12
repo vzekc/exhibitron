@@ -2177,7 +2177,6 @@
           "autoincrement": false,
           "primary": false,
           "nullable": true,
-          "default": "allocate_ip_address()",
           "mappedType": "unknown"
         },
         "services": {

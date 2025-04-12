@@ -96,7 +96,8 @@ BEGIN
 
         -- Insert A record
         INSERT INTO dns.records (domain_id, name, type, content, ttl)
-        VALUES (v_domain_id, NEW.name || '.' || v_zone, 'A', text(NEW.ip_address), 3600);
+        VALUES (v_domain_id, NEW.name || '.' || v_zone, 'A',
+                split_part(text(NEW.ip_address), '/', 1), 3600);
 
         -- Handle reverse DNS
         reverse_zone := dns.get_reverse_zone(NEW.ip_address);
@@ -119,7 +120,7 @@ BEGIN
 
             -- Create PTR record
             IF family(NEW.ip_address) = 4 THEN
-                ptr_name := split_part(text(NEW.ip_address), '.', 4) || '.' || reverse_zone;
+                ptr_name := split_part(split_part(text(NEW.ip_address), '/', 1), '.', 4) || '.' || reverse_zone;
             ELSE
                 -- IPv6 PTR record name would be calculated here
                 ptr_name := NULL;
@@ -182,3 +183,47 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'host') THEN
+
+        DROP FUNCTION IF EXISTS allocate_ip_address() CASCADE;
+
+        CREATE FUNCTION allocate_ip_address()
+            RETURNS inet AS $func$
+        DECLARE
+            last_ip inet;
+            next_ip inet;
+        BEGIN
+            -- Get the highest IP address in the range 10.2.x.y
+            SELECT ip_address::inet INTO last_ip
+            FROM public.host
+            WHERE ip_address::inet << '10.2.0.0/16'
+            ORDER BY ip_address::inet DESC
+            LIMIT 1;
+
+            -- If no IP is in use, return the default IP
+            IF last_ip IS NULL THEN
+                RETURN '10.2.0.0'::inet;
+            END IF;
+
+            -- Calculate the next IP by adding 1 to the host part
+            next_ip := last_ip + 1;
+
+            -- Return the next IP
+            RETURN next_ip;
+        END;
+        $func$ LANGUAGE plpgsql;
+
+        ALTER TABLE public.host ALTER COLUMN ip_address SET DEFAULT allocate_ip_address();
+
+        -- Prevent truncation of host table to maintain DNS consistency
+        REVOKE TRUNCATE ON public.host FROM PUBLIC;
+
+        CREATE OR REPLACE TRIGGER sync_host_dns
+            AFTER INSERT OR UPDATE OR DELETE ON public.host
+            FOR EACH ROW
+        EXECUTE FUNCTION dns.sync_host_dns();
+    END IF;
+END;
+$$;
