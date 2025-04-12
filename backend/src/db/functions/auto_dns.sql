@@ -149,6 +149,9 @@ BEGIN
         -- Get the exhibition's DNS zone for the deleted host
         v_zone := dns.get_exhibition_zone(OLD.exhibition_id);
 
+        -- Get the forward zone domain_id
+        SELECT id INTO v_domain_id FROM dns.domains WHERE name = v_zone;
+
         -- Delete forward records
         DELETE FROM dns.records r
         WHERE r.domain_id = v_domain_id
@@ -178,3 +181,4 @@ BEGIN
     RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
+
