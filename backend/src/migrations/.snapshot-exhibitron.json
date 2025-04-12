@@ -2172,14 +2172,13 @@
         },
         "ip_address": {
           "name": "ip_address",
-          "type": "varchar(255)",
+          "type": "inet",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
-          "length": 255,
           "default": "allocate_ip_address()",
-          "mappedType": "string"
+          "mappedType": "unknown"
         },
         "services": {
           "name": "services",

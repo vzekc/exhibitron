@@ -10,7 +10,7 @@ export class Host extends BaseEntity {
   @Unique()
   name!: string
 
-  @Property({ defaultRaw: 'allocate_ip_address()' })
+  @Property({ defaultRaw: 'allocate_ip_address()', columnType: 'inet' })
   @Unique()
   ipAddress?: string
 

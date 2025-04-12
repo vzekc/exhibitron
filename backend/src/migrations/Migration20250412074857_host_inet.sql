@@ -1,6 +1,12 @@
+-- First drop the default value
+alter table "host" alter column "ip_address" drop default;
+
+-- Then alter the column type
+alter table "host" alter column "ip_address" type inet using ("ip_address"::inet);
+
 DROP FUNCTION IF EXISTS allocate_ip_address();
 
-CREATE FUNCTION allocate_ip_address()
+CREATE OR REPLACE FUNCTION allocate_ip_address()
     RETURNS inet AS $$
 DECLARE
     last_ip inet;
@@ -25,3 +31,6 @@ BEGIN
     RETURN next_ip;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Finally set the default value again
+alter table "host" alter column "ip_address" set default allocate_ip_address();
