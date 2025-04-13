@@ -11,6 +11,7 @@ import { youtubeResolvers } from './modules/youtube/resolver.js'
 import { roomResolvers } from './modules/room/resolvers.js'
 import { conferenceSessionResolvers } from './modules/conferenceSession/resolvers.js'
 import { hostResolvers } from './modules/host/resolvers.js'
+import { docResolvers } from './modules/doc/resolvers.js'
 import { mergeResolvers } from '@graphql-tools/merge'
 import { Resolvers } from './generated/graphql.js'
 
@@ -28,6 +29,7 @@ const resolvers: Resolvers = mergeResolvers([
   roomResolvers,
   conferenceSessionResolvers,
   hostResolvers,
+  docResolvers,
 ])
 
 export default resolvers

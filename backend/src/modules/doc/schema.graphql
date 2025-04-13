@@ -1,0 +1,9 @@
+type Doc {
+  id: ID!
+  name: String!
+  content: String!
+}
+
+type Query {
+  doc(name: String!): Doc
+}

@@ -19,6 +19,7 @@ import UserExhibits from './pages/user/Exhibits.tsx'
 import ExhibitEditor from './pages/user/ExhibitEditor.tsx'
 import PageEditor from './pages/admin/PageEditor.tsx'
 import Page from '@components/Page.tsx'
+import Documentation from '@components/Documentation.tsx'
 import PageList from './pages/admin/PageList.tsx'
 import Exhibitors from './pages/Exhibitors.tsx'
 import Exhibitor from './pages/Exibitor.tsx'
@@ -69,7 +70,7 @@ const routes: RouteObject[] = [
           { path: 'exhibitorInfo', element: <Page pageKey="exhibitorInfo" /> },
           { path: 'exhibit', element: <UserExhibits /> },
           { path: 'exhibit/:id', element: <ExhibitEditor /> },
-          { path: 'help', element: <Page pageKey="help" /> },
+          { path: 'help', element: <Documentation name="aussteller-dokumentation" /> },
         ],
       },
       { path: '/requestPasswordReset', element: <RequestPasswordReset /> },

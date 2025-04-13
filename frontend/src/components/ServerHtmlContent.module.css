@@ -9,8 +9,9 @@
 
 /* Headings */
 .serverHtmlContent h1,
-.serverHtmlContent h2 {
-  margin-top: 1.5em;
+.serverHtmlContent h2,
+.serverHtmlContent h3 {
+  margin-top: 0.5em;
   margin-bottom: 0.5em;
   font-weight: 600;
   line-height: 1.25;
@@ -22,6 +23,10 @@
 
 .serverHtmlContent h2 {
   font-size: 1.5em;
+}
+
+.serverHtmlContent h3 {
+  font-size: 1.2em;
 }
 
 /* Lists */
