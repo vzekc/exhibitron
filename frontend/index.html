@@ -9,6 +9,7 @@
       function isModernBrowser() {
         try {
           return (
+            !navigator.userAgent.includes('SeaMonkey') &&
             'fetch' in window &&
             'Promise' in window &&
             'assign' in Object &&
