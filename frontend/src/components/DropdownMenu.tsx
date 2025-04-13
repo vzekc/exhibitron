@@ -51,7 +51,7 @@ const DropdownMenu = ({
     if (details) {
       const rect = details.getBoundingClientRect()
       setDropdownPosition({
-        top: rect.bottom + window.scrollY,
+        top: rect.bottom,
         left: rect.right - 192, // 48rem = 192px (w-48 class)
         width: 192,
       })
