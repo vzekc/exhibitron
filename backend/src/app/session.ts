@@ -6,6 +6,11 @@ import { createSessionStore } from '../modules/session/session-store.js'
 export const register = async (app: FastifyInstance) => {
   const sessionStore = await createSessionStore()
 
+  app.addHook('onClose', () => {
+    console.log('closing session store')
+    sessionStore.close()
+  })
+
   const getSessionSecret = () => {
     const secret = process.env.SESSION_SECRET
     if (secret) {

@@ -19,6 +19,7 @@ const generateRandomString = (length: number): string => {
 export const createTestDatabase = async () => {
   const dbName = `exhibitron-test-${generateRandomString(8)}`
   createDatabase(dbName)
+  config.clientUrl = `postgresql://postgres@localhost/${dbName}`
 
   const db = await initORM({
     ...config,
@@ -47,6 +48,7 @@ export const runCommand = (command: string): void => {
 }
 
 export const createDatabase = (dbName: string) => {
+  console.log('creating database', dbName)
   runCommand(`createdb ${dbName}`)
 }
 

@@ -64,6 +64,10 @@ export class SessionStore implements fastifySession.SessionStore {
       callback?.(err as Error)
     }
   }
+
+  async close() {
+    await this.orm.close(true)
+  }
 }
 
 // Create a separate ORM instance for session management
@@ -71,6 +75,7 @@ let sessionORM: MikroORM
 
 export async function createSessionStore() {
   if (!sessionORM) {
+    console.log('calling MikroORM.init', config.clientUrl)
     sessionORM = await MikroORM.init({
       ...config,
       // Use a different connection name to avoid conflicts
