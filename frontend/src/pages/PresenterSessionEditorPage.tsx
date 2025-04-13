@@ -11,9 +11,10 @@ import TextEditor, { TextEditorHandle } from '@components/TextEditor'
 import ActionBar from '@components/ActionBar'
 import Button from '@components/Button'
 import { useUnsavedChangesWarning } from '@hooks/useUnsavedChangesWarning'
+import { getDisplayName } from '@utils/displayName'
 
-const GET_SESSION = graphql(`
-  query GetSession($id: Int!) {
+const GET_SESSION_DATA = graphql(`
+  query GetSessionData($id: Int!) {
     getConferenceSession(id: $id) {
       id
       title
@@ -27,6 +28,20 @@ const GET_SESSION = graphql(`
       exhibitors {
         id
         user {
+          id
+          fullName
+          nickname
+        }
+      }
+    }
+    getCurrentExhibition {
+      id
+      startDate
+      endDate
+      exhibitors {
+        id
+        user {
+          id
           fullName
           nickname
         }
@@ -55,7 +70,7 @@ const PresenterSessionEditorPage = () => {
   const [title, setTitle] = useState('')
   const [isTextEdited, setIsTextEdited] = useState(false)
 
-  const { loading, error, data } = useQuery(GET_SESSION, {
+  const { loading, error, data } = useQuery(GET_SESSION_DATA, {
     variables: { id: parseInt(id ?? '0') },
     skip: !id,
   })
@@ -112,7 +127,7 @@ const PresenterSessionEditorPage = () => {
   const duration = (endTime.getTime() - startTime.getTime()) / (1000 * 60) // duration in minutes
 
   const presenters = session.exhibitors
-    ?.map((exhibitor) => exhibitor.user.nickname || exhibitor.user.fullName)
+    ?.map((exhibitor) => getDisplayName(exhibitor.user))
     .join(', ')
 
   const handleSave = async () => {

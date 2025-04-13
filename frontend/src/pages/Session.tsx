@@ -11,6 +11,7 @@ import { useExhibitor } from '@contexts/ExhibitorContext'
 import ActionBar from '@components/ActionBar'
 import Button from '@components/Button'
 import { useNavigate } from 'react-router-dom'
+import { getDisplayName } from '@utils/displayName'
 
 const GET_SESSION = graphql(`
   query GetSession($id: Int!) {
@@ -59,7 +60,7 @@ const Session = () => {
   const duration = (endTime.getTime() - startTime.getTime()) / (1000 * 60) // duration in minutes
 
   const presenters = session.exhibitors
-    ?.map((exhibitor) => exhibitor.user.nickname || exhibitor.user.fullName)
+    ?.map((exhibitor) => getDisplayName(exhibitor.user))
     .join(', ')
 
   const isPresenter = exhibitor && session.exhibitors?.some((e) => e.id === exhibitor.id)

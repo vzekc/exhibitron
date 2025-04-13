@@ -1,10 +1,11 @@
 import Icon from './Icon'
+import { getDisplayName } from '@utils/displayName'
 
 type ProfileSectionProps = {
   userId: string
   fullName: string
-  nickname?: string | null
-  profileImage?: boolean | null
+  nickname: string | null
+  profileImage: boolean
   topic?: string | null
 }
 
@@ -15,7 +16,7 @@ const ProfileSection = ({
   profileImage,
   topic,
 }: ProfileSectionProps) => {
-  const displayName = nickname || fullName
+  const displayName = getDisplayName({ fullName, nickname })
 
   return (
     <div className="flex flex-col gap-4">
@@ -42,7 +43,9 @@ const ProfileSection = ({
             {displayName}
           </h2>
           {nickname && (
-            <p className="truncate text-sm text-gray-600 dark:text-gray-400">{fullName}</p>
+            <p className="truncate text-sm text-gray-600 dark:text-gray-400">
+              {getDisplayName({ fullName, nickname })}
+            </p>
           )}
         </div>
       </div>

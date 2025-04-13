@@ -2,6 +2,7 @@ import { Document, Page, Text, View, StyleSheet, Image, Font, pdf } from '@react
 import { graphql, ResultOf } from 'gql.tada'
 import { ApolloClient } from '@apollo/client'
 import QRCode from 'qrcode'
+import { getDisplayName } from '@utils/displayName'
 
 // Register fonts (assuming you have Lato fonts in your public directory)
 Font.register({
@@ -132,6 +133,7 @@ const GET_EXHIBIT = graphql(`
         user {
           id
           fullName
+          nickname
         }
       }
       table {
@@ -237,7 +239,7 @@ const ExhibitPDFDocument = ({
   const hasMainImage = mainImageBase64 !== '' && mainImageBase64.startsWith('data:')
   const hasQrCode =
     qrCodeBase64 !== undefined && qrCodeBase64 !== '' && qrCodeBase64.startsWith('data:')
-  const exhibitorName = exhibit.exhibitor?.user?.fullName || ''
+  const exhibitorName = exhibit.exhibitor?.user ? getDisplayName(exhibit.exhibitor.user) : ''
 
   return (
     <Document>

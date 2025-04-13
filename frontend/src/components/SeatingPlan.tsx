@@ -9,6 +9,7 @@ import TableInfoPanel from './seatingPlan/TableInfo'
 import ExhibitorChip from './ExhibitorChip'
 import ExhibitChip from './ExhibitChip'
 import LoadInProgress from './LoadInProgress'
+import { getDisplayName } from '@utils/displayName'
 
 const GET_TABLES = graphql(
   `
@@ -395,7 +396,7 @@ export const SeatingPlan: React.FC = () => {
         tableElement.classList.add('occupied')
 
         // Create tooltip content
-        const tooltipContent = `${tableInfo.exhibitor.user.fullName}\n${tableInfo.exhibits.map((exhibit) => exhibit.title).join('\n')}`
+        const tooltipContent = `${getDisplayName(tableInfo.exhibitor.user)}\n${tableInfo.exhibits.map((exhibit) => exhibit.title).join('\n')}`
         addTooltip(tableElement, tooltipContent)
       } else {
         addTooltip(tableElement, 'Nicht belegt')
@@ -511,7 +512,7 @@ export const SeatingPlan: React.FC = () => {
             id: exhibitor.id,
             user: {
               fullName: exhibitor.user.fullName,
-              nickname: exhibitor.user.nickname || undefined,
+              nickname: exhibitor.user.nickname || null,
             },
           }))}
           currentExhibitorId={exhibitor?.id}

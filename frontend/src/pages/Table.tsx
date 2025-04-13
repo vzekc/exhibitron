@@ -10,6 +10,7 @@ import ExhibitChip from '@components/ExhibitChip.tsx'
 import ChipContainer from '@components/ChipContainer.tsx'
 import ActionBar from '@components/ActionBar.tsx'
 import Button from '@components/Button.tsx'
+import { getDisplayName } from '@utils/displayName'
 
 const GET_TABLE = graphql(
   `
@@ -172,7 +173,7 @@ const Table = () => {
         <ExhibitorCard exhibitor={exhibitor} />
         <OtherExhibits
           exhibits={otherExhibitorExhibits}
-          title={`Exponate von ${exhibitor.user.nickname}`}
+          title={`Exponate von ${getDisplayName(exhibitor.user)}`}
         />
       </article>
     )
@@ -184,7 +185,7 @@ const Table = () => {
         <OneOrMoreExhibits exhibits={onThisTableExhibits} />
         <OtherExhibits
           exhibits={otherExhibitorExhibits}
-          title={`Weitere Exponate von ${exhibitor.user.fullName}`}
+          title={`Weitere Exponate von ${getDisplayName(exhibitor.user)}`}
         />
       </article>
     )
@@ -194,7 +195,7 @@ const Table = () => {
       <OneOrMoreExhibits exhibits={noTableExhibits} />
       <OtherExhibits
         exhibits={onAnyTableExhibits}
-        title={`Exponate von ${exhibitor.user.fullName} auf anderen Tischen`}
+        title={`Exponate von ${getDisplayName(exhibitor.user)} auf anderen Tischen`}
       />
     </article>
   )

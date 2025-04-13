@@ -1,6 +1,7 @@
 import { FragmentOf, graphql } from 'gql.tada'
 import Icon from './Icon'
 import Card from '@components/Card.tsx'
+import { getDisplayName } from '@utils/displayName'
 
 const EXHIBITOR_CHIP_FRAGMENT = graphql(`
   fragment ExhibitorChip on Exhibitor @_unmask {
@@ -21,8 +22,8 @@ type ExhibitorChipProps = {
 
 const ExhibitorChip = ({ exhibitor }: ExhibitorChipProps) => {
   const { topic, user } = exhibitor
-  const { fullName, nickname, profileImage, id: userId } = user
-  const displayName = nickname || fullName
+  const { profileImage, id: userId } = user
+  const displayName = getDisplayName(user)
 
   return (
     <Card to={`/exhibitor/${exhibitor.id}`} className="w-80">

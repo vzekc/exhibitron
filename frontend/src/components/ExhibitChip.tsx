@@ -1,6 +1,7 @@
 import Card from '@components/Card.tsx'
 import { FragmentOf, graphql } from 'gql.tada'
 import RandomComputer from '@components/RandomComputer.tsx'
+import { getDisplayName } from '@utils/displayName'
 
 const EXHIBIT_FRAGMENT = graphql(`
   fragment ExhibitCard on Exhibit @_unmask {
@@ -52,7 +53,7 @@ const ExhibitChip = ({ exhibit, noTable, noExhibitor, url = '/exhibit' }: Exhibi
         <div className="flex flex-grow flex-col">
           <div className="font-medium text-gray-900 dark:text-gray-100">{exhibit.title}</div>
           <div className="mt-auto flex justify-between text-sm text-gray-600 dark:text-gray-400">
-            {!noExhibitor && <div>{user.nickname || user.fullName}</div>}
+            {!noExhibitor && <div>{getDisplayName(user)}</div>}
             {exhibit.table && !noTable && <div>Tisch {exhibit.table.number}</div>}
           </div>
         </div>

@@ -35,6 +35,7 @@ const GET_SCHEDULE_DATA = graphql(`
         id
         user {
           fullName
+          nickname
         }
       }
     }
@@ -47,6 +48,7 @@ const GET_SCHEDULE_DATA = graphql(`
         user {
           id
           fullName
+          nickname
         }
       }
     }

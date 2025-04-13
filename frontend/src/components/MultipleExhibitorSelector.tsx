@@ -3,6 +3,7 @@ import FormInput from './FormInput'
 import ChipContainer from './ChipContainer'
 import Icon from './Icon'
 import { Exhibitor } from '../types/exhibitor'
+import { getDisplayName } from '@utils/displayName'
 
 interface RemovableExhibitorChipProps {
   exhibitor: Exhibitor
@@ -11,8 +12,7 @@ interface RemovableExhibitorChipProps {
 
 const RemovableExhibitorChip: React.FC<RemovableExhibitorChipProps> = ({ exhibitor, onRemove }) => {
   const { user } = exhibitor
-  const { fullName, nickname } = user
-  const displayName = nickname || fullName
+  const displayName = getDisplayName(user)
 
   return (
     <div className="flex items-center gap-2 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800">
@@ -45,7 +45,7 @@ const MultipleExhibitorSelector: React.FC<MultipleExhibitorSelectorProps> = ({
       .slice()
       .sort((a, b) => a.user.fullName.localeCompare(b.user.fullName))
       .filter((exhibitor) => {
-        const displayName = exhibitor.user.nickname || exhibitor.user.fullName
+        const displayName = getDisplayName(exhibitor.user)
         return displayName.toLowerCase().includes(searchQuery.toLowerCase())
       })
       .filter((exhibitor) => !selectedIds.includes(exhibitor.id.toString()))
@@ -85,7 +85,7 @@ const MultipleExhibitorSelector: React.FC<MultipleExhibitorSelectorProps> = ({
         {isSearching && searchQuery && sortedAndFilteredExhibitors.length > 0 && (
           <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-300 bg-white shadow-lg">
             {sortedAndFilteredExhibitors.map((exhibitor) => {
-              const displayName = exhibitor.user.nickname || exhibitor.user.fullName
+              const displayName = getDisplayName(exhibitor.user)
               return (
                 <button
                   key={exhibitor.id}

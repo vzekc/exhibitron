@@ -3,6 +3,7 @@ import { useQuery } from '@apollo/client'
 import ChipContainer from '@components/ChipContainer.tsx'
 import ExhibitorChip from '@components/ExhibitorChip.tsx'
 import { useEffect, useState } from 'react'
+import { getDisplayName } from '@utils/displayName'
 
 const GET_EXHIBITORS = graphql(
   `
@@ -30,9 +31,9 @@ const Exhibitors = () => {
     if (data?.getCurrentExhibition?.exhibitors) {
       setExhibitors(
         [...data.getCurrentExhibition.exhibitors].sort((a, b) => {
-          return (a.user.nickname || a.user.fullName)
+          return getDisplayName(a.user)
             .toLowerCase()
-            .localeCompare((b.user.nickname || b.user.fullName).toLowerCase())
+            .localeCompare(getDisplayName(b.user).toLowerCase())
         }),
       )
     }

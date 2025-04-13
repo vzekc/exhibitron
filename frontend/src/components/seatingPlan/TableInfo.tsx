@@ -62,6 +62,11 @@ type TableInfo = {
 // Add configurable variable for number of exhibit chips to show
 const MAX_EXHIBIT_CHIPS = 3
 
+interface User {
+  fullName: string
+  nickname: string | null
+}
+
 interface TableInfoPanelProps {
   selectedTable: number
   tableInfo: TableInfo | undefined
@@ -69,7 +74,7 @@ interface TableInfoPanelProps {
   position: { top: number; left?: number; right?: number; placement: 'left' | 'right' }
   measureRef?: React.RefObject<HTMLDivElement | null>
   isAdmin?: boolean
-  exhibitors?: Array<{ id: number; user: { fullName: string; nickname?: string } }>
+  exhibitors?: Array<{ id: number; user: User }>
   currentExhibitorId?: number
   exhibitionId: string
 }
@@ -104,114 +109,21 @@ const TableInfoPanel: React.FC<TableInfoPanelProps> = ({
   const canReleaseTable = isAdmin || isTableOwner
 
   const [claimTable] = useMutation(CLAIM_TABLE, {
-    update(cache) {
-      // Update the GetTables query cache
-      const existingTables = cache.readQuery({ query: GET_TABLES })
-      if (existingTables?.getCurrentExhibition?.tables && currentExhibitorId) {
-        cache.writeQuery({
-          query: GET_TABLES,
-          data: {
-            getCurrentExhibition: {
-              id: existingTables.getCurrentExhibition.id,
-              tables: existingTables.getCurrentExhibition.tables.map((table) => {
-                if (table.number === selectedTable) {
-                  return {
-                    ...table,
-                    exhibitor: {
-                      id: currentExhibitorId,
-                      topic: null,
-                      user: {
-                        id: currentExhibitorId,
-                        fullName:
-                          exhibitors?.find((e) => e.id === currentExhibitorId)?.user.fullName || '',
-                        nickname:
-                          exhibitors?.find((e) => e.id === currentExhibitorId)?.user.nickname ||
-                          null,
-                        profileImage: null,
-                      },
-                      exhibits: [],
-                    },
-                  }
-                }
-                return table
-              }),
-            },
-          },
-        })
-      }
-    },
+    refetchQueries: [GET_TABLES],
   })
 
   const [assignTable] = useMutation(ASSIGN_TABLE, {
-    update(cache, _, { variables }) {
-      // Update the GetTables query cache
-      const existingTables = cache.readQuery({ query: GET_TABLES })
-      if (existingTables?.getCurrentExhibition?.tables && variables?.exhibitorId) {
-        const selectedExhibitor = exhibitors?.find((e) => e.id === variables.exhibitorId)
-        if (selectedExhibitor) {
-          cache.writeQuery({
-            query: GET_TABLES,
-            data: {
-              getCurrentExhibition: {
-                id: existingTables.getCurrentExhibition.id,
-                tables: existingTables.getCurrentExhibition.tables.map((table) => {
-                  if (table.number === variables.number) {
-                    return {
-                      ...table,
-                      exhibitor: {
-                        id: selectedExhibitor.id,
-                        topic: null,
-                        user: {
-                          id: selectedExhibitor.id,
-                          fullName: selectedExhibitor.user.fullName,
-                          nickname: selectedExhibitor.user.nickname || null,
-                          profileImage: null,
-                        },
-                        exhibits: [],
-                      },
-                    }
-                  }
-                  return table
-                }),
-              },
-            },
-          })
-        }
-      }
-    },
+    refetchQueries: [GET_TABLES],
   })
 
   const [releaseTable] = useMutation(RELEASE_TABLE, {
-    update(cache, _, { variables }) {
-      // Update the GetTables query cache
-      const existingTables = cache.readQuery({ query: GET_TABLES })
-      if (existingTables?.getCurrentExhibition?.tables && variables?.number) {
-        cache.writeQuery({
-          query: GET_TABLES,
-          data: {
-            getCurrentExhibition: {
-              id: existingTables.getCurrentExhibition.id,
-              tables: existingTables.getCurrentExhibition.tables.map((table) => {
-                if (table.number === variables.number) {
-                  return {
-                    ...table,
-                    exhibitor: null,
-                  }
-                }
-                return table
-              }),
-            },
-          },
-        })
-      }
-    },
+    refetchQueries: [GET_TABLES],
   })
 
   const handleClaimTable = async () => {
     try {
       await claimTable({
         variables: { number: selectedTable },
-        refetchQueries: [GET_TABLES],
       })
       onClose()
     } catch (error) {
@@ -224,7 +136,6 @@ const TableInfoPanel: React.FC<TableInfoPanelProps> = ({
     try {
       await assignTable({
         variables: { number: selectedTable, exhibitorId: selectedExhibitorId },
-        refetchQueries: [GET_TABLES],
       })
       onClose()
     } catch (error) {
@@ -236,7 +147,6 @@ const TableInfoPanel: React.FC<TableInfoPanelProps> = ({
     try {
       await releaseTable({
         variables: { number: selectedTable },
-        refetchQueries: [GET_TABLES],
       })
       setShowReleaseConfirmation(false)
       onClose()

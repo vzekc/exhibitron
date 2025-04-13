@@ -9,6 +9,7 @@ import ChipContainer from '@components/ChipContainer.tsx'
 import { useExhibitor } from '@contexts/ExhibitorContext.ts'
 import ActionBar from '@components/ActionBar.tsx'
 import Button from '@components/Button.tsx'
+import { getDisplayName } from '@utils/displayName'
 
 const GET_EXHIBITOR = graphql(
   `
@@ -43,9 +44,8 @@ const Exhibitor = () => {
   const { setDetailName } = useBreadcrumb()
   const location = useLocation()
   useEffect(() => {
-    const name = data?.getExhibitor?.user?.fullName
-    if (name) {
-      setDetailName(location.pathname, name)
+    if (data?.getExhibitor?.user) {
+      setDetailName(location.pathname, getDisplayName(data.getExhibitor.user))
     }
   }, [location.pathname, data, setDetailName])
   const { exhibitor: operator, reloadExhibitor } = useExhibitor()
@@ -79,7 +79,7 @@ const Exhibitor = () => {
       {operator?.canSwitchExhibitor && exhibitor?.id !== operator?.id && (
         <ActionBar>
           <Button onClick={handleSwitchExhibitor} variant="secondary" icon="become">
-            Become {user.nickname || user.fullName}
+            Become {getDisplayName(user)}
           </Button>
         </ActionBar>
       )}

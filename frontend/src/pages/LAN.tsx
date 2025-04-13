@@ -8,6 +8,7 @@ import Card from '@components/Card.tsx'
 import LoadInProgress from '@components/LoadInProgress'
 import ChipContainer from '@components/ChipContainer.tsx'
 import { useExhibitor } from '@contexts/ExhibitorContext.ts'
+import { getDisplayName } from '@utils/displayName'
 
 const GET_HOSTS = graphql(`
   query GetHosts {
@@ -143,7 +144,7 @@ const LAN = () => {
                       to={`/exhibitor/${host.exhibitor.id}`}
                       onClick={(e) => e.stopPropagation()}
                       className="text-blue-600 hover:text-blue-800">
-                      {host.exhibitor.user.nickname || host.exhibitor.user.fullName}
+                      {getDisplayName(host.exhibitor.user)}
                     </Link>
                   )
                 ) : column === 'exhibit' ? (

@@ -1,7 +1,13 @@
 import { useState, useRef, useEffect } from 'react'
+import { getDisplayName } from '@utils/displayName'
+
+interface User {
+  fullName: string
+  nickname: string | null
+}
 
 interface ExhibitorSelectorProps {
-  options: Array<{ id: number; user: { fullName: string; nickname?: string } }>
+  options: Array<{ id: number; user: User }>
   onSelect: (exhibitorId: number) => void
 }
 
@@ -13,7 +19,7 @@ const ExhibitorSelector = ({ options, onSelect }: ExhibitorSelectorProps) => {
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   const filteredOptions = options.filter((option) =>
-    (option.user.nickname || option.user.fullName).toLowerCase().includes(inputValue.toLowerCase()),
+    getDisplayName(option.user).toLowerCase().includes(inputValue.toLowerCase()),
   )
 
   useEffect(() => {
@@ -39,7 +45,7 @@ const ExhibitorSelector = ({ options, onSelect }: ExhibitorSelectorProps) => {
     console.debug('Selecting exhibitor:', exhibitorId)
     const selectedExhibitor = options.find((opt) => opt.id === exhibitorId)
     if (selectedExhibitor) {
-      setInputValue(selectedExhibitor.user.nickname || selectedExhibitor.user.fullName)
+      setInputValue(getDisplayName(selectedExhibitor.user))
     }
     onSelect(exhibitorId)
     setShowDropdown(false)
@@ -60,8 +66,7 @@ const ExhibitorSelector = ({ options, onSelect }: ExhibitorSelectorProps) => {
       e.preventDefault()
 
       const exactMatch = options.find(
-        (opt) =>
-          (opt.user.nickname || opt.user.fullName).toLowerCase() === inputValue.toLowerCase(),
+        (opt) => getDisplayName(opt.user).toLowerCase() === inputValue.toLowerCase(),
       )
 
       if (exactMatch) {
@@ -104,7 +109,9 @@ const ExhibitorSelector = ({ options, onSelect }: ExhibitorSelectorProps) => {
       {showDropdown && inputRect && (
         <div
           ref={dropdownRef}
-          className="fixed max-h-60 overflow-auto rounded border border-gray-300 bg-white shadow-lg"
+          className={`fixed max-h-60 overflow-auto rounded border border-gray-300 bg-white shadow-lg ${
+            showAbove ? 'bottom-full mb-1' : 'top-full'
+          }`}
           style={{
             zIndex: 9999,
             width: inputRef.current?.offsetWidth,
@@ -119,7 +126,7 @@ const ExhibitorSelector = ({ options, onSelect }: ExhibitorSelectorProps) => {
                 key={option.id}
                 className="cursor-pointer p-2 hover:bg-gray-100"
                 onMouseDown={() => handleSelect(option.id)}>
-                {option.user.nickname || option.user.fullName}
+                {getDisplayName(option.user)}
               </div>
             ))
           ) : (
