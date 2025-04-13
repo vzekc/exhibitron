@@ -8,10 +8,10 @@ services:
       - "8081:8081"
     environment:
       - PDNS_LAUNCH=gpgsql
-      - PDNS_GPGSQL_HOST=host.docker.internal
-      - PDNS_GPGSQL_PORT=5432
-      - PDNS_GPGSQL_USER=pdns
-      - PDNS_GPGSQL_PASSWORD=${PDNS_PASSWORD}
+      - PDNS_GPGSQL_HOST=${PGHOST}
+      - PDNS_GPGSQL_PORT=${PGPORT}
+      - PDNS_GPGSQL_USER=${PGUSER}
+      - PDNS_GPGSQL_PASSWORD=${PGPASSWORD}
       - PDNS_GPGSQL_DBNAME=exhibitron
       - PDNS_API_KEY=${PDNS_API_KEY}
     volumes:
