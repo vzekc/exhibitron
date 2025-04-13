@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "vite",
     "make-build-info": "node src/build/makeBuildInfo.js",
-    "build": "pnpm generate-graphql-types && pnpm make-build-info && tsc -b && vite build",
+    "build": "pnpm generate && pnpm make-build-info && tsc -b && vite build",
     "lint": "eslint . && tsc -b",
     "preview": "vite preview",
     "generate": "gql.tada generate-output --tsconfig tsconfig.app.json && pnpm make-build-info"
