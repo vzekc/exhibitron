@@ -15,12 +15,10 @@ let app: FastifyInstance
 
 beforeAll(async () => {
   app = await createApp({ migrate: false, logLevel: 'fatal' })
-  console.log('app created')
 })
 
 afterAll(async () => {
   await app.close()
-  console.log('app closed')
 })
 
 export type Session = {

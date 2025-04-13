@@ -10,10 +10,8 @@ let db: Services
 
 beforeAll(async () => {
   db = await createTestDatabase()
-  console.log('DATABASE_URL', db.dbName)
   config.clientUrl = `postgres://localhost/${db.dbName}`
   process.env.DATABASE_URL = config.clientUrl
-  console.log('config.clientUrl', config.clientUrl)
 })
 
 afterAll(async () => {

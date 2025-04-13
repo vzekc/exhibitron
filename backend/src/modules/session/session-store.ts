@@ -75,7 +75,6 @@ let sessionORM: MikroORM
 
 export async function createSessionStore() {
   if (!sessionORM) {
-    console.log('calling MikroORM.init', config.clientUrl)
     sessionORM = await MikroORM.init({
       ...config,
       // Use a different connection name to avoid conflicts

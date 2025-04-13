@@ -48,7 +48,6 @@ export const runCommand = (command: string): void => {
 }
 
 export const createDatabase = (dbName: string) => {
-  console.log('creating database', dbName)
   runCommand(`createdb ${dbName}`)
 }
 

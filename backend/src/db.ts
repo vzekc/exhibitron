@@ -59,7 +59,6 @@ export async function initORM(options?: Options): Promise<Services> {
   }
 
   // Only cache the ORM instance
-  console.log('calling MikroORM.init', config.clientUrl)
   if (!ormCache) {
     ormCache = await MikroORM.init({
       ...config,
