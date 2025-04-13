@@ -97,7 +97,8 @@ export const makeMenuHtml = (context: GeneratePageHtmlContext) => {
       <a href="/home.html">Start</a> |
       <a href="/exhibits.html">Exponate</a> |
       <a href="/exhibitors.html">Mitwirkende</a> |
-      <a href="/schedule.html">Zeitplan</a>
+      <a href="/schedule.html">Zeitplan</a> |
+      <a href="/lan.html">LAN</a>
     </div>
     <hr/>
   `

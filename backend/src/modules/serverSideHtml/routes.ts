@@ -9,6 +9,7 @@ import { exhibitorsHtml } from './pages/exhibitors.js'
 import { exhibitsHtml } from './pages/exhibits.js'
 import { exhibitHtml } from './pages/exhibit.js'
 import { exhibitorHtml } from './pages/exhibitor.js'
+import { lanHtml } from './pages/lan.js'
 import { GeneratePageHtmlContext } from './utils.js'
 import { readFile } from 'fs/promises'
 import { join } from 'path'
@@ -83,6 +84,7 @@ export const registerServerSideHtmlRoutes = async (app: FastifyInstance): Promis
       hasIdParam: true,
       methods: ['GET', 'POST'],
     }),
+    createRoute({ path: '/lan.html', handler: lanHtml }),
   ] as const
 
   for (const route of routes) {
