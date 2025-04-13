@@ -3,11 +3,13 @@ import { graphql } from 'gql.tada'
 import { graphqlTest, login } from '../../test/server.js'
 import { sendEmail } from '../common/sendEmail.js'
 
-vi.mock('../common/sendEmail')
 let mockedSendEmail: MockedFunction<typeof sendEmail>
 
 beforeAll(async () => {
-  mockedSendEmail = sendEmail as MockedFunction<typeof sendEmail>
+  mockedSendEmail = vi.spyOn(await import('../common/sendEmail.js'), 'sendEmail') as MockedFunction<
+    typeof sendEmail
+  >
+  mockedSendEmail.mockImplementation(async () => {})
 })
 
 graphqlTest('login', async (graphqlRequest) => {
