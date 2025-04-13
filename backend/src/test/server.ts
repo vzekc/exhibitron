@@ -1,10 +1,9 @@
 import { createApp } from '../app.js'
 
 import { afterAll, beforeAll, expect, test } from 'vitest'
-import { Services } from '../db.js'
+import { initORM } from '../db.js'
 import { FastifyInstance } from 'fastify'
 import { RequestContext } from '@mikro-orm/core'
-import { createTestDatabase, deleteDatabase } from './utils.js'
 import { graphql, TadaDocumentNode } from 'gql.tada'
 import { print } from 'graphql'
 import pino from 'pino'
@@ -12,18 +11,14 @@ import pino from 'pino'
 // @ts-expect-error ts2345
 const logger = pino()
 
-let db: Services
 let app: FastifyInstance
 
 beforeAll(async () => {
-  db = await createTestDatabase()
   app = await createApp({ migrate: false, logLevel: 'fatal' })
 })
 
 afterAll(async () => {
-  await app.close()
-  await db.orm.close()
-  deleteDatabase(db.dbName!)
+  await app?.close()
 })
 
 export type Session = {
@@ -47,6 +42,7 @@ export const graphqlTest = (
   fn: (executeOperation: ExecuteOperationFunction, app: FastifyInstance) => Promise<void>,
 ) => {
   test(name, async () => {
+    const db = await initORM()
     await RequestContext.create(db.em, async () => {
       const executeOperation = async <TData, TVariables>(
         query: TadaDocumentNode<TData, TVariables>,
