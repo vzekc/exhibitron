@@ -47,6 +47,9 @@ Als Aussteller kannst du dein Profil mit verschiedenen Informationen füllen, di
 - **Profilbild**: Lade ein Foto von dir hoch, damit Besucher dich leichter wiedererkennen können
 - **Bio**: Eine ausführlichere Beschreibung über dich und deine Ausstellung
 
+Im System werden Dein Name und Dein Spitzname einheitlich als "Name (Spitzname)" angezeigt.  Wenn Du nur einen Spitznamen verwenden möchtest, gib ihn
+im Namensfeld ein und lasse das Feld für den Spitznamen leer.
+
 ### Kontaktmöglichkeiten
 Du kannst verschiedene Kontaktmöglichkeiten angeben:
 - E-Mail
@@ -55,7 +58,10 @@ Du kannst verschiedene Kontaktmöglichkeiten angeben:
 - Website
 - YouTube-Kanal
 
-Du entscheidest selbst, ob Besucher dich per E-Mail kontaktieren können. Wenn du diese Option aktivierst, können Besucher dir direkt über das System eine Nachricht schicken.
+Diese Informationen werden auf der Website für alle Besucher sichtbar angezeigt.  Stelle also sicher, dass Du nur die Informationen angibst, die Du auch wirklich öffentlich machen möchtest.
+
+Wenn Du möchtest, dass Besucher Dich über ein Kontaktformular auf der Website erreichen können, dann setze ein Kreuz bei "Kontaktformular aktivieren.  Besucher der Website können Dir
+dann Email-Nachrichten schicken, ohne dass Du Deine Email-Adresse veröffentlichen musst.
 
 ## Deine Exponate
 
