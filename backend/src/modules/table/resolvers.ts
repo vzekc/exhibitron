@@ -1,5 +1,6 @@
 import { Context } from '../../app/context.js'
 import { MutationResolvers, QueryResolvers, TableResolvers } from '../../generated/graphql.js'
+import { AuthError, PermissionDeniedError } from '../common/errors.js'
 
 export const tableQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2345
@@ -12,7 +13,17 @@ export const tableMutations: MutationResolvers<Context> = {
   // @ts-expect-error ts2345
   claimTable: async (_, { number }, { db, exhibition, exhibitor }) => {
     if (!exhibitor) {
-      throw new Error('You must be logged in to claim a table')
+      throw new AuthError('You must be logged in to claim a table')
+    }
+    await db.em.populate(exhibitor, ['tables'])
+    console.log(
+      `try to claim table ${number}, already claimed: ${exhibitor.tables.map((table) => table.number).join(' ')}`,
+    )
+    if (
+      exhibitor.tables.length >= 2 &&
+      !exhibitor.tables.find((table) => table.number === number)
+    ) {
+      throw new PermissionDeniedError('You can claim at most two tables')
     }
     return await db.table.claim(exhibition, number, exhibitor)
   },

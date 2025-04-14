@@ -31,6 +31,29 @@ graphqlTest('claim and release', async (graphqlRequest) => {
   const daffy = await login('daffy@example.com')
   const admin = await login('admin@example.com')
 
+  const releaseTables = async (tables: number[]) => {
+    for (const table of tables) {
+      const result = await graphqlRequest(
+        graphql(`
+          mutation ReleaseTable($number: Int!) {
+            releaseTable(number: $number) {
+              id
+              number
+              exhibitor {
+                user {
+                  id
+                }
+              }
+            }
+          }
+        `),
+        { number: table },
+        admin,
+      )
+      expect(result.errors).toBeUndefined()
+    }
+  }
+
   // verify table can be claimed
   {
     const result = await graphqlRequest(
@@ -273,7 +296,9 @@ graphqlTest('claim and release', async (graphqlRequest) => {
     expect(result.errors).toBeUndefined()
   }
 
-  // expect that the table is reported as free
+  await releaseTables([1, 2])
+
+  // expect that the unclaimed table 2 is now reported as free
   {
     const result = await graphqlRequest(
       graphql(`
@@ -288,7 +313,7 @@ graphqlTest('claim and release', async (graphqlRequest) => {
           }
         }
       `),
-      { number: 7 },
+      { number: 2 },
     )
     expect(result.errors).toBeUndefined()
     expect(result.data?.getTable?.exhibitor).toBeNull()
@@ -310,7 +335,7 @@ graphqlTest('claim and release', async (graphqlRequest) => {
           }
         }
       `),
-      { number: 7 },
+      { number: 2 },
       donald,
     )
     expect(result.errors).toBeUndefined()
@@ -331,11 +356,13 @@ graphqlTest('claim and release', async (graphqlRequest) => {
           }
         }
       `),
-      { number: 7 },
+      { number: 2 },
     )
     expect(result.errors).toBeUndefined()
     expect(result.data?.getTable?.exhibitor?.user.id).toBe(donald.userId)
   }
+
+  await releaseTables([1, 2])
 
   // check that a nonexistent table is correctly reported
   {
@@ -382,10 +409,10 @@ graphqlTest('claim and release', async (graphqlRequest) => {
   }
 
   // check free list handling
-  const [firstFreeTable, ...remainingFreeTables] = await getFreeTables()
+  const claimNextFreeTable = async () => {
+    const [firstFreeTable, ...remainingFreeTables] = await getFreeTables()
 
-  // claim first free table
-  {
+    // claim first free table
     const result = await graphqlRequest(
       graphql(`
         mutation ClaimTable($number: Int!) {
@@ -403,10 +430,31 @@ graphqlTest('claim and release', async (graphqlRequest) => {
       { number: firstFreeTable },
       donald,
     )
-    expect(result.errors).toBeUndefined()
+    return { tableNumber: firstFreeTable, result, remainingFreeTables }
   }
 
-  expect(await getFreeTables()).toEqual(remainingFreeTables)
+  // expect that we can only claim two tables
+  {
+    const tables: number[] = []
+    {
+      const { result, remainingFreeTables, tableNumber } = await claimNextFreeTable()
+      expect(result.errors).toBeUndefined()
+      expect(await getFreeTables()).toEqual(remainingFreeTables)
+      tables.push(tableNumber)
+    }
+    {
+      const { result, remainingFreeTables, tableNumber } = await claimNextFreeTable()
+      expect(result.errors).toBeUndefined()
+      expect(await getFreeTables()).toEqual(remainingFreeTables)
+      tables.push(tableNumber)
+
+      const { result: failedResult } = await claimNextFreeTable()
+      expect(failedResult.errors).toBeDefined()
+      expect(failedResult.errors![0].message).toBe('You can claim at most two tables')
+      expect(await getFreeTables()).toEqual(remainingFreeTables)
+    }
+    await releaseTables(tables)
+  }
 })
 
 graphqlTest('verify transactional integrity of releaseTable', async (graphqlRequest) => {

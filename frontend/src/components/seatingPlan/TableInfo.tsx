@@ -8,6 +8,7 @@ import { FragmentOf } from 'gql.tada'
 import { graphql } from 'gql.tada'
 import { useMutation } from '@apollo/client'
 import TableChip from '@components/TableChip.tsx'
+import { showMessage } from '@components/MessageModalUtil.tsx'
 
 const GET_TABLES = graphql(
   `
@@ -121,25 +122,28 @@ const TableInfoPanel: React.FC<TableInfoPanelProps> = ({
   })
 
   const handleClaimTable = async () => {
-    try {
-      await claimTable({
-        variables: { number: selectedTable },
-      })
-      onClose()
-    } catch (error) {
-      console.error('Failed to claim table:', error)
+    const result = await claimTable({
+      variables: { number: selectedTable },
+    })
+    const { errors } = result
+    if (errors && errors.length) {
+      const error = errors[0]
+      await showMessage(
+        'Tisch konnte nicht reserviert werden',
+        error.extensions?.code === 'FORBIDDEN'
+          ? 'Du kannst maximal zwei Tische selbst reservieren.  Wenn Du mehr Platz brauchst, wende Dich bitte an die Organisatoren.'
+          : error.message,
+      )
     }
+    onClose()
   }
 
   const handleAssignTable = async () => {
-    if (!selectedExhibitorId) return
-    try {
+    if (selectedExhibitorId) {
       await assignTable({
         variables: { number: selectedTable, exhibitorId: selectedExhibitorId },
       })
       onClose()
-    } catch (error) {
-      console.error('Failed to assign table:', error)
     }
   }
 
