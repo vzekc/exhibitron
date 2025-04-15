@@ -10,7 +10,9 @@ const MainLayout = () => {
     <ExhibitorProvider>
       <BreadcrumbProvider>
         <NavBar />
-        <Outlet />
+        <div className="mx-2">
+          <Outlet />
+        </div>
         <Footer />
       </BreadcrumbProvider>
     </ExhibitorProvider>
