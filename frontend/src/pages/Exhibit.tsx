@@ -86,7 +86,7 @@ const Exhibit = () => {
 
   const exhibit = data?.getExhibit
   const canEdit =
-    currentUser?.user.isAdministrator || currentUser?.id === exhibit?.exhibitor.user.id
+    currentUser?.user.isAdministrator || currentUser?.user.id === exhibit?.exhibitor.user.id
 
   const handleEdit = () => {
     navigate(`/user/exhibit/${exhibit.id}`)
