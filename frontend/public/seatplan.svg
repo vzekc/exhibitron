@@ -81,51 +81,6 @@
      id="image1" />
   <!-- Regular tables -->
   <g
-     id="table_1">
-    <rect
-       class="table"
-       x="316.73318"
-       y="8.3466396"
-       width="31.098043"
-       height="13.742294"
-       id="rect1" />
-    <text
-       class="table-text"
-       x="332.5"
-       y="15.688286"
-       id="text1">1</text>
-  </g>
-  <g
-     id="table_2">
-    <rect
-       class="table"
-       x="349.77313"
-       y="8.3466396"
-       width="31.315802"
-       height="13.960081"
-       id="rect2" />
-    <text
-       class="table-text"
-       x="367.5"
-       y="15.688286"
-       id="text2">2</text>
-  </g>
-  <g
-     id="table_3">
-    <rect
-       class="table"
-       x="383.25772"
-       y="8.3466396"
-       width="30.871132"
-       height="13.960081"
-       id="rect3" />
-    <text
-       class="table-text"
-       x="400"
-       y="15.688286"
-       id="text3">3</text>
-  </g>
-  <g
      id="table_4">
     <rect
        class="table"
@@ -334,36 +289,6 @@
        x="502.5"
        y="198.5"
        id="text17">17</text>
-  </g>
-  <g
-     id="table_18">
-    <rect
-       class="table"
-       x="187.5218"
-       y="223.09531"
-       width="31.193855"
-       height="13.904692"
-       id="rect18" />
-    <text
-       class="table-text"
-       x="203.5"
-       y="230"
-       id="text18">18</text>
-  </g>
-  <g
-     id="table_19">
-    <rect
-       class="table"
-       x="221"
-       y="223"
-       width="31"
-       height="14"
-       id="rect19" />
-    <text
-       class="table-text"
-       x="236.5"
-       y="230"
-       id="text19">19</text>
   </g>
   <g
      id="table_20">
