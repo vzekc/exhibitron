@@ -1,39 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg
-   width="766"
-   height="842"
-   viewBox="0 0 766 842"
-   version="1.1"
-   id="svg107"
-   sodipodi:docname="seatplan.svg"
-   inkscape:version="1.4-rc1 (61ec3f24, 2024-09-26)"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
-  <defs
-     id="defs107" />
-  <sodipodi:namedview
-     id="namedview107"
-     pagecolor="#ffffff"
-     bordercolor="#000000"
-     borderopacity="0.25"
-     inkscape:showpageshadow="2"
-     inkscape:pageopacity="0.0"
-     inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#d1d1d1"
-     showgrid="false"
-     inkscape:zoom="1.0140043"
-     inkscape:cx="453.64701"
-     inkscape:cy="464.49509"
-     inkscape:window-width="1912"
-     inkscape:window-height="1157"
-     inkscape:window-x="7"
-     inkscape:window-y="51"
-     inkscape:window-maximized="0"
-     inkscape:current-layer="svg107" />
-  <style
-     id="style1">
+<svg xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg" width="766" height="842" viewBox="0 0 766 842" version="1.1" id="svg107" sodipodi:docname="seatplan.svg" inkscape:version="1.4-rc1 (61ec3f24, 2024-09-26)">
+  <defs id="defs107"/>
+  <sodipodi:namedview id="namedview107" pagecolor="#ffffff" bordercolor="#000000" borderopacity="0.25" inkscape:showpageshadow="2" inkscape:pageopacity="0.0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#d1d1d1" showgrid="false" inkscape:zoom="1.0140043" inkscape:cx="453.64701" inkscape:cy="464.49509" inkscape:window-width="1912" inkscape:window-height="1157" inkscape:window-x="7" inkscape:window-y="51" inkscape:window-maximized="0" inkscape:current-layer="svg107"/>
+  <style id="style1">
     .table {
       stroke-width: 0;
       fill: white;
@@ -65,8 +34,8 @@
     }
     /* Fix for text color in occupied tables */
     .occupied ~ .table-text,
-    [id^=&quot;table_&quot;].occupied .table-text,
-    [id^=&quot;table_&quot;].occupied text {
+    [id^="table_"].occupied .table-text,
+    [id^="table_"].occupied text {
       fill: white;
     }
     [data-tooltip] {
@@ -74,1583 +43,415 @@
     }
   </style>
   <!-- Background image -->
-  <image
-     href="cc2025-tischplan.png"
-     width="766"
-     height="842"
-     id="image1" />
+  <image href="cc2025-tischplan.png" width="766" height="842" id="image1"/>
   <!-- Regular tables -->
-  <g
-     id="table_4">
-    <rect
-       class="table"
-       x="416"
-       y="8"
-       width="31"
-       height="14"
-       id="rect4" />
-    <text
-       class="table-text"
-       x="432.5"
-       y="15.688286"
-       id="text4">4</text>
-  </g>
-  <g
-     id="table_5">
-    <rect
-       class="table"
-       x="449"
-       y="8"
-       width="31"
-       height="14"
-       id="rect5" />
-    <text
-       class="table-text"
-       x="465"
-       y="15.688286"
-       id="text5">5</text>
-  </g>
-  <g
-     id="table_6">
-    <rect
-       class="table"
-       x="482"
-       y="8"
-       width="30.662441"
-       height="14"
-       id="rect6" />
-    <text
-       class="table-text"
-       x="497.5"
-       y="15.688286"
-       id="text6">6</text>
-  </g>
-  <g
-     id="table_7">
-    <rect
-       class="table"
-       x="515"
-       y="8"
-       width="31"
-       height="14"
-       id="rect7" />
-    <text
-       class="table-text"
-       x="532.5"
-       y="15.688286"
-       id="text7">7</text>
-  </g>
-  <g
-     id="table_8">
-    <rect
-       class="table"
-       x="187.80775"
-       y="193"
-       width="31"
-       height="14"
-       id="rect8" />
-    <text
-       class="table-text"
-       x="203.5"
-       y="201"
-       id="text8">8</text>
-  </g>
-  <g
-     id="table_9">
-    <rect
-       class="table"
-       x="221.19063"
-       y="193"
-       width="30.80937"
-       height="14"
-       id="rect9" />
-    <text
-       class="table-text"
-       x="236.5"
-       y="201"
-       id="text9">9</text>
-  </g>
-  <g
-     id="table_10">
-    <rect
-       class="table"
-       x="254.09532"
-       y="193"
-       width="30.904686"
-       height="14"
-       id="rect10" />
-    <text
-       class="table-text"
-       x="269.5"
-       y="201"
-       id="text10">10</text>
-  </g>
-  <g
-     id="table_11">
-    <rect
-       class="table"
-       x="287"
-       y="193"
-       width="31"
-       height="14"
-       id="rect11" />
-    <text
-       class="table-text"
-       x="303"
-       y="201"
-       id="text11">11</text>
-  </g>
-  <g
-     id="table_12">
-    <rect
-       class="table"
-       x="320"
-       y="193"
-       width="30.285938"
-       height="14"
-       id="rect12" />
-    <text
-       class="table-text"
-       x="336"
-       y="201"
-       id="text12">12</text>
-  </g>
-  <g
-     id="table_13">
-    <rect
-       class="table"
-       x="353"
-       y="193"
-       width="31"
-       height="14"
-       id="rect13" />
-    <text
-       class="table-text"
-       x="369.5"
-       y="201"
-       id="text13">13</text>
-  </g>
-  <g
-     id="table_14">
-    <rect
-       class="table"
-       x="386"
-       y="193"
-       width="31"
-       height="14"
-       id="rect14" />
-    <text
-       class="table-text"
-       x="401"
-       y="201"
-       id="text14">14</text>
-  </g>
-  <g
-     id="table_15">
-    <rect
-       class="table"
-       x="419"
-       y="193"
-       width="31"
-       height="14"
-       id="rect15" />
-    <text
-       class="table-text"
-       x="434"
-       y="201"
-       id="text15">15</text>
-  </g>
-  <g
-     id="table_16">
-    <rect
-       class="table"
-       x="452"
-       y="193"
-       width="31"
-       height="14"
-       id="rect16" />
-    <text
-       class="table-text"
-       x="467"
-       y="201"
-       id="text16">16</text>
-  </g>
-  <g
-     id="table_17">
-    <rect
-       class="table"
-       x="485"
-       y="193"
-       width="31"
-       height="14"
-       id="rect17" />
-    <text
-       class="table-text"
-       x="500"
-       y="201"
-       id="text17">17</text>
-  </g>
-  <g
-     id="table_20">
-    <rect
-       class="table"
-       x="254"
-       y="225"
-       width="31"
-       height="14"
-       id="rect20" />
-    <text
-       class="table-text"
-       x="269.5"
-       y="232"
-       id="text20">20</text>
-  </g>
-  <g
-     id="table_21">
-    <rect
-       class="table"
-       x="287"
-       y="225"
-       width="31"
-       height="14"
-       id="rect21" />
-    <text
-       class="table-text"
-       x="303"
-       y="232"
-       id="text21">21</text>
-  </g>
-  <g
-     id="table_22">
-    <rect
-       class="table"
-       x="320"
-       y="225"
-       width="31"
-       height="14"
-       id="rect22" />
-    <text
-       class="table-text"
-       x="336"
-       y="232"
-       id="text22">22</text>
-  </g>
-  <g
-     id="table_23">
-    <rect
-       class="table"
-       x="353"
-       y="225"
-       width="31"
-       height="14"
-       id="rect23" />
-    <text
-       class="table-text"
-       x="369.5"
-       y="232"
-       id="text23">23</text>
-  </g>
-  <g
-     id="table_24">
-    <rect
-       class="table"
-       x="386"
-       y="225"
-       width="31"
-       height="14"
-       id="rect24" />
-    <text
-       class="table-text"
-       x="402.5"
-       y="232"
-       id="text24">24</text>
-  </g>
-  <g
-     id="table_25">
-    <rect
-       class="table"
-       x="419"
-       y="225"
-       width="30.953148"
-       height="14"
-       id="rect25" />
-    <text
-       class="table-text"
-       x="435"
-       y="232"
-       id="text25">25</text>
-  </g>
-  <g
-     id="table_26">
-    <rect
-       class="table"
-       x="452"
-       y="225"
-       width="31"
-       height="14"
-       id="rect26" />
-    <text
-       class="table-text"
-       x="467"
-       y="232"
-       id="text26">26</text>
-  </g>
-  <g
-     id="table_27">
-    <rect
-       class="table"
-       x="485"
-       y="225"
-       width="31"
-       height="14"
-       id="rect27" />
-    <text
-       class="table-text"
-       x="500"
-       y="232"
-       id="text27">27</text>
-  </g>
-  <g
-     id="table_28">
-    <rect
-       class="table"
-       x="190.2462"
-       y="396.07892"
-       width="31"
-       height="14"
-       id="rect28" />
-    <text
-       class="table-text"
-       x="206.5"
-       y="403.71301"
-       id="text28">28</text>
-  </g>
-  <g
-     id="table_29">
-    <rect
-       class="table"
-       x="224"
-       y="396"
-       width="31"
-       height="14"
-       id="rect29" />
-    <text
-       class="table-text"
-       x="239.5"
-       y="403.71301"
-       id="text29">29</text>
-  </g>
-  <g
-     id="table_30">
-    <rect
-       class="table"
-       x="257"
-       y="396"
-       width="30.881393"
-       height="14"
-       id="rect30" />
-    <text
-       class="table-text"
-       x="272"
-       y="403.71301"
-       id="text30">30</text>
-  </g>
-  <g
-     id="table_31">
-    <rect
-       class="table"
-       x="290"
-       y="396"
-       width="31"
-       height="14"
-       id="rect31" />
-    <text
-       class="table-text"
-       x="306"
-       y="403.71301"
-       id="text31">31</text>
-  </g>
-  <g
-     id="table_32">
-    <rect
-       class="table"
-       x="323.98792"
-       y="396.07785"
-       width="31"
-       height="14"
-       id="rect32" />
-    <text
-       class="table-text"
-       x="340"
-       y="403.71301"
-       id="text32">32</text>
-  </g>
-  <g
-     id="table_33">
-    <rect
-       class="table"
-       x="357.1069"
-       y="396.06378"
-       width="30.893108"
-       height="14"
-       id="rect33" />
-    <text
-       class="table-text"
-       x="373"
-       y="403.71301"
-       id="text33">33</text>
-  </g>
-  <g
-     id="table_34">
-    <rect
-       class="table"
-       x="390"
-       y="396"
-       width="31"
-       height="14"
-       id="rect34" />
-    <text
-       class="table-text"
-       x="406"
-       y="403.71301"
-       id="text34">34</text>
-  </g>
-  <g
-     id="table_35">
-    <rect
-       class="table"
-       x="423.36206"
-       y="395.93622"
-       width="31"
-       height="14"
-       id="rect35" />
-    <text
-       class="table-text"
-       x="439.5"
-       y="403.71301"
-       id="text35">35</text>
-  </g>
-  <g
-     id="table_36">
-    <rect
-       class="table"
-       x="457"
-       y="396"
-       width="31"
-       height="14"
-       id="rect36" />
-    <text
-       class="table-text"
-       x="472.5"
-       y="403.71301"
-       id="text36">36</text>
-  </g>
-  <g
-     id="table_37">
-    <rect
-       class="table"
-       x="490"
-       y="396"
-       width="31"
-       height="14"
-       id="rect37" />
-    <text
-       class="table-text"
-       x="505.5"
-       y="403.71301"
-       id="text37">37</text>
-  </g>
-  <g
-     id="table_38">
-    <rect
-       class="table"
-       x="523"
-       y="396"
-       width="31"
-       height="14"
-       id="rect38" />
-    <text
-       class="table-text"
-       x="539"
-       y="403.71301"
-       id="text38">38</text>
-  </g>
-  <g
-     id="table_39">
-    <rect
-       class="table"
-       x="557"
-       y="396"
-       width="31"
-       height="14"
-       id="rect39" />
-    <text
-       class="table-text"
-       x="572.5"
-       y="403.71301"
-       id="text39">39</text>
-  </g>
-  <g
-     id="table_40">
-    <rect
-       class="table"
-       x="190.17068"
-       y="428.06378"
-       width="31"
-       height="14"
-       id="rect40" />
-    <text
-       class="table-text"
-       x="206.5"
-       y="435.4975"
-       id="text40">40</text>
-  </g>
-  <g
-     id="table_41">
-    <rect
-       class="table"
-       x="224"
-       y="428"
-       width="31"
-       height="14"
-       id="rect41" />
-    <text
-       class="table-text"
-       x="239.5"
-       y="435.4975"
-       id="text41">41</text>
-  </g>
-  <g
-     id="table_42">
-    <rect
-       class="table"
-       x="257"
-       y="428"
-       width="30.956903"
-       height="14"
-       id="rect42" />
-    <text
-       class="table-text"
-       x="272"
-       y="435.4975"
-       id="text42">42</text>
-  </g>
-  <g
-     id="table_43">
-    <rect
-       class="table"
-       x="290"
-       y="428"
-       width="31"
-       height="14"
-       id="rect43" />
-    <text
-       class="table-text"
-       x="306"
-       y="435.4975"
-       id="text43">43</text>
-  </g>
-  <g
-     id="table_44">
-    <rect
-       class="table"
-       x="324.1069"
-       y="428"
-       width="30.893108"
-       height="14"
-       id="rect44" />
-    <text
-       class="table-text"
-       x="340"
-       y="435.4975"
-       id="text44">44</text>
-  </g>
-  <g
-     id="table_45">
-    <rect
-       class="table"
-       x="357.17068"
-       y="427.93622"
-       width="30.829306"
-       height="14"
-       id="rect45" />
-    <text
-       class="table-text"
-       x="373"
-       y="435.4975"
-       id="text45">45</text>
-  </g>
-  <g
-     id="table_46">
-    <rect
-       class="table"
-       x="390"
-       y="428"
-       width="31"
-       height="14"
-       id="rect46" />
-    <text
-       class="table-text"
-       x="406"
-       y="435.4975"
-       id="text46">46</text>
-  </g>
-  <g
-     id="table_47">
-    <rect
-       class="table"
-       x="423.42587"
-       y="428"
-       width="31"
-       height="14"
-       id="rect47" />
-    <text
-       class="table-text"
-       x="439.5"
-       y="435.4975"
-       id="text47">47</text>
-  </g>
-  <g
-     id="table_48">
-    <rect
-       class="table"
-       x="457"
-       y="428"
-       width="31"
-       height="14"
-       id="rect48" />
-    <text
-       class="table-text"
-       x="472.5"
-       y="435.4975"
-       id="text48">48</text>
-  </g>
-  <g
-     id="table_49">
-    <rect
-       class="table"
-       x="490"
-       y="428"
-       width="31"
-       height="14"
-       id="rect49" />
-    <text
-       class="table-text"
-       x="505.5"
-       y="435.4975"
-       id="text49">49</text>
-  </g>
-  <g
-     id="table_50">
-    <rect
-       class="table"
-       x="523"
-       y="428"
-       width="31"
-       height="14"
-       id="rect50" />
-    <text
-       class="table-text"
-       x="539"
-       y="435.4975"
-       id="text50">50</text>
-  </g>
-  <g
-     id="table_51">
-    <rect
-       class="table"
-       x="557"
-       y="428"
-       width="31"
-       height="14"
-       id="rect51" />
-    <text
-       class="table-text"
-       x="572.5"
-       y="435.4975"
-       id="text51">51</text>
-  </g>
-  <g
-     id="table_52">
-    <rect
-       class="table"
-       x="190.10689"
-       y="644"
-       width="31"
-       height="14"
-       id="rect52" />
-    <text
-       class="table-text"
-       x="206.5"
-       y="652.15607"
-       id="text52">52</text>
-  </g>
-  <g
-     id="table_53">
-    <rect
-       class="table"
-       x="224"
-       y="644"
-       width="31"
-       height="14"
-       id="rect53" />
-    <text
-       class="table-text"
-       x="239.5"
-       y="652.15607"
-       id="text53">53</text>
-  </g>
-  <g
-     id="table_54">
-    <rect
-       class="table"
-       x="256.93622"
-       y="643.93622"
-       width="31"
-       height="14"
-       id="rect54" />
-    <text
-       class="table-text"
-       x="272"
-       y="652.15607"
-       id="text54">54</text>
-  </g>
-  <g
-     id="table_55"
-     transform="translate(0,0.13720016)">
-    <rect
-       class="table"
-       x="290"
-       y="644"
-       width="31"
-       height="14"
-       id="rect55" />
-    <text
-       class="table-text"
-       x="306"
-       y="652.15607"
-       id="text55">55</text>
-  </g>
-  <g
-     id="table_56">
-    <rect
-       class="table"
-       x="324.23447"
-       y="644"
-       width="30.765522"
-       height="14"
-       id="rect56" />
-    <text
-       class="table-text"
-       x="340"
-       y="652.15607"
-       id="text56">56</text>
-  </g>
-  <g
-     id="table_57">
-    <rect
-       class="table"
-       x="357.04309"
-       y="644"
-       width="30.956903"
-       height="14"
-       id="rect57" />
-    <text
-       class="table-text"
-       x="373"
-       y="652.15607"
-       id="text57">57</text>
-  </g>
-  <g
-     id="table_58">
-    <rect
-       class="table"
-       x="390"
-       y="644"
-       width="31"
-       height="14"
-       id="rect58" />
-    <text
-       class="table-text"
-       x="406"
-       y="652.15607"
-       id="text58">58</text>
-  </g>
-  <g
-     id="table_59">
-    <rect
-       class="table"
-       x="423.42587"
-       y="644"
-       width="31"
-       height="14"
-       id="rect59" />
-    <text
-       class="table-text"
-       x="439.5"
-       y="652.15607"
-       id="text59">59</text>
-  </g>
-  <g
-     id="table_60">
-    <rect
-       class="table"
-       x="457"
-       y="644"
-       width="31"
-       height="14"
-       id="rect60" />
-    <text
-       class="table-text"
-       x="472.5"
-       y="652.15607"
-       id="text60">60</text>
-  </g>
-  <g
-     id="table_61">
-    <rect
-       class="table"
-       x="490"
-       y="644"
-       width="31"
-       height="14"
-       id="rect61" />
-    <text
-       class="table-text"
-       x="505.5"
-       y="652.15607"
-       id="text61">61</text>
-  </g>
-  <g
-     id="table_62">
-    <rect
-       class="table"
-       x="523"
-       y="644"
-       width="31"
-       height="14"
-       id="rect62" />
-    <text
-       class="table-text"
-       x="539"
-       y="652.15607"
-       id="text62">62</text>
-  </g>
-  <g
-     id="table_63">
-    <rect
-       class="table"
-       x="557"
-       y="644"
-       width="31"
-       height="14"
-       id="rect63" />
-    <text
-       class="table-text"
-       x="572.5"
-       y="652.15607"
-       id="text63">63</text>
-  </g>
-  <g
-     id="table_64">
-    <rect
-       class="table"
-       x="190.29828"
-       y="676.06378"
-       width="31"
-       height="14"
-       id="rect64" />
-    <text
-       class="table-text"
-       x="206.5"
-       y="684.06262"
-       id="text64">64</text>
-  </g>
-  <g
-     id="table_65">
-    <rect
-       class="table"
-       x="224"
-       y="676"
-       width="31"
-       height="14"
-       id="rect65" />
-    <text
-       class="table-text"
-       x="239.5"
-       y="684.06262"
-       id="text65">65</text>
-  </g>
-  <g
-     id="table_66">
-    <rect
-       class="table"
-       x="257"
-       y="676"
-       width="31"
-       height="14"
-       id="rect66" />
-    <text
-       class="table-text"
-       x="272"
-       y="684.06262"
-       id="text66">66</text>
-  </g>
-  <g
-     id="table_67">
-    <rect
-       class="table"
-       x="290"
-       y="676"
-       width="31"
-       height="14"
-       id="rect67" />
-    <text
-       class="table-text"
-       x="306"
-       y="684.06262"
-       id="text67">67</text>
-  </g>
-  <g
-     id="table_68">
-    <rect
-       class="table"
-       x="324.23447"
-       y="676.06378"
-       width="30.637959"
-       height="14"
-       id="rect68" />
-    <text
-       class="table-text"
-       x="340"
-       y="684.06262"
-       id="text68">68</text>
-  </g>
-  <g
-     id="table_69">
-    <rect
-       class="table"
-       x="357.36206"
-       y="676"
-       width="30.318972"
-       height="14"
-       id="rect69" />
-    <text
-       class="table-text"
-       x="373"
-       y="684.06262"
-       id="text69">69</text>
-  </g>
-  <g
-     id="table_70">
-    <rect
-       class="table"
-       x="390"
-       y="676"
-       width="31"
-       height="14"
-       id="rect70" />
-    <text
-       class="table-text"
-       x="406"
-       y="684.06262"
-       id="text70">70</text>
-  </g>
-  <g
-     id="table_71">
-    <rect
-       class="table"
-       x="423.42587"
-       y="676"
-       width="31"
-       height="14"
-       id="rect71" />
-    <text
-       class="table-text"
-       x="439.5"
-       y="684.06262"
-       id="text71">71</text>
-  </g>
-  <g
-     id="table_72">
-    <rect
-       class="table"
-       x="457"
-       y="676"
-       width="31"
-       height="14"
-       id="rect72" />
-    <text
-       class="table-text"
-       x="472.5"
-       y="684.06262"
-       id="text72">72</text>
-  </g>
-  <g
-     id="table_73">
-    <rect
-       class="table"
-       x="490"
-       y="676"
-       width="31"
-       height="14"
-       id="rect73" />
-    <text
-       class="table-text"
-       x="505.5"
-       y="684.06262"
-       id="text73">73</text>
-  </g>
-  <g
-     id="table_74">
-    <rect
-       class="table"
-       x="523"
-       y="676"
-       width="31"
-       height="14"
-       id="rect74" />
-    <text
-       class="table-text"
-       x="539"
-       y="684.06262"
-       id="text74">74</text>
-  </g>
-  <g
-     id="table_75">
-    <rect
-       class="table"
-       x="557"
-       y="676"
-       width="31"
-       height="14"
-       id="rect75" />
-    <text
-       class="table-text"
-       x="572.5"
-       y="684.06262"
-       id="text75">75</text>
-  </g>
-  <g
-     id="table_76">
-    <rect
-       class="table"
-       x="288.97931"
-       y="817.7655"
-       width="31"
-       height="14"
-       id="rect76" />
-    <text
-       class="table-text"
-       x="305"
-       y="825.47552"
-       id="text76">76</text>
-  </g>
-  <g
-     id="table_77">
-    <rect
-       class="table"
-       x="322"
-       y="817.82935"
-       width="31"
-       height="14"
-       id="rect77" />
-    <text
-       class="table-text"
-       x="337.5"
-       y="825.47552"
-       id="text77">77</text>
-  </g>
-  <g
-     id="table_78">
-    <rect
-       class="table"
-       x="355.93622"
-       y="817.7655"
-       width="30.999989"
-       height="14"
-       id="rect78" />
-    <text
-       class="table-text"
-       x="371.5"
-       y="825.47552"
-       id="text78">78</text>
-  </g>
-  <g
-     id="table_79">
-    <rect
-       class="table"
-       x="389.29828"
-       y="817.63794"
-       width="30.808613"
-       height="14"
-       id="rect79" />
-    <text
-       class="table-text"
-       x="405.5"
-       y="825.47552"
-       id="text79">79</text>
-  </g>
-  <g
-     id="table_80">
-    <rect
-       class="table"
-       x="422.34137"
-       y="817.7655"
-       width="31"
-       height="14"
-       id="rect80" />
-    <text
-       class="table-text"
-       x="439"
-       y="825.47552"
-       id="text80">80</text>
-  </g>
-  <g
-     id="table_81">
-    <rect
-       class="table"
-       x="456.04312"
-       y="817.70172"
-       width="30.956879"
-       height="14"
-       id="rect81" />
-    <text
-       class="table-text"
-       x="472"
-       y="825.47552"
-       id="text81">81</text>
-  </g>
-  <g
-     id="table_82">
-    <rect
-       class="table"
-       x="489.42587"
-       y="817.70172"
-       width="30.63792"
-       height="14"
-       id="rect82" />
-    <text
-       class="table-text"
-       x="505"
-       y="825.47552"
-       id="text82">82</text>
-  </g>
-  <g
-     id="table_83">
-    <rect
-       class="table"
-       x="522.17065"
-       y="817.51038"
-       width="30.893139"
-       height="14"
-       id="rect83" />
-    <text
-       class="table-text"
-       x="538"
-       y="825.47552"
-       id="text83">83</text>
-  </g>
-  <g
-     id="table_84">
-    <rect
-       class="table"
-       x="555.06378"
-       y="817.63794"
-       width="31"
-       height="14"
-       id="rect84" />
-    <text
-       class="table-text"
-       x="571"
-       y="825.47552"
-       id="text84">84</text>
-  </g>
-  <g
-     id="table_85">
-    <rect
-       class="table"
-       x="589.29828"
-       y="817.63794"
-       width="30.637928"
-       height="14"
-       id="rect85" />
-    <text
-       class="table-text"
-       x="605"
-       y="825.47552"
-       id="text85">85</text>
-  </g>
-  <g
-     id="table_86">
-    <rect
-       class="table"
-       x="621.93622"
-       y="817.63794"
-       width="31"
-       height="14"
-       id="rect86" />
-    <text
-       class="table-text"
-       x="637.5"
-       y="825.47552"
-       id="text86">86</text>
-  </g>
-  <g
-     id="table_87">
-    <rect
-       class="table"
-       x="655.17065"
-       y="817.63794"
-       width="31"
-       height="14"
-       id="rect87" />
-    <text
-       class="table-text"
-       x="671.5"
-       y="825.47552"
-       style="display:inline"
-       id="text87">87</text>
+  <g id="table_4">
+    <rect class="table" x="416" y="8" width="31" height="14" id="rect4"/>
+    <text class="table-text" x="432.5" y="15.688286" id="text4">4</text>
+  </g>
+  <g id="table_5">
+    <rect class="table" x="449" y="8" width="31" height="14" id="rect5"/>
+    <text class="table-text" x="465" y="15.688286" id="text5">5</text>
+  </g>
+  <g id="table_6">
+    <rect class="table" x="482" y="8" width="30.662441" height="14" id="rect6"/>
+    <text class="table-text" x="497.5" y="15.688286" id="text6">6</text>
+  </g>
+  <g id="table_7">
+    <rect class="table" x="515" y="8" width="31" height="14" id="rect7"/>
+    <text class="table-text" x="532.5" y="15.688286" id="text7">7</text>
+  </g>
+  <g id="table_8">
+    <rect class="table" x="187.80775" y="193" width="31" height="14" id="rect8"/>
+    <text class="table-text" x="203.5" y="201" id="text8">8</text>
+  </g>
+  <g id="table_9">
+    <rect class="table" x="221.19063" y="193" width="30.80937" height="14" id="rect9"/>
+    <text class="table-text" x="236.5" y="201" id="text9">9</text>
+  </g>
+  <g id="table_10">
+    <rect class="table" x="254.09532" y="193" width="30.904686" height="14" id="rect10"/>
+    <text class="table-text" x="269.5" y="201" id="text10">10</text>
+  </g>
+  <g id="table_11">
+    <rect class="table" x="287" y="193" width="31" height="14" id="rect11"/>
+    <text class="table-text" x="303" y="201" id="text11">11</text>
+  </g>
+  <g id="table_12">
+    <rect class="table" x="320" y="193" width="30.285938" height="14" id="rect12"/>
+    <text class="table-text" x="336" y="201" id="text12">12</text>
+  </g>
+  <g id="table_13">
+    <rect class="table" x="353" y="193" width="31" height="14" id="rect13"/>
+    <text class="table-text" x="369.5" y="201" id="text13">13</text>
+  </g>
+  <g id="table_14">
+    <rect class="table" x="386" y="193" width="31" height="14" id="rect14"/>
+    <text class="table-text" x="401" y="201" id="text14">14</text>
+  </g>
+  <g id="table_15">
+    <rect class="table" x="419" y="193" width="31" height="14" id="rect15"/>
+    <text class="table-text" x="434" y="201" id="text15">15</text>
+  </g>
+  <g id="table_16">
+    <rect class="table" x="452" y="193" width="31" height="14" id="rect16"/>
+    <text class="table-text" x="467" y="201" id="text16">16</text>
+  </g>
+  <g id="table_17">
+    <rect class="table" x="485" y="193" width="31" height="14" id="rect17"/>
+    <text class="table-text" x="500" y="201" id="text17">17</text>
+  </g>
+  <g id="table_20">
+    <rect class="table" x="254" y="225" width="31" height="14" id="rect20"/>
+    <text class="table-text" x="269.5" y="232" id="text20">20</text>
+  </g>
+  <g id="table_21">
+    <rect class="table" x="287" y="225" width="31" height="14" id="rect21"/>
+    <text class="table-text" x="303" y="232" id="text21">21</text>
+  </g>
+  <g id="table_22">
+    <rect class="table" x="320" y="225" width="31" height="14" id="rect22"/>
+    <text class="table-text" x="336" y="232" id="text22">22</text>
+  </g>
+  <g id="table_23">
+    <rect class="table" x="353" y="225" width="31" height="14" id="rect23"/>
+    <text class="table-text" x="369.5" y="232" id="text23">23</text>
+  </g>
+  <g id="table_24">
+    <rect class="table" x="386" y="225" width="31" height="14" id="rect24"/>
+    <text class="table-text" x="402.5" y="232" id="text24">24</text>
+  </g>
+  <g id="table_25">
+    <rect class="table" x="419" y="225" width="30.953148" height="14" id="rect25"/>
+    <text class="table-text" x="435" y="232" id="text25">25</text>
+  </g>
+  <g id="table_26">
+    <rect class="table" x="452" y="225" width="31" height="14" id="rect26"/>
+    <text class="table-text" x="467" y="232" id="text26">26</text>
+  </g>
+  <g id="table_27">
+    <rect class="table" x="485" y="225" width="31" height="14" id="rect27"/>
+    <text class="table-text" x="500" y="232" id="text27">27</text>
+  </g>
+  <g id="table_28">
+    <rect class="table" x="190.2462" y="396.07892" width="31" height="14" id="rect28"/>
+    <text class="table-text" x="206.5" y="403.71301" id="text28">28</text>
+  </g>
+  <g id="table_29">
+    <rect class="table" x="224" y="396" width="31" height="14" id="rect29"/>
+    <text class="table-text" x="239.5" y="403.71301" id="text29">29</text>
+  </g>
+  <g id="table_30">
+    <rect class="table" x="257" y="396" width="30.881393" height="14" id="rect30"/>
+    <text class="table-text" x="272" y="403.71301" id="text30">30</text>
+  </g>
+  <g id="table_31">
+    <rect class="table" x="290" y="396" width="31" height="14" id="rect31"/>
+    <text class="table-text" x="306" y="403.71301" id="text31">31</text>
+  </g>
+  <g id="table_32">
+    <rect class="table" x="323.98792" y="396.07785" width="31" height="14" id="rect32"/>
+    <text class="table-text" x="340" y="403.71301" id="text32">32</text>
+  </g>
+  <g id="table_33">
+    <rect class="table" x="357.1069" y="396.06378" width="30.893108" height="14" id="rect33"/>
+    <text class="table-text" x="373" y="403.71301" id="text33">33</text>
+  </g>
+  <g id="table_34">
+    <rect class="table" x="390" y="396" width="31" height="14" id="rect34"/>
+    <text class="table-text" x="406" y="403.71301" id="text34">34</text>
+  </g>
+  <g id="table_35">
+    <rect class="table" x="423.36206" y="395.93622" width="31" height="14" id="rect35"/>
+    <text class="table-text" x="439.5" y="403.71301" id="text35">35</text>
+  </g>
+  <g id="table_36">
+    <rect class="table" x="457" y="396" width="31" height="14" id="rect36"/>
+    <text class="table-text" x="472.5" y="403.71301" id="text36">36</text>
+  </g>
+  <g id="table_37">
+    <rect class="table" x="490" y="396" width="31" height="14" id="rect37"/>
+    <text class="table-text" x="505.5" y="403.71301" id="text37">37</text>
+  </g>
+  <g id="table_38">
+    <rect class="table" x="523" y="396" width="31" height="14" id="rect38"/>
+    <text class="table-text" x="539" y="403.71301" id="text38">38</text>
+  </g>
+  <g id="table_39">
+    <rect class="table" x="557" y="396" width="31" height="14" id="rect39"/>
+    <text class="table-text" x="572.5" y="403.71301" id="text39">39</text>
+  </g>
+  <g id="table_40">
+    <rect class="table" x="190.17068" y="428.06378" width="31" height="14" id="rect40"/>
+    <text class="table-text" x="206.5" y="435.4975" id="text40">40</text>
+  </g>
+  <g id="table_41">
+    <rect class="table" x="224" y="428" width="31" height="14" id="rect41"/>
+    <text class="table-text" x="239.5" y="435.4975" id="text41">41</text>
+  </g>
+  <g id="table_42">
+    <rect class="table" x="257" y="428" width="30.956903" height="14" id="rect42"/>
+    <text class="table-text" x="272" y="435.4975" id="text42">42</text>
+  </g>
+  <g id="table_43">
+    <rect class="table" x="290" y="428" width="31" height="14" id="rect43"/>
+    <text class="table-text" x="306" y="435.4975" id="text43">43</text>
+  </g>
+  <g id="table_44">
+    <rect class="table" x="324.1069" y="428" width="30.893108" height="14" id="rect44"/>
+    <text class="table-text" x="340" y="435.4975" id="text44">44</text>
+  </g>
+  <g id="table_45">
+    <rect class="table" x="357.17068" y="427.93622" width="30.829306" height="14" id="rect45"/>
+    <text class="table-text" x="373" y="435.4975" id="text45">45</text>
+  </g>
+  <g id="table_46">
+    <rect class="table" x="390" y="428" width="31" height="14" id="rect46"/>
+    <text class="table-text" x="406" y="435.4975" id="text46">46</text>
+  </g>
+  <g id="table_47">
+    <rect class="table" x="423.42587" y="428" width="31" height="14" id="rect47"/>
+    <text class="table-text" x="439.5" y="435.4975" id="text47">47</text>
+  </g>
+  <g id="table_48">
+    <rect class="table" x="457" y="428" width="31" height="14" id="rect48"/>
+    <text class="table-text" x="472.5" y="435.4975" id="text48">48</text>
+  </g>
+  <g id="table_49">
+    <rect class="table" x="490" y="428" width="31" height="14" id="rect49"/>
+    <text class="table-text" x="505.5" y="435.4975" id="text49">49</text>
+  </g>
+  <g id="table_50">
+    <rect class="table" x="523" y="428" width="31" height="14" id="rect50"/>
+    <text class="table-text" x="539" y="435.4975" id="text50">50</text>
+  </g>
+  <g id="table_51">
+    <rect class="table" x="557" y="428" width="31" height="14" id="rect51"/>
+    <text class="table-text" x="572.5" y="435.4975" id="text51">51</text>
+  </g>
+  <g id="table_52">
+    <rect class="table" x="190.10689" y="644" width="31" height="14" id="rect52"/>
+    <text class="table-text" x="206.5" y="652.15607" id="text52">52</text>
+  </g>
+  <g id="table_53">
+    <rect class="table" x="224" y="644" width="31" height="14" id="rect53"/>
+    <text class="table-text" x="239.5" y="652.15607" id="text53">53</text>
+  </g>
+  <g id="table_54">
+    <rect class="table" x="256.93622" y="643.93622" width="31" height="14" id="rect54"/>
+    <text class="table-text" x="272" y="652.15607" id="text54">54</text>
+  </g>
+  <g id="table_55" transform="translate(0,0.13720016)">
+    <rect class="table" x="290" y="644" width="31" height="14" id="rect55"/>
+    <text class="table-text" x="306" y="652.15607" id="text55">55</text>
+  </g>
+  <g id="table_56">
+    <rect class="table" x="324.23447" y="644" width="30.765522" height="14" id="rect56"/>
+    <text class="table-text" x="340" y="652.15607" id="text56">56</text>
+  </g>
+  <g id="table_57">
+    <rect class="table" x="357.04309" y="644" width="30.956903" height="14" id="rect57"/>
+    <text class="table-text" x="373" y="652.15607" id="text57">57</text>
+  </g>
+  <g id="table_58">
+    <rect class="table" x="390" y="644" width="31" height="14" id="rect58"/>
+    <text class="table-text" x="406" y="652.15607" id="text58">58</text>
+  </g>
+  <g id="table_59">
+    <rect class="table" x="423.42587" y="644" width="31" height="14" id="rect59"/>
+    <text class="table-text" x="439.5" y="652.15607" id="text59">59</text>
+  </g>
+  <g id="table_60">
+    <rect class="table" x="457" y="644" width="31" height="14" id="rect60"/>
+    <text class="table-text" x="472.5" y="652.15607" id="text60">60</text>
+  </g>
+  <g id="table_61">
+    <rect class="table" x="490" y="644" width="31" height="14" id="rect61"/>
+    <text class="table-text" x="505.5" y="652.15607" id="text61">61</text>
+  </g>
+  <g id="table_62">
+    <rect class="table" x="523" y="644" width="31" height="14" id="rect62"/>
+    <text class="table-text" x="539" y="652.15607" id="text62">62</text>
+  </g>
+  <g id="table_63">
+    <rect class="table" x="557" y="644" width="31" height="14" id="rect63"/>
+    <text class="table-text" x="572.5" y="652.15607" id="text63">63</text>
+  </g>
+  <g id="table_64">
+    <rect class="table" x="190.29828" y="676.06378" width="31" height="14" id="rect64"/>
+    <text class="table-text" x="206.5" y="684.06262" id="text64">64</text>
+  </g>
+  <g id="table_65">
+    <rect class="table" x="224" y="676" width="31" height="14" id="rect65"/>
+    <text class="table-text" x="239.5" y="684.06262" id="text65">65</text>
+  </g>
+  <g id="table_66">
+    <rect class="table" x="257" y="676" width="31" height="14" id="rect66"/>
+    <text class="table-text" x="272" y="684.06262" id="text66">66</text>
+  </g>
+  <g id="table_67">
+    <rect class="table" x="290" y="676" width="31" height="14" id="rect67"/>
+    <text class="table-text" x="306" y="684.06262" id="text67">67</text>
+  </g>
+  <g id="table_68">
+    <rect class="table" x="324.23447" y="676.06378" width="30.637959" height="14" id="rect68"/>
+    <text class="table-text" x="340" y="684.06262" id="text68">68</text>
+  </g>
+  <g id="table_69">
+    <rect class="table" x="357.36206" y="676" width="30.318972" height="14" id="rect69"/>
+    <text class="table-text" x="373" y="684.06262" id="text69">69</text>
+  </g>
+  <g id="table_70">
+    <rect class="table" x="390" y="676" width="31" height="14" id="rect70"/>
+    <text class="table-text" x="406" y="684.06262" id="text70">70</text>
+  </g>
+  <g id="table_71">
+    <rect class="table" x="423.42587" y="676" width="31" height="14" id="rect71"/>
+    <text class="table-text" x="439.5" y="684.06262" id="text71">71</text>
+  </g>
+  <g id="table_72">
+    <rect class="table" x="457" y="676" width="31" height="14" id="rect72"/>
+    <text class="table-text" x="472.5" y="684.06262" id="text72">72</text>
+  </g>
+  <g id="table_73">
+    <rect class="table" x="490" y="676" width="31" height="14" id="rect73"/>
+    <text class="table-text" x="505.5" y="684.06262" id="text73">73</text>
+  </g>
+  <g id="table_74">
+    <rect class="table" x="523" y="676" width="31" height="14" id="rect74"/>
+    <text class="table-text" x="539" y="684.06262" id="text74">74</text>
+  </g>
+  <g id="table_75">
+    <rect class="table" x="557" y="676" width="31" height="14" id="rect75"/>
+    <text class="table-text" x="572.5" y="684.06262" id="text75">75</text>
+  </g>
+  <g id="table_76">
+    <rect class="table" x="288.97931" y="817.7655" width="31" height="14" id="rect76"/>
+    <text class="table-text" x="305" y="825.47552" id="text76">76</text>
+  </g>
+  <g id="table_77">
+    <rect class="table" x="322" y="817.82935" width="31" height="14" id="rect77"/>
+    <text class="table-text" x="337.5" y="825.47552" id="text77">77</text>
+  </g>
+  <g id="table_78">
+    <rect class="table" x="355.93622" y="817.7655" width="30.999989" height="14" id="rect78"/>
+    <text class="table-text" x="371.5" y="825.47552" id="text78">78</text>
+  </g>
+  <g id="table_79">
+    <rect class="table" x="389.29828" y="817.63794" width="30.808613" height="14" id="rect79"/>
+    <text class="table-text" x="405.5" y="825.47552" id="text79">79</text>
+  </g>
+  <g id="table_80">
+    <rect class="table" x="422.34137" y="817.7655" width="31" height="14" id="rect80"/>
+    <text class="table-text" x="439" y="825.47552" id="text80">80</text>
+  </g>
+  <g id="table_81">
+    <rect class="table" x="456.04312" y="817.70172" width="30.956879" height="14" id="rect81"/>
+    <text class="table-text" x="472" y="825.47552" id="text81">81</text>
+  </g>
+  <g id="table_82">
+    <rect class="table" x="489.42587" y="817.70172" width="30.63792" height="14" id="rect82"/>
+    <text class="table-text" x="505" y="825.47552" id="text82">82</text>
+  </g>
+  <g id="table_83">
+    <rect class="table" x="522.17065" y="817.51038" width="30.893139" height="14" id="rect83"/>
+    <text class="table-text" x="538" y="825.47552" id="text83">83</text>
+  </g>
+  <g id="table_84">
+    <rect class="table" x="555.06378" y="817.63794" width="31" height="14" id="rect84"/>
+    <text class="table-text" x="571" y="825.47552" id="text84">84</text>
+  </g>
+  <g id="table_85">
+    <rect class="table" x="589.29828" y="817.63794" width="30.637928" height="14" id="rect85"/>
+    <text class="table-text" x="605" y="825.47552" id="text85">85</text>
+  </g>
+  <g id="table_86">
+    <rect class="table" x="621.93622" y="817.63794" width="31" height="14" id="rect86"/>
+    <text class="table-text" x="637.5" y="825.47552" id="text86">86</text>
+  </g>
+  <g id="table_87">
+    <rect class="table" x="655.17065" y="817.63794" width="31" height="14" id="rect87"/>
+    <text class="table-text" x="671.5" y="825.47552" style="display:inline" id="text87">87</text>
   </g>
   <!-- Rotated tables - separate group -->
-  <g
-     id="table_88"
-     transform="matrix(1.0844309,0,0,1.0320134,725.9512,134.5198)">
-    <rect
-       class="table"
-       x="-6.5"
-       y="-15"
-       width="13"
-       height="30"
-       id="rect88" />
-    <text
-       class="table-text"
-       transform="rotate(90)"
-       x="0"
-       y="0.86135399"
-       id="text88">88</text>
+  <g id="table_88" transform="matrix(1.0844309,0,0,1.0320134,725.9512,134.5198)">
+    <rect class="table" x="-6.5" y="-15" width="13" height="30" id="rect88"/>
+    <text class="table-text" transform="rotate(90)" x="0" y="0.86135399" id="text88">88</text>
   </g>
-  <g
-     id="table_89"
-     transform="matrix(1.073877,0,0,1.0221291,726.0198,168.157)">
-    <rect
-       class="table"
-       x="-6.5"
-       y="-15.5"
-       width="13"
-       height="31"
-       id="rect89" />
-    <text
-       class="table-text"
-       transform="rotate(90)"
-       x="0"
-       y="0.86981934"
-       id="text89">89</text>
+  <g id="table_89" transform="matrix(1.073877,0,0,1.0221291,726.0198,168.157)">
+    <rect class="table" x="-6.5" y="-15.5" width="13" height="31" id="rect89"/>
+    <text class="table-text" transform="rotate(90)" x="0" y="0.86981934" id="text89">89</text>
   </g>
-  <g
-     id="table_90"
-     transform="matrix(1.073877,0,0,1.0320134,726.0198,201.5198)">
-    <rect
-       class="table"
-       x="-6.5"
-       y="-15"
-       width="13"
-       height="30"
-       id="rect90" />
-    <text
-       class="table-text"
-       transform="rotate(90)"
-       x="0"
-       y="0.86981934"
-       id="text90">90</text>
+  <g id="table_90" transform="matrix(1.073877,0,0,1.0320134,726.0198,201.5198)">
+    <rect class="table" x="-6.5" y="-15" width="13" height="30" id="rect90"/>
+    <text class="table-text" transform="rotate(90)" x="0" y="0.86981934" id="text90">90</text>
   </g>
-  <g
-     id="table_91"
-     transform="matrix(1.0949847,0,0,1.04116,725.8826,234.3826)">
-    <rect
-       class="table"
-       x="-6.5"
-       y="-15"
-       width="13"
-       height="30"
-       id="rect91" />
-    <text
-       class="table-text"
-       transform="rotate(90)"
-       x="0"
-       y="0.85305202"
-       id="text91">91</text>
+  <g id="table_91" transform="matrix(1.0949847,0,0,1.04116,725.8826,234.3826)">
+    <rect class="table" x="-6.5" y="-15" width="13" height="30" id="rect91"/>
+    <text class="table-text" transform="rotate(90)" x="0" y="0.85305202" id="text91">91</text>
   </g>
-  <g
-     id="table_92"
-     transform="matrix(1.0949847,0,0,1.0177032,725.8826,267.7744)">
-    <rect
-       class="table"
-       x="-6.5"
-       y="-15.5"
-       width="13"
-       height="31"
-       id="rect92" />
-    <text
-       class="table-text"
-       transform="rotate(90)"
-       x="0"
-       y="0.85305202"
-       id="text92">92</text>
+  <g id="table_92" transform="matrix(1.0949847,0,0,1.0177032,725.8826,267.7744)">
+    <rect class="table" x="-6.5" y="-15.5" width="13" height="31" id="rect92"/>
+    <text class="table-text" transform="rotate(90)" x="0" y="0.85305202" id="text92">92</text>
   </g>
-  <g
-     id="table_93"
-     transform="matrix(1.0949847,0,0,1.0398323,725.8826,312.7454)">
-    <rect
-       class="table"
-       x="-6.5"
-       y="-15.5"
-       width="13"
-       height="31"
-       id="rect93" />
-    <text
-       class="table-text"
-       transform="rotate(90)"
-       x="0"
-       y="0.85305202"
-       id="text93">93</text>
+  <g id="table_93" transform="matrix(1.0949847,0,0,1.0398323,725.8826,312.7454)">
+    <rect class="table" x="-6.5" y="-15.5" width="13" height="31" id="rect93"/>
+    <text class="table-text" transform="rotate(90)" x="0" y="0.85305202" id="text93">93</text>
   </g>
-  <g
-     id="table_94"
-     transform="matrix(1.073877,0,0,1,726.0198,346.5)">
-    <rect
-       class="table"
-       x="-6.5"
-       y="-15.5"
-       width="13"
-       height="31"
-       id="rect94" />
-    <text
-       class="table-text"
-       transform="rotate(90)"
-       x="0"
-       y="0.86981934"
-       id="text94">94</text>
+  <g id="table_94" transform="matrix(1.073877,0,0,1,726.0198,346.5)">
+    <rect class="table" x="-6.5" y="-15.5" width="13" height="31" id="rect94"/>
+    <text class="table-text" transform="rotate(90)" x="0" y="0.86981934" id="text94">94</text>
   </g>
-  <g
-     id="table_95"
-     transform="matrix(1.073877,0,0,1,726.0198,379.5)">
-    <rect
-       class="table"
-       x="-6.5"
-       y="-15.5"
-       width="13"
-       height="31"
-       id="rect95" />
-    <text
-       class="table-text"
-       transform="rotate(90)"
-       x="0"
-       y="0.86981934"
-       id="text95">95</text>
+  <g id="table_95" transform="matrix(1.073877,0,0,1,726.0198,379.5)">
+    <rect class="table" x="-6.5" y="-15.5" width="13" height="31" id="rect95"/>
+    <text class="table-text" transform="rotate(90)" x="0" y="0.86981934" id="text95">95</text>
   </g>
-  <g
-     id="table_96"
-     transform="matrix(1.0633231,0,0,1.0354065,726.0884,413.0488)">
-    <rect
-       class="table"
-       x="-6.5"
-       y="-15.5"
-       width="13"
-       height="31"
-       id="rect96" />
-    <text
-       class="table-text"
-       transform="rotate(90)"
-       x="0"
-       y="0.87845254"
-       id="text96">96</text>
+  <g id="table_96" transform="matrix(1.0633231,0,0,1.0354065,726.0884,413.0488)">
+    <rect class="table" x="-6.5" y="-15.5" width="13" height="31" id="rect96"/>
+    <text class="table-text" transform="rotate(90)" x="0" y="0.87845254" id="text96">96</text>
   </g>
-  <g
-     id="table_97"
-     transform="matrix(1.0527693,0,0,1,726.157,446.5)">
-    <rect
-       class="table"
-       x="-6.5"
-       y="-15.5"
-       width="13"
-       height="31"
-       id="rect97" />
-    <text
-       class="table-text"
-       transform="rotate(90)"
-       x="0"
-       y="0.88725883"
-       id="text97">97</text>
+  <g id="table_97" transform="matrix(1.0527693,0,0,1,726.157,446.5)">
+    <rect class="table" x="-6.5" y="-15.5" width="13" height="31" id="rect97"/>
+    <text class="table-text" transform="rotate(90)" x="0" y="0.88725883" id="text97">97</text>
   </g>
-  <g
-     id="table_98"
-     transform="matrix(1.0633231,0,0,1,726.0884,489.5)">
-    <rect
-       class="table"
-       x="-6.5"
-       y="-15.5"
-       width="13"
-       height="31"
-       id="rect98" />
-    <text
-       class="table-text"
-       transform="rotate(90)"
-       x="0"
-       y="0.87845254"
-       id="text98">98</text>
+  <g id="table_98" transform="matrix(1.0633231,0,0,1,726.0884,489.5)">
+    <rect class="table" x="-6.5" y="-15.5" width="13" height="31" id="rect98"/>
+    <text class="table-text" transform="rotate(90)" x="0" y="0.87845254" id="text98">98</text>
   </g>
-  <g
-     id="table_99"
-     transform="matrix(1.073877,0,0,1,726.0198,522.5)">
-    <rect
-       class="table"
-       x="-6.5"
-       y="-15.5"
-       width="13"
-       height="31"
-       id="rect99" />
-    <text
-       class="table-text"
-       transform="rotate(90)"
-       x="0"
-       y="0.86981934"
-       id="text99">99</text>
+  <g id="table_99" transform="matrix(1.073877,0,0,1,726.0198,522.5)">
+    <rect class="table" x="-6.5" y="-15.5" width="13" height="31" id="rect99"/>
+    <text class="table-text" transform="rotate(90)" x="0" y="0.86981934" id="text99">99</text>
   </g>
-  <g
-     id="table_100"
-     transform="matrix(1.0633231,0,0,1,726.0884,556)">
-    <rect
-       class="table"
-       x="-6.5"
-       y="-16"
-       width="13"
-       height="32"
-       id="rect100" />
-    <text
-       class="table-text"
-       transform="rotate(90)"
-       x="0"
-       y="0.87845254"
-       id="text100">100</text>
+  <g id="table_100" transform="matrix(1.0633231,0,0,1,726.0884,556)">
+    <rect class="table" x="-6.5" y="-16" width="13" height="32" id="rect100"/>
+    <text class="table-text" transform="rotate(90)" x="0" y="0.87845254" id="text100">100</text>
   </g>
-  <g
-     id="table_101"
-     transform="matrix(1.0527693,0,0,1,726.157,589.5)">
-    <rect
-       class="table"
-       x="-6.5"
-       y="-15.5"
-       width="13"
-       height="31"
-       id="rect101" />
-    <text
-       class="table-text"
-       transform="rotate(90)"
-       x="0"
-       y="0.88725883"
-       id="text101">101</text>
+  <g id="table_101" transform="matrix(1.0527693,0,0,1,726.157,589.5)">
+    <rect class="table" x="-6.5" y="-15.5" width="13" height="31" id="rect101"/>
+    <text class="table-text" transform="rotate(90)" x="0" y="0.88725883" id="text101">101</text>
   </g>
-  <g
-     id="table_102"
-     transform="matrix(1.0527693,0,0,1,726.157,622.5)">
-    <rect
-       class="table"
-       x="-6.5"
-       y="-15.5"
-       width="13"
-       height="31"
-       id="rect102" />
-    <text
-       class="table-text"
-       transform="rotate(90)"
-       x="0"
-       y="0.88725883"
-       id="text102">102</text>
+  <g id="table_102" transform="matrix(1.0527693,0,0,1,726.157,622.5)">
+    <rect class="table" x="-6.5" y="-15.5" width="13" height="31" id="rect102"/>
+    <text class="table-text" transform="rotate(90)" x="0" y="0.88725883" id="text102">102</text>
   </g>
-  <g
-     id="table_103"
-     transform="matrix(1.073877,0,0,0.98713749,726.0198,665.7942)">
-    <rect
-       class="table"
-       x="-6.5"
-       y="-16"
-       width="13"
-       height="32"
-       id="rect103" />
-    <text
-       class="table-text"
-       transform="rotate(90)"
-       x="0"
-       y="0.86981934"
-       id="text103">103</text>
+  <g id="table_103" transform="matrix(1.073877,0,0,0.98713749,726.0198,665.7942)">
+    <rect class="table" x="-6.5" y="-16" width="13" height="32" id="rect103"/>
+    <text class="table-text" transform="rotate(90)" x="0" y="0.86981934" id="text103">103</text>
   </g>
-  <g
-     id="table_104"
-     transform="matrix(1.073877,0,0,1.0221291,726.0198,699.157)">
-    <rect
-       class="table"
-       x="-6.5"
-       y="-15.5"
-       width="13"
-       height="31"
-       id="rect104" />
-    <text
-       class="table-text"
-       transform="rotate(90)"
-       x="0"
-       y="0.86981934"
-       id="text104">104</text>
+  <g id="table_104" transform="matrix(1.073877,0,0,1.0221291,726.0198,699.157)">
+    <rect class="table" x="-6.5" y="-15.5" width="13" height="31" id="rect104"/>
+    <text class="table-text" transform="rotate(90)" x="0" y="0.86981934" id="text104">104</text>
   </g>
-  <g
-     id="table_105"
-     transform="matrix(1.0633231,0,0,1,726.0884,732.5)">
-    <rect
-       class="table"
-       x="-6.5"
-       y="-15.5"
-       width="13"
-       height="31"
-       id="rect105" />
-    <text
-       class="table-text"
-       transform="rotate(90)"
-       x="0"
-       y="0.87845254"
-       id="text105">105</text>
+  <g id="table_105" transform="matrix(1.0633231,0,0,1,726.0884,732.5)">
+    <rect class="table" x="-6.5" y="-15.5" width="13" height="31" id="rect105"/>
+    <text class="table-text" transform="rotate(90)" x="0" y="0.87845254" id="text105">105</text>
   </g>
-  <g
-     id="table_106"
-     transform="matrix(1.0422154,0,0,1,726.2256,765.5)">
-    <rect
-       class="table"
-       x="-6.5"
-       y="-15.5"
-       width="13"
-       height="31"
-       id="rect106" />
-    <text
-       class="table-text"
-       transform="rotate(90)"
-       x="0"
-       y="0.89624363"
-       id="text106">106</text>
+  <g id="table_106" transform="matrix(1.0422154,0,0,1,726.2256,765.5)">
+    <rect class="table" x="-6.5" y="-15.5" width="13" height="31" id="rect106"/>
+    <text class="table-text" transform="rotate(90)" x="0" y="0.89624363" id="text106">106</text>
   </g>
-  <g
-     id="table_107"
-     transform="matrix(1.0844309,0,0,0.98713749,725.9512,798.7942)">
-    <rect
-       class="table"
-       x="-6.5"
-       y="-16"
-       width="13"
-       height="32"
-       id="rect107" />
-    <text
-       class="table-text"
-       transform="rotate(90)"
-       x="0"
-       y="0.86135399"
-       id="text107">107</text>
+  <g id="table_107" transform="matrix(1.0844309,0,0,0.98713749,725.9512,798.7942)">
+    <rect class="table" x="-6.5" y="-16" width="13" height="32" id="rect107"/>
+    <text class="table-text" transform="rotate(90)" x="0" y="0.86135399" id="text107">107</text>
   </g>
 </svg>
