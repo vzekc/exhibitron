@@ -84,10 +84,10 @@
      id="table_4">
     <rect
        class="table"
-       x="416.29761"
-       y="8.0762663"
-       width="31.315826"
-       height="14.230456"
+       x="416"
+       y="8"
+       width="31"
+       height="14"
        id="rect4" />
     <text
        class="table-text"
@@ -99,10 +99,10 @@
      id="table_5">
     <rect
        class="table"
-       x="449.78223"
-       y="8.1288528"
-       width="31.742281"
-       height="13.742294"
+       x="449"
+       y="8"
+       width="31"
+       height="14"
        id="rect5" />
     <text
        class="table-text"
@@ -114,10 +114,10 @@
      id="table_6">
     <rect
        class="table"
-       x="483.25772"
-       y="8.1288528"
+       x="482"
+       y="8"
        width="30.662441"
-       height="13.960081"
+       height="14"
        id="rect6" />
     <text
        class="table-text"
@@ -129,10 +129,10 @@
      id="table_7">
     <rect
        class="table"
-       x="515.98553"
-       y="8.4145584"
-       width="31.5235"
-       height="13.505422"
+       x="515"
+       y="8"
+       width="31"
+       height="14"
        id="rect7" />
     <text
        class="table-text"
@@ -145,14 +145,14 @@
     <rect
        class="table"
        x="187.80775"
-       y="191.23749"
-       width="31.098541"
-       height="13.762515"
+       y="193"
+       width="31"
+       height="14"
        id="rect8" />
     <text
        class="table-text"
        x="203.5"
-       y="198.5"
+       y="201"
        id="text8">8</text>
   </g>
   <g
@@ -160,14 +160,14 @@
     <rect
        class="table"
        x="221.19063"
-       y="191.23749"
+       y="193"
        width="30.80937"
-       height="13.762518"
+       height="14"
        id="rect9" />
     <text
        class="table-text"
        x="236.5"
-       y="198.5"
+       y="201"
        id="text9">9</text>
   </g>
   <g
@@ -175,119 +175,119 @@
     <rect
        class="table"
        x="254.09532"
-       y="191.23749"
+       y="193"
        width="30.904686"
-       height="13.762518"
+       height="14"
        id="rect10" />
     <text
        class="table-text"
        x="269.5"
-       y="198.5"
+       y="201"
        id="text10">10</text>
   </g>
   <g
      id="table_11">
     <rect
        class="table"
-       x="287.09531"
-       y="191.23749"
-       width="31.904686"
-       height="13.762518"
+       x="287"
+       y="193"
+       width="31"
+       height="14"
        id="rect11" />
     <text
        class="table-text"
        x="303"
-       y="198.5"
+       y="201"
        id="text11">11</text>
   </g>
   <g
      id="table_12">
     <rect
        class="table"
-       x="321.28595"
-       y="191.33279"
+       x="320"
+       y="193"
        width="30.285938"
-       height="13.667206"
+       height="14"
        id="rect12" />
     <text
        class="table-text"
        x="336"
-       y="198.5"
+       y="201"
        id="text12">12</text>
   </g>
   <g
      id="table_13">
     <rect
        class="table"
-       x="354"
-       y="191.23749"
+       x="353"
+       y="193"
        width="31"
-       height="13.762518"
+       height="14"
        id="rect13" />
     <text
        class="table-text"
        x="369.5"
-       y="198.5"
+       y="201"
        id="text13">13</text>
   </g>
   <g
      id="table_14">
     <rect
        class="table"
-       x="387.19064"
-       y="191.14217"
-       width="31.667189"
-       height="14.048464"
+       x="386"
+       y="193"
+       width="31"
+       height="14"
        id="rect14" />
     <text
        class="table-text"
-       x="402.5"
-       y="198.5"
+       x="401"
+       y="201"
        id="text14">14</text>
   </g>
   <g
      id="table_15">
     <rect
        class="table"
-       x="420.66559"
-       y="191.14217"
-       width="31.334406"
-       height="13.857833"
+       x="419"
+       y="193"
+       width="31"
+       height="14"
        id="rect15" />
     <text
        class="table-text"
-       x="437"
-       y="198.5"
+       x="434"
+       y="201"
        id="text15">15</text>
   </g>
   <g
      id="table_16">
     <rect
        class="table"
-       x="453.90469"
-       y="191.23749"
-       width="31.095314"
-       height="13.762518"
+       x="452"
+       y="193"
+       width="31"
+       height="14"
        id="rect16" />
     <text
        class="table-text"
-       x="469.5"
-       y="198.5"
+       x="467"
+       y="201"
        id="text16">16</text>
   </g>
   <g
      id="table_17">
     <rect
        class="table"
-       x="487"
-       y="191.04686"
-       width="31.476574"
-       height="13.95314"
+       x="485"
+       y="193"
+       width="31"
+       height="14"
        id="rect17" />
     <text
        class="table-text"
-       x="502.5"
-       y="198.5"
+       x="500"
+       y="201"
        id="text17">17</text>
   </g>
   <g
@@ -295,14 +295,14 @@
     <rect
        class="table"
        x="254"
-       y="223"
+       y="225"
        width="31"
        height="14"
        id="rect20" />
     <text
        class="table-text"
        x="269.5"
-       y="230"
+       y="232"
        id="text20">20</text>
   </g>
   <g
@@ -310,104 +310,104 @@
     <rect
        class="table"
        x="287"
-       y="223"
-       width="32"
+       y="225"
+       width="31"
        height="14"
        id="rect21" />
     <text
        class="table-text"
        x="303"
-       y="230"
+       y="232"
        id="text21">21</text>
   </g>
   <g
      id="table_22">
     <rect
        class="table"
-       x="321"
-       y="223"
-       width="30.762518"
-       height="13.904685"
+       x="320"
+       y="225"
+       width="31"
+       height="14"
        id="rect22" />
     <text
        class="table-text"
        x="336"
-       y="230"
+       y="232"
        id="text22">22</text>
   </g>
   <g
      id="table_23">
     <rect
        class="table"
-       x="354"
-       y="223"
+       x="353"
+       y="225"
        width="31"
        height="14"
        id="rect23" />
     <text
        class="table-text"
        x="369.5"
-       y="230"
+       y="232"
        id="text23">23</text>
   </g>
   <g
      id="table_24">
     <rect
        class="table"
-       x="387"
-       y="223"
-       width="31.571888"
+       x="386"
+       y="225"
+       width="31"
        height="14"
        id="rect24" />
     <text
        class="table-text"
        x="402.5"
-       y="230"
+       y="232"
        id="text24">24</text>
   </g>
   <g
      id="table_25">
     <rect
        class="table"
-       x="421.04684"
-       y="223.09532"
+       x="419"
+       y="225"
        width="30.953148"
-       height="13.904685"
+       height="14"
        id="rect25" />
     <text
        class="table-text"
-       x="437"
-       y="230"
+       x="435"
+       y="232"
        id="text25">25</text>
   </g>
   <g
      id="table_26">
     <rect
        class="table"
-       x="454"
-       y="223"
+       x="452"
+       y="225"
        width="31"
        height="14"
        id="rect26" />
     <text
        class="table-text"
-       x="469.5"
-       y="230"
+       x="467"
+       y="232"
        id="text26">26</text>
   </g>
   <g
      id="table_27">
     <rect
        class="table"
-       x="487"
-       y="223"
-       width="31.762518"
+       x="485"
+       y="225"
+       width="31"
        height="14"
        id="rect27" />
     <text
        class="table-text"
-       x="502.5"
-       y="230"
+       x="500"
+       y="232"
        id="text27">27</text>
   </g>
   <g
@@ -416,8 +416,8 @@
        class="table"
        x="190.2462"
        y="396.07892"
-       width="31.753807"
-       height="13.921096"
+       width="31"
+       height="14"
        id="rect28" />
     <text
        class="table-text"
@@ -461,7 +461,7 @@
        class="table"
        x="290"
        y="396"
-       width="32"
+       width="31"
        height="14"
        id="rect31" />
     <text
@@ -476,8 +476,8 @@
        class="table"
        x="323.98792"
        y="396.07785"
-       width="31.012079"
-       height="13.922148"
+       width="31"
+       height="14"
        id="rect32" />
     <text
        class="table-text"
@@ -492,7 +492,7 @@
        x="357.1069"
        y="396.06378"
        width="30.893108"
-       height="13.936207"
+       height="14"
        id="rect33" />
     <text
        class="table-text"
@@ -506,8 +506,8 @@
        class="table"
        x="390"
        y="396"
-       width="31.617239"
-       height="14.063793"
+       width="31"
+       height="14"
        id="rect34" />
     <text
        class="table-text"
@@ -521,8 +521,8 @@
        class="table"
        x="423.36206"
        y="395.93622"
-       width="31.637936"
-       height="14.063793"
+       width="31"
+       height="14"
        id="rect35" />
     <text
        class="table-text"
@@ -551,7 +551,7 @@
        class="table"
        x="490"
        y="396"
-       width="31.382761"
+       width="31"
        height="14"
        id="rect37" />
     <text
@@ -566,7 +566,7 @@
        class="table"
        x="523"
        y="396"
-       width="32"
+       width="31"
        height="14"
        id="rect38" />
     <text
@@ -596,8 +596,8 @@
        class="table"
        x="190.17068"
        y="428.06378"
-       width="31.829315"
-       height="13.936207"
+       width="31"
+       height="14"
        id="rect40" />
     <text
        class="table-text"
@@ -641,7 +641,7 @@
        class="table"
        x="290"
        y="428"
-       width="32"
+       width="31"
        height="14"
        id="rect43" />
     <text
@@ -672,7 +672,7 @@
        x="357.17068"
        y="427.93622"
        width="30.829306"
-       height="14.063793"
+       height="14"
        id="rect45" />
     <text
        class="table-text"
@@ -686,7 +686,7 @@
        class="table"
        x="390"
        y="428"
-       width="31.617239"
+       width="31"
        height="14"
        id="rect46" />
     <text
@@ -701,7 +701,7 @@
        class="table"
        x="423.42587"
        y="428"
-       width="31.574142"
+       width="31"
        height="14"
        id="rect47" />
     <text
@@ -746,7 +746,7 @@
        class="table"
        x="523"
        y="428"
-       width="32"
+       width="31"
        height="14"
        id="rect50" />
     <text
@@ -776,7 +776,7 @@
        class="table"
        x="190.10689"
        y="644"
-       width="31.893108"
+       width="31"
        height="14"
        id="rect52" />
     <text
@@ -806,8 +806,8 @@
        class="table"
        x="256.93622"
        y="643.93622"
-       width="31.27586"
-       height="14.000072"
+       width="31"
+       height="14"
        id="rect54" />
     <text
        class="table-text"
@@ -822,7 +822,7 @@
        class="table"
        x="290"
        y="644"
-       width="32"
+       width="31"
        height="14"
        id="rect55" />
     <text
@@ -867,7 +867,7 @@
        class="table"
        x="390"
        y="644"
-       width="32"
+       width="31"
        height="14"
        id="rect58" />
     <text
@@ -882,7 +882,7 @@
        class="table"
        x="423.42587"
        y="644"
-       width="31.574142"
+       width="31"
        height="14"
        id="rect59" />
     <text
@@ -927,7 +927,7 @@
        class="table"
        x="523"
        y="644"
-       width="32"
+       width="31"
        height="14"
        id="rect62" />
     <text
@@ -957,8 +957,8 @@
        class="table"
        x="190.29828"
        y="676.06378"
-       width="31.701721"
-       height="14.42587"
+       width="31"
+       height="14"
        id="rect64" />
     <text
        class="table-text"
@@ -972,8 +972,8 @@
        class="table"
        x="224"
        y="676"
-       width="31.063793"
-       height="14.489652"
+       width="31"
+       height="14"
        id="rect65" />
     <text
        class="table-text"
@@ -987,8 +987,8 @@
        class="table"
        x="257"
        y="676"
-       width="31.148283"
-       height="14.425858"
+       width="31"
+       height="14"
        id="rect66" />
     <text
        class="table-text"
@@ -1002,8 +1002,8 @@
        class="table"
        x="290"
        y="676"
-       width="32.127586"
-       height="14.489652"
+       width="31"
+       height="14"
        id="rect67" />
     <text
        class="table-text"
@@ -1018,7 +1018,7 @@
        x="324.23447"
        y="676.06378"
        width="30.637959"
-       height="14.234486"
+       height="14"
        id="rect68" />
     <text
        class="table-text"
@@ -1033,7 +1033,7 @@
        x="357.36206"
        y="676"
        width="30.318972"
-       height="14.298271"
+       height="14"
        id="rect69" />
     <text
        class="table-text"
@@ -1047,8 +1047,8 @@
        class="table"
        x="390"
        y="676"
-       width="31.298271"
-       height="14.298271"
+       width="31"
+       height="14"
        id="rect70" />
     <text
        class="table-text"
@@ -1062,8 +1062,8 @@
        class="table"
        x="423.42587"
        y="676"
-       width="31.63792"
-       height="14.362065"
+       width="31"
+       height="14"
        id="rect71" />
     <text
        class="table-text"
@@ -1078,7 +1078,7 @@
        x="457"
        y="676"
        width="31"
-       height="14.425858"
+       height="14"
        id="rect72" />
     <text
        class="table-text"
@@ -1092,8 +1092,8 @@
        class="table"
        x="490"
        y="676"
-       width="31.063793"
-       height="14.425858"
+       width="31"
+       height="14"
        id="rect73" />
     <text
        class="table-text"
@@ -1107,8 +1107,8 @@
        class="table"
        x="523"
        y="676"
-       width="31.744825"
-       height="14.298271"
+       width="31"
+       height="14"
        id="rect74" />
     <text
        class="table-text"
@@ -1123,7 +1123,7 @@
        x="557"
        y="676"
        width="31"
-       height="14.170685"
+       height="14"
        id="rect75" />
     <text
        class="table-text"
@@ -1137,8 +1137,8 @@
        class="table"
        x="288.97931"
        y="817.7655"
-       width="31.020691"
-       height="14.000019"
+       width="31"
+       height="14"
        id="rect76" />
     <text
        class="table-text"
@@ -1152,8 +1152,8 @@
        class="table"
        x="322"
        y="817.82935"
-       width="32.020695"
-       height="13.936176"
+       width="31"
+       height="14"
        id="rect77" />
     <text
        class="table-text"
@@ -1168,7 +1168,7 @@
        x="355.93622"
        y="817.7655"
        width="30.999989"
-       height="14.1914"
+       height="14"
        id="rect78" />
     <text
        class="table-text"
@@ -1183,7 +1183,7 @@
        x="389.29828"
        y="817.63794"
        width="30.808613"
-       height="14.063789"
+       height="14"
        id="rect79" />
     <text
        class="table-text"
@@ -1197,8 +1197,8 @@
        class="table"
        x="422.34137"
        y="817.7655"
-       width="31.403456"
-       height="13.872432"
+       width="31"
+       height="14"
        id="rect80" />
     <text
        class="table-text"
@@ -1213,7 +1213,7 @@
        x="456.04312"
        y="817.70172"
        width="30.956879"
-       height="14.000008"
+       height="14"
        id="rect81" />
     <text
        class="table-text"
@@ -1228,7 +1228,7 @@
        x="489.42587"
        y="817.70172"
        width="30.63792"
-       height="13.744833"
+       height="14"
        id="rect82" />
     <text
        class="table-text"
@@ -1243,7 +1243,7 @@
        x="522.17065"
        y="817.51038"
        width="30.893139"
-       height="14.063766"
+       height="14"
        id="rect83" />
     <text
        class="table-text"
@@ -1257,8 +1257,8 @@
        class="table"
        x="555.06378"
        y="817.63794"
-       width="31.61725"
-       height="14.25517"
+       width="31"
+       height="14"
        id="rect84" />
     <text
        class="table-text"
@@ -1273,7 +1273,7 @@
        x="589.29828"
        y="817.63794"
        width="30.637928"
-       height="14.063789"
+       height="14"
        id="rect85" />
     <text
        class="table-text"
@@ -1287,8 +1287,8 @@
        class="table"
        x="621.93622"
        y="817.63794"
-       width="31.063782"
-       height="14.191376"
+       width="31"
+       height="14"
        id="rect86" />
     <text
        class="table-text"
@@ -1302,8 +1302,8 @@
        class="table"
        x="655.17065"
        y="817.63794"
-       width="31.701759"
-       height="14.318963"
+       width="31"
+       height="14"
        id="rect87" />
     <text
        class="table-text"
