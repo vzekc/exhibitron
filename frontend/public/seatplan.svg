@@ -24,8 +24,8 @@
      inkscape:deskcolor="#d1d1d1"
      showgrid="false"
      inkscape:zoom="1.7827431"
-     inkscape:cx="618.14853"
-     inkscape:cy="200.2532"
+     inkscape:cx="619.27038"
+     inkscape:cy="363.48479"
      inkscape:window-width="3008"
      inkscape:window-height="1639"
      inkscape:window-x="7"
@@ -81,49 +81,49 @@
      id="image1" />
   <!-- Regular tables -->
   <g
-          id="table_1">
+     id="table_1">
     <rect
-            class="table"
-            x="317"
-            y="8"
-            width="31"
-            height="14"
-            id="rect4" />
+       class="table"
+       x="317"
+       y="8"
+       width="31"
+       height="14"
+       id="rect4" />
     <text
-            class="table-text"
-            x="332"
-            y="16"
-            id="text4">1</text>
+       class="table-text"
+       x="332"
+       y="16"
+       id="text4">1</text>
   </g>
   <g
-          id="table_2">
+     id="table_2">
     <rect
-            class="table"
-            x="350"
-            y="8"
-            width="31"
-            height="14"
-            id="rect5" />
+       class="table"
+       x="350"
+       y="8"
+       width="31"
+       height="14"
+       id="rect5" />
     <text
-            class="table-text"
-            x="366"
-            y="16"
-            id="text5">2</text>
+       class="table-text"
+       x="366"
+       y="16"
+       id="text5">2</text>
   </g>
   <g
-          id="table_3">
+     id="table_3">
     <rect
-            class="table"
-            x="383"
-            y="8"
-            width="31"
-            height="14"
-            id="rect6" />
+       class="table"
+       x="383"
+       y="8"
+       width="31"
+       height="14"
+       id="rect6" />
     <text
-            class="table-text"
-            x="399"
-            y="16"
-            id="text6">3</text>
+       class="table-text"
+       x="399"
+       y="16"
+       id="text6">3</text>
   </g>
   <g
      id="table_4">
@@ -1720,13 +1720,13 @@
   <text
      xml:space="preserve"
      style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Lato, sans-serif;-inkscape-font-specification:'Lato, sans-serif';text-align:center;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#000000;stroke-width:1000"
-     x="242.62726"
-     y="539.49744"
+     x="249.91939"
+     y="531.64435"
      id="text114"><tspan
        sodipodi:role="line"
        id="tspan114"
-       x="242.62726"
-       y="539.49744">Commodore</tspan></text>
+       x="249.91939"
+       y="531.64435">Commodore</tspan></text>
   <text
      xml:space="preserve"
      style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Lato, sans-serif;-inkscape-font-specification:'Lato, sans-serif';text-align:center;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#000000;stroke-width:1000"
@@ -1754,4 +1754,18 @@
        y="791.2077"
        style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:Lato, sans-serif;-inkscape-font-specification:'Lato, sans-serif Bold'"
        id="tspan118">Zone</tspan></text>
+  <text
+     xml:space="preserve"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Lato, sans-serif;-inkscape-font-specification:'Lato, sans-serif';text-align:center;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#000000;stroke-width:1000"
+     x="676.2287"
+     y="462.64957"
+     id="text76"><tspan
+       sodipodi:role="line"
+       id="tspan5"
+       x="676.2287"
+       y="462.64957">Z80-</tspan><tspan
+       sodipodi:role="line"
+       x="676.2287"
+       y="485.98294"
+       id="tspan76">Zone</tspan></text>
 </svg>
