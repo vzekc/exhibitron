@@ -10,6 +10,7 @@ import { exhibitsHtml } from './pages/exhibits.js'
 import { exhibitHtml } from './pages/exhibit.js'
 import { exhibitorHtml } from './pages/exhibitor.js'
 import { lanHtml } from './pages/lan.js'
+import { exhibitorListHtml } from './pages/exhibitorList.js'
 import { GeneratePageHtmlContext } from './utils.js'
 import { readFile } from 'fs/promises'
 import { join } from 'path'
@@ -19,8 +20,11 @@ const servePageHtml = async (
   htmlContent: string,
   context: GeneratePageHtmlContext,
 ) => {
+  // Skip header for exhibitor list page
+  const content = context.noHeader ? htmlContent : makeMenuHtml(context) + htmlContent
+
   // Convert UTF-8 to ISO-8859-1 using iconv-lite
-  const iso88591Content = iconv.encode(makeMenuHtml(context) + htmlContent, 'ISO-8859-1')
+  const iso88591Content = iconv.encode(content, 'ISO-8859-1')
 
   return reply
     .code(200)
@@ -36,6 +40,7 @@ type RouteConfigWithoutId = {
   handler: RouteHandlerWithoutId
   methods?: HTTPMethods[]
   hasIdParam?: false
+  noHeader?: boolean
 }
 
 type RouteConfigWithId = {
@@ -43,13 +48,14 @@ type RouteConfigWithId = {
   handler: RouteHandlerWithId
   methods?: HTTPMethods[]
   hasIdParam: true
+  noHeader?: boolean
 }
 
 type RouteConfig = RouteConfigWithoutId | RouteConfigWithId
 
 const createRoute = <T extends RouteConfig>(
   config: T,
-): T & { methods: HTTPMethods[]; hasIdParam: boolean } => ({
+): T & { methods: HTTPMethods[]; hasIdParam: boolean; noHeader?: boolean } => ({
   methods: ['GET'],
   hasIdParam: false,
   ...config,
@@ -85,6 +91,7 @@ export const registerServerSideHtmlRoutes = async (app: FastifyInstance): Promis
       methods: ['GET', 'POST'],
     }),
     createRoute({ path: '/lan.html', handler: lanHtml }),
+    createRoute({ path: '/exhibitor-list.html', handler: exhibitorListHtml, noHeader: true }),
   ] as const
 
   for (const route of routes) {
@@ -92,7 +99,7 @@ export const registerServerSideHtmlRoutes = async (app: FastifyInstance): Promis
       const exhibition = request.apolloContext.exhibition
       const userAgent = request.headers['user-agent'] || ''
       const gifSuffix = isLegacyBrowser(userAgent) ? 'Gif' : ''
-      const context = { request, exhibition, db, gifSuffix }
+      const context = { request, exhibition, db, gifSuffix, noHeader: route.noHeader }
 
       if (route.hasIdParam) {
         const id = (request.params as { id: string }).id

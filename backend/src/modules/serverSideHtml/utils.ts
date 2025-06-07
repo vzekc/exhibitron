@@ -11,6 +11,7 @@ export type GeneratePageHtmlContext = {
   exhibition: Exhibition
   request: FastifyRequest
   gifSuffix: string
+  noHeader?: boolean
 }
 
 export const ITEMS_PER_PAGE = 10
