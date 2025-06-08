@@ -59,7 +59,7 @@ const ImageUploader = ({
           onImageChange(1) // Placeholder ID
         }
       } catch (error) {
-        console.error('Error uploading image:', error)
+        console.error('Error uploading image:', JSON.stringify(error))
         await showMessage('Fehler', 'Fehler beim Hochladen des Bildes')
       } finally {
         setIsImageLoading(false)
