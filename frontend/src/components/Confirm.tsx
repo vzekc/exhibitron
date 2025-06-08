@@ -24,10 +24,22 @@ const Confirm: React.FC<ConfirmProps> = ({
   <Modal isOpen={isOpen} title={title} onClose={onClose}>
     <p className="mb-6 text-gray-900 dark:text-gray-100">{message}</p>
     <footer className="flex justify-end space-x-2 border-t border-gray-200 pt-4">
-      <Button variant="secondary" onClick={onClose}>
+      <Button
+        variant="secondary"
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          onClose()
+        }}>
         {cancel}
       </Button>
-      <Button variant="danger" onClick={onConfirm}>
+      <Button
+        variant="danger"
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          onConfirm()
+        }}>
         {confirm}
       </Button>
     </footer>

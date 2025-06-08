@@ -37,7 +37,10 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title }) => {
           <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">{title}</h3>
           <button
             aria-label="Close"
-            onClick={onClose}
+            onClick={(e) => {
+              e.stopPropagation()
+              onClose()
+            }}
             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -54,7 +57,9 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title }) => {
             </svg>
           </button>
         </header>
-        <div className="p-4">{children}</div>
+        <div className="p-4" onClick={(e) => e.stopPropagation()}>
+          {children}
+        </div>
       </article>
     </dialog>
   )

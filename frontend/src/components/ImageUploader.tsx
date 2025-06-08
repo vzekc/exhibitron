@@ -238,6 +238,7 @@ const ImageUploader = ({
             </p>
             <button
               onClick={(e) => {
+                e.preventDefault()
                 e.stopPropagation()
                 fileInputRef.current?.click()
               }}
