@@ -110,6 +110,9 @@ importers:
       nodemailer:
         specifier: ^6.10.0
         version: 6.10.0
+      nodemailer-plugin-inline-base64:
+        specifier: ^2.1.1
+        version: 2.1.1
       pino:
         specifier: ^9.6.0
         version: 9.6.0
@@ -252,6 +255,9 @@ importers:
       vitest:
         specifier: ^3.0.8
         version: 3.0.8(@types/node@22.13.9)(jiti@2.4.2)(jsdom@26.0.0)
+      ​nodemailer-plugin-inline-base64:
+        specifier: link:@types/​nodemailer-plugin-inline-base64
+        version: link:@types/​nodemailer-plugin-inline-base64
 
   frontend:
     dependencies:
@@ -8646,6 +8652,10 @@ packages:
 
   /node-releases@2.0.19:
     resolution: {integrity: sha512-xxOWJsBKtzAq7DY0J+DTzuz58K8e7sJbdgwkbMWQe8UYB6ekmsQ45q0M/tJDsGaZmbC+l7n57UV8Hl5tHxO9uw==}
+
+  /nodemailer-plugin-inline-base64@2.1.1:
+    resolution: {integrity: sha512-/cTnVq9vxZBDh5FjCOkPG5ioTs4o7flRuaqfDGLUfa5yeSMR21OW8hgWJIGuCHgcXmN5QHbR8IeujJeeOzi7uQ==}
+    dev: false
 
   /nodemailer@6.10.0:
     resolution: {integrity: sha512-SQ3wZCExjeSatLE/HBaXS5vqUOQk6GtBdIIKxiFdmm01mOQZX/POJkO3SUX1wDiYcwUOJwT23scFSC9fY2H8IA==}

@@ -1,7 +1,9 @@
 import { Context } from '../../app/context.js'
-import { ExhibitionResolvers, QueryResolvers } from '../../generated/graphql.js'
+import { ExhibitionResolvers, MutationResolvers, QueryResolvers } from '../../generated/graphql.js'
 import { QueryOrder } from '@mikro-orm/core'
 import { Exhibit } from '../exhibit/entity.js'
+import { sendEmail } from '../common/sendEmail.js'
+import { htmlToText } from '../common/emailUtils.js'
 
 export const exhibitionQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2345
@@ -11,6 +13,35 @@ export const exhibitionQueries: QueryResolvers<Context> = {
   getCurrentExhibition: async (_, _args, { exhibition }) => exhibition,
   // @ts-expect-error ts2345
   getExhibitions: async (_, _args, { db }) => db.exhibition.findAll(),
+}
+
+export const exhibitionMutations: MutationResolvers<Context> = {
+  emailExhibitors: async (_, { exhibitorIds, subject, html }, { db, exhibition }) => {
+    const loadedExhibition = await db.exhibition.findOneOrFail(
+      { id: exhibition.id },
+      { populate: ['exhibitors.user'] }, // populate exhibitors and their user
+    )
+    const exhibitors = loadedExhibition.exhibitors.getItems()
+    if (exhibitors.length === 0) {
+      throw new Error(`No exhibitors found for exhibition`)
+    }
+    const emailAddresses = exhibitors
+      .filter(({ id }) => !exhibitorIds.length || exhibitorIds.includes(id))
+      .map((exhibitor) => exhibitor.user.email)
+      .filter(Boolean)
+    if (emailAddresses.length === 0) {
+      throw new Error(`No valid emails found for exhibitors in exhibition`)
+    }
+    await sendEmail({
+      to: emailAddresses,
+      subject,
+      body: {
+        html,
+        text: htmlToText(html),
+      },
+    })
+    return true
+  },
 }
 
 export const exhibitionTypeResolvers: ExhibitionResolvers = {
@@ -31,5 +62,6 @@ export const exhibitionTypeResolvers: ExhibitionResolvers = {
 
 export const exhibitionResolvers = {
   Query: exhibitionQueries,
+  Mutation: exhibitionMutations,
   Exhibition: exhibitionTypeResolvers,
 }

@@ -30,12 +30,14 @@ interface MultipleExhibitorSelectorProps {
   exhibitors: Exhibitor[]
   selectedIds: string[]
   onChange: (ids: string[]) => void
+  disabled?: boolean
 }
 
 const MultipleExhibitorSelector: React.FC<MultipleExhibitorSelectorProps> = ({
   exhibitors,
   selectedIds,
   onChange,
+  disabled = false,
 }) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearching, setIsSearching] = useState(false)
@@ -56,33 +58,40 @@ const MultipleExhibitorSelector: React.FC<MultipleExhibitorSelectorProps> = ({
   }, [exhibitors, selectedIds])
 
   const handleRemoveExhibitor = (exhibitorId: string) => {
+    if (disabled) return
     onChange(selectedIds.filter((id) => id !== exhibitorId))
   }
 
   const handleAddExhibitor = (exhibitorId: string) => {
+    if (disabled) return
     onChange([...selectedIds, exhibitorId])
     setSearchQuery('')
   }
 
   return (
-    <div className="space-y-2">
+    <div className={`space-y-2 ${disabled ? 'pointer-events-none opacity-50' : ''}`}>
       <div className="relative">
         <FormInput
           type="text"
           placeholder="Nach Aussteller suchen..."
           value={searchQuery}
           onChange={(e) => {
+            if (disabled) return
             setSearchQuery(e.target.value)
             setIsSearching(true)
           }}
-          onFocus={() => setIsSearching(true)}
+          onFocus={() => {
+            if (disabled) return
+            setIsSearching(true)
+          }}
           onBlur={() => {
             // Delay hiding results to allow click events to fire
             setTimeout(() => setIsSearching(false), 200)
           }}
           className="mb-2"
+          disabled={disabled}
         />
-        {isSearching && searchQuery && sortedAndFilteredExhibitors.length > 0 && (
+        {isSearching && searchQuery && sortedAndFilteredExhibitors.length > 0 && !disabled && (
           <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-300 bg-white shadow-lg">
             {sortedAndFilteredExhibitors.map((exhibitor) => {
               const displayName = getDisplayName(exhibitor.user)

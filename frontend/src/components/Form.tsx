@@ -83,5 +83,28 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
   ),
 )
 
+interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
+  error?: string
+  label?: string
+}
+
+export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
+  ({ error, label, className = '', ...props }, ref) => (
+    <div className="flex items-center">
+      <input
+        ref={ref}
+        type="checkbox"
+        className={`h-4 w-4 rounded border-gray-300 bg-gray-50 text-blue-600 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-blue-400 dark:focus:ring-blue-400 ${className}`}
+        {...props}
+      />
+      {label && (
+        <label className="ml-2 block text-sm text-gray-700 dark:text-gray-300">{label}</label>
+      )}
+      {error && <FormError>{error}</FormError>}
+    </div>
+  ),
+)
+
 Input.displayName = 'Input'
 TextArea.displayName = 'TextArea'
+Checkbox.displayName = 'Checkbox'

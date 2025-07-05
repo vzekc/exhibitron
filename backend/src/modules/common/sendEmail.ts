@@ -1,5 +1,7 @@
 import 'dotenv/config'
 import nodemailer from 'nodemailer'
+// @ts-expect-error ts7016
+import inlineBase64 from 'nodemailer-plugin-inline-base64'
 import { pino } from 'pino'
 
 const logger = pino({ level: process.env.TEST_LOG_LEVEL || 'fatal' })
@@ -47,17 +49,17 @@ export async function sendEmail({
     debug: !!DEBUG_EMAIL,
     logger: !!DEBUG_EMAIL,
   })
+  transporter.use('compile', inlineBase64())
+
   const { html, text } = body
 
-  const mailOptions = {
+  // need to guard against null transporter for testing
+  await transporter?.sendMail({
     from: from || (ADMIN_EMAIL_NAME ? `${ADMIN_EMAIL_NAME} <${ADMIN_EMAIL}>` : ADMIN_EMAIL),
     to,
     subject,
     text,
     html,
     attachments,
-  }
-
-  // need to guard against null transporter for testing
-  await transporter?.sendMail(mailOptions)
+  })
 }

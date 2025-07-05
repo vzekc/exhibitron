@@ -19,3 +19,7 @@ extend type Query {
   getCurrentExhibition: Exhibition
   getExhibitions: [Exhibition!]
 }
+
+extend type Mutation {
+  emailExhibitors(exhibitorIds: [Int!]!, subject: String!, html: String!): Boolean!
+}
