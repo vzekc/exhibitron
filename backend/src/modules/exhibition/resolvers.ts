@@ -16,7 +16,7 @@ export const exhibitionQueries: QueryResolvers<Context> = {
 }
 
 export const exhibitionMutations: MutationResolvers<Context> = {
-  emailExhibitors: async (_, { exhibitorIds, subject, html }, { db, exhibition }) => {
+  emailExhibitors: async (_, { exhibitorIds, subject, html }, { db, exhibition, user }) => {
     const loadedExhibition = await db.exhibition.findOneOrFail(
       { id: exhibition.id },
       { populate: ['exhibitors.user'] }, // populate exhibitors and their user
@@ -32,14 +32,19 @@ export const exhibitionMutations: MutationResolvers<Context> = {
     if (emailAddresses.length === 0) {
       throw new Error(`No valid emails found for exhibitors in exhibition`)
     }
-    await sendEmail({
-      to: emailAddresses,
-      subject,
-      body: {
-        html,
-        text: htmlToText(html),
-      },
-    })
+    let bcc: string[] | undefined = [user!.email]
+    for (const emailAddress of emailAddresses) {
+      await sendEmail({
+        to: [emailAddress],
+        subject,
+        bcc,
+        body: {
+          html,
+          text: htmlToText(html),
+        },
+      })
+      bcc = undefined // clear BCC after first email to avoid sending to all in subsequent emails
+    }
     return true
   },
 }

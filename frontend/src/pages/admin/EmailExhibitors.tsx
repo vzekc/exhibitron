@@ -5,6 +5,7 @@ import Button from '@components/Button.tsx'
 import { FormFieldGroup, FormLabel, Input, Checkbox } from '@components/Form.tsx'
 import ActionBar from '@components/ActionBar.tsx'
 import MultipleExhibitorSelector from '@components/MultipleExhibitorSelector.tsx'
+import Modal from '@components/Modal.tsx'
 import { graphql } from 'gql.tada'
 
 const EMAIL_EXHIBITORS = graphql(`
@@ -37,15 +38,44 @@ const EmailExhibitors = () => {
   const [selectedExhibitorIds, setSelectedExhibitorIds] = useState<string[]>([])
   const [sendToAllExhibitors, setSendToAllExhibitors] = useState(false)
   const [edited, setEdited] = useState(false)
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [isSending, setIsSending] = useState(false)
+  const [emailSent, setEmailSent] = useState(false)
   const editorRef = useRef<TextEditorHandle>(null)
   const { data } = useQuery(GET_EXHIBITORS)
 
-  const handleSend = async () => {
+  const handleSendClick = () => {
+    setShowConfirmModal(true)
+    setIsSending(false)
+    setEmailSent(false)
+  }
+
+  const handleConfirmSend = async () => {
+    setIsSending(true)
     const currentHtml = editorRef.current?.getHTML() || ''
 
-    await emailExhibitors({
-      variables: { exhibitorIds: selectedExhibitorIds.map(Number), subject, html: currentHtml },
-    })
+    try {
+      await emailExhibitors({
+        variables: { exhibitorIds: selectedExhibitorIds.map(Number), subject, html: currentHtml },
+      })
+      setEmailSent(true)
+    } catch (error) {
+      console.error('Error sending email:', error)
+      setEmailSent(false)
+    } finally {
+      setIsSending(false)
+    }
+  }
+
+  const handleCloseModal = () => {
+    setShowConfirmModal(false)
+    if (emailSent) {
+      setSubject('')
+      setSelectedExhibitorIds([])
+      setSendToAllExhibitors(false)
+      editorRef.current?.clear()
+      setEdited(false)
+    }
   }
 
   const handleSendToAllChange = (checked: boolean) => {
@@ -87,15 +117,53 @@ const EmailExhibitors = () => {
           disabled={sendToAllExhibitors}
         />
         <FormLabel>Betreff</FormLabel>
-        <Input onChange={(e) => setSubject(e.target.value)} placeholder="Betreff der E-Mail" />
+        <Input
+          value={subject}
+          onChange={(e) => setSubject(e.target.value)}
+          placeholder="Betreff der E-Mail"
+        />
         <FormLabel>Nachricht</FormLabel>
         <TextEditor ref={editorRef} onEditStateChange={(e) => setEdited(e)} />
       </FormFieldGroup>
       <ActionBar>
-        <Button type="button" onClick={handleSend} disabled={!canSend()}>
+        <Button type="button" onClick={handleSendClick} disabled={!canSend()}>
           Senden
         </Button>
       </ActionBar>
+
+      <Modal isOpen={showConfirmModal} onClose={handleCloseModal} title="E-Mail senden">
+        {!isSending && !emailSent && (
+          <div className="space-y-4">
+            <p>Möchtest Du die Email senden?</p>
+            <div className="flex justify-end space-x-2">
+              <Button type="button" onClick={handleCloseModal}>
+                Abbrechen
+              </Button>
+              <Button type="button" onClick={handleConfirmSend}>
+                Senden
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {isSending && (
+          <div className="flex min-h-[100px] items-center justify-center">
+            <p>Die Email wird gesendet</p>
+            <div className="border-primary h-12 w-12 animate-spin rounded-full border-b-2"></div>
+          </div>
+        )}
+
+        {emailSent && (
+          <div className="space-y-4">
+            <p className="text-green-600">E-Mail gesendet</p>
+            <div className="flex justify-end">
+              <Button type="button" onClick={handleCloseModal}>
+                Schließen
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   )
 }

@@ -9,6 +9,8 @@ const logger = pino({ level: process.env.TEST_LOG_LEVEL || 'fatal' })
 interface EmailOptions {
   from?: string
   to: string[]
+  replyTo?: string
+  bcc?: string[]
   subject: string
   body: { html: string; text: string }
   attachments?: { filename: string; content: string }[]
@@ -17,6 +19,8 @@ interface EmailOptions {
 export async function sendEmail({
   from,
   to,
+  replyTo,
+  bcc,
   subject,
   body,
   attachments,
@@ -51,12 +55,18 @@ export async function sendEmail({
   })
   transporter.use('compile', inlineBase64())
 
+  if (!from) {
+    from = ADMIN_EMAIL_NAME ? `${ADMIN_EMAIL_NAME} <${ADMIN_EMAIL}>` : ADMIN_EMAIL
+  }
+
   const { html, text } = body
 
   // need to guard against null transporter for testing
   await transporter?.sendMail({
-    from: from || (ADMIN_EMAIL_NAME ? `${ADMIN_EMAIL_NAME} <${ADMIN_EMAIL}>` : ADMIN_EMAIL),
+    from: from,
     to,
+    replyTo,
+    bcc,
     subject,
     text,
     html,

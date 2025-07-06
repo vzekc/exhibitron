@@ -26,6 +26,7 @@ interface TextEditorProps {
 export interface TextEditorHandle {
   getHTML: () => string
   resetEditState: () => void
+  clear: () => void
 }
 
 const TextEditor = forwardRef<TextEditorHandle, TextEditorProps>(
@@ -48,6 +49,13 @@ const TextEditor = forwardRef<TextEditorHandle, TextEditorProps>(
         },
         resetEditState: () => {
           if (quillRef.current) {
+            initialDeltaRef.current = quillRef.current.getContents()
+            setIsEdited(false)
+          }
+        },
+        clear: () => {
+          if (quillRef.current) {
+            quillRef.current.setText('')
             initialDeltaRef.current = quillRef.current.getContents()
             setIsEdited(false)
           }
