@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     color: '#cc0000',
     textAlign: 'center',
     // Position before rotation - measured from left edge of textContainer
-    left: '-2.5mm',
+    left: '0mm',
     top: '47mm', // Move down further
     // Rotate around top-left corner
     transform: 'rotate(-90deg)',
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     color: '#4a4a4a',
     textAlign: 'left',
     whiteSpace: 'nowrap',
-    left: '-38mm',
+    left: '-41mm',
     width: '70mm',
     bottom: '40mm',
   },
@@ -114,9 +114,22 @@ const styles = StyleSheet.create({
     color: '#4a4a4a',
     textAlign: 'left',
     whiteSpace: 'nowrap',
-    left: '-38mm',
+    left: '-41mm',
     width: '60mm',
     bottom: '-3mm',
+  },
+  ipNetmask: {
+    position: 'absolute',
+    fontSize: 8,
+    color: '#4a4a4a',
+    textAlign: 'center',
+    whiteSpace: 'nowrap',
+    left: '6mm',
+    bottom: '-5mm',
+    transform: 'rotate(-90deg)',
+    transformOrigin: 'left bottom',
+    padding: '2mm',
+    width: '50mm',
   },
   dnsZone: {
     position: 'absolute',
@@ -233,6 +246,7 @@ const TableLabelsPDFDocument = ({
                 <Text style={styles.ipAddressRange}>
                   IP Range: 10.1.{tableNumber}.0-10.1.{tableNumber}.255
                 </Text>
+                <Text style={styles.ipNetmask}>Netmask: 255.0.0.0</Text>
                 <Text style={styles.dnsZone}>{exhibition.dnsZone}</Text>
               </View>
             </View>
