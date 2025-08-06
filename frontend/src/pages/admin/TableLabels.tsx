@@ -33,8 +33,8 @@ const LABEL_PARAMETER_SETS: Record<string, LayoutConfig> = {
       columnWidth: 95, // Width of each column in mm (including spacing)
     },
     offset: {
-      top: 13, // Distance from top of page to first row in mm
-      left: 17, // Distance from left edge to first column in mm
+      top: 12, // Distance from top of page to first row in mm
+      left: 19, // Distance from left edge to first column in mm
     },
   },
 } as const
@@ -47,7 +47,6 @@ const TableLabels = () => {
   const [isPrinting, setIsPrinting] = useState(false)
   const [selectedParameterSet, setSelectedParameterSet] =
     useState<LabelParameterSet>('Avery Zweckform 80x50')
-  const [showBorders, setShowBorders] = useState(false)
 
   const parseTableSpec = (spec: string): number[] | undefined => {
     if (!spec.trim()) return undefined
@@ -88,7 +87,6 @@ const TableLabels = () => {
         client,
         tableNumbers,
         layoutConfig: LABEL_PARAMETER_SETS[selectedParameterSet],
-        showBorders,
       })
     } catch (error) {
       console.error('Failed to generate table labels:', error)
@@ -119,19 +117,6 @@ const TableLabels = () => {
                 </option>
               ))}
             </select>
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="showBorders"
-                checked={showBorders}
-                onChange={(e) => setShowBorders(e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                disabled={isPrinting}
-              />
-              <label htmlFor="showBorders" className="text-sm text-gray-600">
-                Rahmen um die Labels anzeigen
-              </label>
-            </div>
           </div>
 
           <div>

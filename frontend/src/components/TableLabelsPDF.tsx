@@ -173,7 +173,6 @@ interface TableLabelsPDFDocumentProps {
   tableNumbers: number[]
   qrCodes: Map<number, string>
   layoutConfig: LayoutConfig
-  showBorders: boolean
 }
 
 const TableLabelsPDFDocument = ({
@@ -181,7 +180,6 @@ const TableLabelsPDFDocument = ({
   tableNumbers,
   qrCodes,
   layoutConfig,
-  showBorders,
 }: TableLabelsPDFDocumentProps) => {
   // Compute labels per page based on A4 dimensions (210mm × 297mm)
   const labelsPerPage =
@@ -220,22 +218,7 @@ const TableLabelsPDFDocument = ({
       {pages.map((pageLabels, pageIndex) => (
         <Page key={pageIndex} size="A4" style={styles.page}>
           {pageLabels.map((tableNumber, labelIndex) => (
-            <View
-              key={tableNumber}
-              style={[
-                styles.label,
-                getLabelPosition(labelIndex),
-                showBorders
-                  ? {
-                      borderTopWidth: 1,
-                      borderRightWidth: 1,
-                      borderBottomWidth: 1,
-                      borderLeftWidth: 1,
-                      borderColor: '#333333',
-                      borderStyle: 'solid',
-                    }
-                  : {},
-              ]}>
+            <View key={tableNumber} style={[styles.label, getLabelPosition(labelIndex)]}>
               <View style={styles.qrCodeContainer}>
                 <Image src={qrCodes.get(tableNumber) || ''} style={styles.qrCode} />
               </View>
@@ -261,13 +244,12 @@ interface GenerateTableLabelsParams {
   client: ApolloClient<object>
   tableNumbers?: number[]
   layoutConfig: LayoutConfig
-  showBorders: boolean
 }
 
 export const generateAndDownloadTableLabels = async (
   params: GenerateTableLabelsParams,
 ): Promise<void> => {
-  const { client, tableNumbers, layoutConfig, showBorders } = params
+  const { client, tableNumbers, layoutConfig } = params
 
   const result = await client.query({
     query: GET_TABLES,
@@ -303,7 +285,6 @@ export const generateAndDownloadTableLabels = async (
       tableNumbers={tablesToPrint}
       qrCodes={qrCodes}
       layoutConfig={layoutConfig}
-      showBorders={showBorders}
     />
   )
 
