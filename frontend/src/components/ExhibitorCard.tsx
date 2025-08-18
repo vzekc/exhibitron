@@ -7,6 +7,7 @@ import Modal from './Modal'
 import TableChip from './TableChip'
 import { useState } from 'react'
 import { useMutation } from '@apollo/client'
+import { Input } from '@components/Form.tsx'
 
 const EXHIBITOR_FRAGMENT = graphql(`
   fragment ExhibitorDetails on Exhibitor @_unmask {
@@ -51,6 +52,7 @@ const ExhibitorCard = ({ exhibitor }: { exhibitor: FragmentOf<typeof EXHIBITOR_F
     allowEmailContact,
   } = user || {}
   const [isContactModalOpen, setIsContactModalOpen] = useState(false)
+  const [sender, setSender] = useState('')
   const [message, setMessage] = useState('')
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [sendVisitorEmail] = useMutation(SEND_VISITOR_EMAIL)
@@ -58,10 +60,13 @@ const ExhibitorCard = ({ exhibitor }: { exhibitor: FragmentOf<typeof EXHIBITOR_F
   const handleSendMessage = async () => {
     if (!userId || !message.trim()) return
 
+    const senderInfo = sender.trim() || 'Unbekannt'
+    const fullMessage = `Nachricht von: ${senderInfo}\n\n${message.trim()}`
+
     await sendVisitorEmail({
       variables: {
         userId,
-        message: message.trim(),
+        message: fullMessage,
       },
     })
     setIsContactModalOpen(false)
@@ -117,6 +122,12 @@ const ExhibitorCard = ({ exhibitor }: { exhibitor: FragmentOf<typeof EXHIBITOR_F
           <p className="text-gray-700 dark:text-gray-300">
             Deine Nachricht wird per Email an {fullName} weitergeleitet.
           </p>
+          <Input
+            placeholder="Deine Email-Adresse oder Rückrufnummer"
+            name="email"
+            id="email"
+            onChange={(e) => setSender(e.target.value)}
+          />
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
