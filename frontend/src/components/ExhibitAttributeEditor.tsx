@@ -165,6 +165,7 @@ const DraggableAttributeItem = ({
 
       {/* Remove button */}
       <button
+        type="button"
         onClick={() => handleRemoveAttribute(index)}
         className="flex-shrink-0 p-2 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
         aria-label="Entfernen">
@@ -298,6 +299,7 @@ const ExhibitAttributeEditor = ({ attributes, onChange }: ExhibitAttributeEditor
             />
             <div className="mt-2 flex justify-end">
               <button
+                type="button"
                 onClick={() => setShowAddAttributeInput(false)}
                 className="rounded bg-gray-300 px-3 py-1 text-sm text-gray-700 hover:bg-gray-400 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500">
                 Abbrechen
@@ -307,6 +309,7 @@ const ExhibitAttributeEditor = ({ attributes, onChange }: ExhibitAttributeEditor
         ) : (
           <div className="mt-4 flex space-x-2">
             <button
+              type="button"
               onClick={handleAddAttribute}
               className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
               Attribut hinzufügen

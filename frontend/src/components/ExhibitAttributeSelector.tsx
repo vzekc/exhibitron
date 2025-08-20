@@ -142,11 +142,13 @@ export const ExhibitAttributeSelector = ({ options, onSelect, onCreateNew }: Com
             </p>
             <div className="flex justify-end space-x-2">
               <button
+                type="button"
                 className="rounded bg-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-400 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
                 onClick={handleCancelCreate}>
                 Abbrechen
               </button>
               <button
+                type="button"
                 className="rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
                 onClick={handleCreateAttribute}>
                 Erstellen
