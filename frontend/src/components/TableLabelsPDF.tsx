@@ -225,7 +225,7 @@ const TableLabelsPDFDocument = ({
               <View style={styles.textContainer}>
                 <Text style={styles.tableNumber}>{tableNumber}</Text>
                 <Text style={styles.eventName}>{exhibition.title}</Text>
-                <Text style={styles.ipNetworkParameters}>Gateway 10.0.0.1 DNS 10.0.0.2</Text>
+                <Text style={styles.ipNetworkParameters}>Gateway 10.0.0.1 DNS 10.0.0.1</Text>
                 <Text style={styles.ipAddressRange}>
                   IP Range: 10.1.{tableNumber}.0-10.1.{tableNumber}.255
                 </Text>
