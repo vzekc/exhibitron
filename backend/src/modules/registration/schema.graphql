@@ -13,6 +13,8 @@ type Registration {
   status: RegistrationStatus!
   topic: String!
   data: JSON
+  isLoggedIn: Boolean!
+  tables: [Table!]!
 }
 
 input RegisterInput {

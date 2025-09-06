@@ -22,11 +22,25 @@ const GET_REGISTRATIONS = graphql(`
       createdAt
       updatedAt
       data
+      isLoggedIn
+      tables {
+        id
+        number
+      }
     }
   }
 `)
 
-const tableColumns = ['status', 'nickname', 'name', 'email', 'createdAt', 'updatedAt'] as const
+const tableColumns = [
+  'status',
+  'nickname',
+  'name',
+  'email',
+  'isLoggedIn',
+  'tables',
+  'createdAt',
+  'updatedAt',
+] as const
 
 type TableColumn = (typeof tableColumns)[number]
 
@@ -36,6 +50,10 @@ const getColumnHeader = (column: TableColumn) => {
       return 'Eingegangen'
     case 'updatedAt':
       return 'Geändert'
+    case 'isLoggedIn':
+      return 'Eingeloggt'
+    case 'tables':
+      return 'Tische'
     default:
       return column.charAt(0).toUpperCase() + column.slice(1)
   }
@@ -80,6 +98,41 @@ const StatusChip = ({ status }: { status: string }) => {
   )
 }
 
+const LoginStatusChip = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
+  const getStatusColor = (isLoggedIn: boolean) => {
+    return isLoggedIn ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+  }
+
+  const getStatusText = (isLoggedIn: boolean) => {
+    return isLoggedIn ? 'Ja' : 'Nein'
+  }
+
+  return (
+    <span
+      className={`text-xs inline-flex items-center rounded-full px-2.5 py-0.5 font-medium ${getStatusColor(isLoggedIn)}`}>
+      {getStatusText(isLoggedIn)}
+    </span>
+  )
+}
+
+const TablesDisplay = ({ tables }: { tables: Array<{ id: number; number: number }> }) => {
+  if (!tables || tables.length === 0) {
+    return <span className="text-gray-500">-</span>
+  }
+
+  return (
+    <div className="flex flex-wrap gap-1">
+      {tables.map((table) => (
+        <span
+          key={table.id}
+          className="text-xs inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 font-medium text-blue-800">
+          {table.number}
+        </span>
+      ))}
+    </div>
+  )
+}
+
 const RegistrationList = () => {
   const { data } = useQuery(GET_REGISTRATIONS)
   type Registrations = NonNullable<typeof data>['getRegistrations']
@@ -106,6 +159,8 @@ const RegistrationList = () => {
       'email',
       'nickname',
       'message',
+      'isLoggedIn',
+      'tables',
       'updatedAt',
       ...Array.from(keys).sort(),
     ]
@@ -152,6 +207,12 @@ const RegistrationList = () => {
               <TableCell key={column}>
                 {column === 'status' ? (
                   <StatusChip status={registration[column] as string} />
+                ) : column === 'isLoggedIn' ? (
+                  <LoginStatusChip isLoggedIn={registration[column] as boolean} />
+                ) : column === 'tables' ? (
+                  <TablesDisplay
+                    tables={registration[column] as Array<{ id: number; number: number }>}
+                  />
                 ) : (
                   formatValue(column, registration[column] as string | number | boolean)
                 )}

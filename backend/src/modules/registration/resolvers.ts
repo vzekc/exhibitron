@@ -9,10 +9,12 @@ import { requireAdmin } from '../../db.js'
 import { wrap } from '@mikro-orm/core'
 
 export const registrationQueries: QueryResolvers<Context> = {
+  // @ts-expect-error ts2322
   getRegistration: async (_, { id }, { db, user }) => {
     requireAdmin(user)
     return db.registration.findOneOrFail({ id })
   },
+  // @ts-expect-error ts2322
   getRegistrations: async (_, _args, { db, user }) => {
     requireAdmin(user)
     return db.registration.findAll()
@@ -24,6 +26,7 @@ export const registrationQueries: QueryResolvers<Context> = {
 }
 
 export const registrationMutations: MutationResolvers<Context> = {
+  // @ts-expect-error ts2322
   register: async (_, { input }, { exhibition, db }) => {
     const { email, message, ...rest } = input
     const existing = await db.registration.findOne({
@@ -41,6 +44,7 @@ export const registrationMutations: MutationResolvers<Context> = {
       ...rest,
     })
   },
+  // @ts-expect-error ts2322
   updateRegistrationNotes: async (_, { id, notes }, { db, user }) => {
     requireAdmin(user)
     const registration = await db.registration.findOneOrFail({ id })
@@ -77,6 +81,32 @@ export const registrationMutations: MutationResolvers<Context> = {
 
 export const registrationTypeResolvers: RegistrationResolvers = {
   status: (registration) => registration.status,
+  isLoggedIn: async (registration, _, { db }) => {
+    // Find user by email
+    const user = await db.user.findOne({ email: registration.email })
+    if (!user) {
+      return false
+    }
+    // Check if user has no password reset token (meaning they've completed setup)
+    return !user.passwordResetToken
+  },
+  tables: async (registration, _, { db, exhibition }) => {
+    // Find user by email
+    const user = await db.user.findOne({ email: registration.email })
+    if (!user) {
+      return []
+    }
+    // Find exhibitor for this user and exhibition
+    const exhibitor = await db.exhibitor.findOne({
+      user,
+      exhibition,
+    })
+    if (!exhibitor) {
+      return []
+    }
+    // Get tables for this exhibitor
+    return db.table.find({ exhibitor })
+  },
 }
 
 export const registrationResolvers = {
