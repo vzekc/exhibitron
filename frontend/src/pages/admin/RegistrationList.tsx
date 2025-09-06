@@ -27,6 +27,10 @@ const GET_REGISTRATIONS = graphql(`
         id
         number
       }
+      processedTopic
+      nextTo
+      hasNotes
+      notes
     }
   }
 `)
@@ -35,7 +39,9 @@ const tableColumns = [
   'status',
   'nickname',
   'name',
-  'email',
+  'processedTopic',
+  'nextTo',
+  'hasNotes',
   'isLoggedIn',
   'tables',
   'createdAt',
@@ -54,6 +60,12 @@ const getColumnHeader = (column: TableColumn) => {
       return 'Eingeloggt'
     case 'tables':
       return 'Tische'
+    case 'processedTopic':
+      return 'Thema'
+    case 'nextTo':
+      return 'Neben'
+    case 'hasNotes':
+      return 'Notizen'
     default:
       return column.charAt(0).toUpperCase() + column.slice(1)
   }
@@ -92,7 +104,7 @@ const StatusChip = ({ status }: { status: string }) => {
 
   return (
     <span
-      className={`text-xs inline-flex items-center rounded-full px-2.5 py-0.5 font-medium ${getStatusColor(status)}`}>
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${getStatusColor(status)}`}>
       {getStatusText(status)}
     </span>
   )
@@ -133,6 +145,62 @@ const TablesDisplay = ({ tables }: { tables: Array<{ id: number; number: number 
   )
 }
 
+const NotesIcon = ({ hasNotes, notes }: { hasNotes: boolean; notes?: string | null }) => {
+  if (!hasNotes) {
+    return <span className="text-gray-400">-</span>
+  }
+
+  return (
+    <div className="group relative">
+      <svg
+        className="h-4 w-4 cursor-help text-blue-600"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg">
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+        />
+      </svg>
+      <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 max-w-xs -translate-x-1/2 transform whitespace-pre-wrap rounded-lg bg-gray-900 px-3 py-2 text-sm text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+        {notes}
+        <div className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 transform border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+      </div>
+    </div>
+  )
+}
+
+const TruncatedText = ({
+  text,
+  maxLength = 20,
+}: {
+  text: string | null | undefined
+  maxLength?: number
+}) => {
+  if (!text) {
+    return <span className="text-gray-400">-</span>
+  }
+
+  const truncated = text.length > maxLength ? text.substring(0, maxLength) + '...' : text
+
+  if (text.length <= maxLength) {
+    return <span>{text}</span>
+  }
+
+  return (
+    <div className="group relative">
+      <span className="cursor-help">{truncated}</span>
+      <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 max-w-xs -translate-x-1/2 transform whitespace-pre-wrap rounded-lg bg-gray-900 px-3 py-2 text-sm text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+        {text}
+        <div className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 transform border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+      </div>
+    </div>
+  )
+}
+
 const RegistrationList = () => {
   const { data } = useQuery(GET_REGISTRATIONS)
   type Registrations = NonNullable<typeof data>['getRegistrations']
@@ -149,9 +217,8 @@ const RegistrationList = () => {
     if (!registrations) {
       return ''
     }
-    const keys = registrations
-      ?.map((data) => new Set(Object.keys(data)))
-      .reduce((acc, set) => new Set([...acc, ...set]), new Set<string>())
+
+    // Define the exact columns we want in the CSV, matching the UI display
     const columns = [
       'id',
       'status',
@@ -159,12 +226,43 @@ const RegistrationList = () => {
       'email',
       'nickname',
       'message',
+      'processedTopic',
+      'nextTo',
+      'hasNotes',
       'isLoggedIn',
       'tables',
+      'createdAt',
       'updatedAt',
-      ...Array.from(keys).sort(),
     ]
-    return Papa.unparse(registrations, { columns })
+
+    // Transform the data to include only the columns we want and format them properly
+    const csvData = registrations.map((registration) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const row: Record<string, any> = {}
+
+      // Add all the basic fields
+      columns.forEach((column) => {
+        if (column === 'tables') {
+          // Format tables as a readable string
+          const tables = registration.tables || []
+          row[column] = tables.length > 0 ? tables.map((t) => t.number).join(', ') : ''
+        } else if (column === 'hasNotes') {
+          // Convert boolean to readable text
+          row[column] = registration.hasNotes ? 'Ja' : 'Nein'
+        } else if (column === 'isLoggedIn') {
+          // Convert boolean to readable text
+          row[column] = registration.isLoggedIn ? 'Ja' : 'Nein'
+        } else {
+          // Use the field value directly
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          row[column] = (registration as any)[column] || ''
+        }
+      })
+
+      return row
+    })
+
+    return Papa.unparse(csvData, { columns })
   }
 
   const handleDownload = () => {
@@ -213,6 +311,15 @@ const RegistrationList = () => {
                   <TablesDisplay
                     tables={registration[column] as Array<{ id: number; number: number }>}
                   />
+                ) : column === 'hasNotes' ? (
+                  <NotesIcon
+                    hasNotes={registration[column] as boolean}
+                    notes={registration.notes}
+                  />
+                ) : column === 'processedTopic' ? (
+                  <TruncatedText text={registration[column] as string} />
+                ) : column === 'nextTo' ? (
+                  <TruncatedText text={registration[column] as string} />
                 ) : (
                   formatValue(column, registration[column] as string | number | boolean)
                 )}

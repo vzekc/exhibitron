@@ -107,6 +107,19 @@ export const registrationTypeResolvers: RegistrationResolvers = {
     // Get tables for this exhibitor
     return db.table.find({ exhibitor })
   },
+  processedTopic: (registration) => {
+    // Replace /Etwas anderes \((.*)\)/ with $1
+    return registration.topic.replace(/^Etwas anderes \((.*)\)$/, '$1')
+  },
+  nextTo: (registration) => {
+    // Extract tableNextTo from data JSON
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (registration.data as any)?.tableNextTo || null
+  },
+  hasNotes: (registration) => {
+    // Check if notes exist and are not empty
+    return !!(registration.notes && registration.notes.trim().length > 0)
+  },
 }
 
 export const registrationResolvers = {

@@ -15,6 +15,9 @@ type Registration {
   data: JSON
   isLoggedIn: Boolean!
   tables: [Table!]!
+  processedTopic: String!
+  nextTo: String
+  hasNotes: Boolean!
 }
 
 input RegisterInput {
