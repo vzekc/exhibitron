@@ -127,14 +127,31 @@ const LoginStatusChip = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
   )
 }
 
-const TablesDisplay = ({ tables }: { tables: Array<{ id: number; number: number }> }) => {
-  if (!tables || tables.length === 0) {
+const TablesDisplay = ({
+  tables,
+  requestedTables
+}: {
+  tables: Array<{ id: number; number: number }>
+  requestedTables?: string | number | null
+}) => {
+  const hasAssignedTables = tables && tables.length > 0
+  const hasRequestedTables = requestedTables && requestedTables !== ''
+
+  if (!hasAssignedTables && !hasRequestedTables) {
     return <span className="text-gray-500">-</span>
   }
 
   return (
     <div className="flex flex-wrap gap-1">
-      {tables.map((table) => (
+      {/* Show requested number of tables */}
+      {hasRequestedTables && (
+        <span className="text-xs inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 font-medium text-orange-800">
+          {requestedTables}
+        </span>
+      )}
+
+      {/* Show actually assigned tables */}
+      {hasAssignedTables && tables.map((table) => (
         <span
           key={table.id}
           className="text-xs inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 font-medium text-blue-800">
@@ -225,11 +242,12 @@ const RegistrationList = () => {
       'name',
       'email',
       'nickname',
-      'message',
+      'notes',
       'processedTopic',
       'nextTo',
       'hasNotes',
       'isLoggedIn',
+      'tables_requested',
       'tables',
       'createdAt',
       'updatedAt',
@@ -242,8 +260,13 @@ const RegistrationList = () => {
 
       // Add all the basic fields
       columns.forEach((column) => {
-        if (column === 'tables') {
-          // Format tables as a readable string
+        if (column === 'tables_requested') {
+          // Show requested number of tables from data.tables
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const requestedTables = (registration.data as any)?.tables || ''
+          row[column] = requestedTables
+        } else if (column === 'tables') {
+          // Format assigned tables as a readable string
           const tables = registration.tables || []
           row[column] = tables.length > 0 ? tables.map((t) => t.number).join(', ') : ''
         } else if (column === 'hasNotes') {
@@ -310,6 +333,8 @@ const RegistrationList = () => {
                 ) : column === 'tables' ? (
                   <TablesDisplay
                     tables={registration[column] as Array<{ id: number; number: number }>}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    requestedTables={(registration.data as any)?.tables}
                   />
                 ) : column === 'hasNotes' ? (
                   <NotesIcon
