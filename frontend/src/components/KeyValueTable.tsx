@@ -6,9 +6,19 @@ interface KeyValueTableProps {
   headers?: KeyValueHeaders
   children: ReactNode
   className?: string
+  mobile?: boolean
 }
 
-const KeyValueTable = ({ headers, children, className = '' }: KeyValueTableProps) => {
+const KeyValueTable = ({
+  headers,
+  children,
+  className = '',
+  mobile = false,
+}: KeyValueTableProps) => {
+  if (mobile) {
+    return <div className={`space-y-4 ${className}`}>{children}</div>
+  }
+
   return (
     <div className="overflow-x-auto">
       <table className={`min-w-full divide-y divide-gray-200 dark:divide-gray-700 ${className}`}>

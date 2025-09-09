@@ -12,6 +12,7 @@ import ActionBar from '@components/ActionBar'
 import Button from '@components/Button'
 import { useNavigate } from 'react-router-dom'
 import { getDisplayName } from '@utils/displayName'
+import { useIsMobile } from '@hooks/useIsMobile'
 
 const GET_SESSION = graphql(`
   query GetSession($id: Int!) {
@@ -41,6 +42,7 @@ const Session = () => {
   const { setDetailName } = useBreadcrumb()
   const { exhibitor } = useExhibitor()
   const navigate = useNavigate()
+  const isMobile = useIsMobile()
   const { loading, error, data } = useQuery(GET_SESSION, {
     variables: { id: parseInt(id ?? '0') },
     skip: !id,
@@ -71,43 +73,42 @@ const Session = () => {
       <Card>
         <h1 className="mb-6 text-2xl font-bold">{session.title}</h1>
 
-        <KeyValueTable>
+        <KeyValueTable mobile={isMobile}>
           {presenters && (
-            <TableRow>
-              <TableCell>Präsentierende</TableCell>
-              <TableCell>{presenters}</TableCell>
+            <TableRow mobile={isMobile}>
+              <TableCell mobile={isMobile} isLabel>
+                Präsentierende
+              </TableCell>
+              <TableCell mobile={isMobile}>{presenters}</TableCell>
             </TableRow>
           )}
-          <TableRow>
-            <TableCell>Datum</TableCell>
-            <TableCell>
+          <TableRow mobile={isMobile}>
+            <TableCell mobile={isMobile} isLabel>
+              Datum
+            </TableCell>
+            <TableCell mobile={isMobile}>
               {startTime.toLocaleDateString('de-DE', {
                 weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
               })}
             </TableCell>
           </TableRow>
-          <TableRow>
-            <TableCell>Zeit</TableCell>
-            <TableCell>
+          <TableRow mobile={isMobile}>
+            <TableCell mobile={isMobile} isLabel>
+              Zeit
+            </TableCell>
+            <TableCell mobile={isMobile}>
               {startTime.toLocaleTimeString('de-DE', {
                 hour: '2-digit',
                 minute: '2-digit',
               })}{' '}
-              -{' '}
-              {endTime.toLocaleTimeString('de-DE', {
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-              {' ('}
-              {duration} Minuten{')'}
+              ({duration} Minuten)
             </TableCell>
           </TableRow>
-          <TableRow>
-            <TableCell>Raum</TableCell>
-            <TableCell>{session.room?.name}</TableCell>
+          <TableRow mobile={isMobile}>
+            <TableCell mobile={isMobile} isLabel>
+              Raum
+            </TableCell>
+            <TableCell mobile={isMobile}>{session.room?.name}</TableCell>
           </TableRow>
         </KeyValueTable>
 

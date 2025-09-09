@@ -129,7 +129,7 @@ const LoginStatusChip = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
 
 const TablesDisplay = ({
   tables,
-  requestedTables
+  requestedTables,
 }: {
   tables: Array<{ id: number; number: number }>
   requestedTables?: string | number | null
@@ -151,13 +151,14 @@ const TablesDisplay = ({
       )}
 
       {/* Show actually assigned tables */}
-      {hasAssignedTables && tables.map((table) => (
-        <span
-          key={table.id}
-          className="text-xs inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 font-medium text-blue-800">
-          {table.number}
-        </span>
-      ))}
+      {hasAssignedTables &&
+        tables.map((table) => (
+          <span
+            key={table.id}
+            className="text-xs inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 font-medium text-blue-800">
+            {table.number}
+          </span>
+        ))}
     </div>
   )
 }
