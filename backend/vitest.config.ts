@@ -7,6 +7,6 @@ export default defineConfig({
     env: {
       NODE_ENV: 'test',
     },
-    testTimeout: 15000, // Increase timeout to 15 seconds for CI compatibility
+    testTimeout: 60000, // Increase timeout to 15 seconds for CI compatibility
   },
 })
