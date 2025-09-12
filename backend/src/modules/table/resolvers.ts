@@ -1,6 +1,7 @@
 import { Context } from '../../app/context.js'
 import { MutationResolvers, QueryResolvers, TableResolvers } from '../../generated/graphql.js'
 import { AuthError, PermissionDeniedError } from '../common/errors.js'
+import { logger } from '../../app/logger.js'
 
 export const tableQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2345
@@ -16,7 +17,7 @@ export const tableMutations: MutationResolvers<Context> = {
       throw new AuthError('You must be logged in to claim a table')
     }
     await db.em.populate(exhibitor, ['tables'])
-    console.log(
+    logger.debug(
       `try to claim table ${number}, already claimed: ${exhibitor.tables.map((table) => table.number).join(' ')}`,
     )
     if (

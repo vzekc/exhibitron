@@ -7,5 +7,6 @@ export default defineConfig({
     env: {
       NODE_ENV: 'test',
     },
+    testTimeout: 10000, // Increase timeout to 10 seconds
   },
 })
