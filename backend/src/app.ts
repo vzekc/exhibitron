@@ -27,6 +27,11 @@ export async function createApp({
   migrate?: boolean
   logLevel?: string
 } = {}) {
+  // Override log level for test environment unless explicitly set
+  const isTest = process.env.NODE_ENV === 'test' || process.env.VITEST === 'true'
+  if (isTest && logLevel === 'INFO') {
+    logLevel = process.env.TEST_LOG_LEVEL || 'FATAL'
+  }
   const app = fastify({
     bodyLimit: 20 * 1024 * 1024, // 20 MB
     trustProxy: true,

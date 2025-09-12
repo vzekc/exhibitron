@@ -8,8 +8,9 @@ if (!existsSync(logsDir)) {
   mkdirSync(logsDir, { recursive: true })
 }
 
-// Determine if we're in production
+// Determine if we're in production or testing
 const isProduction = process.env.NODE_ENV === 'production'
+const isTest = process.env.NODE_ENV === 'test' || process.env.VITEST === 'true'
 
 // Create a base logger configuration
 const createLoggerConfig = (name: string, customLogFile?: string) => {
@@ -45,8 +46,16 @@ const createLoggerConfig = (name: string, customLogFile?: string) => {
     },
   })
 
+  // Determine log level based on environment
+  let logLevel = process.env.LOG_LEVEL || 'info'
+
+  if (isTest) {
+    // In test environment, use fatal level unless overridden by TEST_LOG_LEVEL
+    logLevel = process.env.TEST_LOG_LEVEL || 'fatal'
+  }
+
   return {
-    level: process.env.LOG_LEVEL || 'info',
+    level: logLevel,
     transport: {
       targets,
     },

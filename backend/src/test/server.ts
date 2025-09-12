@@ -14,7 +14,7 @@ const logger = pino()
 let app: FastifyInstance
 
 beforeAll(async () => {
-  app = await createApp({ migrate: false, logLevel: 'fatal' })
+  app = await createApp({ migrate: false })
 })
 
 afterAll(async () => {

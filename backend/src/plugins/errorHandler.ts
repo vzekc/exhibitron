@@ -5,8 +5,12 @@ import { pino } from 'pino'
 import { NotFoundError } from '@mikro-orm/core'
 import { ErrorCode } from '../modules/common/errors.js'
 
+// Determine log level based on environment
+const isTest = process.env.NODE_ENV === 'test' || process.env.VITEST === 'true'
+const logLevel = isTest ? process.env.TEST_LOG_LEVEL || 'fatal' : 'info'
+
 const logger = pino({
-  level: 'info',
+  level: logLevel,
   transport: {
     targets: [
       {
