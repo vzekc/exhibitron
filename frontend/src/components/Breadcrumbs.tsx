@@ -19,6 +19,7 @@ const breadcrumbMap: { [key: string]: string } = {
   '/admin/registration': 'Anmeldungen',
   '/admin/tableLabels': 'Tisch-Labels',
   '/admin/emailExhibitors': 'E-Mail an Mitwirkende',
+  '/admin/welcomePdf': 'Willkommens-PDF',
   '/resetPassword': 'Passwort zurücksetzen',
   '/setupExhibitor': 'Registrierung abschließen',
   '/help': 'Hilfe',

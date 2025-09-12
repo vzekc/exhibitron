@@ -183,6 +183,7 @@ const NavBar = () => {
     { to: '/admin/emailExhibitors', label: 'E-Mail an Mitwirkende' },
     { to: '/admin/page', label: 'Seiten' },
     { to: '/admin/tableLabels', label: 'Tisch-Labels' },
+    { to: '/admin/welcomePdf', label: 'Willkommens-PDF' },
   ]
 
   const renderUserMenuItem = (item: (typeof commonUserMenuItems)[0], onClose?: () => void) => {
