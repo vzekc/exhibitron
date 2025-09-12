@@ -3,12 +3,10 @@ import { NotFoundError } from '@mikro-orm/core'
 import { User } from './entity.js'
 import { PermissionDeniedError } from '../common/errors.js'
 import { match, P } from 'ts-pattern'
-import { pino } from 'pino'
+import { logger } from '../../app/logger.js'
 import { sendEmail } from '../common/sendEmail.js'
 import { makePasswordResetEmail } from '../registration/emails.js'
 import { hash } from 'argon2'
-
-const logger = pino({ level: process.env.TEST_LOG_LEVEL || 'fatal' })
 
 type AssociateForumUserOptions = {
   nickname: string

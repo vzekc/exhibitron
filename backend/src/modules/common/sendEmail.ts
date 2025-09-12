@@ -2,9 +2,7 @@ import 'dotenv/config'
 import nodemailer from 'nodemailer'
 // @ts-expect-error ts7016
 import inlineBase64 from 'nodemailer-plugin-inline-base64'
-import { pino } from 'pino'
-
-const logger = pino({ level: process.env.TEST_LOG_LEVEL || 'fatal' })
+import { logger } from '../../app/logger.js'
 
 interface EmailOptions {
   from?: string

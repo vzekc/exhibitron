@@ -1,19 +1,7 @@
 import { ApolloServerPlugin } from '@apollo/server'
 import { GraphQLFormattedError } from 'graphql'
 import { Context } from '../app/context.js'
-import { pino } from 'pino'
-
-const logger = pino({
-  level: 'info',
-  transport: {
-    targets: [
-      {
-        target: 'pino/file',
-        options: { destination: 'mutations.log' },
-      },
-    ],
-  },
-})
+import { mutationLogger } from '../app/logger.js'
 
 // Function to truncate long string arguments and redact sensitive data
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -56,7 +44,7 @@ export const mutationLoggerPlugin = (): ApolloServerPlugin => {
             errors = context.response.body.singleResult.errors
           }
 
-          logger.info({
+          mutationLogger.info({
             timestamp: new Date().toISOString(),
             user: user?.email || 'anonymous',
             operationName,

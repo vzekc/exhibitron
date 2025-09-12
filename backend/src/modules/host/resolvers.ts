@@ -3,16 +3,7 @@ import { MutationResolvers, QueryResolvers } from '../../generated/graphql.js'
 import { Host } from './entity.js'
 import { UniqueConstraintViolationException, NotFoundError } from '@mikro-orm/core'
 import { UniqueConstraintError, PermissionDeniedError } from '../common/errors.js'
-import { pino } from 'pino'
-
-const logger = pino({
-  transport: {
-    target: 'pino-pretty',
-    options: {
-      colorize: true,
-    },
-  },
-})
+import { logger } from '../../app/logger.js'
 
 export const hostQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2345

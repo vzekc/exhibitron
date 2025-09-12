@@ -9,16 +9,7 @@ import { fileURLToPath } from 'node:url'
 import { initORM } from '../db.js'
 import { mutationLoggerPlugin } from '../plugins/mutationLogger.js'
 import { errorHandlerPlugin } from '../plugins/errorHandler.js'
-import { pino } from 'pino'
-
-const logger = pino({
-  transport: {
-    target: 'pino-pretty',
-    options: {
-      colorize: true,
-    },
-  },
-})
+import { createRequestLogger } from './logger.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -47,6 +38,7 @@ export const register = async (app: FastifyInstance) => {
 
   // Start a transaction and create context for each request
   app.addHook('onRequest', async (request) => {
+    const logger = createRequestLogger(request.requestId)
     logger.debug('Starting request transaction')
     try {
       await db.em.begin()
@@ -61,6 +53,7 @@ export const register = async (app: FastifyInstance) => {
 
   // Commit or rollback the transaction before sending the response
   app.addHook('onSend', async (request, reply) => {
+    const logger = createRequestLogger(request.requestId)
     logger.debug({ statusCode: reply.statusCode }, 'Handling response')
     try {
       if (reply.statusCode >= 200 && reply.statusCode < 300) {
@@ -88,7 +81,7 @@ export const register = async (app: FastifyInstance) => {
     } finally {
       logger.debug('Destroying context')
       try {
-        await destroyContext(request.apolloContext)
+        await destroyContext(request.apolloContext, request.requestId)
         logger.debug('Context destroyed')
       } catch (error) {
         logger.error({ error }, 'Failed to destroy context')
@@ -98,6 +91,7 @@ export const register = async (app: FastifyInstance) => {
   })
 
   app.addHook('onError', async (request, reply, error) => {
+    const logger = createRequestLogger(request.requestId)
     logger.error({ error }, 'Handling error')
     // Rollback on error
     if (request.apolloContext?.db) {
@@ -114,6 +108,7 @@ export const register = async (app: FastifyInstance) => {
 
   // shut down the connection when closing the app
   app.addHook('onClose', async () => {
+    const logger = createRequestLogger('shutdown')
     logger.debug('Closing database connection')
     await db.orm.close()
     logger.debug('Database connection closed')

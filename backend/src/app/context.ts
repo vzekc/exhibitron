@@ -3,13 +3,11 @@ import memoize from 'memoizee'
 import { Services } from '../db.js'
 import { Exhibition } from '../modules/exhibition/entity.js'
 import { Exhibitor } from '../modules/exhibitor/entity.js'
-import { pino } from 'pino'
+import { createRequestLogger } from './logger.js'
 import { User } from '../modules/user/entity.js'
 import { FastifySessionObject } from '@fastify/session'
 import { FastifyRequest } from 'fastify'
 import { isRequestFromLan } from '../misc/isRequestFromLan.js'
-
-const logger = pino()
 
 export const getHostMatchers = memoize(async () => {
   const db = await initORM()
@@ -49,6 +47,7 @@ export type Context = {
 
 export const createContext = async (request: FastifyRequest) => {
   const db = await initORM()
+  const logger = createRequestLogger(request.requestId)
 
   if (request.session.userId) {
     const user = await db.user.findOne({
@@ -87,7 +86,8 @@ export const createContext = async (request: FastifyRequest) => {
   return context
 }
 
-export const destroyContext = async (context: Context) => {
+export const destroyContext = async (context: Context, requestId: string) => {
+  const logger = createRequestLogger(requestId)
   logger.debug('destroyContext', context)
   // No need to flush here as it's handled by the transaction
 }

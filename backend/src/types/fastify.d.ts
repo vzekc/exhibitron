@@ -16,6 +16,7 @@ declare module 'fastify' {
     user: User | null
     exhibitor: Exhibitor | null
     exhibition: Exhibition
+    requestId: string
   }
 }
 

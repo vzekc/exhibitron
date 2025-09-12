@@ -1,3 +1,4 @@
+logs/
 temp/
 dist/
 sqlite.db

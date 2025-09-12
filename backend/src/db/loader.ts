@@ -1,21 +1,11 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { SqlEntityManager } from '@mikro-orm/postgresql'
-import { pino } from 'pino'
+import { logger } from '../app/logger.js'
 
 // Singleton state
 let functionsLoaded = false
 const loadedFunctions = new Set<string>()
-
-// Create a logger instance with the same configuration as Fastify
-const logger = pino({
-  transport: {
-    target: 'pino-pretty',
-    options: {
-      colorize: true,
-    },
-  },
-})
 
 export async function loadDatabaseFunctions(em: SqlEntityManager): Promise<void> {
   // If functions are already loaded, skip
