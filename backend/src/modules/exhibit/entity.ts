@@ -43,6 +43,9 @@ export class Exhibit extends BaseEntity<'text' | 'table' | 'attributes'> {
   @Property()
   title!: string
 
+  @Property()
+  touchMe: boolean = false
+
   @OneToOne(() => Document, { nullable: true, orphanRemoval: true, eager: true })
   description!: Document | null
 

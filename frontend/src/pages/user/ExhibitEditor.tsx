@@ -12,7 +12,14 @@ import { showMessage } from '@components/MessageModalUtil.tsx'
 import Button from '@components/Button.tsx'
 import ActionBar from '@components/ActionBar.tsx'
 import PageHeading from '@components/PageHeading.tsx'
-import { FormSection, FormFieldGroup, FormLabel, SectionLabel, Input } from '@components/Form.tsx'
+import {
+  FormSection,
+  FormFieldGroup,
+  FormLabel,
+  SectionLabel,
+  Input,
+  Checkbox,
+} from '@components/Form.tsx'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import LoadInProgress from '@components/LoadInProgress'
 import Icon from '@components/Icon'
@@ -28,6 +35,7 @@ type Attribute = {
 type ExhibitFormData = {
   title: string
   table?: number
+  touchMe: boolean
   description: string
   descriptionExtension: string
   attributes: Attribute[]
@@ -41,6 +49,7 @@ const GET_DATA = graphql(`
     getExhibit(id: $id) {
       id
       title
+      touchMe
       description
       descriptionExtension
       table {
@@ -83,6 +92,7 @@ const UPDATE_EXHIBIT = graphql(`
   mutation UpdateExhibit(
     $id: Int!
     $title: String
+    $touchMe: Boolean
     $description: String
     $descriptionExtension: String
     $table: Int
@@ -91,6 +101,7 @@ const UPDATE_EXHIBIT = graphql(`
     updateExhibit(
       id: $id
       title: $title
+      touchMe: $touchMe
       description: $description
       descriptionExtension: $descriptionExtension
       table: $table
@@ -98,6 +109,7 @@ const UPDATE_EXHIBIT = graphql(`
     ) {
       id
       title
+      touchMe
       description
       descriptionExtension
       table {
@@ -120,6 +132,7 @@ const UPDATE_EXHIBIT = graphql(`
 const CREATE_EXHIBIT = graphql(`
   mutation CreateExhibit(
     $title: String!
+    $touchMe: Boolean
     $description: String
     $descriptionExtension: String
     $table: Int
@@ -127,6 +140,7 @@ const CREATE_EXHIBIT = graphql(`
   ) {
     createExhibit(
       title: $title
+      touchMe: $touchMe
       description: $description
       descriptionExtension: $descriptionExtension
       table: $table
@@ -134,6 +148,7 @@ const CREATE_EXHIBIT = graphql(`
     ) {
       id
       title
+      touchMe
       description
       descriptionExtension
       table {
@@ -217,6 +232,7 @@ const ExhibitEditor = () => {
     mode: 'onBlur',
     defaultValues: {
       title: '',
+      touchMe: false,
       table: undefined,
       description: '',
       descriptionExtension: '',
@@ -271,10 +287,11 @@ const ExhibitEditor = () => {
 
   useEffect(() => {
     if (exhibitData?.getExhibit) {
-      const { title, table, description, descriptionExtension, attributes, mainImage } =
+      const { title, touchMe, table, description, descriptionExtension, attributes, mainImage } =
         exhibitData.getExhibit
       reset({
         title: title || '',
+        touchMe: Boolean(touchMe),
         table: table?.number || undefined,
         description: description || '',
         descriptionExtension: descriptionExtension || '',
@@ -287,6 +304,7 @@ const ExhibitEditor = () => {
     } else if (isNew) {
       reset({
         title: '',
+        touchMe: false,
         table: undefined,
         description: '',
         descriptionExtension: '',
@@ -299,6 +317,7 @@ const ExhibitEditor = () => {
     }
   }, [
     exhibitData?.getExhibit?.title,
+    exhibitData?.getExhibit?.touchMe,
     exhibitData?.getExhibit?.table,
     exhibitData?.getExhibit?.description,
     exhibitData?.getExhibit?.descriptionExtension,
@@ -340,6 +359,7 @@ const ExhibitEditor = () => {
     await apolloClient.resetStore()
     const variables = {
       title: data.title,
+      touchMe: data.touchMe,
       description: currentDescription,
       descriptionExtension: currentDescriptionExtension,
       table: data.table || null,
@@ -452,6 +472,8 @@ const ExhibitEditor = () => {
                 {...register('title', { required: true })}
                 error={errors.title?.message}
               />
+              <FormLabel>Bespielbar</FormLabel>
+              <Checkbox label="Besucher dürfen das Exponat bespielen" {...register('touchMe')} />
 
               {!isNew && tables.length > 0 && (
                 <>

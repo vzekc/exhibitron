@@ -54,7 +54,7 @@ export const exhibitMutations: MutationResolvers<Context> = {
   // @ts-expect-error ts2345
   createExhibit: async (
     _,
-    { title, description, descriptionExtension, table, attributes },
+    { title, touchMe, description, descriptionExtension, table, attributes },
     { exhibition, exhibitor, db },
   ) => {
     if (!exhibitor) {
@@ -79,6 +79,7 @@ export const exhibitMutations: MutationResolvers<Context> = {
     const exhibit = db.em.getRepository(Exhibit).create({
       exhibition,
       title,
+      touchMe: touchMe ?? false,
       description: null,
       descriptionExtension: null,
       table: tableEntity,

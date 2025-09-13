@@ -74,8 +74,8 @@ export class TestSeeder extends Seeder {
           fullName: 'Daffy Duck',
           nickname: 'daffy',
           exhibits: [
-            { id: 1001, title: 'The first Macintosh' },
-            { id: 1002, title: 'Old DEC systems' },
+            { id: 1001, title: 'The first Macintosh', touchMe: true },
+            { id: 1002, title: 'Old DEC systems', touchMe: false },
           ],
         },
         {
@@ -83,8 +83,8 @@ export class TestSeeder extends Seeder {
           fullName: 'Donald Duck',
           nickname: 'donald',
           exhibits: [
-            { id: 1003, title: 'IBM Mainframes' },
-            { id: 1004, title: 'HP calculators' },
+            { id: 1003, title: 'IBM Mainframes', touchMe: false },
+            { id: 1004, title: 'HP calculators', touchMe: true },
           ],
         },
         {

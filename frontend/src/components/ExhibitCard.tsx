@@ -2,6 +2,7 @@ import { graphql } from 'gql.tada'
 import { useQuery } from '@apollo/client'
 import ExhibitorChip from './ExhibitorChip.tsx'
 import TableChip from './TableChip.tsx'
+import TouchMeChip from './TouchMeChip.tsx'
 import ServerHtmlContent from './ServerHtmlContent'
 import PageHeading from './PageHeading'
 import { KeyValueTable, TableRow, TableCell } from './Table'
@@ -14,6 +15,7 @@ const GET_EXHIBIT = graphql(
       getExhibit(id: $id) {
         id
         title
+        touchMe
         description
         descriptionExtension
         table {
@@ -67,6 +69,9 @@ const ExhibitCard = ({ id }: { id: number }) => {
                 <TableChip number={tableNumber} />
               </div>
             ))}
+            <div className="ml-4 mt-3">
+              <TouchMeChip touchMe={exhibit.touchMe ?? false} />
+            </div>
           </div>
         </div>
       </Card>

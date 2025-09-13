@@ -2,6 +2,7 @@ type Page {
   id: Int!
   key: String!
   title: String!
+  touchMe: Boolean!
   html: String!
 }
 

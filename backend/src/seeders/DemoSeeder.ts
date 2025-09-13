@@ -80,6 +80,7 @@ export class DemoSeeder extends Seeder {
         id: 1,
         exhibition,
         title: 'Bildschirmtext',
+        touchMe: false,
         html: 'Bildschirmtext war ein interaktives Textsystem, das in den 1990er Jahren in Deutschland weit verbreitet war.',
         table: tables[0],
         exhibitor: exhibitors[0],
@@ -88,6 +89,7 @@ export class DemoSeeder extends Seeder {
         id: 2,
         exhibition,
         title: 'TELEBAHN',
+        touchMe: true,
         html: 'TELEBAHN ist ein X.25-Netzwerk.',
         extendedHtml:
           'TELEBAHN ist die erweiterte Version des deutschen X.25-Netzwerks, das in den 1980er Jahren eingeführt wurde.',
@@ -97,6 +99,7 @@ export class DemoSeeder extends Seeder {
         id: 3,
         exhibition,
         title: 'GIGI',
+        touchMe: true,
         html: 'Der GIGI ist ein Grafikterminal, welches auch ein eingebautes Microsoft BASIC besitzt.',
         table: tables[1],
         exhibitor: exhibitors[0],
@@ -105,11 +108,12 @@ export class DemoSeeder extends Seeder {
         id: 4,
         exhibition,
         title: 'PDP-8',
+        touchMe: false,
         html: `Der [PDP-8](https://de.wikipedia.org/wiki/PDP-8) (bei Anwendern meist 'die PDP-8') war ein 12-Bit
-         Minirechner aus der Reihe Programmed Data Processor von Digital 
-         Equipment Corporation (DEC). Es war der erste kommerziell erfolgreiche 
+         Minirechner aus der Reihe Programmed Data Processor von Digital
+         Equipment Corporation (DEC). Es war der erste kommerziell erfolgreiche
          Minicomputer mit weit über 50.000 verkauften Exemplaren, Schätzungen
-         gehen sogar von bis zu 300.000 Exemplaren aus bei Berücksichtigung 
+         gehen sogar von bis zu 300.000 Exemplaren aus bei Berücksichtigung
          von kompatiblen Nachbauten.`,
         extendedHtml: `
 ![image](https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Digital_pdp8-e2.jpg/2880px-Digital_pdp8-e2.jpg)
@@ -126,6 +130,7 @@ export class DemoSeeder extends Seeder {
         id: 5,
         exhibition,
         title: 'Patcher',
+        touchMe: true,
         html: 'Der Patcher ist ein **Retro-Universal-Laptop** auf Raspberry-Pi-Basis.',
         table: tables[2],
         exhibitor: exhibitors[2],
@@ -134,6 +139,7 @@ export class DemoSeeder extends Seeder {
         id: 6,
         exhibition,
         title: 'Macintosh SE/30',
+        touchMe: true,
         html: 'Der Macintosh SE/30 war ein Computer der Firma Apple.',
         extendedHtml:
           'Der Macintosh SE/30 wurde 1989 eingeführt und gilt bis heute als einer der besten klassischen Macintosh-Computer. Er verfügt über einen Motorola 68030 Prozessor mit 16 MHz und kann bis zu 128 MB RAM aufnehmen.',
