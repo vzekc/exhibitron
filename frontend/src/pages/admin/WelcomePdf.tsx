@@ -2,14 +2,18 @@ import { useState } from 'react'
 import { generateAndDownloadWelcomePDF } from '@components/WelcomePDF'
 import Card from '@components/Card'
 import Button from '@components/Button'
+import { useExhibition } from '@contexts/ExhibitionContext.ts'
 
 const WelcomePdf = () => {
   const [isGenerating, setIsGenerating] = useState(false)
+  const { exhibition } = useExhibition()
+  const exhibitionTitle = exhibition?.title ?? 'Classic Computing'
+  const exhibitionLocation = exhibition?.location ?? ''
 
   const handleGeneratePDF = async () => {
     setIsGenerating(true)
     try {
-      await generateAndDownloadWelcomePDF()
+      await generateAndDownloadWelcomePDF(exhibitionTitle, exhibitionLocation)
     } catch (error) {
       console.error('Failed to generate PDF:', error)
       alert('Fehler beim Generieren des PDFs. Bitte versuchen Sie es erneut.')
@@ -28,9 +32,9 @@ const WelcomePdf = () => {
             <h2 className="mb-2 text-lg font-semibold">PDF-Generierung</h2>
             <p className="mb-4 text-sm text-gray-600">
               Der "Willkommen" Aufsteller ist ein PDF-Dokument, das als Begrüßung für die Besucher
-              der Classic Computing 2025 in Hof dient. Es enthält wichtige Informationen und
-              QR-Codes, die den Gästen helfen, sich zurechtzufinden und auf den Online-Katalog sowie
-              den Zeitplan zuzugreifen.
+              der {exhibitionTitle} {exhibitionLocation} dient. Es enthält wichtige Informationen
+              und QR-Codes, die den Gästen helfen, sich zurechtzufinden und auf den Online-Katalog
+              sowie den Zeitplan zuzugreifen.
             </p>
             <Button
               onClick={handleGeneratePDF}
@@ -45,7 +49,9 @@ const WelcomePdf = () => {
             <p className="text-gray-600">Das PDF wird im A4-Format erstellt und enthält:</p>
             <ul className="mt-2 list-inside list-disc text-gray-600">
               <li>CC-Logo (groß) oben</li>
-              <li>Willkommenstitel "Willkommen zur Classic Computing 2025 in Hof"</li>
+              <li>
+                Willkommenstitel "Willkommen zur {exhibitionTitle} {exhibitionLocation}"
+              </li>
               <li>Willkommenstext mit QR-Code zum Online-Katalog</li>
               <li>QR-Code für die Startseite (/)</li>
               <li>Vorträge-Sektion mit QR-Code zum Zeitplan</li>

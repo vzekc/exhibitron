@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import React, { useEffect, useState } from 'react'
 import { useExhibitor } from '@contexts/ExhibitorContext.ts'
+import { useExhibition } from '@contexts/ExhibitionContext.ts'
 import DropdownMenu from './DropdownMenu.tsx'
 import SearchTableNumber from './SearchTableNumber.tsx'
 import { getBookmarks } from '@utils/bookmarks.ts'
@@ -93,11 +94,13 @@ const MenuItem = ({
 
 const NavBar = () => {
   const { exhibitor } = useExhibitor()
+  const { exhibition } = useExhibition()
   const location = useLocation()
   const [hasBookmarks, setHasBookmarks] = useState(getBookmarks().exhibits.length > 0)
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const exhibitionKey = exhibition?.key ?? 'cc'
   const [logout] = useMutation(
     gql`
       mutation Logout {
@@ -171,7 +174,7 @@ const NavBar = () => {
     { to: '/user/profile', label: 'Profil' },
     { to: '/user/exhibit', label: 'Deine Exponate' },
     { to: '/user/exhibitorInfo', label: 'Infos für Mitwirkende' },
-    { to: 'https://www.classic-computing.de/cc2025faq', label: 'FAQ' },
+    { to: `https://www.classic-computing.de/${exhibitionKey}faq`, label: 'FAQ' },
     { to: '/user/help', label: 'Hilfe' },
     { type: 'divider' },
     { type: 'logout', label: 'Logout' },

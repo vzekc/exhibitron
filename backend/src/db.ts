@@ -98,3 +98,9 @@ export const requireAdmin = (user: User | null) => {
     throw new Error('You must be an administrator to perform this operation')
   }
 }
+
+export const requireNotFrozen = (exhibition: Exhibition) => {
+  if (exhibition.frozen) {
+    throw new Error('Diese Ausstellung ist eingefroren und kann nicht mehr verändert werden')
+  }
+}

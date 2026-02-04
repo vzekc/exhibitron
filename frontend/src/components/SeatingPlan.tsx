@@ -4,6 +4,7 @@ import { graphql } from 'gql.tada'
 import { useQuery } from '@apollo/client'
 import ReactSVG from './ReactSVG'
 import { useExhibitor } from '@contexts/ExhibitorContext'
+import { useExhibition } from '@contexts/ExhibitionContext'
 import { FragmentOf } from 'gql.tada'
 import TableInfoPanel from './seatingPlan/TableInfo'
 import ExhibitorChip from './ExhibitorChip'
@@ -65,11 +66,13 @@ const MemoizedSVG = memo(
     onTableClick,
     onLoad,
     onError,
+    exhibitionKey,
   }: {
     onTableClick: (tableNumber: number, event: React.MouseEvent<SVGSVGElement>) => void
     onLoad: (svg: SVGSVGElement) => void
     onError: (error: string) => void
     tables: Map<number, TableInfo>
+    exhibitionKey: string
   }) => {
     const handleClick = (event: React.MouseEvent<SVGSVGElement>) => {
       const target = event.target as Element
@@ -91,7 +94,7 @@ const MemoizedSVG = memo(
 
     return (
       <ReactSVG
-        src="/seatplan.svg"
+        src={`/seatplan-${exhibitionKey}.svg`}
         className="seating-plan-svg block h-auto w-full"
         onLoad={onLoad}
         onClick={handleClick}
@@ -100,8 +103,10 @@ const MemoizedSVG = memo(
     )
   },
   (prevProps, nextProps) => {
-    // Only re-render if tables data changes
-    return prevProps.tables === nextProps.tables
+    // Only re-render if tables data or exhibition key changes
+    return (
+      prevProps.tables === nextProps.tables && prevProps.exhibitionKey === nextProps.exhibitionKey
+    )
   },
 )
 
@@ -123,7 +128,9 @@ export const SeatingPlan: React.FC = () => {
     target: Element | null
   } | null>(null)
   const { exhibitor } = useExhibitor()
+  const { exhibition } = useExhibition()
   const isAdmin = exhibitor?.user.isAdministrator
+  const exhibitionKey = exhibition?.key ?? 'cc2025'
   const svgRef = useRef<SVGSVGElement | null>(null)
   const stylingAppliedRef = useRef<boolean>(false)
   const tablesRef = useRef<Map<number, TableInfo>>(new Map())
@@ -495,6 +502,7 @@ export const SeatingPlan: React.FC = () => {
             onLoad={handleSVGLoad}
             onError={handleSVGError}
             tables={tables}
+            exhibitionKey={exhibitionKey}
           />
         )}
       </div>

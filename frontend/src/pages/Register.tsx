@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useLazyQuery, useMutation } from '@apollo/client'
 import { graphql } from 'gql.tada'
 
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import Modal from '@components/Modal.tsx'
 import RetroHeader from '@components/RetroHeader'
 import FormField from '@components/FormField'
@@ -12,6 +12,7 @@ import FormInput from '@components/FormInput'
 import FormSelect from '@components/FormSelect'
 import FormTextarea from '@components/FormTextarea'
 import Footer from '@components/Footer'
+import { useExhibition } from '@contexts/ExhibitionContext.ts'
 
 type Inputs = {
   name: string
@@ -67,9 +68,37 @@ const Register = () => {
   const [state, setState] = useState<'entering' | 'sending' | 'done'>('entering')
   const [registerMutation] = useMutation(REGISTER_MUTATION)
   const [checkIsRegistered] = useLazyQuery(IS_REGISTERED_QUERY)
+  const { exhibition } = useExhibition()
   const [notYetRegisteredPopup, setNotYetRegisteredPopup] = useState(
     searchParams.has('forumMemberNotYetRegistered'),
   )
+
+  const isFrozen = exhibition?.frozen ?? false
+  const exhibitionTitle = exhibition?.title ?? 'Classic Computing'
+  const exhibitionKey = exhibition?.key ?? 'cc'
+
+  // Format dates for display
+  const formatDateShort = (dateValue: unknown) => {
+    if (!dateValue) return ''
+    const date = new Date(String(dateValue))
+    return date.toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })
+  }
+
+  const getDateRange = () => {
+    if (!exhibition?.startDate || !exhibition?.endDate) return ''
+    const start = new Date(String(exhibition.startDate))
+    const end = new Date(String(exhibition.endDate))
+    const startDay = start.getDate()
+    const endDay = end.getDate()
+    const month = start.toLocaleDateString('de-DE', { month: 'long' })
+    const year = start.getFullYear()
+    return `${startDay}. bis zum ${endDay}. ${month} ${year}`
+  }
+
+  const getFridayDate = () => {
+    if (!exhibition?.startDate) return 'Freitag'
+    return formatDateShort(exhibition.startDate)
+  }
 
   const topic = watch('topic')
 
@@ -102,6 +131,22 @@ const Register = () => {
   }
 
   const content = () => {
+    if (isFrozen) {
+      return (
+        <div className="py-8 text-center">
+          <h2 className="mb-4 text-2xl font-bold text-gray-900">Die Anmeldung ist geschlossen</h2>
+          <p className="mb-4 text-lg text-gray-700">
+            Die Anmeldung für {exhibitionTitle} ist leider nicht mehr möglich.
+          </p>
+          <p className="text-gray-600">
+            <Link to="/" className="text-blue-600 hover:underline">
+              Zur Startseite
+            </Link>
+          </p>
+        </div>
+      )
+    }
+
     switch (state) {
       case 'sending':
         return (
@@ -139,17 +184,17 @@ const Register = () => {
               <p>
                 Hier kannst Du Dich für die{' '}
                 <a
-                  href="https://www.classic-computing.de/cc2025/"
+                  href={`https://www.classic-computing.de/${exhibitionKey}/`}
                   target="_blank"
                   rel="noreferrer nofollow"
                   className="text-blue-600 hover:text-blue-800">
-                  Classic Computing 2025
+                  {exhibitionTitle}
                 </a>
-                , die vom 12. bis zum 14. September 2025 in der Freiheitshalle in Hof stattfindet,
-                als Aussteller anmelden. Die Daten, die Du in dieses Formular eingibst, werden für
-                die Planung der Ausstellung verwendet und nach der Veranstaltung gelöscht. Deine
-                Email-Adresse wird nur für die Kommunikation mit Dir im Zusammenhang mit der
-                Ausstellung verwendet. Wir geben Deine Daten nicht an Dritte weiter.
+                , die vom {getDateRange()} {exhibition?.location} stattfindet, als Aussteller
+                anmelden. Die Daten, die Du in dieses Formular eingibst, werden für die Planung der
+                Ausstellung verwendet und nach der Veranstaltung gelöscht. Deine Email-Adresse wird
+                nur für die Kommunikation mit Dir im Zusammenhang mit der Ausstellung verwendet. Wir
+                geben Deine Daten nicht an Dritte weiter.
               </p>
               <p>
                 Nach Absendung des Formulars erhältst Du eine automatisch generierte Email mit einer
@@ -242,7 +287,7 @@ const Register = () => {
                   <div className="space-y-2">
                     <div className="flex items-center">
                       <FormInput type="checkbox" {...register('friday')} className="mr-2" />
-                      <span>Freitag (12. September, nur Aussteller und persönliche Gäste)</span>
+                      <span>Freitag ({getFridayDate()}, nur Aussteller und persönliche Gäste)</span>
                     </div>
                     <div className="flex items-center">
                       <FormInput type="checkbox" {...register('saturday')} className="mr-2" />
@@ -260,7 +305,7 @@ const Register = () => {
                 <div className="space-y-2">
                   <div className="flex items-center">
                     <FormInput type="checkbox" {...register('setupHelper')} className="mr-2" />
-                    <span>Ich unterstütze beim Aufbau der CC 2025 am Donnerstag</span>
+                    <span>Ich unterstütze beim Aufbau am Donnerstag</span>
                   </div>
                   <div className="flex items-center">
                     <FormInput

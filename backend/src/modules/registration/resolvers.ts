@@ -5,7 +5,7 @@ import {
   RegistrationResolvers,
   RegistrationStatus,
 } from '../../generated/graphql.js'
-import { requireAdmin } from '../../db.js'
+import { requireAdmin, requireNotFrozen } from '../../db.js'
 import { wrap } from '@mikro-orm/core'
 
 export const registrationQueries: QueryResolvers<Context> = {
@@ -28,6 +28,7 @@ export const registrationQueries: QueryResolvers<Context> = {
 export const registrationMutations: MutationResolvers<Context> = {
   // @ts-expect-error ts2322
   register: async (_, { input }, { exhibition, db }) => {
+    requireNotFrozen(exhibition)
     const { email, message, ...rest } = input
     const existing = await db.registration.findOne({
       email: email,

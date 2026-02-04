@@ -1,6 +1,10 @@
 import '@styles/fonts/press-start-2p.css'
+import { useExhibition } from '@contexts/ExhibitionContext.ts'
 
 const RetroHeader = () => {
+  const { exhibition } = useExhibition()
+  const title = exhibition?.title ?? 'Classic Computing'
+
   return (
     <header className="relative mb-10 overflow-hidden bg-[#F7C55F] py-6">
       <div className="container mx-auto px-4">
@@ -14,7 +18,7 @@ const RetroHeader = () => {
               transformOrigin: 'left center',
               whiteSpace: 'nowrap',
             }}>
-            Classic Computing 2025
+            {title}
           </h1>
           <img
             src="/vzekc-logo-transparent-border.png"

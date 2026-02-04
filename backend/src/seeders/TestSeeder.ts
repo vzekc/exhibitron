@@ -19,6 +19,7 @@ export class TestSeeder extends Seeder {
       hostMatch: 'localhost|2025\\.classic-computing\\.de',
       startDate: '2025-09-11',
       endDate: '2025-09-14',
+      frozen: false,
     })
 
     const rooms = [{ name: 'Main Hall' }, { name: 'Workshop Room' }, { name: 'Lecture Hall' }]

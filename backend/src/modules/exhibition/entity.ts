@@ -25,6 +25,12 @@ export class Exhibition extends BaseEntity {
   @Property()
   endDate!: Date
 
+  @Property({ default: false })
+  frozen: boolean = false
+
+  @Property({ nullable: true })
+  location?: string
+
   @OneToMany(() => Table, (table) => table.exhibition)
   tables: Collection<Table> = new Collection<Table>(this)
 

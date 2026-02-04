@@ -41,7 +41,23 @@ extend type Mutation {
   deleteExhibit(id: Int!): Boolean
 }
 
+type ExhibitWithExhibition {
+  id: Int!
+  title: String!
+  touchMe: Boolean
+  description: String
+  attributes: [AttributeValue!]
+  mainImage: Int
+  exhibitionTitle: String!
+  exhibitionKey: String!
+}
+
 extend type Query {
   getExhibit(id: Int!): Exhibit
   getExhibits: [Exhibit!]
+  getMyExhibitsFromOtherExhibitions: [ExhibitWithExhibition!]!
+}
+
+extend type Mutation {
+  copyExhibitsToCurrentExhibition(exhibitIds: [Int!]!): [Exhibit!]!
 }

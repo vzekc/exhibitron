@@ -1,8 +1,8 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useBreadcrumb } from '@contexts/BreadcrumbContext.ts'
+import { useExhibition } from '@contexts/ExhibitionContext.ts'
 
 const breadcrumbMap: { [key: string]: string } = {
-  '/': 'CC2025',
   '/exhibit': 'Exponate',
   '/exhibitor': 'Mitwirkende',
   '/table': 'Tische',
@@ -28,8 +28,14 @@ const breadcrumbMap: { [key: string]: string } = {
 const Breadcrumbs = () => {
   const location = useLocation()
   const { detailNames } = useBreadcrumb()
+  const { exhibition } = useExhibition()
+
+  const exhibitionKey = exhibition?.key?.toUpperCase() ?? ''
 
   const getLabel = (path: string) => {
+    if (path === '/') {
+      return exhibitionKey
+    }
     return detailNames[path] || breadcrumbMap[path] || ''
   }
 

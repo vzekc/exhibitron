@@ -45,6 +45,9 @@ type LookupYouTubeChannelsResult = {
 
 const GET_USER_PROFILE = graphql(`
   query GetUserProfile {
+    getCurrentExhibition {
+      title
+    }
     getCurrentExhibitor {
       id
       topic
@@ -207,7 +210,7 @@ const Profile = () => {
         <Modal
           isOpen={welcome}
           onClose={() => setWelcome(false)}
-          title="Willkommen als Aussteller bei der CC2025!">
+          title={`Willkommen als Aussteller bei der ${data?.getCurrentExhibition?.title ?? 'Ausstellung'}!`}>
           <p>
             Du bist jetzt als Aussteller registriert. Bitte vervollständige dein Profil, wenn Du
             möchtest, daß Besucher dich kontaktieren können.

@@ -6,7 +6,7 @@ import {
 } from '../../generated/graphql.js'
 import { ConferenceSession } from './entity.js'
 import { wrap } from '@mikro-orm/core'
-import { requireAdmin } from '../../db.js'
+import { requireAdmin, requireNotFrozen } from '../../db.js'
 
 export const conferenceSessionQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2345
@@ -20,6 +20,7 @@ export const conferenceSessionQueries: QueryResolvers<Context> = {
 export const conferenceSessionMutations: MutationResolvers<Context> = {
   // @ts-expect-error ts2345
   createConferenceSession: async (_, { input }, { db, user, exhibition }) => {
+    requireNotFrozen(exhibition)
     requireAdmin(user)
     const conferenceSession = db.conferenceSession.create({
       title: input.title,
@@ -39,7 +40,8 @@ export const conferenceSessionMutations: MutationResolvers<Context> = {
   },
 
   // @ts-expect-error ts2345
-  updateConferenceSession: async (_, { id, input }, { db, exhibitor, user }) => {
+  updateConferenceSession: async (_, { id, input }, { db, exhibitor, user, exhibition }) => {
+    requireNotFrozen(exhibition)
     const conferenceSession = await db.conferenceSession.findOneOrFail(
       { id },
       { populate: ['exhibitors'] },
@@ -82,7 +84,8 @@ export const conferenceSessionMutations: MutationResolvers<Context> = {
     return conferenceSession
   },
 
-  deleteConferenceSession: async (_, { id }, { db }) => {
+  deleteConferenceSession: async (_, { id }, { db, exhibition }) => {
+    requireNotFrozen(exhibition)
     const conferenceSession = await db.conferenceSession.findOneOrFail({ id })
     db.em.remove(conferenceSession)
     return true

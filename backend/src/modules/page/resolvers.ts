@@ -1,6 +1,6 @@
 import { Context } from '../../app/context.js'
 import { MutationResolvers, QueryResolvers, PageResolvers } from '../../generated/graphql.js'
-import { requireAdmin } from '../../db.js'
+import { requireAdmin, requireNotFrozen } from '../../db.js'
 import { wrap } from '@mikro-orm/core'
 import { Page } from './entity.js'
 
@@ -12,6 +12,7 @@ export const pageQueries: QueryResolvers<Context> = {
 export const pageMutations: MutationResolvers<Context> = {
   // @ts-expect-error ts2345
   createPage: async (_, { key, title, html }, { db, user, exhibition }) => {
+    requireNotFrozen(exhibition)
     requireAdmin(user)
     const page = db.page.create({
       exhibition,
@@ -28,7 +29,8 @@ export const pageMutations: MutationResolvers<Context> = {
     return page
   },
   // @ts-expect-error ts2345
-  updatePage: async (_, { id, key, title, html }, { db, user }) => {
+  updatePage: async (_, { id, key, title, html }, { db, user, exhibition }) => {
+    requireNotFrozen(exhibition)
     requireAdmin(user)
     const page = await db.page.findOneOrFail({ id })
 
@@ -40,7 +42,8 @@ export const pageMutations: MutationResolvers<Context> = {
     await db.em.persistAndFlush(page)
     return page
   },
-  deletePage: async (_, { id }, { db, user }) => {
+  deletePage: async (_, { id }, { db, user, exhibition }) => {
+    requireNotFrozen(exhibition)
     requireAdmin(user)
     const page = await db.page.findOneOrFail({ id })
     await db.em.removeAndFlush(page)

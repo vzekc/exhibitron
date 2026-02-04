@@ -17,6 +17,7 @@ export class DemoSeeder extends Seeder {
       hostMatch: 'localhost|2025\\.classic-computing\\.de',
       startDate: '2025-09-11',
       endDate: '2025-09-14',
+      frozen: false,
     })
 
     for (let number = 1; number <= 10; number++) {

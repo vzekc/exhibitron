@@ -2,12 +2,16 @@ import { Context } from '../../app/context.js'
 import {
   AttributeInput,
   ExhibitResolvers,
+  ExhibitWithExhibitionResolvers,
   MutationResolvers,
   QueryResolvers,
 } from '../../generated/graphql.js'
 import { Exhibit, ExhibitImage } from './entity.js'
 import { wrap, QueryOrder } from '@mikro-orm/core'
 import { ExhibitAttribute } from '../exhibitAttribute/entity.js'
+import { requireNotFrozen } from '../../db.js'
+import { randomUUID } from 'crypto'
+import { Document } from '../document/entity.js'
 
 // Helper function to process attributes and update the ExhibitAttribute table
 async function processAttributes(
@@ -48,6 +52,33 @@ export const exhibitQueries: QueryResolvers<Context> = {
       .then((exhibits) =>
         exhibits.sort((a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase())),
       ),
+  // @ts-expect-error ts2345
+  getMyExhibitsFromOtherExhibitions: async (_, _args, { db, user, exhibition }) => {
+    if (!user) {
+      throw new Error('You must be logged in to view your exhibits')
+    }
+
+    // Find all exhibitors for this user in OTHER exhibitions
+    const exhibitors = await db.exhibitor.find({
+      user,
+      exhibition: { $ne: exhibition },
+    })
+
+    if (exhibitors.length === 0) {
+      return []
+    }
+
+    // Find all exhibits for these exhibitors
+    const exhibits = await db.exhibit.find(
+      { exhibitor: { $in: exhibitors } },
+      {
+        orderBy: { title: QueryOrder.ASC },
+        populate: ['exhibition', 'mainImage.image'],
+      },
+    )
+
+    return exhibits
+  },
 }
 
 export const exhibitMutations: MutationResolvers<Context> = {
@@ -57,6 +88,7 @@ export const exhibitMutations: MutationResolvers<Context> = {
     { title, touchMe, description, descriptionExtension, table, attributes },
     { exhibition, exhibitor, db },
   ) => {
+    requireNotFrozen(exhibition)
     if (!exhibitor) {
       throw new Error('You must be logged in to create an exhibit')
     }
@@ -105,8 +137,9 @@ export const exhibitMutations: MutationResolvers<Context> = {
   updateExhibit: async (
     _,
     { id, description, descriptionExtension, attributes, ...rest },
-    { db, exhibitor, user },
+    { db, exhibitor, user, exhibition },
   ) => {
+    requireNotFrozen(exhibition)
     const exhibit = await db.exhibit.findOneOrFail({ id })
     if (exhibitor !== exhibit.exhibitor && !user?.isAdministrator) {
       throw new Error('You do not have permission to update this exhibit')
@@ -146,13 +179,90 @@ export const exhibitMutations: MutationResolvers<Context> = {
     await db.em.persist(updatedExhibit).flush()
     return updatedExhibit
   },
-  deleteExhibit: async (_, { id }, { db, exhibitor, user }) => {
+  deleteExhibit: async (_, { id }, { db, exhibitor, user, exhibition }) => {
+    requireNotFrozen(exhibition)
     const exhibit = await db.exhibit.findOneOrFail({ id })
     if (exhibitor !== exhibit.exhibitor && !user?.isAdministrator) {
       throw new Error('You do not have permission to delete this exhibit')
     }
     db.em.remove(exhibit)
     return true
+  },
+  // @ts-expect-error ts2345
+  copyExhibitsToCurrentExhibition: async (
+    _,
+    { exhibitIds },
+    { db, user, exhibitor, exhibition },
+  ) => {
+    requireNotFrozen(exhibition)
+
+    if (!user) {
+      throw new Error('You must be logged in to copy exhibits')
+    }
+    if (!exhibitor) {
+      throw new Error('You must be an exhibitor at the current exhibition to copy exhibits')
+    }
+
+    // Fetch the source exhibits with their related entities
+    const sourceExhibits = await db.exhibit.find(
+      { id: { $in: exhibitIds } },
+      { populate: ['exhibitor.user', 'description', 'mainImage.image'] },
+    )
+
+    // Verify user owns all requested exhibits
+    for (const exhibit of sourceExhibits) {
+      if (exhibit.exhibitor.user.id !== user.id) {
+        throw new Error(`You do not own exhibit "${exhibit.title}"`)
+      }
+    }
+
+    const copiedExhibits: Exhibit[] = []
+
+    for (const sourceExhibit of sourceExhibits) {
+      // Create new document for description if source has one
+      let newDescription: Document | null = null
+      if (sourceExhibit.description?.html) {
+        newDescription = await db.document.ensureDocument(null, sourceExhibit.description.html)
+      }
+
+      // Create new exhibit first (without mainImage)
+      const newExhibit = db.em.create(Exhibit, {
+        exhibition,
+        exhibitor,
+        title: sourceExhibit.title,
+        touchMe: sourceExhibit.touchMe,
+        description: newDescription,
+        descriptionExtension: null,
+        attributes: sourceExhibit.attributes ? [...sourceExhibit.attributes] : undefined,
+      })
+
+      // Create new exhibit image if source has one
+      if (sourceExhibit.mainImage?.image) {
+        const sourceImage = sourceExhibit.mainImage.image
+        // Fetch the full image data
+        await db.em.populate(sourceImage, ['data'])
+
+        // Create a new image storage with a new slug
+        const newImage = await db.image.createImage(
+          sourceImage.data,
+          sourceImage.mimeType,
+          sourceImage.filename,
+          randomUUID(),
+        )
+
+        // Create the exhibit image linking to the new image storage and exhibit
+        const newMainImage = db.em.create(ExhibitImage, {
+          image: newImage,
+          exhibit: newExhibit,
+        })
+        newExhibit.mainImage = newMainImage
+      }
+
+      copiedExhibits.push(newExhibit)
+    }
+
+    await db.em.persist(copiedExhibits).flush()
+    return copiedExhibits
   },
 }
 
@@ -187,8 +297,34 @@ export const exhibitTypeResolvers: ExhibitResolvers = {
   },
 }
 
+export const exhibitWithExhibitionTypeResolvers: ExhibitWithExhibitionResolvers = {
+  attributes: (exhibit) => {
+    const exhibitEntity = exhibit as unknown as Exhibit
+    if (!exhibitEntity.attributes) return null
+    return exhibitEntity.attributes.map(([name, value]) => ({ name, value }))
+  },
+  mainImage: (exhibit) => {
+    const exhibitEntity = exhibit as unknown as Exhibit
+    if (!exhibitEntity.mainImage) return null
+    return exhibitEntity.mainImage.id
+  },
+  description: (exhibit) => {
+    const exhibitEntity = exhibit as unknown as Exhibit
+    return exhibitEntity.description?.html ?? ''
+  },
+  exhibitionTitle: (exhibit) => {
+    const exhibitEntity = exhibit as unknown as Exhibit
+    return exhibitEntity.exhibition.title
+  },
+  exhibitionKey: (exhibit) => {
+    const exhibitEntity = exhibit as unknown as Exhibit
+    return exhibitEntity.exhibition.key
+  },
+}
+
 export const exhibitResolvers = {
   Query: exhibitQueries,
   Mutation: exhibitMutations,
   Exhibit: exhibitTypeResolvers,
+  ExhibitWithExhibition: exhibitWithExhibitionTypeResolvers,
 }

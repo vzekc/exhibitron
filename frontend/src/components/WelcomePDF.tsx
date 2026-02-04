@@ -67,12 +67,16 @@ interface WelcomePDFDocumentProps {
   headerLogoBase64: string
   qrCodeHomeBase64: string
   qrCodeScheduleBase64: string
+  exhibitionTitle: string
+  exhibitionLocation: string
 }
 
 const WelcomePDFDocument = ({
   headerLogoBase64,
   qrCodeHomeBase64,
   qrCodeScheduleBase64,
+  exhibitionTitle,
+  exhibitionLocation,
 }: WelcomePDFDocumentProps) => {
   return (
     <Document>
@@ -83,7 +87,9 @@ const WelcomePDFDocument = ({
         </View>
 
         {/* Welcome Title */}
-        <Text style={styles.title}>Willkommen zur Classic Computing 2025 in Hof</Text>
+        <Text style={styles.title}>
+          Willkommen zur {exhibitionTitle} {exhibitionLocation}
+        </Text>
 
         {/* Welcome Text */}
         <Text style={styles.text}>
@@ -151,9 +157,14 @@ const getImageDataViaCanvas = async (imageUrl: string): Promise<string> => {
 
 /**
  * Generate and download the Welcome PDF
+ * @param exhibitionTitle The title of the exhibition to display in the PDF
+ * @param exhibitionLocation The location phrase (e.g., "in der Freiheitshalle in Hof")
  * @returns A promise that resolves when the PDF is generated and downloaded
  */
-export const generateAndDownloadWelcomePDF = async (): Promise<void> => {
+export const generateAndDownloadWelcomePDF = async (
+  exhibitionTitle: string,
+  exhibitionLocation: string,
+): Promise<void> => {
   try {
     // Load images
     const headerLogoBase64 = await getImageDataViaCanvas(`${window.location.origin}/cc-logo.svg`)
@@ -168,6 +179,8 @@ export const generateAndDownloadWelcomePDF = async (): Promise<void> => {
         headerLogoBase64={headerLogoBase64}
         qrCodeHomeBase64={qrCodeHomeBase64}
         qrCodeScheduleBase64={qrCodeScheduleBase64}
+        exhibitionTitle={exhibitionTitle}
+        exhibitionLocation={exhibitionLocation}
       />
     )
 
