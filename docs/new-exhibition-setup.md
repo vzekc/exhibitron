@@ -13,7 +13,8 @@ When transitioning to a new exhibition year, the following steps are required:
 2. **Create New Exhibition Record**
 3. **Freeze Previous Exhibition**
 4. **Copy Pages from Previous Exhibition**
-5. **Update Frontend Assets**
+5. **Copy Administrator Exhibitors**
+6. **Update Frontend Assets**
 
 ## Detailed Steps
 
@@ -84,7 +85,37 @@ Create a second migration to copy pages from the previous exhibition:
 // - Update home page title to reflect new year/location
 ```
 
-### 3. Update Frontend Assets
+### 3. Copy Administrator Exhibitors
+
+Administrators need exhibitor records in the new exhibition to access it. Without this, admins who authenticate will appear as not logged in (because `getMyExhibitor` returns null for users without an exhibitor record in the current exhibition).
+
+```typescript
+// Example: Migration20260205000000_copy_admin_exhibitors.ts
+
+// Copy exhibitor records for administrators from previous to new exhibition
+await this.execute(`
+  INSERT INTO exhibitor (user_id, exhibition_id, created_at, updated_at)
+  SELECT e.user_id, ex_new.id, now(), now()
+  FROM exhibitor e
+  JOIN "user" u ON e.user_id = u.id
+  JOIN exhibition ex_old ON e.exhibition_id = ex_old.id
+  JOIN exhibition ex_new ON ex_new.key = 'cc<new_year>'
+  WHERE ex_old.key = 'cc<previous_year>'
+    AND u.is_administrator = true
+    AND NOT EXISTS (
+      SELECT 1 FROM exhibitor e2
+      WHERE e2.user_id = e.user_id
+        AND e2.exhibition_id = ex_new.id
+    )
+`)
+```
+
+**Why this is needed:**
+- The frontend checks for an exhibitor record to determine if a user is "logged in"
+- Exhibitor records are per-exhibition
+- Without copying admin exhibitors, admins can't manage the new exhibition
+
+### 5. Update Frontend Assets
 
 #### Seatplan SVG
 
@@ -94,7 +125,7 @@ The seatplan is exhibition-specific. Create a new file:
 
 The `SeatingPlan.tsx` component dynamically loads `/seatplan-${exhibitionKey}.svg`.
 
-### 4. Run Migrations
+### 6. Run Migrations
 
 ```bash
 cd backend
@@ -190,9 +221,11 @@ async function createExhibition(config: ExhibitionConfig) {
 - [ ] Set correct dates (Friday-Sunday)
 - [ ] Create migration to copy pages
 - [ ] Update home page title in migration
+- [ ] Create migration to copy administrator exhibitors
 - [ ] Create seatplan SVG for new venue
 - [ ] Run migrations
 - [ ] Verify previous exhibition is frozen
 - [ ] Verify new exhibition is accessible on localhost
+- [ ] Verify administrators can log in to new exhibition
 - [ ] Test registration form shows new dates/location
 - [ ] Test exhibit import from previous year
