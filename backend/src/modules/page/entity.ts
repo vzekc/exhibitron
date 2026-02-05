@@ -6,7 +6,7 @@ import { Document } from '../document/entity.js'
 @Entity()
 @Unique({ properties: ['exhibition', 'key'] })
 export class Page extends BaseEntity {
-  @Property({ unique: true })
+  @Property()
   key!: string
 
   @ManyToOne()
