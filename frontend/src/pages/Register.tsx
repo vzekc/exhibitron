@@ -35,6 +35,7 @@ type Inputs = {
   talkDuration: number
   tables: number
   tableNextTo: string
+  ethernet: boolean
   message: string
 }
 
@@ -316,6 +317,19 @@ const Register = () => {
                         <option value={1}>1</option>
                         <option value={2}>2 (wenn verfügbar)</option>
                       </FormSelect>
+                    </FormField>
+                    <FormField>
+                      <div className="flex items-center">
+                        <FormInput
+                          type="checkbox"
+                          id="ethernet"
+                          {...register('ethernet')}
+                          className="mr-2"
+                        />
+                        <label htmlFor="ethernet" className="cursor-pointer">
+                          Für meine Ausstellung benötige ich einen Internet-Zugang über Ethernet
+                        </label>
+                      </div>
                     </FormField>
                     <FormField label="Ich wünsche mir einen Tisch neben:">
                       <FormInput type="text" {...register('tableNextTo')} />
