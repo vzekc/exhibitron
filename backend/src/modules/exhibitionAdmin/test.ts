@@ -24,51 +24,41 @@ describe('exhibition admin', () => {
     },
   )
 
-  graphqlTest(
-    'exhibition admin cannot perform global-only operations',
-    async (graphqlRequest) => {
-      const exadmin = await login('exadmin@example.com')
+  graphqlTest('exhibition admin cannot perform global-only operations', async (graphqlRequest) => {
+    const exadmin = await login('exadmin@example.com')
 
-      const result = await graphqlRequest(
-        graphql(`
-          query GetUsers {
-            getUsers {
-              id
-            }
+    const result = await graphqlRequest(
+      graphql(`
+        query GetUsers {
+          getUsers {
+            id
           }
-        `),
-        {},
-        exadmin,
-      )
-      expect(result.errors).toBeDefined()
-      expect(result.errors![0].message).toBe(
-        'You must be an administrator to perform this operation',
-      )
-    },
-  )
+        }
+      `),
+      {},
+      exadmin,
+    )
+    expect(result.errors).toBeDefined()
+    expect(result.errors![0].message).toBe('You must be an administrator to perform this operation')
+  })
 
-  graphqlTest(
-    'regular user still cannot perform admin operations',
-    async (graphqlRequest) => {
-      const donald = await login('donald@example.com')
+  graphqlTest('regular user still cannot perform admin operations', async (graphqlRequest) => {
+    const donald = await login('donald@example.com')
 
-      const result = await graphqlRequest(
-        graphql(`
-          query GetRegistrations {
-            getRegistrations {
-              id
-            }
+    const result = await graphqlRequest(
+      graphql(`
+        query GetRegistrations {
+          getRegistrations {
+            id
           }
-        `),
-        {},
-        donald,
-      )
-      expect(result.errors).toBeDefined()
-      expect(result.errors![0].message).toBe(
-        'You must be an administrator to perform this operation',
-      )
-    },
-  )
+        }
+      `),
+      {},
+      donald,
+    )
+    expect(result.errors).toBeDefined()
+    expect(result.errors![0].message).toBe('You must be an administrator to perform this operation')
+  })
 
   graphqlTest('global admin still works for all operations', async (graphqlRequest) => {
     const admin = await login('admin@example.com')

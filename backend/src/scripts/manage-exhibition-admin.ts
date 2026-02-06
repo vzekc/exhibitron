@@ -38,21 +38,15 @@ const main = async () => {
             } else {
               user.adminExhibitions.add(exhibition)
               await db.em.flush()
-              console.log(
-                `Added "${email}" as admin for exhibition "${exhibition.title}"`,
-              )
+              console.log(`Added "${email}" as admin for exhibition "${exhibition.title}"`)
             }
           } else {
             if (!user.adminExhibitions.contains(exhibition)) {
-              console.log(
-                `User "${email}" is not an admin for exhibition "${exhibition.title}"`,
-              )
+              console.log(`User "${email}" is not an admin for exhibition "${exhibition.title}"`)
             } else {
               user.adminExhibitions.remove(exhibition)
               await db.em.flush()
-              console.log(
-                `Removed "${email}" as admin for exhibition "${exhibition.title}"`,
-              )
+              console.log(`Removed "${email}" as admin for exhibition "${exhibition.title}"`)
             }
           }
 
