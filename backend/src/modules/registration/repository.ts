@@ -15,12 +15,14 @@ export type RegistrationData = Omit<Registration, keyof BaseEntity | 'notes'>
 
 // extending the EntityRepository exported from driver package, so we can access things like the QB factory
 export class RegistrationRepository extends EntityRepository<Registration> {
-  async register(data: RegistrationData) {
+  async register(data: RegistrationData, siteUrl: string) {
     const registration = this.create(data)
     await this.em.persist(registration).flush()
     if (process.env.ADMIN_EMAIL) {
-      await sendEmail(makeNewRegistrationEmail([process.env.ADMIN_EMAIL], registration))
-      await sendEmail(makeNewRegistrationReceivedEmail(registration.email))
+      await sendEmail(makeNewRegistrationEmail([process.env.ADMIN_EMAIL], registration, siteUrl))
+      await sendEmail(
+        makeNewRegistrationReceivedEmail(registration.email, registration.exhibition.title),
+      )
     } else {
       console.log('ADMIN_EMAIL not set, skipping email notification')
     }
@@ -63,7 +65,13 @@ export class RegistrationRepository extends EntityRepository<Registration> {
     }
     await this.em.flush()
     await sendEmail(
-      makeWelcomeEmail(registration.name, registration.email, completeProfileUrl, message),
+      makeWelcomeEmail(
+        registration.name,
+        registration.email,
+        completeProfileUrl,
+        registration.exhibition.title,
+        message,
+      ),
     )
   }
 

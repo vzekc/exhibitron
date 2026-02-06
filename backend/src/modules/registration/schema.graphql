@@ -18,6 +18,8 @@ type Registration {
   processedTopic: String!
   nextTo: String
   hasNotes: Boolean!
+  talkTitle: String
+  talkSummary: String
 }
 
 input RegisterInput {

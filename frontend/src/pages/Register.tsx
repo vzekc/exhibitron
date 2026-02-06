@@ -29,6 +29,8 @@ type Inputs = {
   gameCornerSupporter: boolean
   dailyLunch: boolean
   talk: boolean
+  talkTitle: string
+  talkSummary: string
   tables: number
   tableNextTo: string
   message: string
@@ -61,6 +63,7 @@ const Register = () => {
       friday: true,
       saturday: true,
       sunday: true,
+      talk: false,
     },
   })
 
@@ -101,6 +104,7 @@ const Register = () => {
   }
 
   const topic = watch('topic')
+  const talk = watch('talk')
 
   const isNewEmail = async (email: string) => {
     const isRegistered = await checkIsRegistered({
@@ -214,8 +218,15 @@ const Register = () => {
                 </FormField>
                 <FormField>
                   <div className="flex items-center">
-                    <FormInput type="checkbox" {...register('vzekcMember')} className="mr-2" />
-                    <span>Ich bin Mitglied im VzEkC e.V</span>
+                    <FormInput
+                      type="checkbox"
+                      id="vzekcMember"
+                      {...register('vzekcMember')}
+                      className="mr-2"
+                    />
+                    <label htmlFor="vzekcMember" className="cursor-pointer">
+                      Ich bin Mitglied im VzEkC e.V
+                    </label>
                   </div>
                 </FormField>
                 <FormField label="E-Mail Adresse" error={errors.email?.message}>
@@ -285,47 +296,72 @@ const Register = () => {
               <FormFieldset legend="Teilnahme">
                 <FormField>
                   <div className="space-y-2">
-                    <div className="flex items-center">
+                    <label className="flex cursor-pointer items-center">
                       <FormInput type="checkbox" {...register('friday')} className="mr-2" />
                       <span>Freitag ({getFridayDate()}, nur Aussteller und persönliche Gäste)</span>
-                    </div>
-                    <div className="flex items-center">
+                    </label>
+                    <label className="flex cursor-pointer items-center">
                       <FormInput type="checkbox" {...register('saturday')} className="mr-2" />
                       <span>Samstag (Publikumstag)</span>
-                    </div>
-                    <div className="flex items-center">
+                    </label>
+                    <label className="flex cursor-pointer items-center">
                       <FormInput type="checkbox" {...register('sunday')} className="mr-2" />
                       <span>Sonntag (Publikumstag)</span>
-                    </div>
+                    </label>
                   </div>
                 </FormField>
               </FormFieldset>
 
               <FormFieldset legend="Unterstützung">
                 <div className="space-y-2">
-                  <div className="flex items-center">
+                  <label className="flex cursor-pointer items-center">
                     <FormInput type="checkbox" {...register('setupHelper')} className="mr-2" />
                     <span>Ich unterstütze beim Aufbau am Donnerstag</span>
-                  </div>
-                  <div className="flex items-center">
+                  </label>
+                  <label className="flex cursor-pointer items-center">
                     <FormInput
                       type="checkbox"
                       {...register('gameCornerSupporter')}
                       className="mr-2"
                     />
                     <span>Ich unterstütze die Spiele-Ecke mit eigener Hardware</span>
-                  </div>
-                  <div className="flex items-center">
+                  </label>
+                  <label className="flex cursor-pointer items-center">
                     <FormInput type="checkbox" {...register('dailyLunch')} className="mr-2" />
                     <span>
                       Ich wünsche mir ein tägliches Mittagessen in der Halle (Möglichkeiten werden
                       noch geprüft)
                     </span>
-                  </div>
-                  <div className="flex items-center">
+                  </label>
+                  <label className="flex cursor-pointer items-center">
                     <FormInput type="checkbox" {...register('talk')} className="mr-2" />
                     <span>Ich plane einen Vortrag</span>
-                  </div>
+                  </label>
+                  {talk && (
+                    <>
+                      <FormField label="Titel des Vortrags" error={errors.talkTitle?.message}>
+                        <FormInput
+                          type="text"
+                          {...register('talkTitle', {
+                            required: talk ? 'Bitte gib einen Titel für deinen Vortrag ein' : false,
+                          })}
+                        />
+                      </FormField>
+                      <FormField
+                        label="Kurzbeschreibung des Vortrags"
+                        error={errors.talkSummary?.message}>
+                        <FormTextarea
+                          rows={4}
+                          {...register('talkSummary', {
+                            required: talk
+                              ? 'Bitte gib eine kurze Beschreibung deines Vortrags ein'
+                              : false,
+                          })}
+                          placeholder="Beschreibe kurz, worum es in deinem Vortrag geht..."
+                        />
+                      </FormField>
+                    </>
+                  )}
                 </div>
               </FormFieldset>
 

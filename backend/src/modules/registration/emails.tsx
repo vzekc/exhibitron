@@ -6,16 +6,17 @@ export const makeWelcomeEmail = (
   name: string,
   email: string,
   completeProfileUrl: string,
+  exhibitionTitle: string,
   message?: string | null,
 ) => ({
   to: [email],
-  subject: 'Willkommen als Aussteller auf der CC2025!',
+  subject: `Willkommen als Aussteller auf der ${exhibitionTitle}!`,
   body: makeEmailBody(
     <article>
       <h1>Willkommen, {name}!</h1>
       <p>
-        Deine Anmeldung als Aussteller auf der CC2025 war erfolgreich. Bitte vervollständige deine
-        Registrierung, um deine Anmeldung abzuschließen.
+        Deine Anmeldung als Aussteller auf der {exhibitionTitle} war erfolgreich. Bitte
+        vervollständige deine Registrierung, um deine Anmeldung abzuschließen.
       </p>
       {message && <p>{message}</p>}
       <a href={completeProfileUrl}>Registrierung vervollständigen</a>
@@ -23,23 +24,27 @@ export const makeWelcomeEmail = (
   ),
 })
 
-export const makeNewRegistrationEmail = (to: string[], registration: Registration) => {
+export const makeNewRegistrationEmail = (
+  to: string[],
+  registration: Registration,
+  siteUrl: string,
+) => {
   const name =
     registration.data?.forum === 'forum.classic-computing.de' && registration.nickname
       ? `@${registration.nickname}`
       : registration.name
+  const exhibitionTitle = registration.exhibition.title
   return {
     to,
-    subject: `Neue Anmeldung zur CC2025 von ${name}`,
+    subject: `Neue Anmeldung zur ${exhibitionTitle} von ${name}`,
     body: makeEmailBody(
       <article>
         <h1>Hallo</h1>
         <p>
-          Eine neue Anmeldung zur CC2025 von <a href={`mailto:${registration.email}`}>{name}</a> ist
-          eingegangen. Die Anmeldung wurde in der Datenbank gespeichert und kann über das{' '}
-          <a href={`https://2025.classic-computing.de/admin/registration/${registration.id}`}>
-            Admin-Interface
-          </a>{' '}
+          Eine neue Anmeldung zur {exhibitionTitle} von{' '}
+          <a href={`mailto:${registration.email}`}>{name}</a> ist eingegangen. Die Anmeldung wurde
+          in der Datenbank gespeichert und kann über das{' '}
+          <a href={`${siteUrl}/admin/registration/${registration.id}`}>Admin-Interface</a>{' '}
           eingesehen und bestätigt werden.
         </p>
       </article>,
@@ -53,12 +58,12 @@ export const makeNewRegistrationEmail = (to: string[], registration: Registratio
   }
 }
 
-export const makeNewRegistrationReceivedEmail = (email: string) => ({
+export const makeNewRegistrationReceivedEmail = (email: string, exhibitionTitle: string) => ({
   to: [email],
-  subject: 'Deine Anmeldung zur CC2025 ist eingegangen',
+  subject: `Deine Anmeldung zur ${exhibitionTitle} ist eingegangen`,
   body: makeEmailBody(
     <article>
-      <h1>Vielen Dank für deine Anmeldung zur CC2025!</h1>
+      <h1>Vielen Dank für deine Anmeldung zur {exhibitionTitle}!</h1>
       <p>Wir haben Deine Anmeldung empfangen und melden uns in den nächsten Tagen bei Dir.</p>
     </article>,
   ),

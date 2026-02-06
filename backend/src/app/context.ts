@@ -43,6 +43,7 @@ export type Context = {
   exhibition: Exhibition
   exhibitor: Exhibitor | null
   canSwitchExhibitor: boolean
+  siteUrl: string
 }
 
 export const createContext = async (request: FastifyRequest) => {
@@ -73,6 +74,9 @@ export const createContext = async (request: FastifyRequest) => {
       exhibition: exhibition,
       user: request.user,
     }))
+  const protocol = request.headers['x-forwarded-proto'] || request.protocol || 'https'
+  const siteUrl = `${protocol}://${request.hostname}`
+
   const context = {
     db,
     session: request.session,
@@ -81,6 +85,7 @@ export const createContext = async (request: FastifyRequest) => {
     exhibitor,
     canSwitchExhibitor: !!request.session.canSwitchExhibitor,
     isClientInLan,
+    siteUrl,
   }
   logger.debug('createContext', context)
   return context

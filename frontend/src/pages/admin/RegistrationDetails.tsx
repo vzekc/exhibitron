@@ -35,6 +35,8 @@ const GET_REGISTRATION = graphql(`
       message
       notes
       data
+      talkTitle
+      talkSummary
     }
   }
 `)
@@ -183,6 +185,26 @@ const RegistrationDetails = () => {
               <span className="text-sm font-medium text-gray-700">Nachricht</span>
               <p className="mt-1 text-base">{registration.message}</p>
             </label>
+          )}
+
+          {(registration.talkTitle || registration.talkSummary) && (
+            <div className="mt-6 border-t border-gray-200 pt-4">
+              <h3 className="mb-3 text-base font-medium text-gray-900">Vortrag</h3>
+              <div className="space-y-3">
+                {registration.talkTitle && (
+                  <label className="block">
+                    <span className="text-sm font-medium text-gray-700">Titel</span>
+                    <p className="mt-1 text-base">{registration.talkTitle}</p>
+                  </label>
+                )}
+                {registration.talkSummary && (
+                  <label className="block">
+                    <span className="text-sm font-medium text-gray-700">Kurzbeschreibung</span>
+                    <p className="mt-1 whitespace-pre-wrap text-base">{registration.talkSummary}</p>
+                  </label>
+                )}
+              </div>
+            </div>
           )}
         </section>
 

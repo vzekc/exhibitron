@@ -10,14 +10,14 @@ import { wrap } from '@mikro-orm/core'
 
 export const registrationQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2322
-  getRegistration: async (_, { id }, { db, user }) => {
+  getRegistration: async (_, { id }, { db, user, exhibition }) => {
     requireAdmin(user)
-    return db.registration.findOneOrFail({ id })
+    return db.registration.findOneOrFail({ id, exhibition })
   },
   // @ts-expect-error ts2322
-  getRegistrations: async (_, _args, { db, user }) => {
+  getRegistrations: async (_, _args, { db, user, exhibition }) => {
     requireAdmin(user)
-    return db.registration.findAll()
+    return db.registration.find({ exhibition })
   },
   isRegistered: async (_, { email }, { db, exhibition }) => {
     const registration = await db.registration.findOne({ email, exhibition })
@@ -27,7 +27,7 @@ export const registrationQueries: QueryResolvers<Context> = {
 
 export const registrationMutations: MutationResolvers<Context> = {
   // @ts-expect-error ts2322
-  register: async (_, { input }, { exhibition, db }) => {
+  register: async (_, { input }, { exhibition, db, siteUrl }) => {
     requireNotFrozen(exhibition)
     const { email, message, ...rest } = input
     const existing = await db.registration.findOne({
@@ -37,13 +37,16 @@ export const registrationMutations: MutationResolvers<Context> = {
     if (existing) {
       throw new Error('The email address is already registered')
     }
-    return await db.registration.register({
-      exhibition,
-      status: RegistrationStatus.New,
-      message: message || undefined,
-      email,
-      ...rest,
-    })
+    return await db.registration.register(
+      {
+        exhibition,
+        status: RegistrationStatus.New,
+        message: message || undefined,
+        email,
+        ...rest,
+      },
+      siteUrl,
+    )
   },
   // @ts-expect-error ts2322
   updateRegistrationNotes: async (_, { id, notes }, { db, user }) => {
@@ -120,6 +123,12 @@ export const registrationTypeResolvers: RegistrationResolvers = {
   hasNotes: (registration) => {
     // Check if notes exist and are not empty
     return !!(registration.notes && registration.notes.trim().length > 0)
+  },
+  talkTitle: (registration) => {
+    return (registration.data as Record<string, unknown>)?.talkTitle as string || null
+  },
+  talkSummary: (registration) => {
+    return (registration.data as Record<string, unknown>)?.talkSummary as string || null
   },
 }
 
