@@ -183,6 +183,7 @@ const NavBar = () => {
   // Common admin menu items
   const commonAdminMenuItems = [
     { to: '/admin/registration', label: 'Anmeldungen' },
+    { to: '/admin/sessions', label: 'Sessions' },
     { to: '/admin/emailExhibitors', label: 'E-Mail an Mitwirkende' },
     { to: '/admin/page', label: 'Seiten' },
     { to: '/admin/tableLabels', label: 'Tisch-Labels' },

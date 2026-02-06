@@ -125,10 +125,10 @@ export const registrationTypeResolvers: RegistrationResolvers = {
     return !!(registration.notes && registration.notes.trim().length > 0)
   },
   talkTitle: (registration) => {
-    return (registration.data as Record<string, unknown>)?.talkTitle as string || null
+    return ((registration.data as Record<string, unknown>)?.talkTitle as string) || null
   },
   talkSummary: (registration) => {
-    return (registration.data as Record<string, unknown>)?.talkSummary as string || null
+    return ((registration.data as Record<string, unknown>)?.talkSummary as string) || null
   },
 }
 

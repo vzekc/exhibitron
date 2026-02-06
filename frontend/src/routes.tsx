@@ -8,6 +8,7 @@ import Profile from './pages/user/Profile.tsx'
 import Register from './pages/Register.tsx'
 import Login from './pages/Login.tsx'
 import RegistrationList from './pages/admin/RegistrationList.tsx'
+import UnscheduledSessionList from './pages/admin/UnscheduledSessionList.tsx'
 import RegistrationDetails from './pages/admin/RegistrationDetails.tsx'
 import TableLabels from './pages/admin/TableLabels.tsx'
 import MainLayout from '@components/MainLayout.tsx'
@@ -86,6 +87,7 @@ const routes: RouteObject[] = [
         children: [
           { path: 'registration', element: <RegistrationList /> },
           { path: 'registration/:id', element: <RegistrationDetails /> },
+          { path: 'sessions', element: <UnscheduledSessionList /> },
           { path: 'page', element: <PageList /> },
           { path: 'page/:key', element: <PageEditor /> },
           { path: 'tableLabels', element: <TableLabels /> },

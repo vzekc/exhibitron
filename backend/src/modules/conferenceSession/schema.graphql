@@ -13,6 +13,7 @@ type ConferenceSession {
 extend type Query {
   getConferenceSession(id: Int!): ConferenceSession
   getConferenceSessions: [ConferenceSession!]
+  getUnscheduledConferenceSessions: [ConferenceSession!]
 }
 
 extend type Mutation {

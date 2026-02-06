@@ -10,6 +10,8 @@ import {
 import { sendEmail } from '../common/sendEmail.js'
 import { User } from '../user/entity.js'
 import { Exhibitor } from '../exhibitor/entity.js'
+import { ConferenceSession } from '../conferenceSession/entity.js'
+import { Document } from '../document/entity.js'
 
 export type RegistrationData = Omit<Registration, keyof BaseEntity | 'notes'>
 
@@ -51,7 +53,6 @@ export class RegistrationRepository extends EntityRepository<Registration> {
     let exhibitor: Exhibitor | null = await exhibitorRepository.findOne(
       {
         user,
-        topic: registration.topic.replace(/^Etwas anderes \((.*)\)$/, '$1'),
         exhibition: registration.exhibition,
       },
       { populate: ['exhibits'] },
@@ -63,6 +64,40 @@ export class RegistrationRepository extends EntityRepository<Registration> {
       })
       this.em.persist(exhibitor)
     }
+
+    // Create ConferenceSession if registration includes a talk
+    const data = registration.data
+    if (data?.talk && data?.talkTitle) {
+      const conferenceSessionRepository = this.em.getRepository(ConferenceSession)
+
+      // Check if session already exists for this exhibitor with same title
+      const existingSession = await conferenceSessionRepository.findOne({
+        title: data.talkTitle as string,
+        exhibitors: exhibitor,
+        exhibition: registration.exhibition,
+      })
+
+      if (!existingSession) {
+        const conferenceSession = conferenceSessionRepository.create({
+          title: data.talkTitle as string,
+          exhibition: registration.exhibition,
+        })
+
+        // Add exhibitor to the session
+        conferenceSession.exhibitors.add(exhibitor)
+
+        // Create description document if summary provided
+        if (data.talkSummary) {
+          const description = `<p>${(data.talkSummary as string).replace(/\n/g, '</p><p>')}</p>`
+          conferenceSession.description = await this.em
+            .getRepository(Document)
+            .ensureDocument(null, description)
+        }
+
+        this.em.persist(conferenceSession)
+      }
+    }
+
     await this.em.flush()
     await sendEmail(
       makeWelcomeEmail(

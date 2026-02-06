@@ -15,6 +15,14 @@ export const conferenceSessionQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2345
   getConferenceSessions: async (_, _args, { db, exhibition }) =>
     db.conferenceSession.find({ exhibition }),
+  // @ts-expect-error ts2345
+  getUnscheduledConferenceSessions: async (_, _args, { db, exhibition, user }) => {
+    requireAdmin(user)
+    return db.conferenceSession.find(
+      { exhibition, startTime: null },
+      { populate: ['description', 'exhibitors', 'exhibitors.user'] },
+    )
+  },
 }
 
 export const conferenceSessionMutations: MutationResolvers<Context> = {
