@@ -14,6 +14,7 @@ import { registerImageRoutes } from './modules/image/routes.js'
 import { registerExhibitImageRoutes } from './modules/exhibit/routes.js'
 import { registerServerSideHtmlRoutes } from './modules/serverSideHtml/routes.js'
 import { registerScheduleRoutes } from './modules/schedule/routes.js'
+import { startCleanupScheduler } from './app/cleanup.js'
 
 const registerErrorHandler = (app: FastifyInstance) => {
   // register global error handler to process 404 errors from `findOneOrFail` calls
@@ -166,6 +167,11 @@ export async function bootstrap({
   const app = await createApp({ migrate, logLevel })
 
   const url = await app.listen({ host, port })
+
+  // Start cleanup scheduler in production
+  if (process.env.NODE_ENV === 'production') {
+    startCleanupScheduler()
+  }
 
   return { app, url }
 }
