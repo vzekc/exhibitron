@@ -39,6 +39,9 @@ export class Exhibition extends BaseEntity {
   @Property({ nullable: true })
   location?: string
 
+  @Property({ type: 'text', nullable: true })
+  seatplanSvg?: string
+
   @OneToMany(() => Table, (table) => table.exhibition)
   tables: Collection<Table> = new Collection<Table>(this)
 

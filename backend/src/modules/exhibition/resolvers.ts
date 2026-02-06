@@ -2,6 +2,7 @@ import { Context } from '../../app/context.js'
 import { ExhibitionResolvers, MutationResolvers, QueryResolvers } from '../../generated/graphql.js'
 import { QueryOrder } from '@mikro-orm/core'
 import { Exhibit } from '../exhibit/entity.js'
+import { Exhibition } from './entity.js'
 import { sendEmail } from '../common/sendEmail.js'
 import { htmlToText } from '../common/emailUtils.js'
 
@@ -63,6 +64,7 @@ export const exhibitionTypeResolvers: ExhibitionResolvers = {
   pages: async (exhibition, _, { db }) => db.page.find({ exhibition }),
   hosts: async (exhibition, _, { db }) => db.host.find({ exhibition }),
   isClientInLan: (_1, _2, { isClientInLan }) => isClientInLan,
+  hasSeatplan: (exhibition) => !!(exhibition as unknown as Exhibition).seatplanSvg,
 }
 
 export const exhibitionResolvers = {

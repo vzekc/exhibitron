@@ -188,6 +188,7 @@ const NavBar = () => {
     { to: '/admin/page', label: 'Seiten' },
     { to: '/admin/tableLabels', label: 'Tisch-Labels' },
     { to: '/admin/welcomePdf', label: 'Willkommens-PDF' },
+    { to: '/admin/seatplan', label: 'Tischplan' },
   ]
 
   const renderUserMenuItem = (item: (typeof commonUserMenuItems)[0], onClose?: () => void) => {

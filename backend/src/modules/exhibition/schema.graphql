@@ -14,6 +14,7 @@ type Exhibition {
   exhibits: [Exhibit!]
   hosts: [Host!]
   pages: [Page!]
+  hasSeatplan: Boolean!
 }
 
 extend type Query {

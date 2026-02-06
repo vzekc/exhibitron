@@ -37,6 +37,7 @@ import PresenterSessionEditorPage from './pages/PresenterSessionEditorPage.tsx'
 import LAN from './pages/LAN.tsx'
 import EmailExhibitors from '@pages/admin/EmailExhibitors.tsx'
 import WelcomePdf from '@pages/admin/WelcomePdf.tsx'
+import SeatplanImport from '@pages/admin/SeatplanImport.tsx'
 
 const routes: RouteObject[] = [
   { path: '/register', element: <Register /> },
@@ -93,6 +94,7 @@ const routes: RouteObject[] = [
           { path: 'tableLabels', element: <TableLabels /> },
           { path: 'emailExhibitors', element: <EmailExhibitors /> },
           { path: 'welcomePdf', element: <WelcomePdf /> },
+          { path: 'seatplan', element: <SeatplanImport /> },
           { path: 'session/new', element: <SessionEditorPage /> },
           { path: 'session/:id', element: <SessionEditorPage /> },
         ],

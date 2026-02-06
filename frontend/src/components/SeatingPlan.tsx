@@ -94,7 +94,7 @@ const MemoizedSVG = memo(
 
     return (
       <ReactSVG
-        src={`/seatplan-${exhibitionKey}.svg`}
+        src={`/api/exhibition/${exhibitionKey}/seatplan`}
         className="seating-plan-svg block h-auto w-full"
         onLoad={onLoad}
         onClick={handleClick}
