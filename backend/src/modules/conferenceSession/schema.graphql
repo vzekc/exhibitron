@@ -5,6 +5,7 @@ type ConferenceSession {
   title: String!
   startTime: DateTime
   endTime: DateTime
+  durationMinutes: Int
   room: Room
   exhibitors: [Exhibitor!]
   description: String
@@ -25,7 +26,7 @@ extend type Mutation {
 input CreateConferenceSessionInput {
   title: String!
   startTime: DateTime
-  endTime: DateTime
+  durationMinutes: Int
   roomId: Int
   exhibitorIds: [Int!]
   description: String
@@ -34,7 +35,7 @@ input CreateConferenceSessionInput {
 input UpdateConferenceSessionInput {
   title: String
   startTime: DateTime
-  endTime: DateTime
+  durationMinutes: Int
   roomId: Int
   exhibitorIds: [Int!]
   description: String

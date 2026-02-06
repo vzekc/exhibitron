@@ -12,7 +12,7 @@ export const registerScheduleRoutes = async (app: FastifyInstance) => {
     const sessions = await Promise.all(
       exhibition.conferenceSessions
         .toArray()
-        .filter(({ startTime, endTime, room }) => startTime && endTime && room)
+        .filter(({ startTime, durationMinutes, room }) => startTime && durationMinutes && room)
         .sort((a, b) => (a.startTime?.getTime() ?? 0) - (b.startTime?.getTime() ?? 0))
         .map(async (sessionDto) => {
           const session = await db.em.findOneOrFail(
@@ -20,11 +20,15 @@ export const registerScheduleRoutes = async (app: FastifyInstance) => {
             { id: sessionDto.id },
             { populate: ['room', 'exhibitors.user'] },
           )
+          const endTime =
+            session.startTime && session.durationMinutes
+              ? new Date(session.startTime.getTime() + session.durationMinutes * 60 * 1000)
+              : undefined
           return {
             id: session.id.toString(),
             title: session.title,
             startTime: session.startTime,
-            endTime: session.endTime,
+            endTime,
             room: session.room?.name || null,
             presenters: session.exhibitors
               .toArray()

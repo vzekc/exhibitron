@@ -13,6 +13,7 @@ const GET_SESSION = graphql(`
       description
       startTime
       endTime
+      durationMinutes
       room {
         id
       }
@@ -52,8 +53,13 @@ const SessionEditorPage = () => {
         id: data.getConferenceSession.id.toString(),
         title: data.getConferenceSession.title,
         description: data.getConferenceSession.description ?? undefined,
-        startTime: new Date(data.getConferenceSession.startTime as string).getTime(),
-        endTime: new Date(data.getConferenceSession.endTime as string).getTime(),
+        startTime: data.getConferenceSession.startTime
+          ? new Date(data.getConferenceSession.startTime as string).getTime()
+          : 0,
+        endTime: data.getConferenceSession.endTime
+          ? new Date(data.getConferenceSession.endTime as string).getTime()
+          : 0,
+        durationMinutes: data.getConferenceSession.durationMinutes ?? 30,
         roomId: data.getConferenceSession.room?.id.toString() ?? '',
         exhibitorIds: data.getConferenceSession.exhibitors?.map((e) => e.id.toString()) ?? [],
       }

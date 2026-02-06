@@ -245,6 +245,26 @@
           "nullable": false,
           "length": 6,
           "mappedType": "datetime"
+        },
+        "frozen": {
+          "name": "frozen",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "location": {
+          "name": "location",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
         }
       },
       "name": "exhibition",
@@ -735,16 +755,6 @@
       "indexes": [
         {
           "columnNames": [
-            "key"
-          ],
-          "composite": false,
-          "keyName": "page_key_unique",
-          "constraint": true,
-          "primary": false,
-          "unique": true
-        },
-        {
-          "columnNames": [
             "content_id"
           ],
           "composite": false,
@@ -1137,15 +1147,14 @@
           "length": 6,
           "mappedType": "datetime"
         },
-        "end_time": {
-          "name": "end_time",
-          "type": "timestamptz",
+        "duration_minutes": {
+          "name": "duration_minutes",
+          "type": "int",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
-          "length": 6,
-          "mappedType": "datetime"
+          "mappedType": "integer"
         },
         "exhibition_id": {
           "name": "exhibition_id",

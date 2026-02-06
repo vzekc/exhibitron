@@ -24,7 +24,7 @@ const createConferenceSession = async (
   input: {
     title: string
     startTime?: string
-    endTime?: string
+    durationMinutes?: number
     roomId?: number
     exhibitorIds?: number[]
     description?: string
@@ -36,7 +36,7 @@ const createConferenceSession = async (
       mutation CreateConferenceSession(
         $title: String!
         $startTime: DateTime
-        $endTime: DateTime
+        $durationMinutes: Int
         $roomId: Int
         $exhibitorIds: [Int!]
         $description: String
@@ -45,7 +45,7 @@ const createConferenceSession = async (
           input: {
             title: $title
             startTime: $startTime
-            endTime: $endTime
+            durationMinutes: $durationMinutes
             roomId: $roomId
             exhibitorIds: $exhibitorIds
             description: $description
@@ -72,6 +72,7 @@ describe('conferenceSession', () => {
             title
             startTime
             endTime
+            durationMinutes
             room {
               id
               name
@@ -124,7 +125,7 @@ describe('conferenceSession', () => {
       {
         title: 'Test ConferenceSession',
         startTime: '2024-01-01T10:00:00Z',
-        endTime: '2024-01-01T11:00:00Z',
+        durationMinutes: 60,
         roomId,
         exhibitorIds: [1], // Assuming exhibitor with ID 1 exists
         description: '<p>Test conferenceSession description</p>',
@@ -140,7 +141,7 @@ describe('conferenceSession', () => {
             $id: Int!
             $title: String
             $startTime: DateTime
-            $endTime: DateTime
+            $durationMinutes: Int
             $roomId: Int
             $exhibitorIds: [Int!]
             $description: String
@@ -150,7 +151,7 @@ describe('conferenceSession', () => {
               input: {
                 title: $title
                 startTime: $startTime
-                endTime: $endTime
+                durationMinutes: $durationMinutes
                 roomId: $roomId
                 exhibitorIds: $exhibitorIds
                 description: $description
@@ -160,6 +161,7 @@ describe('conferenceSession', () => {
               title
               startTime
               endTime
+              durationMinutes
               room {
                 id
                 name
@@ -175,7 +177,7 @@ describe('conferenceSession', () => {
           id: conferenceSessionId,
           title: 'Updated ConferenceSession',
           startTime: '2024-01-01T14:00:00Z',
-          endTime: '2024-01-01T15:00:00Z',
+          durationMinutes: 60,
           roomId,
           exhibitorIds: [exhibitor, otherExhibitor],
           description: '<p>Updated conferenceSession description</p>',

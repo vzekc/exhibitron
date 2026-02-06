@@ -74,7 +74,7 @@ const TruncatedText = ({
 }
 
 const UnscheduledSessionList = () => {
-  const { data, loading } = useQuery(GET_UNSCHEDULED_SESSIONS)
+  const { data, loading, error } = useQuery(GET_UNSCHEDULED_SESSIONS)
   type Sessions = NonNullable<typeof data>['getUnscheduledConferenceSessions']
   const [sortedSessions, setSortedSessions] = useState<Sessions | null>(null)
   const navigate = useNavigate()
@@ -87,6 +87,14 @@ const UnscheduledSessionList = () => {
 
   if (loading) {
     return <LoadInProgress />
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <p className="text-red-600">Fehler beim Laden der Sessions: {error.message}</p>
+      </Card>
+    )
   }
 
   const sessions = sortedSessions ?? data?.getUnscheduledConferenceSessions ?? []

@@ -81,6 +81,7 @@ export class RegistrationRepository extends EntityRepository<Registration> {
         const conferenceSession = conferenceSessionRepository.create({
           title: data.talkTitle as string,
           exhibition: registration.exhibition,
+          durationMinutes: (data.talkDuration as number) || 30,
         })
 
         // Add exhibitor to the session

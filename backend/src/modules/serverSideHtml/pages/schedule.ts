@@ -22,10 +22,10 @@ export const scheduleHtml = async (context: GeneratePageHtmlContext): Promise<st
 
   const sessionItems = sessions
     .map((session) => {
-      if (!session.startTime || !session.endTime) return ''
+      if (!session.startTime || !session.durationMinutes) return ''
 
       const startTime = new Date(session.startTime)
-      const endTime = new Date(session.endTime)
+      const endTime = new Date(startTime.getTime() + session.durationMinutes * 60 * 1000)
       const presenter = session.exhibitors?.[0]?.user.fullName ?? ''
 
       return `

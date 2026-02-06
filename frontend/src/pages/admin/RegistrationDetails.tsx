@@ -203,6 +203,15 @@ const RegistrationDetails = () => {
                     <p className="mt-1 whitespace-pre-wrap text-base">{registration.talkSummary}</p>
                   </label>
                 )}
+                {typeof (registration.data as Record<string, unknown>)?.talkDuration ===
+                  'number' && (
+                  <label className="block">
+                    <span className="text-sm font-medium text-gray-700">Dauer</span>
+                    <p className="mt-1 text-base">
+                      {(registration.data as Record<string, number>).talkDuration} Minuten
+                    </p>
+                  </label>
+                )}
               </div>
             </div>
           )}
@@ -241,7 +250,7 @@ const RegistrationDetails = () => {
           <h2 className="mb-4 text-lg font-medium text-gray-900">Zusätzliche Daten</h2>
           <KeyValueTable headers={['Feld', 'Wert']}>
             {Object.entries(registration.data || {})
-              .filter(([, v]) => !!v)
+              .filter(([key, v]) => !!v && !['talk', 'talkDuration'].includes(key))
               .map(([key, value]) => (
                 <TableRow key={key}>
                   <TableCell className="font-medium text-gray-500">{key}</TableCell>

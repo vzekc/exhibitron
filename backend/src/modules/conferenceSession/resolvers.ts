@@ -33,7 +33,7 @@ export const conferenceSessionMutations: MutationResolvers<Context> = {
     const conferenceSession = db.conferenceSession.create({
       title: input.title,
       startTime: input.startTime,
-      endTime: input.endTime,
+      durationMinutes: input.durationMinutes,
       exhibition,
       room: input.roomId,
     })
@@ -108,6 +108,11 @@ export const conferenceSessionTypeResolvers: ConferenceSessionResolvers = {
   description: (conferenceSession) => {
     const conferenceSessionEntity = conferenceSession as unknown as ConferenceSession
     return conferenceSessionEntity.description?.html ?? ''
+  },
+  endTime: (conferenceSession) => {
+    const entity = conferenceSession as unknown as ConferenceSession
+    if (!entity.startTime || !entity.durationMinutes) return null
+    return new Date(entity.startTime.getTime() + entity.durationMinutes * 60 * 1000)
   },
 }
 

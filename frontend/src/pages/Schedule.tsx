@@ -88,6 +88,12 @@ const Schedule = () => {
     refetchQueries: ['GetScheduleData'],
     optimisticResponse: (variables) => {
       const session = sessions.find((s) => s.id === variables.id.toString())
+      const durationMs = (variables.input.durationMinutes ?? 30) * 60 * 1000
+      const startTimeMs = variables.input.startTime
+        ? new Date(variables.input.startTime as string).getTime()
+        : 0
+      const endTime = new Date(startTimeMs + durationMs).toISOString()
+
       if (!session) {
         // Return a valid response even if session not found
         return {
@@ -97,7 +103,7 @@ const Schedule = () => {
             title: '',
             description: null,
             startTime: variables.input.startTime,
-            endTime: variables.input.endTime,
+            endTime,
             room: {
               __typename: 'Room',
               id: variables.input.roomId ?? 0,
@@ -114,7 +120,7 @@ const Schedule = () => {
           title: session.title,
           description: null,
           startTime: variables.input.startTime,
-          endTime: variables.input.endTime,
+          endTime,
           room: {
             __typename: 'Room',
             id: variables.input.roomId ?? 0,
@@ -162,8 +168,7 @@ const Schedule = () => {
     const session = sessions.find((s) => s.id === sessionId)
     if (!session) return
 
-    const duration = session.endTime - session.startTime
-    const newEndTime = newStartTime + duration
+    const durationMinutes = Math.round((session.endTime - session.startTime) / (60 * 1000))
 
     await updateConferenceSession({
       variables: {
@@ -171,7 +176,7 @@ const Schedule = () => {
         input: {
           roomId: parseInt(newRoomId),
           startTime: new Date(newStartTime).toISOString(),
-          endTime: new Date(newEndTime).toISOString(),
+          durationMinutes,
         },
       },
     })

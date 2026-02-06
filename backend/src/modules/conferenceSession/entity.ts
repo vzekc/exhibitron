@@ -24,7 +24,7 @@ export class ConferenceSession extends BaseEntity {
   startTime?: Date
 
   @Property({ nullable: true })
-  endTime?: Date
+  durationMinutes?: number
 
   @ManyToOne(() => Exhibition)
   exhibition!: Exhibition

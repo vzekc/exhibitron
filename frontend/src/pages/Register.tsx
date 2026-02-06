@@ -11,6 +11,7 @@ import FormFieldset from '@components/FormFieldset'
 import FormInput from '@components/FormInput'
 import FormSelect from '@components/FormSelect'
 import FormTextarea from '@components/FormTextarea'
+import DurationSelector from '@components/DurationSelector'
 import Footer from '@components/Footer'
 import { useExhibition } from '@contexts/ExhibitionContext.ts'
 
@@ -31,6 +32,7 @@ type Inputs = {
   talk: boolean
   talkTitle: string
   talkSummary: string
+  talkDuration: number
   tables: number
   tableNextTo: string
   message: string
@@ -57,6 +59,7 @@ const Register = () => {
     handleSubmit,
     formState: { errors },
     watch,
+    setValue,
   } = useForm<Inputs>({
     mode: 'onBlur',
     defaultValues: {
@@ -64,6 +67,8 @@ const Register = () => {
       saturday: true,
       sunday: true,
       talk: false,
+      talkDuration: 30,
+      tables: 1,
     },
   })
 
@@ -118,6 +123,10 @@ const Register = () => {
 
   const onSubmit: SubmitHandler<Inputs> = async (inputs) => {
     const { name, email, nickname, message, topic, topicExtras, ...data } = inputs
+    // Set tables to 0 if "Keine Ausstellung" is selected
+    if (topic === 'Keine Ausstellung') {
+      data.tables = 0
+    }
     setState('sending')
     await registerMutation({
       variables: {
@@ -266,6 +275,7 @@ const Register = () => {
                       required: 'Bitte wähle aus, was du ausstellen möchtest',
                     })}>
                     <option></option>
+                    <option>Keine Ausstellung</option>
                     <option>Atari 8-Bit und ST/TT/Falcon</option>
                     <option>Apple 8-Bit und Macintosh</option>
                     <option>Commodore CBM</option>
@@ -290,6 +300,69 @@ const Register = () => {
                       disabled={!topic?.includes('*')}
                     />
                   </FormField>
+                )}
+                {topic && topic !== 'Keine Ausstellung' && (
+                  <>
+                    <FormField
+                      label="Gewünschte Anzahl Tische (je 165cm x 80cm)"
+                      error={errors.tables?.message}>
+                      <FormSelect
+                        {...register('tables', {
+                          required:
+                            topic !== 'Keine Ausstellung'
+                              ? 'Bitte wähle aus, wie viele Tische Deine Ausstellung belegen wird'
+                              : false,
+                        })}>
+                        <option value={1}>1</option>
+                        <option value={2}>2 (wenn verfügbar)</option>
+                      </FormSelect>
+                    </FormField>
+                    <FormField label="Ich wünsche mir einen Tisch neben:">
+                      <FormInput type="text" {...register('tableNextTo')} />
+                    </FormField>
+                  </>
+                )}
+              </FormFieldset>
+
+              <FormFieldset legend="Vortrag">
+                <FormField>
+                  <div className="flex items-center">
+                    <FormInput type="checkbox" id="talk" {...register('talk')} className="mr-2" />
+                    <label htmlFor="talk" className="cursor-pointer">
+                      Ich plane einen Vortrag
+                    </label>
+                  </div>
+                </FormField>
+                {talk && (
+                  <>
+                    <FormField label="Titel des Vortrags" error={errors.talkTitle?.message}>
+                      <FormInput
+                        type="text"
+                        {...register('talkTitle', {
+                          required: talk ? 'Bitte gib einen Titel für deinen Vortrag ein' : false,
+                        })}
+                      />
+                    </FormField>
+                    <FormField
+                      label="Kurzbeschreibung des Vortrags"
+                      error={errors.talkSummary?.message}>
+                      <FormTextarea
+                        rows={4}
+                        {...register('talkSummary', {
+                          required: talk
+                            ? 'Bitte gib eine kurze Beschreibung deines Vortrags ein'
+                            : false,
+                        })}
+                        placeholder="Beschreibe kurz, worum es in deinem Vortrag geht..."
+                      />
+                    </FormField>
+                    <FormField label="Dauer">
+                      <DurationSelector
+                        selectedDuration={watch('talkDuration')}
+                        onChange={(duration) => setValue('talkDuration', duration)}
+                      />
+                    </FormField>
+                  </>
                 )}
               </FormFieldset>
 
@@ -333,55 +406,7 @@ const Register = () => {
                       noch geprüft)
                     </span>
                   </label>
-                  <label className="flex cursor-pointer items-center">
-                    <FormInput type="checkbox" {...register('talk')} className="mr-2" />
-                    <span>Ich plane einen Vortrag</span>
-                  </label>
-                  {talk && (
-                    <>
-                      <FormField label="Titel des Vortrags" error={errors.talkTitle?.message}>
-                        <FormInput
-                          type="text"
-                          {...register('talkTitle', {
-                            required: talk ? 'Bitte gib einen Titel für deinen Vortrag ein' : false,
-                          })}
-                        />
-                      </FormField>
-                      <FormField
-                        label="Kurzbeschreibung des Vortrags"
-                        error={errors.talkSummary?.message}>
-                        <FormTextarea
-                          rows={4}
-                          {...register('talkSummary', {
-                            required: talk
-                              ? 'Bitte gib eine kurze Beschreibung deines Vortrags ein'
-                              : false,
-                          })}
-                          placeholder="Beschreibe kurz, worum es in deinem Vortrag geht..."
-                        />
-                      </FormField>
-                    </>
-                  )}
                 </div>
-              </FormFieldset>
-
-              <FormFieldset legend="Tische">
-                <FormField
-                  label="Gewünschte Anzahl Tische (je 165cm x 80cm)"
-                  error={errors.tables?.message}>
-                  <FormSelect
-                    {...register('tables', {
-                      required: 'Bitte wähle aus, wie viele Tische Deine Ausstellung belegen wird',
-                    })}>
-                    <option></option>
-                    <option value={0}>kein Tisch</option>
-                    <option value={1}>1</option>
-                    <option value={2}>2 (wenn verfügbar)</option>
-                  </FormSelect>
-                </FormField>
-                <FormField label="Ich wünsche mir einen Tisch neben:">
-                  <FormInput type="text" {...register('tableNextTo')} />
-                </FormField>
               </FormFieldset>
 
               <FormFieldset legend="Mitteilungen">

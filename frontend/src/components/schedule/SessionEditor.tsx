@@ -27,6 +27,7 @@ const GET_SCHEDULE_DATA = graphql(`
       title
       startTime
       endTime
+      durationMinutes
       room {
         id
         name
@@ -63,6 +64,7 @@ const CREATE_PRESENTATION = graphql(`
       description
       startTime
       endTime
+      durationMinutes
       room {
         id
       }
@@ -84,6 +86,7 @@ const UPDATE_PRESENTATION = graphql(`
       description
       startTime
       endTime
+      durationMinutes
       room {
         id
       }
@@ -108,6 +111,7 @@ interface Session {
   title: string
   startTime: number
   endTime: number
+  durationMinutes: number
   roomId: string
   exhibitorIds: string[]
   description?: string
@@ -189,14 +193,22 @@ const SessionEditor: React.FC<SessionEditorProps> = ({
 
   useEffect(() => {
     if (sessionToEdit) {
-      const startDate = new Date(sessionToEdit.startTime)
       setConferenceSessionTitle(sessionToEdit.title)
       setSelectedRoomId(sessionToEdit.roomId)
       setSelectedExhibitorIds(sessionToEdit.exhibitorIds)
-      setSelectedDate(startDate.toISOString().split('T')[0])
-      setSelectedTime(startDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }))
-      setDurationMinutes((sessionToEdit.endTime - sessionToEdit.startTime) / (1000 * 60))
+      setDurationMinutes(sessionToEdit.durationMinutes)
       setDescription(sessionToEdit.description ?? '')
+      // Only set date and time if the session has a scheduled start time
+      if (sessionToEdit.startTime) {
+        const startDate = new Date(sessionToEdit.startTime)
+        setSelectedDate(startDate.toISOString().split('T')[0])
+        setSelectedTime(
+          startDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+        )
+      } else {
+        setSelectedDate('')
+        setSelectedTime('')
+      }
       if (textEditorRef.current) {
         textEditorRef.current.resetEditState()
       }
@@ -234,7 +246,7 @@ const SessionEditor: React.FC<SessionEditorProps> = ({
       selectedDate !== startDate.toISOString().split('T')[0] ||
       selectedTime !==
         startDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) ||
-      durationMinutes !== (sessionToEdit.endTime - sessionToEdit.startTime) / (1000 * 60) ||
+      durationMinutes !== sessionToEdit.durationMinutes ||
       description !== (sessionToEdit.description ?? '') ||
       isTextEdited
     )
@@ -260,6 +272,13 @@ const SessionEditor: React.FC<SessionEditorProps> = ({
       })) ?? [],
     [data],
   )
+
+  // Auto-select room if there's only one
+  useEffect(() => {
+    if (rooms.length === 1 && !selectedRoomId) {
+      setSelectedRoomId(rooms[0].id)
+    }
+  }, [rooms, selectedRoomId])
 
   const exhibitors = useMemo(
     () => (data?.getCurrentExhibition?.exhibitors ?? []) as Exhibitor[],
@@ -294,6 +313,7 @@ const SessionEditor: React.FC<SessionEditorProps> = ({
             title: conferenceSession.title,
             startTime: startDate.getTime(),
             endTime: endDate.getTime(),
+            durationMinutes: conferenceSession.durationMinutes ?? 30,
             roomId: conferenceSession.room.id.toString(),
             presenter: conferenceSession.exhibitors?.[0]?.user.fullName ?? '',
             exhibitorIds: conferenceSession.exhibitors?.map((e) => e.id.toString()) ?? [],
@@ -351,7 +371,11 @@ const SessionEditor: React.FC<SessionEditorProps> = ({
     const unavailableSlots = new Set<string>()
 
     // First, mark all slots that are part of existing sessions as unavailable
+    // (excluding the session being edited)
     sessions.forEach((session) => {
+      // Skip the session being edited - its slots should be available
+      if (sessionToEdit && session.id === sessionToEdit.id) return
+
       if (session.roomId === selectedRoomId) {
         const sessionStart = new Date(session.startTime)
         const sessionEnd = new Date(session.endTime)
@@ -412,7 +436,7 @@ const SessionEditor: React.FC<SessionEditorProps> = ({
     }
 
     return unavailableSlots
-  }, [selectedDate, selectedRoomId, sessions, durationMinutes])
+  }, [selectedDate, selectedRoomId, sessions, durationMinutes, sessionToEdit])
 
   const resetForm = () => {
     setConferenceSessionTitle('')
@@ -429,7 +453,6 @@ const SessionEditor: React.FC<SessionEditorProps> = ({
     if (!selectedDate || !selectedTime) return
 
     const startDateTime = new Date(`${selectedDate}T${selectedTime}:00`)
-    const endDateTime = new Date(startDateTime.getTime() + durationMinutes * 60000)
     const currentDescription = textEditorRef.current?.getHTML() ?? ''
 
     if (sessionToEdit) {
@@ -442,7 +465,7 @@ const SessionEditor: React.FC<SessionEditorProps> = ({
             roomId: parseInt(selectedRoomId),
             exhibitorIds: selectedExhibitorIds.map((id) => parseInt(id)),
             startTime: startDateTime.toISOString(),
-            endTime: endDateTime.toISOString(),
+            durationMinutes,
           },
         },
       })
@@ -455,7 +478,7 @@ const SessionEditor: React.FC<SessionEditorProps> = ({
             roomId: parseInt(selectedRoomId),
             exhibitorIds: selectedExhibitorIds.map((id) => parseInt(id)),
             startTime: startDateTime.toISOString(),
-            endTime: endDateTime.toISOString(),
+            durationMinutes,
           },
         },
       })
@@ -475,13 +498,17 @@ const SessionEditor: React.FC<SessionEditorProps> = ({
   }
 
   const isFormValid = () => {
-    // Only title is required
+    // Title is required
     if (!conferenceSessionTitle.trim()) return false
 
+    // Room, day, and time are required
+    if (!selectedRoomId || !selectedDate || !selectedTime) return false
+
     // If we're editing an existing session and haven't changed the time slot,
-    // we don't need to validate the time slot
+    // we don't need to validate availability
     if (
       sessionToEdit &&
+      selectedRoomId === sessionToEdit.roomId &&
       selectedDate === new Date(sessionToEdit.startTime).toISOString().split('T')[0] &&
       selectedTime ===
         new Date(sessionToEdit.startTime).toLocaleTimeString('de-DE', {
@@ -492,26 +519,19 @@ const SessionEditor: React.FC<SessionEditorProps> = ({
       return true
     }
 
-    // If a time slot is selected, validate it
-    if (selectedDate && selectedTime) {
-      const startDateTime = new Date(`${selectedDate}T${selectedTime}:00`)
-      const endDateTime = new Date(startDateTime.getTime() + durationMinutes * 60000)
-      const dayStart = new Date(startDateTime)
-      dayStart.setHours(START_HOUR, 0, 0, 0)
-      const dayEnd = new Date(startDateTime)
-      dayEnd.setHours(END_HOUR, 0, 0, 0)
+    // Validate the selected time slot
+    const startDateTime = new Date(`${selectedDate}T${selectedTime}:00`)
+    const endDateTime = new Date(startDateTime.getTime() + durationMinutes * 60000)
+    const dayStart = new Date(startDateTime)
+    dayStart.setHours(START_HOUR, 0, 0, 0)
+    const dayEnd = new Date(startDateTime)
+    dayEnd.setHours(END_HOUR, 0, 0, 0)
 
-      // Check if the session is within the allowed time range
-      if (startDateTime < dayStart || endDateTime > dayEnd) return false
+    // Check if the session is within the allowed time range
+    if (startDateTime < dayStart || endDateTime > dayEnd) return false
 
-      // Check if the selected time slot is available
-      const timeSlots = unavailableTimeSlots
-      const startTimeString = startDateTime.toLocaleTimeString('de-DE', {
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-      if (timeSlots.has(startTimeString)) return false
-    }
+    // Check if the selected time slot is available
+    if (unavailableTimeSlots.has(selectedTime)) return false
 
     return true
   }
