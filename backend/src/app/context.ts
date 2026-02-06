@@ -1,4 +1,4 @@
-import { initORM } from '../db.js'
+import { initORM, createServicesFromEm } from '../db.js'
 import memoize from 'memoizee'
 import { Services } from '../db.js'
 import { Exhibition } from '../modules/exhibition/entity.js'
@@ -47,7 +47,8 @@ export type Context = {
 }
 
 export const createContext = async (request: FastifyRequest) => {
-  const db = await initORM()
+  // Use the forked em from the request if available, otherwise fall back to initORM
+  const db = request.forkedEm ? createServicesFromEm(request.forkedEm) : await initORM()
   const logger = createRequestLogger(request.requestId)
 
   if (request.session.userId) {

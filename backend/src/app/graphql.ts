@@ -41,7 +41,9 @@ export const register = async (app: FastifyInstance) => {
     const logger = createRequestLogger(request.requestId)
     logger.debug('Starting request transaction')
     try {
-      await db.em.begin()
+      // Fork the entity manager to get a fresh one for this request
+      request.forkedEm = db.em.fork()
+      await request.forkedEm.begin()
       logger.debug('Transaction started successfully')
       request.apolloContext = await createContext(request)
       logger.debug('Context created with transaction')
@@ -55,11 +57,15 @@ export const register = async (app: FastifyInstance) => {
   app.addHook('onSend', async (request, reply) => {
     const logger = createRequestLogger(request.requestId)
     logger.debug({ statusCode: reply.statusCode }, 'Handling response')
+    if (!request.forkedEm) {
+      logger.debug('No forked em found, skipping transaction handling')
+      return
+    }
     try {
       if (reply.statusCode >= 200 && reply.statusCode < 300) {
         logger.debug('Committing transaction')
         try {
-          await request.apolloContext.db.em.commit()
+          await request.forkedEm.commit()
           logger.debug('Transaction committed successfully')
         } catch (error) {
           logger.error({ error }, 'Failed to commit transaction')
@@ -68,7 +74,7 @@ export const register = async (app: FastifyInstance) => {
       } else {
         logger.debug('Rolling back transaction due to error status')
         try {
-          await request.apolloContext.db.em.rollback()
+          await request.forkedEm.rollback()
           logger.debug('Transaction rolled back successfully')
         } catch (error) {
           logger.error({ error }, 'Failed to rollback transaction')
@@ -94,10 +100,10 @@ export const register = async (app: FastifyInstance) => {
     const logger = createRequestLogger(request.requestId)
     logger.error({ error }, 'Handling error')
     // Rollback on error
-    if (request.apolloContext?.db) {
+    if (request.forkedEm) {
       try {
         logger.debug('Rolling back transaction due to error')
-        await request.apolloContext.db.em.rollback()
+        await request.forkedEm.rollback()
         logger.debug('Transaction rolled back successfully')
       } catch (rollbackError) {
         logger.error({ rollbackError }, 'Failed to rollback transaction')

@@ -53,6 +53,31 @@ export interface Services {
 
 let ormCache: MikroORM
 
+// Create services from a specific entity manager (used for forked em in requests)
+export function createServicesFromEm(em: SqlEntityManager): Services {
+  if (!ormCache) {
+    throw new Error('ORM not initialized. Call initORM() first.')
+  }
+  return {
+    dbName: undefined,
+    orm: ormCache,
+    em,
+    image: em.getRepository(ImageStorage),
+    user: em.getRepository(User),
+    exhibit: em.getRepository(Exhibit),
+    exhibitor: em.getRepository(Exhibitor),
+    exhibition: em.getRepository(Exhibition),
+    table: em.getRepository(Table),
+    registration: em.getRepository(Registration),
+    page: em.getRepository(Page),
+    document: em.getRepository(Document),
+    exhibitAttribute: em.getRepository(ExhibitAttribute),
+    room: em.getRepository(Room),
+    conferenceSession: em.getRepository(ConferenceSession),
+    host: em.getRepository(Host),
+  }
+}
+
 export async function initORM(options?: Options): Promise<Services> {
   if (!options?.dbName && !process.env.DATABASE_URL) {
     throw new Error('Missing dbName and no DATABASE_URL in environment')

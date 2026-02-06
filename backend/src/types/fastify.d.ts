@@ -1,6 +1,7 @@
 // src/types/fastify.d.ts
 import '@fastify/session'
 import { OAuth2Namespace } from '@fastify/oauth2'
+import { SqlEntityManager } from '@mikro-orm/postgresql'
 import { User } from '../modules/user/entity.js'
 import { Exhibition } from '../modules/exhibition/entity.js'
 import { Exhibitor } from '../modules/exhibitor/entity.js'
@@ -13,6 +14,7 @@ declare module 'fastify' {
 
   interface FastifyRequest {
     apolloContext: Context
+    forkedEm?: SqlEntityManager
     user: User | null
     exhibitor: Exhibitor | null
     exhibition: Exhibition
