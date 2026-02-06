@@ -13,7 +13,7 @@ export const pageMutations: MutationResolvers<Context> = {
   // @ts-expect-error ts2345
   createPage: async (_, { key, title, html }, { db, user, exhibition }) => {
     requireNotFrozen(exhibition)
-    requireAdmin(user)
+    requireAdmin(user, exhibition)
     const page = db.page.create({
       exhibition,
       key,
@@ -31,7 +31,7 @@ export const pageMutations: MutationResolvers<Context> = {
   // @ts-expect-error ts2345
   updatePage: async (_, { id, key, title, html }, { db, user, exhibition }) => {
     requireNotFrozen(exhibition)
-    requireAdmin(user)
+    requireAdmin(user, exhibition)
     const page = await db.page.findOneOrFail({ id })
 
     if (html) {
@@ -44,7 +44,7 @@ export const pageMutations: MutationResolvers<Context> = {
   },
   deletePage: async (_, { id }, { db, user, exhibition }) => {
     requireNotFrozen(exhibition)
-    requireAdmin(user)
+    requireAdmin(user, exhibition)
     const page = await db.page.findOneOrFail({ id })
     await db.em.removeAndFlush(page)
     return true

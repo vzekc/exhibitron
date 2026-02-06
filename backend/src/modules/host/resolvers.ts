@@ -4,6 +4,7 @@ import { Host } from './entity.js'
 import { UniqueConstraintViolationException, NotFoundError } from '@mikro-orm/core'
 import { UniqueConstraintError, PermissionDeniedError } from '../common/errors.js'
 import { logger } from '../../app/logger.js'
+import { isAdmin } from '../../db.js'
 
 export const hostQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2345
@@ -16,7 +17,7 @@ export const hostMutations: MutationResolvers<Context> = {
   // @ts-expect-error ts2345
   addHost: async (_parent, { name, input }, { db, user, exhibition, exhibitor }) => {
     logger.debug('Starting addHost mutation')
-    if ((input.ipAddress || input.exhibitorId) && !user?.isAdministrator) {
+    if ((input.ipAddress || input.exhibitorId) && !isAdmin(user, exhibition)) {
       throw new PermissionDeniedError('Only administrators can set IP address or exhibitor')
     }
 
@@ -26,7 +27,7 @@ export const hostMutations: MutationResolvers<Context> = {
     if (input.exhibitId) {
       logger.debug('Setting exhibit and exhibitor')
       const exhibit = await db.exhibit.findOneOrFail({ id: input.exhibitId })
-      if (exhibit.exhibitor !== exhibitor && !user?.isAdministrator) {
+      if (exhibit.exhibitor !== exhibitor && !isAdmin(user, exhibition)) {
         throw new PermissionDeniedError('Only the exhibitor of the exhibit can add a host')
       }
 
@@ -82,12 +83,12 @@ export const hostMutations: MutationResolvers<Context> = {
   },
 
   // @ts-expect-error ts2322
-  updateHostServices: async (_parent, { name, services }, { db, exhibitor, user }) => {
+  updateHostServices: async (_parent, { name, services }, { db, exhibitor, user, exhibition }) => {
     logger.debug('Starting updateHostServices mutation')
     try {
       const host = await db.host.findOneOrFail({ name })
 
-      if (!user?.isAdministrator && host.exhibitor?.id !== exhibitor?.id) {
+      if (!isAdmin(user, exhibition) && host.exhibitor?.id !== exhibitor?.id) {
         throw new PermissionDeniedError(
           'Only administrators or the host exhibitor can update host services',
         )

@@ -9,7 +9,7 @@ import {
 import { Exhibit, ExhibitImage } from './entity.js'
 import { wrap, QueryOrder } from '@mikro-orm/core'
 import { ExhibitAttribute } from '../exhibitAttribute/entity.js'
-import { requireNotFrozen } from '../../db.js'
+import { requireNotFrozen, isAdmin } from '../../db.js'
 import { randomUUID } from 'crypto'
 import { Document } from '../document/entity.js'
 
@@ -141,7 +141,7 @@ export const exhibitMutations: MutationResolvers<Context> = {
   ) => {
     requireNotFrozen(exhibition)
     const exhibit = await db.exhibit.findOneOrFail({ id })
-    if (exhibitor !== exhibit.exhibitor && !user?.isAdministrator) {
+    if (exhibitor !== exhibit.exhibitor && !isAdmin(user, exhibition)) {
       throw new Error('You do not have permission to update this exhibit')
     }
 
@@ -182,7 +182,7 @@ export const exhibitMutations: MutationResolvers<Context> = {
   deleteExhibit: async (_, { id }, { db, exhibitor, user, exhibition }) => {
     requireNotFrozen(exhibition)
     const exhibit = await db.exhibit.findOneOrFail({ id })
-    if (exhibitor !== exhibit.exhibitor && !user?.isAdministrator) {
+    if (exhibitor !== exhibit.exhibitor && !isAdmin(user, exhibition)) {
       throw new Error('You do not have permission to delete this exhibit')
     }
     db.em.remove(exhibit)

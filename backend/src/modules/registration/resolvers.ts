@@ -11,12 +11,12 @@ import { wrap } from '@mikro-orm/core'
 export const registrationQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2322
   getRegistration: async (_, { id }, { db, user, exhibition }) => {
-    requireAdmin(user)
+    requireAdmin(user, exhibition)
     return db.registration.findOneOrFail({ id, exhibition })
   },
   // @ts-expect-error ts2322
   getRegistrations: async (_, _args, { db, user, exhibition }) => {
-    requireAdmin(user)
+    requireAdmin(user, exhibition)
     return db.registration.find({ exhibition })
   },
   isRegistered: async (_, { email }, { db, exhibition }) => {
@@ -49,26 +49,26 @@ export const registrationMutations: MutationResolvers<Context> = {
     )
   },
   // @ts-expect-error ts2322
-  updateRegistrationNotes: async (_, { id, notes }, { db, user }) => {
-    requireAdmin(user)
+  updateRegistrationNotes: async (_, { id, notes }, { db, user, exhibition }) => {
+    requireAdmin(user, exhibition)
     const registration = await db.registration.findOneOrFail({ id })
     wrap(registration).assign({ notes })
     return registration
   },
-  approveRegistration: async (_, { id, siteUrl, message }, { db, user }) => {
-    requireAdmin(user)
+  approveRegistration: async (_, { id, siteUrl, message }, { db, user, exhibition }) => {
+    requireAdmin(user, exhibition)
     const registration = await db.registration.findOneOrFail({ id }, { populate: ['exhibition'] })
     await db.registration.approve(registration, siteUrl, message)
     return true
   },
-  rejectRegistration: async (_, { id }, { db, user }) => {
-    requireAdmin(user)
+  rejectRegistration: async (_, { id }, { db, user, exhibition }) => {
+    requireAdmin(user, exhibition)
     const registration = await db.registration.findOneOrFail({ id })
     await db.registration.reject(registration)
     return true
   },
-  deleteRegistration: async (_, { id }, { db, user }) => {
-    requireAdmin(user)
+  deleteRegistration: async (_, { id }, { db, user, exhibition }) => {
+    requireAdmin(user, exhibition)
     const registration = await db.registration.findOneOrFail({ id })
     if (registration.status === RegistrationStatus.Approved) {
       throw new Error('Cannot delete approved registration')

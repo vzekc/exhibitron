@@ -6,7 +6,7 @@ import {
 } from '../../generated/graphql.js'
 import { ConferenceSession } from './entity.js'
 import { wrap } from '@mikro-orm/core'
-import { requireAdmin, requireNotFrozen } from '../../db.js'
+import { requireAdmin, requireNotFrozen, isAdmin } from '../../db.js'
 
 export const conferenceSessionQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2345
@@ -17,7 +17,7 @@ export const conferenceSessionQueries: QueryResolvers<Context> = {
     db.conferenceSession.find({ exhibition }),
   // @ts-expect-error ts2345
   getUnscheduledConferenceSessions: async (_, _args, { db, exhibition, user }) => {
-    requireAdmin(user)
+    requireAdmin(user, exhibition)
     return db.conferenceSession.find(
       { exhibition, startTime: null },
       { populate: ['description', 'exhibitors', 'exhibitors.user'] },
@@ -29,7 +29,7 @@ export const conferenceSessionMutations: MutationResolvers<Context> = {
   // @ts-expect-error ts2345
   createConferenceSession: async (_, { input }, { db, user, exhibition }) => {
     requireNotFrozen(exhibition)
-    requireAdmin(user)
+    requireAdmin(user, exhibition)
     const conferenceSession = db.conferenceSession.create({
       title: input.title,
       startTime: input.startTime,
@@ -55,7 +55,7 @@ export const conferenceSessionMutations: MutationResolvers<Context> = {
       { populate: ['exhibitors'] },
     )
 
-    if (!user?.isAdministrator) {
+    if (!isAdmin(user, exhibition)) {
       if (!exhibitor || !conferenceSession?.exhibitors.find((e) => e.id === exhibitor.id)) {
         throw new Error('You do not have permission to update this conferenceSession')
       }

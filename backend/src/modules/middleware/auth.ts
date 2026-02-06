@@ -2,6 +2,7 @@ import { FastifyRequest } from 'fastify'
 import { AuthError, PermissionDeniedError } from '../common/errors.js'
 
 export const isAdmin = (message: string) => async (request: FastifyRequest) => {
+  if (request.apolloContext?.isAdmin) return
   if (!request.user || !request.user.isAdministrator) {
     throw new PermissionDeniedError(message)
   }

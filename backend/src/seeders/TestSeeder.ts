@@ -133,6 +133,17 @@ export class TestSeeder extends Seeder {
       })
     }
 
+    // Create exhibition admin user (not a global admin, but admin for this exhibition)
+    const exadminUser = em.create(User, {
+      id: 1005,
+      fullName: 'Exhibition Admin',
+      email: 'exadmin@example.com',
+      nickname: 'exadmin',
+      contacts: {},
+    })
+    await em.getRepository(User).setPassword(exadminUser, 'geheim')
+    exadminUser.adminExhibitions.add(exhibition)
+
     // Create hosts for testing
     const daffyExhibitor = await em
       .getRepository(Exhibitor)

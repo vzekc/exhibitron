@@ -118,8 +118,20 @@ export async function initORM(options?: Options): Promise<Services> {
   }
 }
 
-export const requireAdmin = (user: User | null) => {
+export const requireGlobalAdmin = (user: User | null) => {
   if (!user?.isAdministrator) {
+    throw new Error('You must be an administrator to perform this operation')
+  }
+}
+
+export const isAdmin = (user: User | null, exhibition: Exhibition) => {
+  if (!user) return false
+  if (user.isAdministrator) return true
+  return user.adminExhibitions.isInitialized() && user.adminExhibitions.contains(exhibition)
+}
+
+export const requireAdmin = (user: User | null, exhibition: Exhibition) => {
+  if (!isAdmin(user, exhibition)) {
     throw new Error('You must be an administrator to perform this operation')
   }
 }

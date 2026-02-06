@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify'
-import { initORM } from '../../db.js'
+import { initORM, isAdmin } from '../../db.js'
 import { Exhibit, ExhibitImage } from './entity.js'
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { randomUUID } from 'crypto'
@@ -24,12 +24,13 @@ export async function registerExhibitImageRoutes(app: FastifyInstance) {
       return null
     }
     const user = await db.user.findOneOrFail({ id: userId })
+    await db.em.populate(user, ['adminExhibitions'])
     const exhibit = await db.exhibit.findOneOrFail(
       { id: parseInt(id, 10) },
-      { populate: ['exhibitor', 'exhibitor.user'] },
+      { populate: ['exhibitor', 'exhibitor.user', 'exhibition'] },
     )
 
-    if (!user.isAdministrator && exhibit.exhibitor.user.id !== userId) {
+    if (!isAdmin(user, exhibit.exhibition) && exhibit.exhibitor.user.id !== userId) {
       reply.code(403).send({ error: 'You do not have permission to modify this exhibit' })
       return null
     }

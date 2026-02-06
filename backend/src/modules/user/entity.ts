@@ -6,11 +6,14 @@ import {
   Property,
   OneToOne,
   Cascade,
+  ManyToMany,
+  Collection,
 } from '@mikro-orm/core'
 import { BaseEntity } from '../common/base.entity.js'
 import { verify } from 'argon2'
 import { UserRepository } from './repository.js'
 import { ImageStorage } from '../image/entity.js'
+import { Exhibition } from '../exhibition/entity.js'
 
 @Embeddable()
 export class Contacts {
@@ -49,7 +52,13 @@ export class ProfileImage extends BaseEntity {
 
 @Entity({ repository: () => UserRepository })
 export class User extends BaseEntity<
-  'password' | 'isAdministrator' | 'fullName' | 'bio' | 'contacts' | 'allowEmailContact'
+  | 'password'
+  | 'isAdministrator'
+  | 'fullName'
+  | 'bio'
+  | 'contacts'
+  | 'allowEmailContact'
+  | 'adminExhibitions'
 > {
   // for automatic inference via `em.getRepository(User)`
   [EntityRepositoryType]?: UserRepository
@@ -86,6 +95,9 @@ export class User extends BaseEntity<
 
   @OneToOne(() => ProfileImage, (image) => image.user)
   profileImage?: ProfileImage
+
+  @ManyToMany(() => Exhibition)
+  adminExhibitions = new Collection<Exhibition>(this)
 
   @Embedded(() => Contacts, { object: true })
   contacts: Contacts = {}

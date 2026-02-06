@@ -1,8 +1,16 @@
-import { Collection, Entity, EntityRepositoryType, OneToMany, Property } from '@mikro-orm/core'
+import {
+  Collection,
+  Entity,
+  EntityRepositoryType,
+  ManyToMany,
+  OneToMany,
+  Property,
+} from '@mikro-orm/core'
 import { BaseEntity } from '../common/base.entity.js'
 import { ExhibitionRepository } from './repository.js'
 import { ConferenceSession, Exhibit, Exhibitor, Table } from '../../entities.js'
 import { Page } from '../page/entity.js'
+import { User } from '../user/entity.js'
 
 @Entity({ repository: () => ExhibitionRepository })
 export class Exhibition extends BaseEntity {
@@ -45,4 +53,7 @@ export class Exhibition extends BaseEntity {
 
   @OneToMany(() => ConferenceSession, (conferenceSession) => conferenceSession.exhibition)
   conferenceSessions: Collection<ConferenceSession> = new Collection<ConferenceSession>(this)
+
+  @ManyToMany(() => User, (user) => user.adminExhibitions)
+  admins = new Collection<User>(this)
 }

@@ -33,9 +33,12 @@ export const performCleanup = async (
   await db.em.flush()
   cleanupLogger.info({ exhibitionId: exhibition.id }, `Froze exhibition: ${exhibition.title}`)
 
-  // 3. Send email notification to all administrators
-  const admins = await db.user.find({ isAdministrator: true })
-  const adminEmails = admins.map((admin) => admin.email)
+  // 3. Send email notification to all administrators (global + per-exhibition)
+  const globalAdmins = await db.user.find({ isAdministrator: true })
+  await db.em.populate(exhibition, ['admins'])
+  const exhibitionAdmins = exhibition.admins.getItems()
+  const allAdmins = [...globalAdmins, ...exhibitionAdmins]
+  const adminEmails = [...new Set(allAdmins.map((admin) => admin.email))]
 
   if (adminEmails.length > 0) {
     await sendEmail(makeCleanupNotificationEmail(adminEmails, exhibition.title, deletedCount))

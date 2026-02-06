@@ -9,7 +9,7 @@ export const roomQueries: QueryResolvers<Context> = {
 
 export const roomMutations: MutationResolvers<Context> = {
   createRoom: async (_, { input }, { db, user, exhibition }) => {
-    requireAdmin(user)
+    requireAdmin(user, exhibition)
     const room = db.room.create({
       name: input.name,
       exhibition,
@@ -18,16 +18,16 @@ export const roomMutations: MutationResolvers<Context> = {
     return room
   },
 
-  updateRoom: async (_, { id, input }, { db, user }) => {
-    requireAdmin(user)
+  updateRoom: async (_, { id, input }, { db, user, exhibition }) => {
+    requireAdmin(user, exhibition)
     const room = await db.room.findOneOrFail({ id })
     if (input.name) room.name = input.name
     db.em.persist(room)
     return room
   },
 
-  deleteRoom: async (_, { id }, { db, user }) => {
-    requireAdmin(user)
+  deleteRoom: async (_, { id }, { db, user, exhibition }) => {
+    requireAdmin(user, exhibition)
     const room = await db.room.findOneOrFail({ id })
     db.em.remove(room)
     return true

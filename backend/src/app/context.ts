@@ -1,4 +1,4 @@
-import { initORM, createServicesFromEm } from '../db.js'
+import { initORM, createServicesFromEm, isAdmin as checkIsAdmin } from '../db.js'
 import memoize from 'memoizee'
 import { Services } from '../db.js'
 import { Exhibition } from '../modules/exhibition/entity.js'
@@ -43,6 +43,7 @@ export type Context = {
   exhibition: Exhibition
   exhibitor: Exhibitor | null
   canSwitchExhibitor: boolean
+  isAdmin: boolean
   siteUrl: string
 }
 
@@ -57,6 +58,7 @@ export const createContext = async (request: FastifyRequest) => {
     })
     if (user) {
       request.user = user
+      await db.em.populate(user, ['adminExhibitions'])
       logger.debug(`User: ${request.user.email} set from session`)
     } else {
       logger.warn(`User with ID ${request.session.userId} not found, invalid session ignored`)
@@ -68,6 +70,7 @@ export const createContext = async (request: FastifyRequest) => {
   })
 
   const isClientInLan = isRequestFromLan(request)
+  const isUserAdmin = checkIsAdmin(request.user, exhibition)
 
   const exhibitor =
     request.user &&
@@ -84,7 +87,8 @@ export const createContext = async (request: FastifyRequest) => {
     user: request.user,
     exhibition,
     exhibitor,
-    canSwitchExhibitor: !!request.session.canSwitchExhibitor,
+    canSwitchExhibitor: isUserAdmin,
+    isAdmin: isUserAdmin,
     isClientInLan,
     siteUrl,
   }

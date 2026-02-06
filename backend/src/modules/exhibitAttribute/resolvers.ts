@@ -5,7 +5,7 @@ import {
   QueryResolvers,
 } from '../../generated/graphql.js'
 import { ExhibitAttribute } from './entity.js'
-import { requireAdmin } from '../../db.js'
+import { requireGlobalAdmin } from '../../db.js'
 import { QueryOrder } from '@mikro-orm/core'
 
 export const exhibitAttributeQueries: QueryResolvers<Context> = {
@@ -27,7 +27,7 @@ export const exhibitAttributeMutations: MutationResolvers<Context> = {
     return attribute
   },
   deleteExhibitAttribute: async (_, { id }, { db, user }) => {
-    requireAdmin(user)
+    requireGlobalAdmin(user)
     const attribute = await db.exhibitAttribute.findOneOrFail({ id })
     await db.em.removeAndFlush(attribute)
     return true

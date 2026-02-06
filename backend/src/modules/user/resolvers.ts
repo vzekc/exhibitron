@@ -1,7 +1,7 @@
 import { GraphQLError } from 'graphql'
 import { Context } from '../../app/context.js'
 import { MutationResolvers, QueryResolvers, UserResolvers } from '../../generated/graphql.js'
-import { requireAdmin } from '../../db.js'
+import { requireGlobalAdmin } from '../../db.js'
 import { wrap } from '@mikro-orm/core'
 import { ProfileImage } from './entity.js'
 import { sendEmail } from '../common/sendEmail.js'
@@ -10,12 +10,12 @@ import { makeVisitorContactEmail } from '../registration/emails.js'
 export const userQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2322
   getUser: async (_, { id }, { db, user }) => {
-    requireAdmin(user)
+    requireGlobalAdmin(user)
     return db.user.findOneOrFail({ id })
   },
   // @ts-expect-error ts2322
   getUsers: async (_, _args, { db, user }) => {
-    requireAdmin(user)
+    requireGlobalAdmin(user)
     return db.user.findAll()
   },
   // @ts-expect-error ts2322

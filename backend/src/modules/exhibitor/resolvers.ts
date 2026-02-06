@@ -2,7 +2,7 @@ import { Context } from '../../app/context.js'
 import { ExhibitorResolvers, MutationResolvers, QueryResolvers } from '../../generated/graphql.js'
 import { QueryOrder, wrap } from '@mikro-orm/core'
 import { GraphQLError } from 'graphql'
-import { requireNotFrozen } from '../../db.js'
+import { requireNotFrozen, isAdmin } from '../../db.js'
 
 export const exhibitorQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2345
@@ -16,7 +16,7 @@ export const exhibitorMutations: MutationResolvers<Context> = {
   updateExhibitor: async (_, { id, ...props }, { db, user, exhibition }) => {
     requireNotFrozen(exhibition)
     const exhibitor = await db.exhibitor.findOneOrFail({ id })
-    if (exhibitor.user !== user && !user?.isAdministrator) {
+    if (exhibitor.user !== user && !isAdmin(user, exhibition)) {
       throw new Error('You do not have permission to update this exhibitor')
     }
 

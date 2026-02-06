@@ -2,7 +2,7 @@ import { Context } from '../../app/context.js'
 import { MutationResolvers, QueryResolvers, TableResolvers } from '../../generated/graphql.js'
 import { AuthError, PermissionDeniedError } from '../common/errors.js'
 import { logger } from '../../app/logger.js'
-import { requireNotFrozen } from '../../db.js'
+import { requireNotFrozen, isAdmin } from '../../db.js'
 
 export const tableQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2345
@@ -44,7 +44,7 @@ export const tableMutations: MutationResolvers<Context> = {
     await db.em.flush()
 
     // Now release the table
-    return await db.table.release(exhibition, number, user?.isAdministrator ? null : exhibitor)
+    return await db.table.release(exhibition, number, isAdmin(user, exhibition) ? null : exhibitor)
   },
   // @ts-expect-error ts2345
   assignTable: async (_, { number, exhibitorId }, { db, exhibition }) => {
