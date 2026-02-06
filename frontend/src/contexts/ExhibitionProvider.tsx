@@ -11,7 +11,11 @@ export const ExhibitionProvider = ({ children }: ExhibitionProviderProps) => {
 
   useEffect(() => {
     const load = async () => {
-      setExhibition((await fetchCurrentExhibition()) || undefined)
+      const exhibition = (await fetchCurrentExhibition()) || undefined
+      setExhibition(exhibition)
+      if (exhibition?.title) {
+        document.title = exhibition.title
+      }
       setLoading(false)
     }
     void load()
