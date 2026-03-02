@@ -3,6 +3,7 @@ import { useRoutes } from 'react-router-dom'
 import ErrorBoundary from '@components/ErrorBoundary.tsx'
 import routes from './routes.tsx'
 import BuildInfo from '@components/BuildInfo.tsx'
+import OfflineIndicator from '@components/OfflineIndicator.tsx'
 
 const App = () => {
   const element = useRoutes(routes)
@@ -22,6 +23,7 @@ const App = () => {
       <footer>
         <BuildInfo />
       </footer>
+      <OfflineIndicator />
     </div>
   )
 }
