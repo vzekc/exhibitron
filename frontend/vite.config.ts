@@ -36,7 +36,7 @@ export default defineConfig({
         name: 'Classic Computing Katalog',
         short_name: 'CC Katalog',
         description: 'Exponat-Katalog der Classic Computing',
-        theme_color: '#1f2937',
+        theme_color: '#f9fafb',
         background_color: '#f9fafb',
         display: 'standalone',
         orientation: 'any',
