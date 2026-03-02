@@ -34,17 +34,20 @@ export const isModernBrowser = (request: FastifyRequest) => {
     return false
   }
 
+  const botPatterns = ['Googlebot', 'bingbot', 'Baiduspider', 'YandexBot', 'DuckDuckBot']
+
+  const isBot = botPatterns.some((pattern) => new RegExp(pattern, 'i').test(userAgent))
+  if (isBot) {
+    console.log('Detected bot, serving SPA')
+    return true
+  }
+
   const basicBrowserPatterns = [
     'Lynx',
     'Links',
     'w3m',
     'Wget',
     'curl',
-    'Googlebot',
-    'bingbot',
-    'Baiduspider',
-    'YandexBot',
-    'DuckDuckBot',
     'Konqueror',
     'NetSurf',
     'MSIE',
