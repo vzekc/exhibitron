@@ -32,12 +32,14 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
+        id: '/',
         name: 'Classic Computing Katalog',
         short_name: 'CC Katalog',
         description: 'Exponat-Katalog der Classic Computing',
         theme_color: '#1f2937',
         background_color: '#f9fafb',
         display: 'standalone',
+        orientation: 'any',
         icons: [
           {
             src: '/icons/icon-192x192.png',
