@@ -1,5 +1,11 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react'
-import { fetchCurrentExhibitor, ExhibitorContext, Exhibitor } from './ExhibitorContext.ts'
+import {
+  fetchCurrentExhibitor,
+  fetchCurrentUser,
+  ExhibitorContext,
+  Exhibitor,
+  CurrentUser,
+} from './ExhibitorContext.ts'
 
 interface UserProviderProps {
   children: ReactNode
@@ -7,16 +13,26 @@ interface UserProviderProps {
 
 export const ExhibitorProvider = ({ children }: UserProviderProps) => {
   const [exhibitor, setExhibitor] = useState<Exhibitor | undefined>()
+  const [currentUser, setCurrentUser] = useState<CurrentUser | undefined>()
   const [loading, setLoading] = useState(true)
 
   const reloadExhibitor = useCallback(async () => {
-    const exhibitorProfile = await fetchCurrentExhibitor()
+    const [exhibitorProfile, userProfile] = await Promise.all([
+      fetchCurrentExhibitor(),
+      fetchCurrentUser(),
+    ])
     setExhibitor(exhibitorProfile || undefined)
+    setCurrentUser(userProfile || undefined)
   }, [])
 
   useEffect(() => {
     const load = async () => {
-      setExhibitor((await fetchCurrentExhibitor()) || undefined)
+      const [exhibitorProfile, userProfile] = await Promise.all([
+        fetchCurrentExhibitor(),
+        fetchCurrentUser(),
+      ])
+      setExhibitor(exhibitorProfile || undefined)
+      setCurrentUser(userProfile || undefined)
       setLoading(false)
     }
     void load()
@@ -25,7 +41,7 @@ export const ExhibitorProvider = ({ children }: UserProviderProps) => {
   if (loading) return null // Prevents context usage before it's ready
 
   return (
-    <ExhibitorContext.Provider value={{ exhibitor, reloadExhibitor }}>
+    <ExhibitorContext.Provider value={{ exhibitor, currentUser, reloadExhibitor }}>
       {children}
     </ExhibitorContext.Provider>
   )

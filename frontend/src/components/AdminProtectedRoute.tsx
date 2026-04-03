@@ -3,23 +3,20 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useExhibitor } from '@contexts/ExhibitorContext.ts'
 
 const AdminProtectedRoute = () => {
-  const { exhibitor } = useExhibitor()
+  const { currentUser } = useExhibitor()
   const navigate = useNavigate()
   const location = useLocation()
 
   useEffect(() => {
-    // If no user is logged in, redirect to login page with current path as redirectUrl
-    if (!exhibitor) {
+    if (!currentUser) {
       const currentPath = location.pathname + location.search
       navigate(`/login?redirectUrl=${encodeURIComponent(currentPath)}`, { replace: true })
-    } else if (!exhibitor.user.isAdministrator) {
-      // If user is logged in but not an admin, redirect to home
+    } else if (!currentUser.isAdministrator) {
       navigate('/', { replace: true })
     }
-  }, [exhibitor, navigate, location])
+  }, [currentUser, navigate, location])
 
-  // Only render the outlet if user is an admin
-  return exhibitor && exhibitor.user.isAdministrator ? <Outlet /> : null
+  return currentUser?.isAdministrator ? <Outlet /> : null
 }
 
 export default AdminProtectedRoute

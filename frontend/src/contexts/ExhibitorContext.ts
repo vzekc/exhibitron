@@ -34,10 +34,32 @@ export const fetchCurrentExhibitor = async () => {
   return result.data!.getCurrentExhibitor
 }
 
+export const fetchCurrentUser = async () => {
+  const result = await client.query({
+    query: graphql(`
+      query GetCurrentUser {
+        getCurrentUser {
+          id
+          email
+          fullName
+          isAdministrator
+          nickname
+          profileImage
+        }
+      }
+    `),
+    variables: {},
+    fetchPolicy: 'network-only',
+  })
+  return result.data!.getCurrentUser
+}
+
 export type Exhibitor = NonNullable<Awaited<ReturnType<typeof fetchCurrentExhibitor>>>
+export type CurrentUser = NonNullable<Awaited<ReturnType<typeof fetchCurrentUser>>>
 
 export interface ExhibitorContextTabe {
   exhibitor: Exhibitor | undefined
+  currentUser: CurrentUser | undefined
   reloadExhibitor: () => Promise<void>
 }
 
