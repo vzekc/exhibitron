@@ -29,6 +29,7 @@ type Inputs = {
   setupHelper: boolean
   gameCornerSupporter: boolean
   dailyLunch: boolean
+  helpOnSunday: boolean
   talk: boolean
   talkTitle: string
   talkSummary: string
@@ -411,14 +412,18 @@ const Register = () => {
                       {...register('gameCornerSupporter')}
                       className="mr-2"
                     />
-                    <span>Ich unterstütze die Spiele-Ecke mit eigener Hardware</span>
+                    <span>Ich unterstütze die Spiele-Ecke im Foyer mit eigener Hardware</span>
                   </label>
                   <label className="flex cursor-pointer items-center">
                     <FormInput type="checkbox" {...register('dailyLunch')} className="mr-2" />
                     <span>
-                      Ich wünsche mir ein tägliches Mittagessen in der Halle (Möglichkeiten werden
-                      noch geprüft)
+                      Ich interessiere mich für Essensangebote in der Halle zwischen Freitag und
+                      Sonntag
                     </span>
+                  </label>
+                  <label className="flex cursor-pointer items-center">
+                    <FormInput type="checkbox" {...register('helpOnSunday')} className="mr-2" />
+                    <span>Ich unterstütze beim Abbau am Sonntag</span>
                   </label>
                 </div>
               </FormFieldset>
