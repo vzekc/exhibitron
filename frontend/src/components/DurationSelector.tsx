@@ -23,8 +23,8 @@ const DurationSelector: React.FC<DurationSelectorProps> = ({ selectedDuration, o
           onClick={() => onChange(duration)}
           className={`min-w-12 rounded-md border px-2 py-1 text-sm ${
             selectedDuration === duration
-              ? 'border-blue-500 bg-blue-50 text-blue-700'
-              : 'border-gray-300 hover:bg-gray-50'
+              ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+              : 'border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700'
           }`}>
           {formatDuration(duration)}
         </button>

@@ -149,12 +149,14 @@ const Register = () => {
     if (isFrozen) {
       return (
         <div className="py-8 text-center">
-          <h2 className="mb-4 text-2xl font-bold text-gray-900">Die Anmeldung ist geschlossen</h2>
-          <p className="mb-4 text-lg text-gray-700">
+          <h2 className="mb-4 text-2xl font-bold text-gray-900 dark:text-gray-100">
+            Die Anmeldung ist geschlossen
+          </h2>
+          <p className="mb-4 text-lg text-gray-700 dark:text-gray-300">
             Die Anmeldung für {exhibitionTitle} ist leider nicht mehr möglich.
           </p>
-          <p className="text-gray-600">
-            <Link to="/" className="text-blue-600 hover:underline">
+          <p className="text-gray-600 dark:text-gray-400">
+            <Link to="/" className="text-blue-600 hover:underline dark:text-blue-400">
               Zur Startseite
             </Link>
           </p>
@@ -166,16 +168,20 @@ const Register = () => {
       case 'sending':
         return (
           <div className="py-8 text-center">
-            <p className="text-lg text-gray-700">Die Anmeldung wird gesendet...</p>
+            <p className="text-lg text-gray-700 dark:text-gray-300">
+              Die Anmeldung wird gesendet...
+            </p>
           </div>
         )
       case 'done':
         return (
           <div className="py-8 text-center">
-            <h2 className="mb-4 text-2xl font-bold text-gray-900">
+            <h2 className="mb-4 text-2xl font-bold text-gray-900 dark:text-gray-100">
               Vielen Dank für deine Anmeldung!
             </h2>
-            <p className="text-lg text-gray-700">Wir melden uns in den nächsten Tagen bei Dir!</p>
+            <p className="text-lg text-gray-700 dark:text-gray-300">
+              Wir melden uns in den nächsten Tagen bei Dir!
+            </p>
           </div>
         )
       default:
@@ -183,14 +189,14 @@ const Register = () => {
           <>
             {notYetRegisteredPopup && (
               <Modal isOpen={notYetRegisteredPopup} onClose={() => setNotYetRegisteredPopup(false)}>
-                <h2 className="mb-4 text-xl font-bold text-gray-900">
+                <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">
                   Du bist noch nicht registriert
                 </h2>
-                <p className="mb-4 text-gray-700">
+                <p className="mb-4 text-gray-700 dark:text-gray-300">
                   Du hast Dich über das Forum angemeldet, bist aber noch nicht als Aussteller
                   registriert.
                 </p>
-                <p className="text-gray-700">
+                <p className="text-gray-700 dark:text-gray-300">
                   Bitte fülle das Formular aus, wenn Du Dich als Aussteller anmelden möchtest.
                 </p>
               </Modal>
@@ -202,7 +208,7 @@ const Register = () => {
                   href={`https://www.classic-computing.de/${exhibitionKey}/`}
                   target="_blank"
                   rel="noreferrer nofollow"
-                  className="text-blue-600 hover:text-blue-800">
+                  className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
                   {exhibitionTitle}
                 </a>
                 , die vom {getDateRange()} {exhibition?.location} stattfindet, als Aussteller
@@ -437,7 +443,7 @@ const Register = () => {
               <div className="flex justify-center">
                 <button
                   type="submit"
-                  className="rounded-md bg-blue-600 px-6 py-3 font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                  className="rounded-md bg-blue-600 px-6 py-3 font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
                   Anmeldung absenden
                 </button>
               </div>

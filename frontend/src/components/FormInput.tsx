@@ -6,8 +6,9 @@ interface FormInputProps extends InputHTMLAttributes<HTMLInputElement> {
 
 const FormInput = ({ type = 'text', className = '', ...props }: FormInputProps) => {
   const baseStyles =
-    'w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-  const checkboxStyles = 'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded'
+    'w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100'
+  const checkboxStyles =
+    'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded dark:border-gray-600 dark:bg-gray-800'
 
   const styles = type === 'checkbox' ? checkboxStyles : baseStyles
 

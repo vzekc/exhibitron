@@ -5,24 +5,24 @@ const Footer = () => {
   const title = exhibition?.title ?? 'Classic Computing'
 
   return (
-    <footer className="mx-4 my-8 border-t border-gray-200 pt-8">
+    <footer className="mx-4 my-8 border-t border-gray-200 pt-8 dark:border-gray-700">
       <div className="flex flex-col items-center justify-between space-y-4 sm:flex-row sm:space-y-0">
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
           Die {title} ist eine Veranstaltung des{' '}
           <a
             href="https://vzekc.de"
             target="_blank"
             rel="noreferrer nofollow"
-            className="text-blue-600 hover:text-blue-800">
+            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
             VzEkC e.V.
           </a>
         </p>
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-gray-600 dark:text-gray-400">
           <a
             href="https://classic-computing.de/impressum"
             target="_blank"
             rel="noreferrer nofollow"
-            className="text-blue-600 hover:text-blue-800">
+            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
             Impressum
           </a>{' '}
           |{' '}
@@ -30,7 +30,7 @@ const Footer = () => {
             href="https://forum.classic-computing.de/index.php?datenschutzerklaerung/"
             target="_blank"
             rel="noreferrer nofollow"
-            className="text-blue-600 hover:text-blue-800">
+            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
             Datenschutz
           </a>
         </div>
