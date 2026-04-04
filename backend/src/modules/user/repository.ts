@@ -1,6 +1,7 @@
 import { EntityRepository } from '@mikro-orm/postgresql'
 import { NotFoundError } from '@mikro-orm/core'
 import { User } from './entity.js'
+import { Exhibitor } from '../exhibitor/entity.js'
 import { PermissionDeniedError } from '../common/errors.js'
 import { match, P } from 'ts-pattern'
 import { logger } from '../../app/logger.js'
@@ -62,28 +63,62 @@ export class UserRepository extends EntityRepository<User> {
 
   async associateForumUser(options: AssociateForumUserOptions) {
     const { nickname, isAdministrator, registrationToken } = options
-
-    const user = await this.findOne(
-      registrationToken ? { passwordResetToken: registrationToken } : { nickname },
-    )
-
-    if (!user) {
-      return null
-    }
-
-    logger.debug(`ensureUser found existing user: @{user.nickname} (${user.email})`)
-    if (isAdministrator) {
-      // Administrator rights are only granted, but never revoked from the forum
-      user.isAdministrator = true
-    }
-    user.nickname = nickname
+    const em = this.getEntityManager()
 
     if (registrationToken) {
-      await this.populate(user, ['passwordResetToken', 'passwordResetTokenExpires'])
-      delete user.passwordResetToken
-      delete user.passwordResetTokenExpires
+      const tokenUser = await this.findOne({ passwordResetToken: registrationToken })
+      if (!tokenUser) return null
+
+      const nicknameUser = await this.findOne({ nickname })
+
+      if (nicknameUser && nicknameUser.id !== tokenUser.id) {
+        // The forum nickname already belongs to a different user — merge accounts.
+        // The nicknameUser is canonical (returning exhibitor), tokenUser is a duplicate
+        // created because they re-registered with a different email.
+        logger.info(
+          `Merging user ${tokenUser.id} (${tokenUser.email}) into user ${nicknameUser.id} (${nicknameUser.email}, nickname ${nickname})`,
+        )
+
+        const exhibitors = await em.getRepository(Exhibitor).find({ user: tokenUser })
+        for (const exhibitor of exhibitors) {
+          exhibitor.user = nicknameUser
+        }
+
+        nicknameUser.email = tokenUser.email
+        if (!nicknameUser.fullName && tokenUser.fullName) {
+          nicknameUser.fullName = tokenUser.fullName
+        }
+        if (isAdministrator) {
+          nicknameUser.isAdministrator = true
+        }
+
+        em.remove(tokenUser)
+        await em.flush()
+        return nicknameUser
+      }
+
+      // No conflict — normal token-based association
+      logger.debug(`Associating forum user ${nickname} with user ${tokenUser.id} (${tokenUser.email})`)
+      tokenUser.nickname = nickname
+      if (isAdministrator) {
+        tokenUser.isAdministrator = true
+      }
+      await this.populate(tokenUser, ['passwordResetToken', 'passwordResetTokenExpires'])
+      delete tokenUser.passwordResetToken
+      delete tokenUser.passwordResetTokenExpires
+      await em.flush()
+      return tokenUser
     }
-    await this.getEntityManager().flush()
+
+    // No registration token — returning forum login
+    const user = await this.findOne({ nickname })
+    if (!user) return null
+
+    logger.debug(`Forum login for existing user: ${user.nickname} (${user.email})`)
+    if (isAdministrator) {
+      user.isAdministrator = true
+    }
+    await em.flush()
     return user
   }
 
