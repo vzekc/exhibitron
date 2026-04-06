@@ -98,7 +98,9 @@ export class UserRepository extends EntityRepository<User> {
       }
 
       // No conflict — normal token-based association
-      logger.debug(`Associating forum user ${nickname} with user ${tokenUser.id} (${tokenUser.email})`)
+      logger.debug(
+        `Associating forum user ${nickname} with user ${tokenUser.id} (${tokenUser.email})`,
+      )
       tokenUser.nickname = nickname
       if (isAdministrator) {
         tokenUser.isAdministrator = true
