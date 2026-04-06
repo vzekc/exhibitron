@@ -4,7 +4,7 @@ import resolvers from '../resolvers.js'
 import { readFileSync } from 'node:fs'
 import fastifyApollo from '@as-integrations/fastify'
 import * as path from 'node:path'
-import { Context, createContext, destroyContext } from './context.js'
+import { Context, createContext, destroyContext, NoExhibitionMatchError } from './context.js'
 import { fileURLToPath } from 'node:url'
 import { initORM } from '../db.js'
 import { mutationLoggerPlugin } from '../plugins/mutationLogger.js'
@@ -48,7 +48,11 @@ export const register = async (app: FastifyInstance) => {
       request.apolloContext = await createContext(request)
       logger.debug('Context created with transaction')
     } catch (error) {
-      logger.error({ error }, 'Failed to start transaction')
+      if (error instanceof NoExhibitionMatchError) {
+        logger.debug(error.message)
+      } else {
+        logger.error({ error }, 'Failed to start transaction')
+      }
       throw error
     }
   })
@@ -98,7 +102,11 @@ export const register = async (app: FastifyInstance) => {
 
   app.addHook('onError', async (request, reply, error) => {
     const logger = createRequestLogger(request.requestId)
-    logger.error({ error }, 'Handling error')
+    if (error instanceof NoExhibitionMatchError) {
+      logger.debug(error.message)
+    } else {
+      logger.error({ error }, 'Handling error')
+    }
     // Rollback on error
     if (request.forkedEm) {
       try {

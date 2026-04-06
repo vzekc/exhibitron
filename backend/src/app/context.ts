@@ -20,6 +20,13 @@ export const getHostMatchers = memoize(async () => {
 
 type HostMatchers = Awaited<ReturnType<typeof getHostMatchers>>
 
+export class NoExhibitionMatchError extends Error {
+  constructor(host: string) {
+    super(`cannot map ${host} to an exhibition, no match`)
+    this.name = 'NoExhibitionMatchError'
+  }
+}
+
 const hostToExhibitionId = memoize((hostMatchers: HostMatchers, host: string) => {
   const ids: number[] = []
   for (const [matcher, id] of hostMatchers) {
@@ -32,7 +39,7 @@ const hostToExhibitionId = memoize((hostMatchers: HostMatchers, host: string) =>
   } else if (ids.length > 1) {
     throw new Error(`multiple exhibitions match ${host}`)
   } else {
-    throw new Error(`cannot map ${host} to an exhibition, no match`)
+    throw new NoExhibitionMatchError(host)
   }
 })
 
