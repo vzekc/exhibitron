@@ -1,3 +1,4 @@
-pnpm prettier -c
+pnpm prettier
+git diff --name-only -- frontend/src backend/src | while IFS= read -r file; do git add "$file"; done
 pnpm lint
 pnpm test

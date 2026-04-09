@@ -75,4 +75,9 @@ jobs:
 
       - name: Deploy to Server
         run: |
-          git push -f hans@${{ secrets.DEPLOYMENT_HOST }}:exhibitron HEAD:deploy
+          git push -f hans@${{ secrets.DEPLOYMENT_HOST }}:exhibitron HEAD:deploy 2>&1 || {
+            echo "::error::Git push failed. Check the server-side post-receive hook for errors."
+            echo "Fetching server deployment log..."
+            ssh hans@${{ secrets.DEPLOYMENT_HOST }} 'tail -50 exhibitron/deploy.log 2>/dev/null || echo "No deploy log found"'
+            exit 1
+          }
