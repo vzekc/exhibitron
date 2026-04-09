@@ -127,9 +127,9 @@ export const SeatingPlan: React.FC = () => {
     clientY: number
     target: Element | null
   } | null>(null)
-  const { exhibitor } = useExhibitor()
+  const { exhibitor, currentUser } = useExhibitor()
   const { exhibition } = useExhibition()
-  const isAdmin = exhibitor?.user.isAdministrator
+  const isAdmin = currentUser?.isAdministrator || false
   const exhibitionKey = exhibition?.key ?? 'cc2025'
   const svgRef = useRef<SVGSVGElement | null>(null)
   const stylingAppliedRef = useRef<boolean>(false)
