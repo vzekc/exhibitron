@@ -19,6 +19,7 @@
     "recompute-dimensions": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/scripts/recompute-image-dimensions.ts",
     "cleanup": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/scripts/cleanup-exhibition.ts",
     "manage-admin": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/scripts/manage-exhibition-admin.ts",
+    "import-seatplan": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/scripts/import-seatplan-svg.ts",
     "watch-schema": "node --no-warnings=ExperimentalWarning --loader ts-node/esm scripts/watch-schema.ts"
   },
   "dependencies": {
