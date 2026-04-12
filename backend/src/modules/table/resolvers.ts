@@ -6,9 +6,10 @@ import { requireNotFrozen, isAdmin } from '../../db.js'
 
 export const tableQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2345
-  getTable: async (_, { number }, { db }) => db.table.findOneOrFail({ number }),
+  getTable: async (_, { number }, { db, exhibition }) =>
+    db.table.findOneOrFail({ exhibition, number }),
   // @ts-expect-error ts2345
-  getTables: async (_, _args, { db }) => db.table.findAll(),
+  getTables: async (_, _args, { db, exhibition }) => db.table.find({ exhibition }),
 }
 
 export const tableMutations: MutationResolvers<Context> = {
