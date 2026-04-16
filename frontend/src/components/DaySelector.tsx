@@ -1,4 +1,5 @@
 import React from 'react'
+import { parseLocalDateString } from '@utils/date'
 
 interface DaySelectorProps {
   availableDates: string[]
@@ -12,7 +13,7 @@ const DaySelector: React.FC<DaySelectorProps> = ({ availableDates, selectedDate,
   return (
     <div className="flex gap-1">
       {availableDates.map((date) => {
-        const dayDate = new Date(date)
+        const dayDate = parseLocalDateString(date)
         const weekday = weekdays[dayDate.getDay()]
         const dayOfMonth = dayDate.getDate()
 

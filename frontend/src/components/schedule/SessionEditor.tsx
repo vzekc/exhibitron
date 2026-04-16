@@ -12,6 +12,7 @@ import Button from '@components/Button'
 import Confirm from '@components/Confirm'
 import TextEditor, { TextEditorHandle } from '@components/TextEditor'
 import ActionBar from '@components/ActionBar'
+import { toLocalDateString } from '@utils/date'
 import { Exhibitor } from '../../types/exhibitor'
 import { useExhibitor } from '@contexts/ExhibitorContext'
 import { useUnsavedChangesWarning } from '@hooks/useUnsavedChangesWarning'
@@ -201,7 +202,7 @@ const SessionEditor: React.FC<SessionEditorProps> = ({
       // Only set date and time if the session has a scheduled start time
       if (sessionToEdit.startTime) {
         const startDate = new Date(sessionToEdit.startTime)
-        setSelectedDate(startDate.toISOString().split('T')[0])
+        setSelectedDate(toLocalDateString(startDate))
         setSelectedTime(
           startDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
         )
@@ -215,7 +216,7 @@ const SessionEditor: React.FC<SessionEditorProps> = ({
     } else if (initialStartTime) {
       const startDate = new Date(initialStartTime)
       setSelectedRoomId(initialRoomId ?? '')
-      setSelectedDate(startDate.toISOString().split('T')[0])
+      setSelectedDate(toLocalDateString(startDate))
       setSelectedTime(startDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }))
       setDescription('')
     } else {
@@ -243,7 +244,7 @@ const SessionEditor: React.FC<SessionEditorProps> = ({
       conferenceSessionTitle !== sessionToEdit.title ||
       selectedRoomId !== sessionToEdit.roomId ||
       JSON.stringify(selectedExhibitorIds) !== JSON.stringify(sessionToEdit.exhibitorIds) ||
-      selectedDate !== startDate.toISOString().split('T')[0] ||
+      selectedDate !== toLocalDateString(startDate) ||
       selectedTime !==
         startDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) ||
       durationMinutes !== sessionToEdit.durationMinutes ||
@@ -329,7 +330,7 @@ const SessionEditor: React.FC<SessionEditorProps> = ({
     const end = new Date(exhibitionDates.endDate)
 
     for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
-      dates.push(date.toISOString().split('T')[0])
+      dates.push(toLocalDateString(date))
     }
 
     return dates
