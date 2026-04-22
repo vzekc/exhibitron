@@ -145,6 +145,47 @@ describe('registration', () => {
     expect(result.errors![0].message).toBe('Registration not found ({ id: 9999 })')
   })
 
+  graphqlTest('approve registration with existing nickname reuses user', async (graphqlRequest) => {
+    const admin = await login('admin@example.com')
+    const registrationId = await createRegistration(graphqlRequest, {
+      name: 'Daffy Duck',
+      nickname: 'daffy',
+      email: 'newdaffy@example.com',
+    })
+
+    const result = await graphqlRequest(
+      graphql(`
+        mutation ApproveRegistration($id: Int!, $siteUrl: String!) {
+          approveRegistration(id: $id, siteUrl: $siteUrl)
+        }
+      `),
+      { id: registrationId, siteUrl: 'https://example.com/' },
+      admin,
+    )
+    expect(result.errors).toBeUndefined()
+
+    const userCheck = await graphqlRequest(
+      graphql(`
+        query GetUsers {
+          getUsers {
+            id
+            email
+            nickname
+          }
+        }
+      `),
+      {},
+      admin,
+    )
+    expect(userCheck.errors).toBeUndefined()
+    const daffy = userCheck.data!.getUsers!.find((u) => u!.nickname === 'daffy')
+    expect(daffy).toBeDefined()
+    expect(daffy!.email).toBe('newdaffy@example.com')
+    expect(daffy!.id).toBe(1002)
+    const oldDaffy = userCheck.data!.getUsers!.find((u) => u!.email === 'daffy@example.com')
+    expect(oldDaffy).toBeUndefined()
+  })
+
   graphqlTest('approve, reject and delete registration', async (graphqlRequest) => {
     const admin = await login('admin@example.com')
     const registrationId = await createRegistration(graphqlRequest)

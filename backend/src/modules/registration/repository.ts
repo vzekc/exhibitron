@@ -40,6 +40,17 @@ export class RegistrationRepository extends EntityRepository<Registration> {
     registration.status = RegistrationStatus.Approved
 
     let user = await userRepository.lookup(registration.email)
+    if (!user && registration.nickname) {
+      // Returning exhibitor re-registering with a different email address. Reuse the
+      // existing user so previous exhibits/tables stay linked, adopt the new email, and
+      // issue a password reset so they can set up access from the new address.
+      user = await userRepository.findOne({ nickname: registration.nickname })
+      if (user) {
+        user.email = registration.email
+        userRepository.createPasswordResetToken(user, registration.exhibition.endDate.getTime())
+        completeProfileUrl = `${siteUrl}/setupExhibitor?registrationToken=${user.passwordResetToken}`
+      }
+    }
     if (!user) {
       user = userRepository.create({
         email: registration.email,
