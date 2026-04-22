@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import tsConfigPaths from 'vite-tsconfig-paths'
 import { VitePWA } from 'vite-plugin-pwa'
 import * as path from 'path'
-import { makeBuildInfo } from './src/build/makeBuildInfo.js' assert { type: 'js' }
+import { makeBuildInfo } from './src/build/makeBuildInfo.js'
 
 const backend = {
   target: 'http://localhost:3001',
