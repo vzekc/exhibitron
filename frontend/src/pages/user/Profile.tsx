@@ -17,6 +17,7 @@ import {
   TextArea,
 } from '@components/Form.tsx'
 import ImageUploader from '@components/ImageUploader.tsx'
+import { showMessage } from '@components/MessageModalUtil.tsx'
 
 type Inputs = {
   fullName: string
@@ -104,6 +105,12 @@ const LOOKUP_YOUTUBE_CHANNELS = graphql(`
   }
 `)
 
+const IS_NICKNAME_AVAILABLE = graphql(`
+  query IsNicknameAvailable($nickname: String!) {
+    isNicknameAvailable(nickname: $nickname)
+  }
+`)
+
 const Profile = () => {
   const { reloadExhibitor, exhibitor } = useExhibitor()
   const {
@@ -121,6 +128,9 @@ const Profile = () => {
   const { data, refetch } = useQuery(GET_USER_PROFILE)
   const [updateUserProfile] = useMutation(UPDATE_USER_PROFILE)
   const [lookupYouTubeChannels] = useLazyQuery<LookupYouTubeChannelsResult>(LOOKUP_YOUTUBE_CHANNELS)
+  const [checkNicknameAvailable] = useLazyQuery(IS_NICKNAME_AVAILABLE, {
+    fetchPolicy: 'network-only',
+  })
   const apolloClient = useApolloClient()
   const [searchParams] = useSearchParams()
   const [welcome, setWelcome] = useState(searchParams.has('welcome'))
@@ -172,13 +182,18 @@ const Profile = () => {
 
   const updateProfile: SubmitHandler<Inputs> = async (inputs) => {
     const { fullName, nickname, bio, topic, allowEmailContact, ...contacts } = inputs
-    await updateUserProfile({
+    const result = await updateUserProfile({
       variables: {
         input: { fullName, nickname, bio, contacts, allowEmailContact },
         exhibitorId: exhibitor!.id,
         topic,
       },
     })
+    if (result.errors?.length) {
+      const errorMessage = result.errors[0]?.message || 'Fehler beim Speichern des Profils'
+      await showMessage('Fehler', errorMessage, 'OK')
+      return
+    }
     await reloadExhibitor()
     reset(inputs)
     await apolloClient.resetStore()
@@ -256,7 +271,20 @@ const Profile = () => {
                     <FormLabel>Nickname</FormLabel>
                     <Input
                       type="text"
-                      {...register('nickname', { required: true })}
+                      {...register('nickname', {
+                        required: 'Bitte gib einen Nickname ein',
+                        validate: async (value) => {
+                          const trimmed = value?.trim() ?? ''
+                          if (!trimmed) return true
+                          if (trimmed === data.getCurrentExhibitor!.user.nickname) return true
+                          const { data: checkData } = await checkNicknameAvailable({
+                            variables: { nickname: trimmed },
+                          })
+                          return checkData?.isNicknameAvailable
+                            ? true
+                            : `Der Nickname „${trimmed}“ ist bereits vergeben`
+                        },
+                      })}
                       error={errors.nickname?.message}
                     />
                     <FormLabel>Name</FormLabel>

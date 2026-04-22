@@ -11,6 +11,7 @@ import ChipContainer from '@components/ChipContainer.tsx'
 import ActionBar from '@components/ActionBar.tsx'
 import Button from '@components/Button.tsx'
 import { getDisplayName } from '@utils/displayName'
+import { showMessage } from '@components/MessageModalUtil.tsx'
 
 const GET_TABLE = graphql(
   `
@@ -67,14 +68,30 @@ const Table = () => {
 
   const handleClaimTable = async (tableId: number, e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
-    await claimTable({ variables: { number: tableId } })
+    const result = await claimTable({ variables: { number: tableId } })
+    if (result.errors?.length) {
+      await showMessage(
+        'Tisch konnte nicht reserviert werden',
+        result.errors[0]?.message || 'Unbekannter Fehler',
+        'OK',
+      )
+      return
+    }
     await apolloClient.resetStore()
     navigate(`/table/${tableId}`)
   }
 
   const handleReleaseTable = async (tableId: number, e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
-    await releaseTable({ variables: { number: tableId } })
+    const result = await releaseTable({ variables: { number: tableId } })
+    if (result.errors?.length) {
+      await showMessage(
+        'Tisch konnte nicht freigegeben werden',
+        result.errors[0]?.message || 'Unbekannter Fehler',
+        'OK',
+      )
+      return
+    }
     await apolloClient.resetStore()
     navigate(`/table/${tableId}`)
   }

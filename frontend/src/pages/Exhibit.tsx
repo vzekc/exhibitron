@@ -12,6 +12,7 @@ import Button from '@components/Button'
 import ActionBar from '@components/ActionBar'
 import LoadInProgress from '@components/LoadInProgress'
 import { generateAndDownloadPDF } from '@components/ExhibitPDF.tsx'
+import { showMessage } from '@components/MessageModalUtil.tsx'
 
 const GET_DATA = graphql(`
   query GetExhibit($id: Int!) {
@@ -97,7 +98,16 @@ const Exhibit = () => {
   }
 
   const handleConfirmDelete = async () => {
-    await deleteExhibit({ variables: { id: exhibit.id } })
+    const result = await deleteExhibit({ variables: { id: exhibit.id } })
+    if (result.errors?.length) {
+      setShowDeleteConfirm(false)
+      await showMessage(
+        'Fehler',
+        result.errors[0]?.message || 'Fehler beim Löschen des Exponats',
+        'OK',
+      )
+      return
+    }
     await apolloClient.clearStore()
     navigate('/exhibit')
   }

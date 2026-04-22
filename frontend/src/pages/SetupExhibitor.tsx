@@ -98,17 +98,31 @@ const SetupExhibitor = () => {
     }
 
     // Set the password (which will invalidate the token)
-    await setPasswordMutation({
+    const setPasswordResult = await setPasswordMutation({
       variables: { token, password },
     })
+    if (setPasswordResult.errors?.length) {
+      setError(
+        setPasswordResult.errors[0]?.message ||
+          'Das Kennwort konnte nicht gesetzt werden. Bitte fordere einen neuen Registrierungslink an.',
+      )
+      return
+    }
 
     // Log in with the new credentials
-    await login({
+    const loginResult = await login({
       variables: {
         email,
         password,
       },
     })
+    if (loginResult.errors?.length) {
+      setError(
+        loginResult.errors[0]?.message ||
+          'Anmeldung fehlgeschlagen. Bitte versuche es über die Anmeldeseite.',
+      )
+      return
+    }
     await apolloClient.clearStore()
 
     await reloadExhibitor()

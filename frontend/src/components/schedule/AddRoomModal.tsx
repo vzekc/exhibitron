@@ -4,6 +4,7 @@ import { graphql } from 'gql.tada'
 import Modal from '@components/Modal'
 import FormInput from '@components/FormInput'
 import Button from '@components/Button'
+import { showMessage } from '@components/MessageModalUtil.tsx'
 
 const CREATE_ROOM = graphql(`
   mutation CreateRoom($input: CreateRoomInput!) {
@@ -29,13 +30,21 @@ const AddRoomModal = ({ isOpen, onClose }: AddRoomModalProps) => {
     e.preventDefault()
     if (!roomName) return
 
-    await createRoom({
+    const result = await createRoom({
       variables: {
         input: {
           name: roomName,
         },
       },
     })
+    if (result.errors?.length) {
+      await showMessage(
+        'Raum konnte nicht angelegt werden',
+        result.errors[0]?.message || 'Unbekannter Fehler',
+        'OK',
+      )
+      return
+    }
     setRoomName('')
     onClose()
   }

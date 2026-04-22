@@ -140,23 +140,34 @@ const TableInfoPanel: React.FC<TableInfoPanelProps> = ({
 
   const handleAssignTable = async () => {
     if (selectedExhibitorId) {
-      await assignTable({
+      const result = await assignTable({
         variables: { number: selectedTable, exhibitorId: selectedExhibitorId },
       })
+      if (result.errors?.length) {
+        await showMessage(
+          'Tisch konnte nicht zugewiesen werden',
+          result.errors[0]?.message || 'Unbekannter Fehler',
+        )
+        return
+      }
       onClose()
     }
   }
 
   const handleReleaseTable = async () => {
-    try {
-      await releaseTable({
-        variables: { number: selectedTable },
-      })
+    const result = await releaseTable({
+      variables: { number: selectedTable },
+    })
+    if (result.errors?.length) {
       setShowReleaseConfirmation(false)
-      onClose()
-    } catch (error) {
-      console.error('Failed to release table:', error)
+      await showMessage(
+        'Tisch konnte nicht freigegeben werden',
+        result.errors[0]?.message || 'Unbekannter Fehler',
+      )
+      return
     }
+    setShowReleaseConfirmation(false)
+    onClose()
   }
 
   return (

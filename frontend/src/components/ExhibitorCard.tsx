@@ -8,6 +8,7 @@ import TableChip from './TableChip'
 import { useState } from 'react'
 import { useMutation } from '@apollo/client'
 import { Input } from '@components/Form.tsx'
+import { showMessage } from '@components/MessageModalUtil.tsx'
 
 const EXHIBITOR_FRAGMENT = graphql(`
   fragment ExhibitorDetails on Exhibitor @_unmask {
@@ -63,12 +64,20 @@ const ExhibitorCard = ({ exhibitor }: { exhibitor: FragmentOf<typeof EXHIBITOR_F
     const senderInfo = sender.trim() || 'Unbekannt'
     const fullMessage = `Nachricht von: ${senderInfo}\n\n${message.trim()}`
 
-    await sendVisitorEmail({
+    const result = await sendVisitorEmail({
       variables: {
         userId,
         message: fullMessage,
       },
     })
+    if (result.errors?.length) {
+      await showMessage(
+        'Nachricht konnte nicht gesendet werden',
+        result.errors[0]?.message || 'Bitte versuche es später erneut.',
+        'OK',
+      )
+      return
+    }
     setIsContactModalOpen(false)
     setShowConfirmation(true)
     setMessage('')

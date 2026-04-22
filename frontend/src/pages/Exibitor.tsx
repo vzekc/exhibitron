@@ -10,6 +10,7 @@ import { useExhibitor } from '@contexts/ExhibitorContext.ts'
 import ActionBar from '@components/ActionBar.tsx'
 import Button from '@components/Button.tsx'
 import { getDisplayName } from '@utils/displayName'
+import { showMessage } from '@components/MessageModalUtil.tsx'
 
 const GET_EXHIBITOR = graphql(
   `
@@ -57,7 +58,15 @@ const Exhibitor = () => {
   const { exhibits, user } = exhibitor
 
   const handleSwitchExhibitor = async () => {
-    await switchExhibitor({ variables: { exhibitorId: exhibitor.id } })
+    const result = await switchExhibitor({ variables: { exhibitorId: exhibitor.id } })
+    if (result.errors?.length) {
+      await showMessage(
+        'Wechsel fehlgeschlagen',
+        result.errors[0]?.message || 'Aussteller konnte nicht gewechselt werden',
+        'OK',
+      )
+      return
+    }
     await reloadExhibitor()
   }
 

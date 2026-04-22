@@ -13,6 +13,7 @@ import Button from '@components/Button'
 import { useUnsavedChangesWarning } from '@hooks/useUnsavedChangesWarning'
 import { getDisplayName } from '@utils/displayName'
 import { useIsMobile } from '@hooks/useIsMobile'
+import { showMessage } from '@components/MessageModalUtil.tsx'
 
 const GET_SESSION_DATA = graphql(`
   query GetSessionData($id: Int!) {
@@ -77,11 +78,7 @@ const PresenterSessionEditorPage = () => {
     skip: !id,
   })
 
-  const [updateSession] = useMutation(UPDATE_SESSION, {
-    onCompleted: () => {
-      navigate(`/session/${id}`)
-    },
-  })
+  const [updateSession] = useMutation(UPDATE_SESSION)
 
   useEffect(() => {
     setDetailName(location.pathname, data?.getConferenceSession?.title ?? 'Session bearbeiten')
@@ -134,7 +131,7 @@ const PresenterSessionEditorPage = () => {
 
   const handleSave = async () => {
     const currentDescription = textEditorRef.current?.getHTML() || ''
-    await updateSession({
+    const result = await updateSession({
       variables: {
         id: parseInt(id ?? '0'),
         input: {
@@ -143,6 +140,15 @@ const PresenterSessionEditorPage = () => {
         },
       },
     })
+    if (result.errors?.length) {
+      await showMessage(
+        'Fehler',
+        result.errors[0]?.message || 'Fehler beim Speichern der Session',
+        'OK',
+      )
+      return
+    }
+    navigate(`/session/${id}`)
   }
 
   return (

@@ -2,10 +2,11 @@ import { GraphQLError } from 'graphql'
 import { Context } from '../../app/context.js'
 import { MutationResolvers, QueryResolvers, UserResolvers } from '../../generated/graphql.js'
 import { requireGlobalAdmin } from '../../db.js'
-import { wrap } from '@mikro-orm/core'
+import { UniqueConstraintViolationException, wrap } from '@mikro-orm/core'
 import { ProfileImage } from './entity.js'
 import { sendEmail } from '../common/sendEmail.js'
 import { makeVisitorContactEmail } from '../registration/emails.js'
+import { UniqueConstraintError } from '../common/errors.js'
 
 export const userQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2322
@@ -29,6 +30,14 @@ export const userQueries: QueryResolvers<Context> = {
   isForumUser: async (_, { email }, { db }) => {
     const user = await db.user.findOne({ email })
     return !!user?.nickname
+  },
+  isNicknameAvailable: async (_, { nickname }, { db, user }) => {
+    const trimmed = nickname.trim()
+    if (!trimmed) {
+      return false
+    }
+    const existing = await db.user.findOne({ nickname: trimmed })
+    return !existing || existing.id === user?.id
   },
 }
 
@@ -64,11 +73,26 @@ export const userMutations: MutationResolvers<Context> = {
     return true
   },
   // @ts-expect-error ts2322
-  updateUserProfile: async (_, { input }, { user }) => {
+  updateUserProfile: async (_, { input }, { db, user }) => {
     if (!user) {
       throw new Error('You must be logged in to update your profile')
     }
     wrap(user).assign(input)
+    try {
+      await db.em.flush()
+    } catch (error) {
+      if (
+        error instanceof UniqueConstraintViolationException &&
+        error.message.includes('user_nickname_unique')
+      ) {
+        throw new UniqueConstraintError(
+          `Der Nickname „${input.nickname}“ ist bereits vergeben.`,
+          'nickname',
+          input.nickname ?? '',
+        )
+      }
+      throw error
+    }
     return user
   },
   sendVisitorEmail: async (_, { userId, message }, { db, exhibition }) => {

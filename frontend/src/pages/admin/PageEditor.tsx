@@ -6,6 +6,7 @@ import TextEditor, { TextEditorHandle } from '@components/TextEditor.tsx'
 import { useUnsavedChangesWarning } from '@hooks/useUnsavedChangesWarning.tsx'
 import Button from '@components/Button.tsx'
 import LoadInProgress from '@components/LoadInProgress'
+import { showMessage } from '@components/MessageModalUtil.tsx'
 
 const GET_PAGE = gql`
   query GetPage($key: String!) {
@@ -76,10 +77,26 @@ const PageEditor = () => {
       const result = await updatePage({
         variables: { id: data.getPage.id, key, title, html: currentHtml },
       })
-      processedHtml = result!.data!.updatePage.html || ''
+      if (result.errors?.length) {
+        await showMessage(
+          'Fehler',
+          result.errors[0]?.message || 'Fehler beim Speichern der Seite',
+          'OK',
+        )
+        return
+      }
+      processedHtml = result.data?.updatePage?.html || ''
     } else {
       const result = await createPage({ variables: { key, title, html: currentHtml } })
-      processedHtml = result!.data!.createPage.html || ''
+      if (result.errors?.length) {
+        await showMessage(
+          'Fehler',
+          result.errors[0]?.message || 'Fehler beim Anlegen der Seite',
+          'OK',
+        )
+        return
+      }
+      processedHtml = result.data?.createPage?.html || ''
     }
     setHtml(processedHtml)
 

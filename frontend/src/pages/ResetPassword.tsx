@@ -44,9 +44,16 @@ const ResetPassword = () => {
 
   const onSubmit = async ({ password }: Inputs) => {
     if (token) {
-      await resetPassword({
+      const result = await resetPassword({
         variables: { token, password },
       })
+      if (result.errors?.length) {
+        setMessage(
+          result.errors[0]?.message ||
+            'Dein Kennwort konnte nicht zurückgesetzt werden. Bitte fordere einen neuen Link an.',
+        )
+        return
+      }
       setMessage('Dein Kennwort wurde zurückgesetzt.')
     }
   }

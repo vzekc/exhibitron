@@ -238,16 +238,18 @@ const ExhibitAttributeEditor = ({ attributes, onChange }: ExhibitAttributeEditor
   const handleCreateNewAttribute = async (name: string) => {
     const trimmedName = name.trim()
     if (trimmedName && !trimmedName.includes(':')) {
-      try {
-        await createExhibitAttribute({
-          variables: { name: trimmedName },
-          refetchQueries: [{ query: GET_EXHIBIT_ATTRIBUTES }],
-        })
-        return true
-      } catch (error) {
-        console.error('Error creating attribute:', error)
+      const result = await createExhibitAttribute({
+        variables: { name: trimmedName },
+        refetchQueries: [{ query: GET_EXHIBIT_ATTRIBUTES }],
+      })
+      if (result.errors?.length) {
+        await showMessage(
+          'Attribut konnte nicht angelegt werden',
+          result.errors[0]?.message || 'Unbekannter Fehler',
+        )
         return false
       }
+      return true
     } else if (trimmedName.includes(':')) {
       await showMessage('Ungültiger Name', 'Attributnamen dürfen keine Doppelpunkte enthalten.')
       return false

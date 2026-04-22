@@ -7,6 +7,7 @@ import ActionBar from '@components/ActionBar.tsx'
 import Button from '@components/Button.tsx'
 import LoadInProgress from '@components/LoadInProgress'
 import RandomComputer from '@components/RandomComputer.tsx'
+import { showMessage } from '@components/MessageModalUtil.tsx'
 
 const GET_MY_EXHIBITS_FROM_OTHER_EXHIBITIONS = graphql(`
   query GetMyExhibitsFromOtherExhibitions {
@@ -62,15 +63,19 @@ const ImportExhibits = () => {
   const handleImport = async () => {
     if (selectedIds.size === 0) return
 
-    try {
-      await copyExhibits({
-        variables: { exhibitIds: Array.from(selectedIds) },
-        refetchQueries: ['GetMyExhibits'],
-      })
-      navigate('/user/exhibit')
-    } catch (error) {
-      console.error('Failed to import exhibits:', error)
+    const result = await copyExhibits({
+      variables: { exhibitIds: Array.from(selectedIds) },
+      refetchQueries: ['GetMyExhibits'],
+    })
+    if (result.errors?.length) {
+      await showMessage(
+        'Import fehlgeschlagen',
+        result.errors[0]?.message || 'Die Exponate konnten nicht importiert werden.',
+        'OK',
+      )
+      return
     }
+    navigate('/user/exhibit')
   }
 
   if (loading) {

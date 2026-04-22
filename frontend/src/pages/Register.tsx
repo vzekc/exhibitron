@@ -14,6 +14,7 @@ import FormTextarea from '@components/FormTextarea'
 import DurationSelector from '@components/DurationSelector'
 import Footer from '@components/Footer'
 import { useExhibition } from '@contexts/ExhibitionContext.ts'
+import { showMessage } from '@components/MessageModalUtil.tsx'
 
 type Inputs = {
   name: string
@@ -130,7 +131,7 @@ const Register = () => {
       data.tables = 0
     }
     setState('sending')
-    await registerMutation({
+    const result = await registerMutation({
       variables: {
         input: {
           name,
@@ -142,6 +143,15 @@ const Register = () => {
         },
       },
     })
+    if (result.errors?.length) {
+      setState('entering')
+      await showMessage(
+        'Anmeldung fehlgeschlagen',
+        result.errors[0]?.message || 'Bitte versuche es erneut.',
+        'OK',
+      )
+      return
+    }
     setState('done')
   }
 

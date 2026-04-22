@@ -51,5 +51,6 @@ extend type Query {
   getUsers: [User!]
   getTokenEmail(token: String!): String
   isForumUser(email: String!): Boolean
+  isNicknameAvailable(nickname: String!): Boolean!
   getDeleteToken(id: Int!): String
 }
