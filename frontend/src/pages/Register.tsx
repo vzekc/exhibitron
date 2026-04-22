@@ -83,6 +83,7 @@ const Register = () => {
   const [notYetRegisteredPopup, setNotYetRegisteredPopup] = useState(
     searchParams.has('forumMemberNotYetRegistered'),
   )
+  const [needsSetupPopup, setNeedsSetupPopup] = useState(searchParams.has('forumMemberNeedsSetup'))
 
   const isFrozen = exhibition?.frozen ?? false
   const exhibitionTitle = exhibition?.title ?? 'Classic Computing'
@@ -208,6 +209,22 @@ const Register = () => {
                 </p>
                 <p className="text-gray-700 dark:text-gray-300">
                   Bitte fülle das Formular aus, wenn Du Dich als Aussteller anmelden möchtest.
+                </p>
+              </Modal>
+            )}
+            {needsSetupPopup && (
+              <Modal isOpen={needsSetupPopup} onClose={() => setNeedsSetupPopup(false)}>
+                <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">
+                  Registrierung noch nicht abgeschlossen
+                </h2>
+                <p className="mb-4 text-gray-700 dark:text-gray-300">
+                  Du bist bereits als Aussteller registriert, aber Dein Konto ist noch nicht mit dem
+                  Forum verknüpft.
+                </p>
+                <p className="text-gray-700 dark:text-gray-300">
+                  Bitte benutze den Link aus der E-Mail, die Du bei der Bestätigung Deiner
+                  Registrierung erhalten hast, um Dein Konto einzurichten. Von dort aus kannst Du
+                  Dich über das Forum anmelden.
                 </p>
               </Modal>
             )}

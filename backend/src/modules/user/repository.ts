@@ -2,12 +2,16 @@ import { EntityRepository } from '@mikro-orm/postgresql'
 import { NotFoundError } from '@mikro-orm/core'
 import { User } from './entity.js'
 import { Exhibitor } from '../exhibitor/entity.js'
+import { Registration } from '../registration/entity.js'
 import { PermissionDeniedError } from '../common/errors.js'
 import { match, P } from 'ts-pattern'
 import { logger } from '../../app/logger.js'
 import { sendEmail } from '../common/sendEmail.js'
 import { makePasswordResetEmail } from '../registration/emails.js'
 import { hash } from 'argon2'
+import { RegistrationStatus } from '../../generated/graphql.js'
+
+type AssociateForumUserResult = User | 'needsSetup' | null
 
 type AssociateForumUserOptions = {
   nickname: string
@@ -61,7 +65,7 @@ export class UserRepository extends EntityRepository<User> {
     return user
   }
 
-  async associateForumUser(options: AssociateForumUserOptions) {
+  async associateForumUser(options: AssociateForumUserOptions): Promise<AssociateForumUserResult> {
     const { nickname, isAdministrator, registrationToken } = options
     const em = this.getEntityManager()
 
@@ -114,14 +118,35 @@ export class UserRepository extends EntityRepository<User> {
 
     // No registration token — returning forum login
     const user = await this.findOne({ nickname })
-    if (!user) return null
-
-    logger.debug(`Forum login for existing user: ${user.nickname} (${user.email})`)
-    if (isAdministrator) {
-      user.isAdministrator = true
+    if (user) {
+      logger.debug(`Forum login for existing user: ${user.nickname} (${user.email})`)
+      if (isAdministrator) {
+        user.isAdministrator = true
+      }
+      await em.flush()
+      return user
     }
-    await em.flush()
-    return user
+
+    // No user found by nickname — check if there's an approved registration with this
+    // nickname whose user hasn't completed setup yet (case-insensitive match).
+    const registration = await em.getRepository(Registration).findOne(
+      {
+        nickname: { $ilike: nickname },
+        status: RegistrationStatus.Approved,
+      },
+      { populate: ['email'] },
+    )
+    if (registration) {
+      const registeredUser = await this.findOne({ email: registration.email })
+      if (registeredUser) {
+        logger.info(
+          `Forum user ${nickname} has approved registration but hasn't completed setup (user ${registeredUser.id}, ${registeredUser.email})`,
+        )
+        return 'needsSetup'
+      }
+    }
+
+    return null
   }
 
   async tokenToUser(token: string) {

@@ -101,11 +101,14 @@ export const register = async (app: FastifyInstance) => {
     })
 
     const url = new URL(redirectUrl ?? '/')
-    if (user) {
+    if (user === 'needsSetup') {
+      url.pathname = '/register'
+      url.search = 'forumMemberNeedsSetup'
+    } else if (user) {
       request.session.userId = user.id
       request.session.canSwitchExhibitor = user.isAdministrator
     } else {
-      url.pathname = url.pathname = '/register'
+      url.pathname = '/register'
       url.search = 'forumMemberNotYetRegistered'
     }
 

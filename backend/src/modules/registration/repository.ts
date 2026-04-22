@@ -55,6 +55,7 @@ export class RegistrationRepository extends EntityRepository<Registration> {
       user = userRepository.create({
         email: registration.email,
         fullName: registration.name,
+        nickname: registration.nickname,
         isAdministrator: false,
       })
       userRepository.createPasswordResetToken(user, registration.exhibition.endDate.getTime())
