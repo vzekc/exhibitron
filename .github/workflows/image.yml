@@ -44,3 +44,32 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-push
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-exhibitron-prod
+      cancel-in-progress: false
+    steps:
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: v1.32.2
+
+      - name: Write kubeconfig
+        env:
+          KUBECONFIG_DATA: ${{ secrets.KUBECONFIG_EXHIBITRON_DEPLOY }}
+        run: |
+          printf '%s' "$KUBECONFIG_DATA" > "$RUNNER_TEMP/kubeconfig"
+          chmod 600 "$RUNNER_TEMP/kubeconfig"
+          echo "KUBECONFIG=$RUNNER_TEMP/kubeconfig" >> "$GITHUB_ENV"
+
+      - name: Rollout restart + wait
+        env:
+          NAMESPACE: prod
+          DEPLOYMENT: exhibitron
+        run: |
+          set -euo pipefail
+          kubectl -n "$NAMESPACE" rollout restart "deployment/$DEPLOYMENT"
+          kubectl -n "$NAMESPACE" rollout status  "deployment/$DEPLOYMENT" --timeout=5m
