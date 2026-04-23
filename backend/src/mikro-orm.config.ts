@@ -22,6 +22,14 @@ export default defineConfig({
   clientUrl: process.env.DATABASE_URL || 'postgresql://postgres@localhost/exhibitron',
   entities: ['dist/**/entity.js'],
   entitiesTs: ['src/**/entity.ts'],
+  migrations: {
+    // Commit each migration in its own transaction. Data migrations that
+    // use getKnex() go through a separate connection that doesn't see
+    // pending transactional changes — so an all-or-nothing batch breaks
+    // the moment such a migration queries a table created earlier in
+    // the same batch.
+    allOrNothing: false,
+  },
   // enable debug mode to log SQL queries and discovery information
   // debug: true,
   // logger: console.log,
