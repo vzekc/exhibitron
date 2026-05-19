@@ -2,6 +2,8 @@ import { describe, expect } from 'vitest'
 import { graphql } from 'gql.tada'
 import { ExecuteOperationFunction, graphqlTest, login } from '../../test/server.js'
 import { RegisterInput } from '../../generated/graphql.js'
+import { initORM } from '../../db.js'
+import { makeNewRegistrationEmail } from './emails.js'
 
 describe('registration', () => {
   const registrationDefaults = {
@@ -35,6 +37,60 @@ describe('registration', () => {
   graphqlTest('create', async (graphqlRequest) => {
     const result = await createRegistration(graphqlRequest)
     expect(result).toBeDefined()
+  })
+
+  graphqlTest('new-registration email JSON attachment shape', async (graphqlRequest) => {
+    const registrationId = await createRegistration(graphqlRequest)
+
+    const { registration: registrationRepo } = await initORM()
+    const registration = await registrationRepo.findOneOrFail(
+      { id: registrationId },
+      { populate: ['exhibition'] },
+    )
+
+    const email = makeNewRegistrationEmail(
+      ['admin@example.com'],
+      registration,
+      'https://example.com/',
+    )
+
+    expect(email.attachments).toHaveLength(1)
+    const attachment = email.attachments[0]
+    expect(attachment.filename).toBe(
+      `registration-${registration.exhibition.key}-${registrationId}.json`,
+    )
+
+    const json = JSON.parse(attachment.content)
+
+    // The attachment must carry the registration record and nothing more.
+    expect(Object.keys(json).sort()).toEqual([
+      'createdAt',
+      'data',
+      'email',
+      'exhibition',
+      'id',
+      'message',
+      'name',
+      'nickname',
+      'notes',
+      'status',
+      'topic',
+      'updatedAt',
+    ])
+
+    expect(json.id).toBe(registrationId)
+    expect(json.name).toBe('John Doe')
+    expect(json.email).toBe(registration.email)
+    expect(json.topic).toBe('ZX Spectrum')
+    expect(json.nickname).toBe('johnny')
+    expect(json.message).toBe('Hello!')
+    expect(json.status).toBe('new')
+    expect(json.data).toEqual({ key: 'value' })
+    expect(typeof json.createdAt).toBe('string')
+
+    // The embedded exhibition is trimmed to identifiers — no seatplanSvg bloat.
+    expect(Object.keys(json.exhibition).sort()).toEqual(['key', 'title'])
+    expect(attachment.content).not.toContain('seatplanSvg')
   })
 
   graphqlTest('create duplicate', async (graphqlRequest) => {

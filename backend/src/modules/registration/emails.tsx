@@ -1,4 +1,5 @@
 import React from 'react'
+import { wrap } from '@mikro-orm/core'
 import { makeEmailBody } from '../common/emailUtils.js'
 import { Registration } from './entity.js'
 
@@ -34,6 +35,11 @@ export const makeNewRegistrationEmail = (
       ? `@${registration.nickname}`
       : registration.name
   const exhibitionTitle = registration.exhibition.title
+  const { exhibition, ...registrationData } = wrap(registration).toObject()
+  const registrationJson = {
+    ...registrationData,
+    exhibition: { key: exhibition.key, title: exhibition.title },
+  }
   return {
     to,
     subject: `Neue Anmeldung zur ${exhibitionTitle} von ${name}`,
@@ -52,7 +58,7 @@ export const makeNewRegistrationEmail = (
     attachments: [
       {
         filename: `registration-${registration.exhibition.key}-${registration.id}.json`,
-        content: JSON.stringify(registration, null, 2),
+        content: JSON.stringify(registrationJson, null, 2),
       },
     ],
   }
