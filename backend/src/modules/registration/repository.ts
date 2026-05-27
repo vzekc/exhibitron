@@ -35,11 +35,11 @@ export class RegistrationRepository extends EntityRepository<Registration> {
     const userRepository = this.em.getRepository(User)
     const exhibitorRepository = this.em.getRepository(Exhibitor)
 
-    let completeProfileUrl = `${siteUrl}/user/profile`
-
     registration.status = RegistrationStatus.Approved
 
     let user = await userRepository.lookup(registration.email)
+    let needsSetupToken = false
+
     if (!user && registration.nickname) {
       // Returning exhibitor re-registering with a different email address. Reuse the
       // existing user so previous exhibits/tables stay linked, adopt the new email, and
@@ -47,8 +47,7 @@ export class RegistrationRepository extends EntityRepository<Registration> {
       user = await userRepository.findOne({ nickname: registration.nickname })
       if (user) {
         user.email = registration.email
-        userRepository.createPasswordResetToken(user, registration.exhibition.endDate.getTime())
-        completeProfileUrl = `${siteUrl}/setupExhibitor?registrationToken=${user.passwordResetToken}`
+        needsSetupToken = true
       }
     }
     if (!user) {
@@ -58,9 +57,22 @@ export class RegistrationRepository extends EntityRepository<Registration> {
         nickname: registration.nickname,
         isAdministrator: false,
       })
+      this.em.persist(user)
+      needsSetupToken = true
+    } else if (!needsSetupToken) {
+      // Existing user matched by email. If they never completed setup (no password and
+      // no linked forum nickname), they still need a setup link — a previous one may
+      // have expired or never been used.
+      await this.em.populate(user, ['password'])
+      if (!user.password && !user.nickname) {
+        needsSetupToken = true
+      }
+    }
+
+    let completeProfileUrl = `${siteUrl}/user/profile`
+    if (needsSetupToken) {
       userRepository.createPasswordResetToken(user, registration.exhibition.endDate.getTime())
       completeProfileUrl = `${siteUrl}/setupExhibitor?registrationToken=${user.passwordResetToken}`
-      this.em.persist(user)
     }
     let exhibitor: Exhibitor | null = await exhibitorRepository.findOne(
       {
