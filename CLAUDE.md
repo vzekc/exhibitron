@@ -1,14 +1,17 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this
+repository.
 
 ## Project Overview
 
-Exhibitron is a dynamic catalog application for the CC conference (Vintage Computer Festival). It's a full-stack TypeScript monorepo using pnpm workspaces with `frontend/` and `backend/` packages.
+Exhibitron is a dynamic catalog application for the CC conference (Vintage Computer Festival). It's
+a full-stack TypeScript monorepo using pnpm workspaces with `frontend/` and `backend/` packages.
 
 ## Commands
 
 ### Root-level (from project root)
+
 ```bash
 pnpm dev          # Run backend, frontend dev server, and schema watcher in parallel
 pnpm build        # Generate schemas → build frontend → build backend
@@ -18,6 +21,7 @@ pnpm prettier -c  # Check formatting
 ```
 
 ### Backend (from backend/)
+
 ```bash
 npm run start:watch         # Dev server with hot reload
 npm run test                # Run Vitest tests
@@ -28,6 +32,7 @@ npm run generate            # GraphQL codegen + gql.tada
 ```
 
 ### Frontend (from frontend/)
+
 ```bash
 npm run dev        # Vite dev server (port 5173, proxies to backend on 3001)
 npm run build      # Generate types → TypeScript check → Vite build
@@ -37,6 +42,7 @@ npm run generate   # gql.tada code generation
 ## Architecture
 
 ### Backend
+
 - **Fastify** server with **Apollo GraphQL** and REST endpoints
 - **MikroORM** with PostgreSQL (citext extension for case-insensitive emails)
 - **Transaction-per-request**: Every GraphQL request wrapped in a database transaction
@@ -44,6 +50,7 @@ npm run generate   # gql.tada code generation
 - **Pino** structured logging
 
 **Module structure** (each in `backend/src/modules/`):
+
 - `entity.ts` - MikroORM entity with decorators
 - `resolvers.ts` - GraphQL Query/Mutation/Type resolvers
 - `repository.ts` - Custom repository with business logic
@@ -54,6 +61,7 @@ npm run generate   # gql.tada code generation
 Key modules: user, exhibit, exhibitor, exhibition, registration, page, table, room, session, image
 
 ### Frontend
+
 - **React 19** with **React Router v7**
 - **Apollo Client** for GraphQL
 - **Tailwind CSS** + **Pico CSS** for styling
@@ -63,10 +71,14 @@ Key modules: user, exhibit, exhibitor, exhibition, registration, page, table, ro
 Path aliases: `@*` → `./src/*`, `@shared/*` → `../shared/src/*`
 
 ### Multi-Exhibition Support
-The system supports multiple exhibitions matched by hostname using regex patterns. Each exhibition has its own exhibitors, exhibits, tables, and registrations.
+
+The system supports multiple exhibitions matched by hostname using regex patterns. Each exhibition
+has its own exhibitors, exhibits, tables, and registrations.
 
 ### GraphQL Code Generation
-Both backend and frontend use gql.tada for type-safe GraphQL. After changing `.graphql` schema files, run `npm run generate` in the respective package.
+
+Both backend and frontend use gql.tada for type-safe GraphQL. After changing `.graphql` schema
+files, run `npm run generate` in the respective package.
 
 ## Database
 
@@ -98,9 +110,39 @@ cd backend && npx vitest run src/modules/user/test.ts
 - No try/catch unless unavoidable
 - Pre-commit hooks run: prettier check, lint, tests
 
+## Error handling — never swallow errors silently
+
+This is a hard rule. A failed mutation that the user can't see is worse than a thrown exception.
+
+**Frontend Apollo mutations.** The Apollo client is configured with `errorPolicy: 'all'` and a
+`fetch` override that downgrades non-2xx responses to 200, so GraphQL errors land in `result.errors`
+instead of throwing. `await someMutation(...)` without inspecting the result silently eats every
+server-side error. Always do one of:
+
+- `const result = await mutation(...); if (result.errors?.length) { await showMessage('Fehler', result.errors[0]?.message || '<German fallback>', 'OK'); return }`
+  — then bail out before any side effects (navigation, success modals, state changes that imply
+  success).
+- `useMutation(QUERY, { onError: (error) => ... })` for fire-and-forget call sites.
+
+Never do `try { await mutation(...) } catch (e) { console.error(e) }` — Apollo doesn't throw with
+this config, so the catch never fires _and_ the error is hidden. Reference patterns:
+`frontend/src/pages/user/Profile.tsx`, `frontend/src/pages/user/ExhibitEditor.tsx`,
+`frontend/src/components/seatingPlan/TableInfo.tsx`.
+
+**Backend resolvers.** Don't let raw `UniqueConstraintViolationException` (or other MikroORM errors)
+bubble up as `INTERNAL_SERVER_ERROR` — the user sees nothing useful and the SQL leaks into logs.
+Catch known constraint failures and rethrow as `UniqueConstraintError` / `BadRequestError` / etc.
+from `modules/common/errors.ts` with a German user-facing message. To catch flush-time errors inside
+the resolver, call `await db.em.flush()` explicitly. Reference pattern:
+`backend/src/modules/host/resolvers.ts` (`addHost`).
+
+**The "No try/catch unless unavoidable" rule above is not a license to silently drop errors** — it
+means prefer letting errors propagate to a place that handles them, not "ignore them."
+
 ## Environment Variables (backend/.env)
 
 Required:
+
 - `SESSION_SECRET` - Session encryption key
 - `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` - WoltLab forum OAuth
 - `DATABASE_URL` - PostgreSQL connection string
