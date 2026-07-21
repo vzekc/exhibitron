@@ -7,6 +7,9 @@ export default defineConfig({
     env: {
       NODE_ENV: 'test',
     },
-    testTimeout: 60000, // Increase timeout to 15 seconds for CI compatibility
+    testTimeout: 60000,
+    // Each suite provisions its own database in a setup hook; with all suites
+    // running in parallel that takes well over the 10s default.
+    hookTimeout: 60000,
   },
 })
