@@ -15,6 +15,7 @@ declare module 'fastify' {
   interface FastifyRequest {
     apolloContext: Context
     forkedEm?: SqlEntityManager
+    transactionSettled?: boolean
     user: User | null
     exhibitor: Exhibitor | null
     exhibition: Exhibition

@@ -22,6 +22,17 @@ export default defineConfig({
   clientUrl: process.env.DATABASE_URL || 'postgresql://postgres@localhost/exhibitron',
   entities: ['dist/**/entity.js'],
   entitiesTs: ['src/**/entity.ts'],
+  pool: {
+    min: 2,
+    max: Number(process.env.DB_POOL_MAX) || 20,
+  },
+  driverOptions: {
+    // A request that cannot get a connection within this window fails and
+    // releases its slot in the queue. Without a bound it waits out knex's
+    // 60s default, long enough for the reverse proxy to give up first and for
+    // the backlog to grow faster than it drains.
+    acquireConnectionTimeout: 10_000,
+  },
   migrations: {
     // Commit each migration in its own transaction. Data migrations that
     // use getKnex() go through a separate connection that doesn't see
