@@ -89,7 +89,7 @@ export const register = async (app: FastifyInstance) => {
 
   // Start a transaction and create context for each request that reads the
   // database
-  app.addHook('onRequest', async (request) => {
+  app.addHook('onRequest', async (request, reply) => {
     if (!needsDatabaseContext(request)) return
 
     const logger = createRequestLogger(request.requestId)
@@ -97,17 +97,20 @@ export const register = async (app: FastifyInstance) => {
 
     // onSend does not run when a handler never returns — a stalled upstream
     // call, or a client that stops sending its request body mid-way. The
-    // socket closing is the one event that always arrives, so it backstops the
-    // release and keeps an abandoned request from owning a connection forever.
+    // response closing is the one event that always arrives, so it backstops
+    // the release and keeps an abandoned request from owning a connection
+    // forever. It fires once the response has been written or the connection
+    // is torn down, both of which mean the request is over and its transaction
+    // is safe to settle.
     //
-    // The socket can close while the transaction is still being opened, before
-    // there is anything to settle. Settling then has to wait until setup
-    // finishes, otherwise the transaction it is about to create outlives the
-    // request that owns it.
+    // The connection can drop while the transaction is still being opened,
+    // before there is anything to settle. Settling then has to wait until
+    // setup finishes, otherwise the transaction it is about to create outlives
+    // the request that owns it.
     let setupFinished = false
-    let clientGone = request.raw.destroyed
-    request.raw.on('close', () => {
-      clientGone = true
+    let responseClosed = reply.raw.destroyed
+    reply.raw.on('close', () => {
+      responseClosed = true
       if (setupFinished) void settleTransaction(request, false)
     })
 
@@ -129,8 +132,8 @@ export const register = async (app: FastifyInstance) => {
       setupFinished = true
     }
 
-    if (clientGone) {
-      logger.debug('Client disconnected while the transaction was being opened')
+    if (responseClosed) {
+      logger.debug('Connection closed while the transaction was being opened')
       await settleTransaction(request, false)
     }
   })

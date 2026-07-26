@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, expect, test } from 'vitest'
 import net from 'node:net'
+import http from 'node:http'
 import { createApp } from '../app.js'
 import { initORM } from '../db.js'
 import { FastifyInstance } from 'fastify'
@@ -33,6 +34,36 @@ const rawRequest = (payload: string, holdMs: number) =>
       socket.destroy()
       resolve()
     }, holdMs)
+  })
+
+// Sends a well-formed request over a real socket. app.inject() drives a mock
+// request whose stream stays open until the response is done, so it cannot
+// observe what a real request stream does: close as soon as the body has been
+// received, while the handler is still running.
+const socketRequest = (method: string, path: string, body?: string) =>
+  new Promise<{ statusCode: number; body: string }>((resolve, reject) => {
+    const request = http.request(
+      {
+        host: '127.0.0.1',
+        port,
+        method,
+        path,
+        headers: {
+          host: 'localhost:3000',
+          ...(body
+            ? { 'content-type': 'application/json', 'content-length': Buffer.byteLength(body) }
+            : {}),
+        },
+      },
+      (response) => {
+        let payload = ''
+        response.setEncoding('utf8')
+        response.on('data', (chunk) => (payload += chunk))
+        response.on('end', () => resolve({ statusCode: response.statusCode!, body: payload }))
+      },
+    )
+    request.on('error', reject)
+    request.end(body)
   })
 
 beforeAll(async () => {
@@ -117,5 +148,21 @@ test('graphql requests still commit and release', async () => {
 
   expect(response.statusCode).toBe(200)
   expect(JSON.parse(response.payload).data).toEqual({ __typename: 'Query' })
+  await expectPoolDrained()
+})
+
+test('a graphql request over a real socket resolves against a live transaction', async () => {
+  const response = await socketRequest(
+    'POST',
+    '/graphql',
+    JSON.stringify({ query: '{ getExhibits { id } }' }),
+  )
+
+  expect(response.statusCode).toBe(200)
+  const result = JSON.parse(response.body)
+  // A transaction settled while the handler was still running surfaces here as
+  // "Transaction query already complete" instead of a result.
+  expect(result.errors).toBeUndefined()
+  expect(Array.isArray(result.data.getExhibits)).toBe(true)
   await expectPoolDrained()
 })
