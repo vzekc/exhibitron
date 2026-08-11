@@ -15,6 +15,7 @@ import { registerExhibitImageRoutes } from './modules/exhibit/routes.js'
 import { registerServerSideHtmlRoutes } from './modules/serverSideHtml/routes.js'
 import { registerScheduleRoutes } from './modules/schedule/routes.js'
 import { registerSeatplanRoutes } from './modules/seatplan/routes.js'
+import { registerVisitorPhotoRoutes } from './modules/visitorPhoto/routes.js'
 import { startCleanupScheduler } from './app/cleanup.js'
 
 const registerErrorHandler = (app: FastifyInstance) => {
@@ -151,6 +152,12 @@ export async function createApp({
   await registerExhibitImageRoutes(app)
   await registerScheduleRoutes(app)
   await registerSeatplanRoutes(app)
+
+  /* The booth sends a JPEG as the raw body; nothing else here posts binary. */
+  app.addContentTypeParser('image/jpeg', { parseAs: 'buffer' }, (_request, body, done) =>
+    done(null, body),
+  )
+  await registerVisitorPhotoRoutes(app)
 
   return app
 }

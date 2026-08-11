@@ -1,0 +1,96 @@
+import * as fs from 'fs/promises'
+import * as path from 'path'
+import { createHash, timingSafeEqual } from 'crypto'
+
+/*
+ * Where the pictures live: one directory per visitor, outside the database and
+ * outside the backup, so that deleting one is complete the moment it returns.
+ *
+ * The directory name is the photo id, and every file inside says which machine
+ * it is for — c64.prg, amiga-ham.adf, photo.jpg. Nothing repeats the id.
+ */
+
+export const PHOTO_ROOT = process.env.VISITOR_PHOTO_ROOT ?? '/var/lib/exhibitron/visitor-photos'
+
+/* Ids and codes are drawn from an alphabet with no 0/O or 1/I in it. */
+const CODE = /^[A-HJ-NP-Z2-9]+$/
+
+export function isWellFormedId(id: string) {
+  return id.length === 6 && CODE.test(id)
+}
+
+export function isWellFormedCode(code: string) {
+  return code.length >= 6 && code.length <= 16 && CODE.test(code)
+}
+
+export function hashCode(code: string) {
+  return createHash('sha256').update(code).digest('hex')
+}
+
+/* Compared without leaking, through timing, how much of a guess was right. */
+export function codeMatches(code: string, expectedHash: string) {
+  const got = Buffer.from(hashCode(code), 'hex')
+  const want = Buffer.from(expectedHash, 'hex')
+  return got.length === want.length && timingSafeEqual(got, want)
+}
+
+export function photoDir(id: string) {
+  if (!isWellFormedId(id)) {
+    throw new Error(`refusing to build a path from ${JSON.stringify(id)}`)
+  }
+  return path.join(PHOTO_ROOT, id)
+}
+
+export async function writePhotoFile(id: string, name: string, data: Buffer) {
+  const dir = photoDir(id)
+  await fs.mkdir(dir, { recursive: true })
+  await fs.writeFile(path.join(dir, path.basename(name)), data)
+}
+
+export async function listPhotoFiles(id: string): Promise<string[]> {
+  const entries = await fs.readdir(photoDir(id)).catch(() => [])
+  return entries.filter((name) => !name.startsWith('.')).sort()
+}
+
+export async function readPhotoFile(id: string, name: string) {
+  return fs.readFile(path.join(photoDir(id), path.basename(name)))
+}
+
+/* Everything the visitor's photo produced, gone. */
+export async function removePhotoFiles(id: string) {
+  await fs.rm(photoDir(id), { recursive: true, force: true })
+}
+
+/*
+ * The downloads, in the order a visitor would look for them: their own picture
+ * first, then the machines, grouped by make. A file that matches no group is
+ * still offered — a new encoder should appear on the page the day it is added,
+ * not the day somebody remembers to edit this list.
+ */
+const GROUPS: { title: string; match: RegExp }[] = [
+  { title: 'Das Foto', match: /^photo\.jpg$/ },
+  { title: 'Commodore', match: /^(c64|amiga)/ },
+  { title: 'Apple', match: /^apple2/ },
+  { title: 'Atari', match: /^atari/ },
+  { title: 'MSX und Amstrad', match: /^(msx|cpc)/ },
+  { title: 'Texas Instruments', match: /^ti99/ },
+  { title: 'PC', match: /^(cga|mga|vga)/ },
+  { title: 'Terminals und Drucker', match: /^(ascii|tektronix)/ },
+  { title: 'Bildformate', match: /^(pcx|gif|bmp|ppm|tiff)/ },
+  { title: 'Der Beleg', match: /^beleg\.png$/ },
+]
+
+export function groupFiles(files: string[]) {
+  const shown = files.filter((f) => !f.endsWith('.sha256'))
+  const groups = GROUPS.map(({ title, match }) => ({
+    title,
+    files: shown.filter((f) => match.test(f)),
+  })).filter((g) => g.files.length > 0)
+
+  const claimed = new Set(groups.flatMap((g) => g.files))
+  const rest = shown.filter((f) => !claimed.has(f))
+  if (rest.length > 0) {
+    groups.push({ title: 'Weitere Formate', files: rest })
+  }
+  return groups
+}
