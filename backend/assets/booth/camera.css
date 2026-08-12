@@ -2,30 +2,46 @@
  * What a browser needs and an Indy does not.
  *
  * booth.css draws the screens; this only puts the 1280x1024 canvas on a display
- * that is not the Indy's, and gives the rectangles the application blits into
- * something to hold. Nothing here restates a colour, a typeface or a position:
- * the screens come from the booth and the coordinates from screen.manifest.
+ * that is not the Indy's, gives the rectangles the application blits into
+ * something to hold, and sets the button box underneath it. Nothing here
+ * restates a colour, a typeface or a position: the screens come from the booth
+ * and the coordinates from screen.manifest.
  */
 
 html,
 body {
   width: 100%;
-  height: 100dvh;
-  overflow: hidden;
+  min-height: 100dvh;
   background: var(--paper);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  /* Not hidden: if the screen and the buttons ever do not both fit, the buttons
+     have to stay reachable. A booth cannot be scrolled, but a window that is
+     too short for one has to be. */
+  overflow: auto;
 }
 
-/* The Indy's screen, scaled to whatever this one is. */
+/* The cabinet: the screen, and the buttons below it. */
+.booth {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  min-height: 100dvh;
+  padding: 16px 0 24px;
+}
+
+/* The Indy's screen, scaled to whatever this one is. Only this is the booth's;
+   everything below it belongs to the page. */
 .stage {
   position: relative;
   width: 1280px;
   height: 1024px;
   flex: 0 0 auto;
   transform: scale(var(--scale, 1));
-  transform-origin: center center;
+  transform-origin: top center;
+  /* The scaled box still occupies its unscaled height in the layout, so the row
+     below it is pulled up by what the scaling saved. */
+  margin-bottom: calc((var(--scale, 1) - 1) * 1024px);
 }
 
 .screen {
@@ -69,73 +85,84 @@ body {
   display: flex;
 }
 
-/* ── the caps, as things to press ────────────────────────────────────────── */
+/* ── the button box ──────────────────────────────────────────────────────── */
 
 /*
- * On the booth these are lamps in plastic buttons and a hand reaches for the
- * one that is lit. Here the whole group is the target, so that what the screen
- * says to press is what there is to press.
+ * The box in buttonbox/: a red button, a green one, and the language button
+ * that has no lamp. It is not drawn on the screen because it is not on the
+ * screen — it is the thing in front of the cabinet that a visitor's hand goes
+ * to, and the screen is what tells them which one to press.
  */
-.screen .button[data-command] {
+.buttonbox {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  padding: 20px 32px;
+  border-radius: 20px;
+  box-shadow: inset 0 0 0 3px var(--dim);
+}
+
+.box-button {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 8px;
+  border-radius: 50%;
   cursor: pointer;
-  border-radius: 12px;
-  padding: 10px 16px 10px 10px;
-  margin: -10px 0 0 -10px;
+  line-height: 0;
 }
-.screen .button[data-command]:hover .cap {
-  filter: brightness(1.25);
-}
-.screen .button[data-command]:focus-visible {
+.box-button:focus-visible {
   outline: 4px solid var(--sgi);
   outline-offset: 2px;
 }
-.screen .button[data-command]:active {
+.box-button:active .cap {
   transform: translateY(2px);
 }
 
+/* The caps are booth.css's own, at the size a finger wants. */
+.buttonbox .cap {
+  display: block;
+  width: 72px;
+  height: 72px;
+  border-radius: 36px;
+  transition: opacity 60ms linear;
+}
 /*
- * The lamps, at the rates the button box runs them: attract 250 ms in 2000,
- * countdown 120 in 240, printing 200 in 400, error 150 in 300.
+ * booth.css paints a cap only where the screens use one, inside `.button`.
+ * These are the box's own, so they carry their colour here — and as text colour
+ * as well, so that a lit lamp glows in the colour it is rather than in whatever
+ * it inherited.
  */
-@keyframes lamp-beckon {
-  0%,
-  12.5% {
-    opacity: 1;
-  }
-  12.6%,
-  100% {
-    opacity: 0.12;
-  }
+.buttonbox .cap.red {
+  background: var(--signal);
+  color: var(--signal);
 }
-@keyframes lamp-even {
-  0%,
-  50% {
-    opacity: 1;
-  }
-  50.1%,
-  100% {
-    opacity: 0.12;
-  }
+.buttonbox .cap.green {
+  background: var(--go);
+  color: var(--go);
+}
+.buttonbox .cap.blue {
+  background: var(--sgi);
+  color: var(--sgi);
 }
 
-.cap.beckon {
-  animation: lamp-beckon 2s steps(1, end) infinite;
+/*
+ * A lamp is lit or it is dark, and the blinking is timed in camera.js from the
+ * same table the Pico runs, so a rate is never written down twice.
+ *
+ * A dark cap is dimmed rather than faded out: an unlit button on the box is
+ * still a red button you can see and reach for, which is the whole reason the
+ * caps are coloured.
+ */
+.buttonbox .cap {
+  filter: brightness(0.4);
 }
-.cap.counting {
-  animation: lamp-even 240ms steps(1, end) infinite;
-}
-.cap.working {
-  animation: lamp-even 400ms steps(1, end) infinite;
-}
-.cap.fault {
-  animation: lamp-even 300ms steps(1, end) infinite;
+.buttonbox .cap.lit {
+  filter: brightness(1);
+  box-shadow: 0 0 24px -4px currentColor;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .cap.beckon,
-  .cap.counting,
-  .cap.working,
-  .cap.fault {
-    animation: none;
-  }
+/* The language button has no lamp on the box, so it is simply a blue cap. */
+.buttonbox .cap.blue {
+  filter: none;
 }

@@ -1,5 +1,5 @@
 import * as path from 'path'
-import { readFile, stat } from 'fs/promises'
+import { readdir, readFile, stat } from 'fs/promises'
 import { fileURLToPath } from 'url'
 
 /*
@@ -15,6 +15,10 @@ import { fileURLToPath } from 'url'
  * The exhibitor sees what a visitor sees, including the words about the printer
  * and the Ausstellungsnetz, because seeing that is the point. The slip that
  * would come out of the printer arrives as a PDF instead.
+ *
+ * The screen is only a screen: the buttons are underneath it, as they are on
+ * the cabinet, and they are the box in buttonbox/ — a red one, a green one and
+ * the language button, lit the way that box lights them.
  */
 
 const backendRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), '../../..')
@@ -24,6 +28,25 @@ const BOOTH_DIR = path.join(backendRoot, 'assets/booth')
    here: it is `live` with a digit over the viewfinder, which is what the booth
    does too. */
 const SCREENS = ['attract', 'live', 'keep', 'printing', 'done', 'error'] as const
+
+/*
+ * The language the booth returns to by itself, and the one this page starts in.
+ * Everything installed is offered; nothing here enumerates them, so a third
+ * language is a directory in the fotofix repository and a run of its sync
+ * script.
+ */
+const DEFAULT_LANGUAGE = 'de'
+
+async function installedLanguages() {
+  const entries = await readdir(BOOTH_DIR, { withFileTypes: true })
+  const languages = entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name)
+  if (languages.length === 0) throw new Error(`no language directory in ${BOOTH_DIR}`)
+
+  /* German first, because that is the one the booth falls back to. */
+  return languages.sort((a, b) =>
+    a === DEFAULT_LANGUAGE ? -1 : b === DEFAULT_LANGUAGE ? 1 : a.localeCompare(b),
+  )
+}
 
 export const CAMERA_ASSETS = ['booth.css', 'camera.css', 'camera.js'] as const
 
@@ -84,11 +107,9 @@ async function version(name: CameraAsset) {
 }
 
 export async function renderCameraPage() {
-  const [manifestText, ...screens] = await Promise.all([
+  const languages = await installedLanguages()
+  const [manifestText, booth, camera, script] = await Promise.all([
     readFile(path.join(BOOTH_DIR, 'screen.manifest'), 'utf8'),
-    ...SCREENS.map((name) => readFile(path.join(BOOTH_DIR, `${name}.html`), 'utf8')),
-  ])
-  const [booth, camera, script] = await Promise.all([
     version('booth.css'),
     version('camera.css'),
     version('camera.js'),
@@ -99,9 +120,15 @@ export async function renderCameraPage() {
   const [cdX, cdY, cdW, cdH] = rects.get('countdown')!
   const [idX, idY, idW, idH] = rects.get('id_slot')!
 
-  const sections = SCREENS.map(
-    (name, i) => `<section class="screen" data-state="${name}">${screenBody(screens[i])}</section>`,
-  ).join('\n')
+  const screens = await Promise.all(
+    languages.flatMap((lang) =>
+      SCREENS.map(async (name) => {
+        const html = await readFile(path.join(BOOTH_DIR, lang, `${name}.html`), 'utf8')
+        return `<section class="screen" data-state="${name}" data-lang="${lang}">${screenBody(html)}</section>`
+      }),
+    ),
+  )
+  const sections = screens.join('\n')
 
   /*
    * What the application draws over a screen, at the coordinates it draws them.
@@ -124,6 +151,7 @@ export async function renderCameraPage() {
 </style>
 </head>
 <body>
+<div class="booth">
 <div class="stage">
 ${sections}
 
@@ -137,6 +165,19 @@ ${sections}
 </div>
 
 <div class="blit id-area sheet" id="photo-id" hidden></div>
+</div>
+
+<div class="buttonbox">
+  <button type="button" class="box-button" data-command="SHOOT" aria-label="Rote Taste">
+    <span class="cap red"></span>
+  </button>
+  <button type="button" class="box-button" data-command="SAVE" aria-label="Grüne Taste">
+    <span class="cap green"></span>
+  </button>
+  <button type="button" class="box-button" data-command="LANG" aria-label="Sprache">
+    <span class="cap blue"></span>
+  </button>
+</div>
 </div>
 <script type="module" src="${script}"></script>
 </body>

@@ -8,9 +8,9 @@ backend/src/migrations/.snapshot-exhibitron.json
 # one. camera.css and camera.js are this repository's own and are not exempt.
 backend/assets/booth/booth.css
 backend/assets/booth/screen.manifest
-backend/assets/booth/attract.html
-backend/assets/booth/live.html
-backend/assets/booth/keep.html
-backend/assets/booth/printing.html
-backend/assets/booth/done.html
-backend/assets/booth/error.html
+backend/assets/booth/*/attract.html
+backend/assets/booth/*/live.html
+backend/assets/booth/*/keep.html
+backend/assets/booth/*/printing.html
+backend/assets/booth/*/done.html
+backend/assets/booth/*/error.html
