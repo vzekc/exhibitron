@@ -1,38 +1,47 @@
 /*
  * The booth's state machine, in a browser.
  *
- * The states and the two commands are the ones in the fotofix repository's
- * camera/PROTOCOL.md, because an exhibitor testing this should be testing the
- * thing that is in the entrance hall: red shoots and discards, green keeps, a
- * command that does not apply is dropped, and the lamps say which is which.
+ * The states, the transitions and the two commands are the ones in the fotofix
+ * repository's camera/PROTOCOL.md, including the waits: three seconds of
+ * countdown, thirty for a frozen frame nobody confirms, three minutes of
+ * nothing before the invitation comes back. An exhibitor pressing these is
+ * being shown the machine in the entrance hall, so it behaves like it.
  *
- * What differs is what a browser forces: the camera has to be asked for, and
- * the slip is a download rather than a strip of paper. Neither changes the
- * order anything happens in.
+ * Two things a browser forces. The camera has to be asked for, which happens on
+ * the first press rather than at the invitation. And there is no printer: the
+ * slip is fetched as a PDF at the moment the printer would be producing it,
+ * which is what the PRINTING screen is already there to cover.
  */
 
-const CAPTURE_WIDTH = 640
-const CAPTURE_HEIGHT = 480
-
-/* What the booth does between the shutter and the freeze. */
+/* Seconds, as fotofix.conf spells them for the booth. */
 const COUNTDOWN_FROM = 3
 const COUNTDOWN_STEP_MS = 1000
+const CONFIRM_TIMEOUT_MS = 30_000
+const DONE_MS = 6_000
+const ATTRACT_AFTER_MS = 180_000
 
 const stage = document.querySelector('.stage')
 const screens = new Map(
   [...document.querySelectorAll('.screen')].map((el) => [el.dataset.state, el]),
 )
 const video = document.getElementById('viewfinder')
-const countEl = document.getElementById('count')
+const frozen = document.getElementById('frozen')
+const picture = document.getElementById('picture')
+const countdownEl = document.getElementById('countdown')
+const photoIdEl = document.getElementById('photo-id')
+
+/* Which screens the picture is drawn on. The manifest says the same thing to
+   the Indy; here the element is simply hidden on the other two. */
+const SHOWS_PICTURE = new Set(['live', 'keep', 'printing', 'done'])
 
 let state = null
 let stream = null
-/* The frame the exhibitor approved, unmirrored, as it will be uploaded. */
+/* The frame at the end of the countdown, unmirrored, as it will be uploaded. */
 let frame = null
-let photo = null
-let countdownTimer = null
+let timer = null
+let idle = null
 
-/* ── the screen ───────────────────────────────────────────────────────────── */
+/* ── the screens ──────────────────────────────────────────────────────────── */
 
 function show(next) {
   state = next
@@ -40,32 +49,61 @@ function show(next) {
     if (name === next) el.setAttribute('data-current', '')
     else el.removeAttribute('data-current')
   }
-  const focus = screens.get(next)?.querySelector('button.button:not(:disabled)')
-  focus?.focus({ preventScroll: true })
+
+  picture.hidden = !SHOWS_PICTURE.has(next)
+  frozen.hidden = next === 'live'
+  countdownEl.hidden = true
+  photoIdEl.hidden = next !== 'done'
+
+  clearTimeout(timer)
+  timer = null
+  if (next === 'keep') timer = setTimeout(() => command('SHOOT'), CONFIRM_TIMEOUT_MS)
+  if (next === 'done') timer = setTimeout(() => show('live'), DONE_MS)
+
+  /* Three minutes of nothing and the invitation comes back, as at the booth. */
+  clearTimeout(idle)
+  idle = null
+  if (next === 'live') idle = setTimeout(() => show('attract'), ATTRACT_AFTER_MS)
+
+  lamps()
+}
+
+/*
+ * The lamps, as the button box would light them for this state. The screens
+ * ship with the caps the booth painted on them; what changes here is only the
+ * blinking, which no still image can carry.
+ */
+function lamps() {
+  for (const cap of document.querySelectorAll('.cap')) {
+    cap.classList.remove('beckon', 'counting', 'working', 'fault')
+  }
+  const current = screens.get(state)
+  const caps = current ? [...current.querySelectorAll('.cap')] : []
+
+  if (state === 'attract') caps[0]?.classList.add('beckon')
+  if (state === 'printing') caps.forEach((cap) => cap.classList.add('working'))
+  if (state === 'error') caps.forEach((cap) => cap.classList.add('fault'))
 }
 
 function fit() {
-  const narrow = window.innerWidth < 900
-  document.body.classList.toggle('narrow', narrow)
-  if (narrow) {
-    stage.style.removeProperty('--scale')
-    return
-  }
-  const scale = Math.min(window.innerWidth / 1280, window.innerHeight / 1024)
-  stage.style.setProperty('--scale', String(scale))
+  stage.style.setProperty(
+    '--scale',
+    String(Math.min(window.innerWidth / 1280, window.innerHeight / 1024)),
+  )
 }
 
-function fail(text) {
-  document.getElementById('error-text').textContent = text
+function fail(what) {
+  const sub = screens.get('error').querySelector('.sub')
+  if (sub && what) sub.textContent = what
   show('error')
 }
 
 /* ── sound ────────────────────────────────────────────────────────────────── */
 
 /*
- * A beep on each digit and a click at the freeze, as the booth makes with
- * sfplay. Synthesised rather than fetched: they are two sine bursts, and a
- * browser that refuses to make noise must not hold up the countdown.
+ * A beep on each digit and the shutter at the freeze, as the booth makes with
+ * sfplay. Nothing waits for a sound: a browser that refuses to make noise must
+ * not hold up the countdown.
  */
 let audio = null
 
@@ -89,13 +127,14 @@ const shutter = () => tone(180, 60, 'square')
 /* ── the camera ───────────────────────────────────────────────────────────── */
 
 async function startCamera() {
+  if (stream) return true
   if (!navigator.mediaDevices?.getUserMedia) {
-    fail('Dieser Browser gibt keine Kamera frei. Bitte einen anderen verwenden.')
-    return
+    fail('Dieser Browser gibt keine Kamera frei.')
+    return false
   }
 
-  /* The audio context has to be made inside the gesture that starts the
-     camera, or the countdown counts in silence. */
+  /* The audio context has to be made inside a gesture, or the countdown counts
+     in silence. */
   audio ??= new (window.AudioContext ?? window.webkitAudioContext)()
   audio.resume()
 
@@ -107,32 +146,30 @@ async function startCamera() {
     .catch((err) => {
       fail(
         err.name === 'NotAllowedError'
-          ? 'Die Kamera wurde nicht freigegeben. Bitte die Erlaubnis erteilen und es noch einmal versuchen.'
+          ? 'Die Kamera wurde nicht freigegeben. Bitte die Erlaubnis erteilen.'
           : `Die Kamera lässt sich nicht öffnen: ${err.message}`,
       )
       return null
     })
-  if (!stream) return
+  if (!stream) return false
 
   video.srcObject = stream
   await video.play()
-  show('live')
+  return true
 }
 
 /*
- * The frame the booth would have taken: 640x480, centre-cropped from whatever
- * the device's camera hands over, and unmirrored — the viewfinder is a mirror
- * so that posing works, but lettering in the room has to read correctly on the
- * slip.
+ * The frame the Indy would have taken: the viewfinder's own 640x480,
+ * centre-cropped from whatever this device's camera hands over, and unmirrored.
  */
-function grab(canvas) {
+function grab() {
   const w = video.videoWidth
   const h = video.videoHeight
-  const wanted = CAPTURE_WIDTH / CAPTURE_HEIGHT
+  const wanted = frozen.width / frozen.height
   const cropW = w / h > wanted ? h * wanted : w
   const cropH = w / h > wanted ? h : w / wanted
 
-  canvas
+  frozen
     .getContext('2d')
     .drawImage(
       video,
@@ -142,103 +179,91 @@ function grab(canvas) {
       cropH,
       0,
       0,
-      CAPTURE_WIDTH,
-      CAPTURE_HEIGHT,
+      frozen.width,
+      frozen.height,
     )
+  frame = frozen
 }
 
-function copyFrame(id) {
-  const target = document.getElementById(id)
-  target.getContext('2d').drawImage(frame, 0, 0)
-}
-
-/* ── the commands ─────────────────────────────────────────────────────────── */
+/* ── the transitions ──────────────────────────────────────────────────────── */
 
 function countdown() {
   let at = COUNTDOWN_FROM
-  countEl.hidden = false
-  countEl.textContent = String(at)
+  const plate = countdownEl.querySelector('.plate')
+  const cap = screens.get('live').querySelector('.cap')
+
+  countdownEl.hidden = false
+  plate.textContent = String(at)
+  cap?.classList.add('counting')
   beep()
 
-  countdownTimer = setInterval(() => {
+  timer = setInterval(() => {
     at -= 1
     if (at > 0) {
-      countEl.textContent = String(at)
+      plate.textContent = String(at)
       beep()
       return
     }
 
-    clearInterval(countdownTimer)
-    countdownTimer = null
-    countEl.hidden = true
-    screens.get('live').querySelector('.cap.red').classList.remove('counting')
-
+    clearInterval(timer)
+    timer = null
+    cap?.classList.remove('counting')
     shutter()
-    frame = document.createElement('canvas')
-    frame.width = CAPTURE_WIDTH
-    frame.height = CAPTURE_HEIGHT
-    grab(frame)
-    copyFrame('frozen')
-    show('frozen')
+    grab()
+    show('keep')
   }, COUNTDOWN_STEP_MS)
 }
 
+/*
+ * What the booth does between the green button and the closing screen: the
+ * photo goes up, the slip is produced, and only then is there an ID to show.
+ */
 async function save() {
-  copyFrame('saving')
-  show('saving')
+  show('printing')
 
-  const blob = await new Promise((resolve) => frame.toBlob(resolve, 'image/jpeg', 0.92))
-  if (!blob) {
-    fail('Das Bild ließ sich nicht in ein JPEG umwandeln.')
-    return
-  }
+  const blob = await new Promise((resolve) => frozen.toBlob(resolve, 'image/jpeg', 0.92))
+  if (!blob) return fail('Das Bild ließ sich nicht in ein JPEG umwandeln.')
 
   const response = await fetch('/api/visitor-photo/kamera', {
     method: 'POST',
     headers: { 'Content-Type': 'image/jpeg' },
     body: blob,
-  }).catch((err) => {
-    fail(`Das Foto konnte nicht übertragen werden: ${err.message}`)
-    return null
-  })
+  }).catch((err) => fail(`Das Foto konnte nicht übertragen werden: ${err.message}`))
   if (!response) return
+  if (!response.ok) return fail(`Die Website hat das Foto abgelehnt (${response.status}).`)
 
-  if (!response.ok) {
-    const said = await response.text().catch(() => '')
-    fail(`Die Website hat das Foto abgelehnt (${response.status}). ${said}`.trim())
-    return
+  const photo = await response.json()
+  if (!(await slip(photo))) {
+    /* A printer that has quietly stopped is what the booth's fault screen is
+       for, and a slip that never arrived is worse here: the deletion code is on
+       it and nowhere else. */
+    return fail('Der Laufzettel konnte nicht erzeugt werden.')
   }
 
-  photo = await response.json()
-  copyFrame('kept')
-  document.getElementById('photo-id').textContent = photo.id
-  document.getElementById('delete-code').textContent = photo.code
-  const link = document.getElementById('photo-page')
-  link.href = `/foto/${photo.id}`
+  /* The glyph sheet, six cells of it, in the slot the manifest reserves. */
+  photoIdEl.replaceChildren(
+    ...[...photo.id].map((ch) => {
+      const cell = document.createElement('div')
+      cell.className = 'cell glyph'
+      cell.textContent = ch
+      return cell
+    }),
+  )
   show('done')
 }
 
 /*
- * The slip. It carries the deletion code, so it is not a file lying on the
- * server waiting to be fetched by anyone who knows the id — it is rendered
- * against the code the browser is holding, which is the same proof the
- * deletion form asks for.
+ * The Laufzettel. On the booth it is on paper before this screen is reached, so
+ * it is fetched here rather than offered as something to press: the deletion
+ * code is on it and nowhere else, and a slip nobody took is a slip lost.
  */
-async function receipt() {
+async function slip(photo) {
   const response = await fetch(`/foto/${photo.id}/beleg.pdf`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ code: photo.code }),
-  }).catch((err) => {
-    fail(`Der Beleg konnte nicht erzeugt werden: ${err.message}`)
-    return null
-  })
-  if (!response) return
-
-  if (!response.ok) {
-    fail(`Der Beleg konnte nicht erzeugt werden (${response.status}).`)
-    return
-  }
+  }).catch(() => null)
+  if (!response?.ok) return false
 
   const url = URL.createObjectURL(await response.blob())
   const a = document.createElement('a')
@@ -246,58 +271,68 @@ async function receipt() {
   a.download = `${photo.id}-beleg.pdf`
   a.click()
   URL.revokeObjectURL(url)
+  return true
 }
 
 /*
- * One entry point for every button and every key, as the booth has one for the
- * button box and its own keyboard. A command that does not apply in the current
- * state is dropped without complaint.
+ * One way in, as the booth has one for the button box and its own keyboard. A
+ * command that does not apply in the current state is dropped without
+ * complaint, so a press can be sent whenever it happens.
  */
-function command(what) {
+async function command(what) {
+  if (state === 'attract') {
+    /* Any button wakes it — and this is the gesture the camera is asked for on. */
+    if (await startCamera()) show('live')
+    return
+  }
+
   if (what === 'SHOOT') {
-    if (state === 'attract') return void startCamera()
-    if (state === 'live' && !countdownTimer) {
-      screens.get('live').querySelector('.cap.red').classList.add('counting')
-      return countdown()
-    }
-    if (state === 'frozen') {
+    if (state === 'live' && !timer) return countdown()
+    if (state === 'keep') {
       frame = null
-      return show('live')
-    }
-    if (state === 'done') {
-      frame = null
-      photo = null
       return show('live')
     }
     return
   }
 
-  if (what === 'SAVE' && state === 'frozen') return void save()
-  if (what === 'RECEIPT' && state === 'done') return void receipt()
-
-  /* Releasing a fault gives the picture back rather than dropping it: a failed
-     upload is the usual cause, and the frame it failed on is still the one the
-     exhibitor approved. */
-  if (what === 'CLEAR' && state === 'error') {
-    if (frame) {
-      copyFrame('frozen')
-      return show('frozen')
-    }
-    return show(stream ? 'live' : 'attract')
-  }
+  if (what === 'SAVE' && state === 'keep') return void save()
+  if (what === 'CLEAR' && state === 'error') return show(stream ? 'live' : 'attract')
 }
 
-for (const button of document.querySelectorAll('button.button')) {
-  button.addEventListener('click', () => command(button.dataset.command))
+/*
+ * The caps the screens are drawn with become the things to press: on every
+ * screen the first is the red button and the second the green one, which is
+ * what the booth's own labels underneath them say.
+ */
+for (const screen of screens.values()) {
+  screen.querySelectorAll('.foot .button').forEach((button, i) => {
+    const what = i === 0 ? 'SHOOT' : 'SAVE'
+    button.dataset.command = what
+    button.setAttribute('role', 'button')
+    button.setAttribute('tabindex', '0')
+    button.addEventListener('click', () => command(what))
+    button.addEventListener('keydown', (event) => {
+      if (event.key === ' ' || event.key === 'Enter') {
+        event.preventDefault()
+        command(what)
+      }
+    })
+  })
 }
 
-/* The booth's own keyboard sends the same commands, so that it stays operable
-   when the button box does not. */
+/* The invitation says any button, and there is no button box to press. */
+screens.get('attract').addEventListener('click', () => command('SHOOT'))
+
+/*
+ * A fault at the booth is released over the control port by somebody from the
+ * stand. There is no control port here, so the screen itself takes it.
+ */
+screens.get('error').addEventListener('click', () => command('CLEAR'))
+
+/* The booth's own keyboard sends the same commands, and so does this one. */
 addEventListener('keydown', (event) => {
   if (event.metaKey || event.ctrlKey || event.altKey) return
-  /* A focused button is already the browser's to activate, and it knows which
-     one is focused; taking the key here would fire the red one either way. */
-  if (event.target.closest?.('button.button')) return
+  if (event.target.closest?.('[data-command]')) return
   if (event.key === ' ' || event.key === 'Enter') {
     event.preventDefault()
     command('SHOOT')

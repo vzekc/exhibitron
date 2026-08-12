@@ -2,7 +2,15 @@ frontend/src/generated/
 backend/src/generated/
 backend/src/migrations/.snapshot-exhibitron.json
 
-# The booth's stylesheet is a verbatim copy from the fotofix repository, kept
-# in step by a script that compares the two. Reformatting it here would make
-# every check report a difference that is not one.
+# The booth's screens, its stylesheet and its manifest are verbatim copies from
+# the fotofix repository, kept in step by a script that compares the two.
+# Reformatting them here would make every check report a difference that is not
+# one. camera.css and camera.js are this repository's own and are not exempt.
 backend/assets/booth/booth.css
+backend/assets/booth/screen.manifest
+backend/assets/booth/attract.html
+backend/assets/booth/live.html
+backend/assets/booth/keep.html
+backend/assets/booth/printing.html
+backend/assets/booth/done.html
+backend/assets/booth/error.html

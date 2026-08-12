@@ -1,0 +1,28 @@
+# Copied from the fotofix repository, camera/assets/screen.manifest, by
+# camera/assets/sync-booth-screens.mjs. Edit it there — an edit made here is
+# lost the next time the two are brought back into step.
+
+# Where the application draws on top of a screen. x,y,width,height in pixels.
+#
+# Every rectangle here must be flat background in the rendered screen — the
+# build checks that and fails if a layout change lets text drift into one.
+
+# The live camera image, and the frozen frame in its place.
+viewfinder = 320,272,640,480
+
+# One countdown digit, centred over the viewfinder. The sprite sheet holds the
+# three digits side by side in cells of this size.
+countdown  = 560,432,160,160
+
+# The six characters of the photo ID on the closing screen, from the glyph
+# sheet, in cells of 64x96.
+id_slot    = 448,872,384,96
+
+# Which screens carry which rectangle. Every installed language has all of
+# them; the sprite sheets carry none.
+screen attract
+screen live      viewfinder
+screen keep      viewfinder
+screen printing  viewfinder
+screen done      viewfinder id_slot
+screen error
