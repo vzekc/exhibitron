@@ -63,7 +63,53 @@ export const isCameraAsset = (name: string): name is CameraAsset =>
 
 export const cameraAssetType = (name: CameraAsset) => TYPES[name]
 
-export const readCameraAsset = (name: CameraAsset) => readFile(path.join(BOOTH_DIR, name))
+/* ── holding on to what was read ─────────────────────────────────────────── */
+
+/*
+ * The screens, the stylesheets and the script do not change while the server is
+ * running — except when they do, because an edit to one of them should show on
+ * the next reload rather than after a restart.
+ *
+ * So each is kept in memory under the moment it was last written, and a request
+ * costs a stat instead of a read: the same file gives the same answer, a changed
+ * one is read again. When the stat itself fails, the last good copy is served
+ * rather than an error — a deployment replaces these files underneath a running
+ * process, and the few seconds in which one of them is missing or moved should
+ * not be a broken page.
+ */
+type Cached<T> = { stamp: string; value: T }
+
+async function stamp(files: string[]) {
+  const stats = await Promise.all(files.map((file) => stat(file)))
+  return stats.map((s) => Math.round(s.mtimeMs)).join(':')
+}
+
+async function cached<T>(
+  slot: { current?: Cached<T> },
+  files: string[],
+  build: () => Promise<T>,
+): Promise<T> {
+  const now = await stamp(files).catch(() => null)
+  if (now !== null && slot.current?.stamp === now) return slot.current.value
+
+  const value = await build().catch((err) => {
+    if (slot.current) return slot.current.value
+    throw err
+  })
+  /* Stamped with what was on disk before the read, so a file changed mid-read
+     is noticed next time rather than cached as if it had been seen. */
+  if (now !== null) slot.current = { stamp: now, value }
+  return value
+}
+
+const assetSlots = new Map<CameraAsset, { current?: Cached<Buffer> }>()
+
+export function readCameraAsset(name: CameraAsset) {
+  const file = path.join(BOOTH_DIR, name)
+  let slot = assetSlots.get(name)
+  if (!slot) assetSlots.set(name, (slot = {}))
+  return cached(slot, [file], () => readFile(file))
+}
 
 /*
  * The manifest's rectangles: `name = x,y,width,height`. The lines naming which
@@ -106,8 +152,35 @@ async function version(name: CameraAsset) {
   return `/foto/kamera/${name}?v=${Math.round(mtimeMs)}`
 }
 
+/*
+ * Everything the page is built from. The directory itself is in the list
+ * because its own timestamp is what changes when a language is added or taken
+ * away, which no file inside it would show.
+ */
+async function pageInputs(languages: string[]) {
+  return [
+    BOOTH_DIR,
+    path.join(BOOTH_DIR, 'screen.manifest'),
+    ...CAMERA_ASSETS.map((name) => path.join(BOOTH_DIR, name)),
+    ...languages.flatMap((lang) =>
+      SCREENS.map((name) => path.join(BOOTH_DIR, lang, `${name}.html`)),
+    ),
+  ]
+}
+
+const pageSlot: { current?: Cached<string> } = {}
+
 export async function renderCameraPage() {
-  const languages = await installedLanguages()
+  const languages = await installedLanguages().catch(() => {
+    if (pageSlot.current) return null
+    throw new Error(`no language directory in ${BOOTH_DIR}`)
+  })
+  if (languages === null) return pageSlot.current!.value
+
+  return cached(pageSlot, await pageInputs(languages), () => buildCameraPage(languages))
+}
+
+async function buildCameraPage(languages: string[]) {
   const [manifestText, booth, camera, script] = await Promise.all([
     readFile(path.join(BOOTH_DIR, 'screen.manifest'), 'utf8'),
     version('booth.css'),
