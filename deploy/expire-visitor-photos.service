@@ -1,12 +1,13 @@
 # One shot, three months after the exhibition ends: every visitor photo from it
 # goes, and this unit and its timer go with it.
 #
-# Fill in the exhibition key and install as root:
+# Installed by deploy-exhibitron.sh on every deployment, and not reinstalled
+# once it has run: the marker it leaves behind outlives the units it removed.
+# Check it with
 #
-#   sudo cp deploy/expire-visitor-photos.* /etc/systemd/system/
-#   sudoedit /etc/systemd/system/expire-visitor-photos.timer   # set the date
-#   sudo systemctl enable --now expire-visitor-photos.timer
-#   systemctl list-timers expire-visitor-photos.timer          # check the date
+#   systemctl list-timers expire-visitor-photos.timer
+#
+# 92 days is 11 October 2026 to 11 January 2027.
 #
 # Runs as root so it can remove its own units afterwards. If your database
 # refuses a root connection, run it as the application user instead and remove
@@ -20,4 +21,4 @@ Type=oneshot
 User=root
 WorkingDirectory=/home/hans/exhibitron/backend
 Environment=NODE_ENV=production
-ExecStart=/usr/bin/pnpm expire-visitor-photos cc2026 --days 90 --self-destruct
+ExecStart=/usr/bin/pnpm expire-visitor-photos cc2026 --days 92 --self-destruct

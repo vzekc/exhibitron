@@ -28,6 +28,13 @@ const run = promisify(execFile)
 
 const UNITS = ['expire-visitor-photos.timer', 'expire-visitor-photos.service']
 
+/*
+ * Left behind when the job has done its work. The units remove themselves, so
+ * without this the next deployment would put them straight back and the job
+ * would run again on every deploy for ever.
+ */
+const doneMarker = (key: string) => `/var/lib/exhibitron/visitor-photos-expired-${key}`
+
 type Options = {
   key: string
   days: number
@@ -149,6 +156,10 @@ const main = async () => {
           console.log(`  removed the stray directory ${stray}`)
         }
       }
+
+      const marker = doneMarker(opt.key)
+      await fs.mkdir(path.dirname(marker), { recursive: true })
+      await fs.writeFile(marker, `${new Date().toISOString()} ${photos.length} photo(s)\n`)
 
       if (opt.selfDestruct) await removeOwnUnits()
       resolve()
