@@ -1,0 +1,18 @@
+# Fires once, on the date the photos are due to go.
+#
+# Set OnCalendar to three months after the exhibition ends. The script checks
+# the date against the exhibition's own end date and refuses to run early, so a
+# mistake here costs a failed unit rather than an exhibition's photos.
+
+[Unit]
+Description=Delete visitor photos three months after the exhibition
+
+[Timer]
+OnCalendar=2026-12-15 04:00:00
+
+# The machine will not necessarily be running that morning. Persistent makes it
+# catch up at the next boot instead of skipping the date it was meant to fire.
+Persistent=true
+
+[Install]
+WantedBy=timers.target

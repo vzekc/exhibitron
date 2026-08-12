@@ -20,7 +20,8 @@
     "cleanup": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/scripts/cleanup-exhibition.ts",
     "manage-admin": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/scripts/manage-exhibition-admin.ts",
     "import-seatplan": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/scripts/import-seatplan-svg.ts",
-    "watch-schema": "node --no-warnings=ExperimentalWarning --loader ts-node/esm scripts/watch-schema.ts"
+    "watch-schema": "node --no-warnings=ExperimentalWarning --loader ts-node/esm scripts/watch-schema.ts",
+    "expire-visitor-photos": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/scripts/expire-visitor-photos.ts"
   },
   "dependencies": {
     "@apollo/server": "^4.11.3",
