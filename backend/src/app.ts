@@ -116,9 +116,22 @@ export async function createApp({
 
   registerErrorHandler(app)
 
+  /*
+   * A visitor's address is not kept. The logs record which page was fetched,
+   * and the photo pages are named after somebody's photo, so a full address
+   * beside one would tie a person to a picture for as long as the log lived.
+   * The network is enough to tell a flood of requests from a person.
+   */
+  const anonymise = (address: string) => {
+    if (address.includes(':')) return address.split(':').slice(0, 3).join(':') + '::'
+    const octets = address.split('.')
+    return octets.length === 4 ? `${octets[0]}.${octets[1]}.${octets[2]}.0` : '-'
+  }
+
   // Add custom access logging - single line per request
   app.addHook('onResponse', async (request, reply) => {
-    const { method, url, ip, headers } = request
+    const { method, url, headers } = request
+    const ip = anonymise(request.ip)
     const { statusCode } = reply
     const responseTime = reply.getResponseTime()
     const responseTimeFormatted = `${responseTime.toFixed(1)}ms`
