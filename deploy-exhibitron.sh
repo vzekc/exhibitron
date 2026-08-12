@@ -1,11 +1,29 @@
 #!/bin/sh
+#
+# Run as the forced command on the deployment key: it receives the push and
+# then builds what arrived.
+#
+# The whole body is one braced block so that the shell parses the file before
+# running any of it. This script is a symlink into the checkout it is about to
+# replace, and a shell reads a script as it goes — without the block, updating
+# this file mid-deployment makes the shell resume at a byte offset that now
+# means something else.
+{
 set -e
 
 git-receive-pack exhibitron
+
+# Keep the client's stderr so a failure can be reported back to whoever pushed,
+# rather than only into a log file on this machine.
+exec 3>&2
 exec >> deploy-exhibitron.log 2>&1
+trap 'echo "deployment failed:" >&3; tail -20 deploy-exhibitron.log >&3' EXIT
+
 date
 cd exhibitron
-git reset --hard deploy
+# refs/heads/ because there is a directory called deployment and a branch
+# called deploy, and git will not guess between a revision and a path.
+git reset --hard refs/heads/deploy
 pnpm install --recursive
 
 # Generate build info for frontend
@@ -34,10 +52,10 @@ sudo systemctl restart exhibitron
 # a timer that has to be installed by hand.
 cd ..
 expiry_key=$(sed -n 's/^ExecStart=.*expire-visitor-photos \([a-z0-9]*\) .*/\1/p' \
-  deploy/expire-visitor-photos.service)
+  deployment/expire-visitor-photos.service)
 if [ -n "$expiry_key" ] && [ ! -f "/var/lib/exhibitron/visitor-photos-expired-$expiry_key" ]; then
-  if sudo install -m 644 deploy/expire-visitor-photos.service \
-       deploy/expire-visitor-photos.timer /etc/systemd/system/ &&
+  if sudo install -m 644 deployment/expire-visitor-photos.service \
+       deployment/expire-visitor-photos.timer /etc/systemd/system/ &&
      sudo systemctl daemon-reload &&
      sudo systemctl enable --now expire-visitor-photos.timer; then
     systemctl list-timers --no-pager expire-visitor-photos.timer | head -2
@@ -49,3 +67,5 @@ else
 fi
 
 date
+trap - EXIT
+}
