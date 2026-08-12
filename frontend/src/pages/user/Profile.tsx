@@ -30,7 +30,6 @@ type Inputs = {
   website: string
   youtube: string
   allowEmailContact: boolean
-  showsVisitorPhotos: boolean
 }
 
 type YouTubeChannel = {
@@ -53,7 +52,6 @@ const GET_USER_PROFILE = graphql(`
     getCurrentExhibitor {
       id
       topic
-      showsVisitorPhotos
       user {
         id
         fullName
@@ -74,12 +72,7 @@ const GET_USER_PROFILE = graphql(`
 `)
 
 const UPDATE_USER_PROFILE = graphql(`
-  mutation UpdateUserProfile(
-    $input: UpdateUserProfileInput!
-    $exhibitorId: Int!
-    $topic: String
-    $showsVisitorPhotos: Boolean
-  ) {
+  mutation UpdateUserProfile($input: UpdateUserProfileInput!, $exhibitorId: Int!, $topic: String) {
     updateUserProfile(input: $input) {
       id
       fullName
@@ -94,7 +87,7 @@ const UPDATE_USER_PROFILE = graphql(`
         youtube
       }
     }
-    updateExhibitor(id: $exhibitorId, topic: $topic, showsVisitorPhotos: $showsVisitorPhotos) {
+    updateExhibitor(id: $exhibitorId, topic: $topic) {
       id
     }
   }
@@ -188,14 +181,12 @@ const Profile = () => {
   }
 
   const updateProfile: SubmitHandler<Inputs> = async (inputs) => {
-    const { fullName, nickname, bio, topic, allowEmailContact, showsVisitorPhotos, ...contacts } =
-      inputs
+    const { fullName, nickname, bio, topic, allowEmailContact, ...contacts } = inputs
     const result = await updateUserProfile({
       variables: {
         input: { fullName, nickname, bio, contacts, allowEmailContact },
         exhibitorId: exhibitor!.id,
         topic,
-        showsVisitorPhotos,
       },
     })
     if (result.errors?.length) {
@@ -216,7 +207,6 @@ const Profile = () => {
         fullName: newUser?.fullName || '',
         nickname: newUser?.nickname || '',
         topic: data.getCurrentExhibitor?.topic || '',
-        showsVisitorPhotos: data.getCurrentExhibitor?.showsVisitorPhotos || false,
         bio: newUser?.bio || '',
         email: newUser?.contacts?.email || '',
         mastodon: newUser?.contacts?.mastodon || '',
@@ -331,28 +321,6 @@ const Profile = () => {
                     Wenn Du das Kontaktformular aktivierst, können Besucher Dich über die Website
                     kontaktieren. Eingegebene Nachrichten werden an Deine hinterlegte Email-Adresse
                     gesendet, ohne dass Du sie auf der Website veröffentlichen musst.
-                  </p>
-                </FormSection>
-
-                <FormSection>
-                  <SectionLabel>Fotoaktion</SectionLabel>
-
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      id="showsVisitorPhotos"
-                      {...register('showsVisitorPhotos')}
-                      className="text-primary-600 focus:ring-primary-500 h-4 w-4 rounded border-gray-300"
-                    />
-                    <FormLabel htmlFor="showsVisitorPhotos">
-                      Ich kann Besucherfotos an meinem Tisch zeigen
-                    </FormLabel>
-                  </div>
-                  <p className="mt-4 text-sm text-gray-500">
-                    Besucher können sich am Fotoautomaten im Eingangsbereich fotografieren und
-                    bekommen einen Laufzettel mit Tischnummern, an denen ihr Foto zu sehen ist. Wenn
-                    Du das hier ankreuzt, steht Dein Tisch auf diesen Zetteln — Dein Exponat sollte
-                    dann also ein Foto aus dem Ausstellungsnetz anzeigen können.
                   </p>
                 </FormSection>
 

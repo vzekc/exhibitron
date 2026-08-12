@@ -20,6 +20,7 @@ const GET_TABLES = graphql(
         tables {
           id
           number
+          showsVisitorPhotos
           exhibitor {
             ...ExhibitorChip
             exhibits {
@@ -50,6 +51,7 @@ const GET_EXHIBITORS = graphql(`
 `)
 
 type TableInfo = {
+  showsVisitorPhotos: boolean
   exhibitor: FragmentOf<typeof ExhibitorChip.fragment>
   exhibits: Array<FragmentOf<typeof ExhibitChip.fragment>>
 }
@@ -134,6 +136,7 @@ export const SeatingPlan: React.FC = () => {
   const svgRef = useRef<SVGSVGElement | null>(null)
   const stylingAppliedRef = useRef<boolean>(false)
   const tablesRef = useRef<Map<number, TableInfo>>(new Map())
+  const photoTablesRef = useRef<Set<number>>(new Set())
   const containerRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
 
@@ -373,6 +376,40 @@ export const SeatingPlan: React.FC = () => {
     element.appendChild(tooltip)
   }
 
+  /*
+   * A small F in the corner of a table whose holder has said a machine on it can
+   * show a visitor's photo. Drawn into the table's own parent so it inherits the
+   * same transforms as the table it belongs to, and cleared first so that
+   * turning the flag off removes it.
+   */
+  const markPhotoTable = (tableElement: Element, shows: boolean) => {
+    const parent = tableElement.parentNode as SVGElement | null
+    if (!parent) return
+
+    const existing = parent.querySelector(`[data-photo-badge="${tableElement.id}"]`)
+    if (existing) parent.removeChild(existing)
+    if (!shows) return
+
+    const box = (tableElement as SVGGraphicsElement).getBBox()
+    if (!box.width || !box.height) return
+
+    const size = Math.min(box.width, box.height) * 0.42
+    const inset = size * 0.2
+    const badge = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+
+    badge.setAttribute('data-photo-badge', tableElement.id)
+    badge.setAttribute('x', String(box.x + box.width - inset))
+    badge.setAttribute('y', String(box.y + size + inset))
+    badge.setAttribute('text-anchor', 'end')
+    badge.setAttribute('font-size', String(size))
+    badge.setAttribute('font-family', 'Liberation Sans, sans-serif')
+    badge.setAttribute('font-weight', 'bold')
+    badge.setAttribute('fill', '#b3261e')
+    badge.setAttribute('pointer-events', 'none')
+    badge.textContent = 'F'
+    parent.appendChild(badge)
+  }
+
   const applyTableStyling = useCallback(() => {
     const renderedSvg = document.querySelector('.seating-plan-svg')
     if (!renderedSvg) {
@@ -394,6 +431,7 @@ export const SeatingPlan: React.FC = () => {
 
       // Clear existing classes first to ensure clean state
       tableElement.classList.remove('occupied')
+      markPhotoTable(tableElement, photoTablesRef.current.has(tableNumber))
 
       // Add clickable style to all tables
       tableElement.setAttribute('style', 'cursor: pointer;')
@@ -428,12 +466,16 @@ export const SeatingPlan: React.FC = () => {
     if (!tablesData) return
 
     const { tables: fetchedTables } = tablesData.getCurrentExhibition!
+    photoTablesRef.current = new Set(
+      fetchedTables?.filter((table) => table.showsVisitorPhotos).map((table) => table.number) ?? [],
+    )
     const occupiedTablesMap = new Map(
       fetchedTables
         ?.filter((table) => table.exhibitor)
         .map((table) => [
           table.number,
           {
+            showsVisitorPhotos: table.showsVisitorPhotos,
             exhibitor: table.exhibitor!,
             exhibits:
               table.exhibitor?.exhibits

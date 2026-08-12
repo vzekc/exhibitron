@@ -124,10 +124,10 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
   })
 
   /*
-   * The tables the booth should print on a visitor's slip: those whose
-   * exhibitor has said their machine can show a photo. Printing numbers at
-   * random would send visitors to tables with nothing to show, which is what
-   * happens today.
+   * The tables the booth should print on a visitor's slip: those whose holder
+   * has said a machine on them can show a photo. Printing numbers at random
+   * would send visitors to tables with nothing to show, which is what happens
+   * today.
    */
   app.get('/api/visitor-photo/tables', async (request, reply) => {
     if (!boothAuthorised(request)) return reply.code(403).send({ error: 'not the booth' })
@@ -135,7 +135,7 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
     const exhibition = request.apolloContext.exhibition
     const tables = await db.em.find(
       Table,
-      { exhibition, exhibitor: { showsVisitorPhotos: true } },
+      { exhibition, showsVisitorPhotos: true },
       { fields: ['number'], orderBy: { number: 'asc' } },
     )
     return reply.send({ tables: tables.map((t) => t.number) })

@@ -18,6 +18,7 @@ const GET_TABLES = graphql(
         tables {
           id
           number
+          showsVisitorPhotos
           exhibitor {
             ...ExhibitorChip
             exhibits {
@@ -47,6 +48,15 @@ const ASSIGN_TABLE = graphql(`
   }
 `)
 
+const UPDATE_TABLE = graphql(`
+  mutation UpdateTable($number: Int!, $showsVisitorPhotos: Boolean) {
+    updateTable(number: $number, showsVisitorPhotos: $showsVisitorPhotos) {
+      id
+      showsVisitorPhotos
+    }
+  }
+`)
+
 const RELEASE_TABLE = graphql(`
   mutation ReleaseTable($number: Int!) {
     releaseTable(number: $number) {
@@ -56,6 +66,7 @@ const RELEASE_TABLE = graphql(`
 `)
 
 type TableInfo = {
+  showsVisitorPhotos: boolean
   exhibitor: FragmentOf<typeof ExhibitorChip.fragment>
   exhibits: Array<FragmentOf<typeof ExhibitChip.fragment>>
 }
@@ -120,6 +131,22 @@ const TableInfoPanel: React.FC<TableInfoPanelProps> = ({
   const [releaseTable] = useMutation(RELEASE_TABLE, {
     refetchQueries: [GET_TABLES],
   })
+
+  const [updateTable] = useMutation(UPDATE_TABLE, {
+    refetchQueries: [GET_TABLES],
+  })
+
+  const handleVisitorPhotos = async (shows: boolean) => {
+    const result = await updateTable({
+      variables: { number: selectedTable, showsVisitorPhotos: shows },
+    })
+    if (result.errors?.length) {
+      await showMessage(
+        'Konnte nicht gespeichert werden',
+        result.errors[0]?.message || 'Unbekannter Fehler',
+      )
+    }
+  }
 
   const handleClaimTable = async () => {
     const result = await claimTable({
@@ -217,6 +244,23 @@ const TableInfoPanel: React.FC<TableInfoPanelProps> = ({
                   Zuweisen
                 </Button>
               </div>
+            </div>
+          )}
+
+          {tableInfo && canReleaseTable && (
+            <div className="space-y-1">
+              <label className="flex items-start gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  className="text-primary-600 focus:ring-primary-500 mt-0.5 h-4 w-4 rounded border-gray-300"
+                  defaultChecked={tableInfo.showsVisitorPhotos}
+                  onChange={(e) => handleVisitorPhotos(e.target.checked)}
+                />
+                <span>An diesem Tisch können Besucherfotos gezeigt werden</span>
+              </label>
+              <p className="text-xs m-0 text-gray-500">
+                Der Tisch steht dann auf den Laufzetteln, die Besucher am Fotoautomaten bekommen.
+              </p>
             </div>
           )}
 

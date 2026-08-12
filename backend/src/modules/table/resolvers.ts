@@ -47,6 +47,24 @@ export const tableMutations: MutationResolvers<Context> = {
     // Now release the table
     return await db.table.release(exhibition, number, isAdmin(user, exhibition) ? null : exhibitor)
   },
+  /*
+   * Whoever holds the table says whether a machine on it can show a visitor's
+   * photo. An administrator may set it for anybody, which is what the desk
+   * needs when an exhibitor asks on the day.
+   */
+  // @ts-expect-error ts2345
+  updateTable: async (_, { number, showsVisitorPhotos }, { db, exhibition, exhibitor, user }) => {
+    requireNotFrozen(exhibition)
+    const table = await db.table.findOneOrFail({ exhibition, number }, { populate: ['exhibitor'] })
+
+    if (!isAdmin(user, exhibition) && (!exhibitor || table.exhibitor?.id !== exhibitor.id)) {
+      throw new PermissionDeniedError('Dieser Tisch gehört Dir nicht')
+    }
+
+    if (showsVisitorPhotos != null) table.showsVisitorPhotos = showsVisitorPhotos
+    await db.em.flush()
+    return table
+  },
   // @ts-expect-error ts2345
   assignTable: async (_, { number, exhibitorId }, { db, exhibition }) => {
     requireNotFrozen(exhibition)

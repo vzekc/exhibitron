@@ -8,7 +8,7 @@ import { ConferenceSession } from '../conferenceSession/entity.js'
 import { Host } from '../host/entity.js'
 
 @Entity()
-export class Exhibitor extends BaseEntity<'showsVisitorPhotos'> {
+export class Exhibitor extends BaseEntity {
   @ManyToOne()
   exhibition!: Exhibition
 
@@ -17,14 +17,6 @@ export class Exhibitor extends BaseEntity<'showsVisitorPhotos'> {
 
   @Property({ nullable: true })
   topic?: string
-
-  /*
-   * Set by the exhibitor: their table can show a visitor's photo, so the photo
-   * booth may send people to it. Without this the trail slip would print table
-   * numbers at random and send visitors to machines with nothing to show.
-   */
-  @Property({ default: false })
-  showsVisitorPhotos: boolean = false
 
   @OneToMany({ mappedBy: 'exhibitor' })
   exhibits = new Collection<Exhibit>(this)

@@ -3,12 +3,14 @@ type Table {
   exhibits: [Exhibit!]
   id: Int!
   number: Int!
+  showsVisitorPhotos: Boolean!
 }
 
 extend type Mutation {
   assignTable(exhibitorId: Int!, number: Int!): Table
   claimTable(number: Int!): Table
   releaseTable(number: Int!): Table
+  updateTable(number: Int!, showsVisitorPhotos: Boolean): Table
 }
 
 extend type Query {
