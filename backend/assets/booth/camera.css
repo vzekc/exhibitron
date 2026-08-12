@@ -93,11 +93,44 @@ body {
 /* ── the button box ──────────────────────────────────────────────────────── */
 
 /*
- * The box in buttonbox/: a red button, a green one, and the language button
- * that has no lamp. It is not drawn on the screen because it is not on the
- * screen — it is the thing in front of the cabinet that a visitor's hand goes
- * to, and the screen is what tells them which one to press.
+ * The row under the screen: the box, and beside it whatever this page has to
+ * say that the booth does not. The empty column on the left balances the one on
+ * the right, so the box stays centred under the screen however long the note
+ * beside it happens to be.
  */
+.controls {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 28px;
+  width: 100%;
+}
+.controls .buttonbox {
+  grid-column: 2;
+}
+
+/*
+ * The last photo taken here, so that the page it landed on is one click away
+ * once the closing screen has gone back to the invitation. It is beside the box
+ * rather than on the screen: the screens are the booth's and say nothing about
+ * a browser.
+ */
+.last-photo {
+  grid-column: 3;
+  justify-self: start;
+  font-size: 20px;
+  color: var(--dim);
+}
+.last-photo[hidden] {
+  display: none;
+}
+.last-photo a {
+  color: var(--sgi);
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-underline-offset: 4px;
+}
+
 .buttonbox {
   display: flex;
   gap: 40px;

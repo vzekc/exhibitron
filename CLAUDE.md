@@ -139,6 +139,30 @@ the resolver, call `await db.em.flush()` explicitly. Reference pattern:
 **The "No try/catch unless unavoidable" rule above is not a license to silently drop errors** — it
 means prefer letting errors propagate to a place that handles them, not "ignore them."
 
+## The camera page is a preview of the booth, not a web version of it
+
+`/foto/kamera` shows the Fotoautomat that stands in the entrance hall, so that exhibitors can see
+what it does to a photo without queueing at it. It is a preview of that machine and must look as
+close to the Indy's own screens as possible.
+
+**The screens get no web-specific text.** They are copied verbatim from the fotofix repository
+(`camera/assets/screens/`) into `backend/assets/booth/` by `sync-booth-screens.mjs` there, and its
+`--check` fails the build when the two have drifted. A line that reads oddly in a browser — the
+printer, the Ausstellungsnetz, "Freigabe über die Steuerung" for a control port a browser does not
+have — stays as the booth says it. Change it in fotofix, for both, or leave it; do not write a
+second wording for the web.
+
+The layout, the type and the colours come from `booth.css`, and the coordinates of the picture, the
+countdown and the photo ID from `screen.manifest` — the same two files the Indy reads. Nothing on
+this side decides where anything goes.
+
+Only what a browser makes impossible may differ, and only as mechanism, never as appearance:
+
+- the camera has to be asked for, which happens on the first press rather than at the invitation;
+- the Laufzettel is fetched as a PDF, because there is no printer;
+- the fault screen is released by the red button, because there is no control port to send `CLEAR`
+  over.
+
 ## Environment Variables (backend/.env)
 
 Required:

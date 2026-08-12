@@ -58,14 +58,22 @@ const SHOWS_PICTURE = new Set(['live', 'keep', 'printing', 'done'])
 
 /* ── the screens ──────────────────────────────────────────────────────────── */
 
-function show(next) {
+/*
+ * `keepLanguage` is for a screen reached from the address, which names the
+ * language it wants. `hold` is for the same case: a step opened to be looked at
+ * stays on screen, where one the booth arrived at moves on by itself. The first
+ * button press puts it back on the clock.
+ */
+function show(next, { keepLanguage = false, hold = false } = {}) {
   /*
    * The language goes back to the booth's own on every arrival at LIVE and
    * ATTRACT, so the next person in front of it starts where the booth starts.
    * Pressing it again once you are there sticks, which is how a visitor takes
    * their photo in English.
    */
-  if (next !== state && (next === 'live' || next === 'attract')) language = DEFAULT_LANGUAGE
+  if (!keepLanguage && next !== state && (next === 'live' || next === 'attract')) {
+    language = DEFAULT_LANGUAGE
+  }
 
   state = next
   paint()
@@ -76,7 +84,10 @@ function show(next) {
   photoIdEl.hidden = next !== 'done'
 
   clearTimeout(timer)
-  timer = null
+  clearTimeout(idle)
+  timer = idle = null
+  if (hold) return
+
   if (next === 'keep') timer = setTimeout(() => command('SHOOT'), CONFIRM_TIMEOUT_MS)
   /* The photo ID stands for done_seconds and then the invitation returns, as
      ST_DONE does in the booth: whoever comes next should find the invitation
@@ -84,23 +95,27 @@ function show(next) {
   if (next === 'done') timer = setTimeout(() => show('attract'), DONE_MS)
 
   /* Three minutes of nothing and the invitation comes back, as at the booth. */
-  clearTimeout(idle)
-  idle = null
   if (next === 'live') idle = setTimeout(() => show('attract'), ATTRACT_AFTER_MS)
 }
 
-/* The screen for the state and the language currently in force. */
+/*
+ * The screen for the state and the language currently in force — and the
+ * address, which says the same two things in the same order as the template
+ * they come from. Replacing rather than pushing keeps the back button meaning
+ * what it did before, which is "leave", not "undo one countdown".
+ */
 function paint() {
   for (const [key, el] of screens) {
     if (key === `${language}/${state}`) el.setAttribute('data-current', '')
     else el.removeAttribute('data-current')
   }
   document.documentElement.lang = language
+  history.replaceState(null, '', `/foto/kamera/${language}/${state}`)
 }
 
 function fit() {
   /* The screen is scaled to fit what is left after the buttons below it. */
-  const box = document.querySelector('.buttonbox').getBoundingClientRect().height + 64
+  const box = document.querySelector('.controls').getBoundingClientRect().height + 64
   stage.style.setProperty(
     '--scale',
     String(Math.min(window.innerWidth / 1280, (window.innerHeight - box) / 1024)),
@@ -294,15 +309,8 @@ async function save() {
     return fail('Der Laufzettel konnte nicht erzeugt werden.')
   }
 
-  /* The glyph sheet, six cells of it, in the slot the manifest reserves. */
-  photoIdEl.replaceChildren(
-    ...[...photo.id].map((ch) => {
-      const cell = document.createElement('div')
-      cell.className = 'cell glyph'
-      cell.textContent = ch
-      return cell
-    }),
-  )
+  showId(photo.id)
+  rememberPhoto(photo.id)
   show('done')
 }
 
@@ -403,6 +411,91 @@ addEventListener('keydown', (event) => {
  * observed rather than measured once.
  */
 addEventListener('resize', fit)
-new ResizeObserver(fit).observe(document.querySelector('.buttonbox'))
+new ResizeObserver(fit).observe(document.querySelector('.controls'))
 fit()
-show('attract')
+
+/*
+ * Where to start: the address, if it names a screen that exists, so that a
+ * reload comes back to the step that was open. The language comes with it and
+ * is kept rather than reset — the address is what is being looked at, and
+ * resetting it would make /foto/kamera/en/live show the German one.
+ */
+function start() {
+  const [, , , lang, step] = location.pathname.split('/')
+  if (step && screens.has(`${lang}/${step}`)) {
+    language = lang
+    /* Nothing has been photographed, so the closing screen would have an empty
+       slot. A stand-in id makes the layout visible while it is being edited. */
+    if (step === 'done') showId('K7NP4M')
+    show(step, { keepLanguage: true, hold: true })
+    return
+  }
+  show('attract')
+}
+
+/*
+ * The last photo taken on this page, beside the button box. The closing screen
+ * shows the id for six seconds and then the invitation returns, which is right
+ * for a booth and awkward here — this keeps the page it landed on within reach.
+ *
+ * Kept for the tab rather than in a variable, so that it survives the reload
+ * that a saved screen triggers.
+ */
+const lastPhotoEl = document.getElementById('last-photo')
+
+function rememberPhoto(id) {
+  sessionStorage.setItem('last-photo', id)
+  showLastPhoto(id)
+}
+
+function showLastPhoto(id) {
+  if (!id) return
+  const link = lastPhotoEl.querySelector('a')
+  /* Relative to the site, so the same page works here and on the exhibition's
+     own server. */
+  link.href = `/foto/${id}`
+  link.textContent = id
+  lastPhotoEl.hidden = false
+}
+
+/* The glyph sheet, six cells of it, in the slot the manifest reserves. */
+function showId(id) {
+  photoIdEl.replaceChildren(
+    ...[...id].map((ch) => {
+      const cell = document.createElement('div')
+      cell.className = 'cell glyph'
+      cell.textContent = ch
+      return cell
+    }),
+  )
+}
+
+/*
+ * While the screens are being worked on, the page asks what the server last
+ * read them at and reloads when that changes. The address already carries the
+ * step, so it comes back to the same screen — saving a template and looking at
+ * the browser is the whole loop.
+ *
+ * Off in production: the server does not mark the page for it, and nothing here
+ * runs.
+ */
+function watchForEdits() {
+  /* The server marks its own script tag when it is not running in production.
+     `document.currentScript` is null in a module, so the tag is looked up. */
+  if (!document.querySelector('script[data-watch]')) return
+
+  let known = null
+  setInterval(async () => {
+    const answer = await fetch('/foto/kamera/stamp').then(
+      (r) => (r.ok ? r.json() : null),
+      () => null,
+    )
+    if (!answer) return
+    if (known === null) known = answer.stamp
+    else if (known !== answer.stamp) location.reload()
+  }, 1000)
+}
+
+start()
+showLastPhoto(sessionStorage.getItem('last-photo'))
+watchForEdits()
