@@ -17,7 +17,10 @@ const GET_TABLE = graphql(
   `
     query GetTable($number: Int!) {
       getTable(number: $number) {
+        id
+        showsVisitorPhotos
         exhibitor {
+          id
           ...ExhibitorDetails
           exhibits {
             ...ExhibitCard
@@ -40,6 +43,15 @@ const CLAIM_TABLE = graphql(`
   }
 `)
 
+const UPDATE_TABLE = graphql(`
+  mutation UpdateTable($number: Int!, $showsVisitorPhotos: Boolean) {
+    updateTable(number: $number, showsVisitorPhotos: $showsVisitorPhotos) {
+      id
+      showsVisitorPhotos
+    }
+  }
+`)
+
 const RELEASE_TABLE = graphql(`
   mutation ReleaseTable($number: Int!) {
     releaseTable(number: $number) {
@@ -56,6 +68,7 @@ const Table = () => {
   const apolloClient = useApolloClient()
   const [claimTable] = useMutation(CLAIM_TABLE)
   const [releaseTable] = useMutation(RELEASE_TABLE)
+  const [updateTable] = useMutation(UPDATE_TABLE)
   const navigate = useNavigate()
   const { exhibitor: currentUser } = useExhibitor()
   const { setDetailName } = useBreadcrumb()
@@ -97,7 +110,21 @@ const Table = () => {
   }
 
   const tableNumber = Number(number)
-  const { exhibits: onThisTableExhibits, exhibitor } = data?.getTable || {}
+  const { exhibits: onThisTableExhibits, exhibitor, showsVisitorPhotos } = data?.getTable || {}
+
+  const handleVisitorPhotos = async (shows: boolean) => {
+    const result = await updateTable({
+      variables: { number: tableNumber, showsVisitorPhotos: shows },
+      refetchQueries: [GET_TABLE],
+    })
+    if (result.errors?.length) {
+      await showMessage(
+        'Konnte nicht gespeichert werden',
+        result.errors[0]?.message || 'Unbekannter Fehler',
+        'OK',
+      )
+    }
+  }
   const { exhibits: exhibitorExhibits } = exhibitor || {}
   const otherExhibitorExhibits = exhibitorExhibits?.filter(
     (exhibit) => exhibit.table?.number !== tableNumber,
@@ -148,6 +175,34 @@ const Table = () => {
     }
   }
 
+  /*
+   * Whoever holds the table says whether a machine on it can show a visitor's
+   * photo from the photo booth. Participating tables carry an F on the floor
+   * plan and are printed on the slips visitors take away with them.
+   */
+  const VisitorPhotos = () => {
+    if (!currentUser || !exhibitor) return <></>
+    if (currentUser.id !== exhibitor.id && !currentUser.user.isAdministrator) return <></>
+
+    return (
+      <section className="mb-4 rounded-lg border border-gray-200 bg-white p-4">
+        <label className="flex items-start gap-2">
+          <input
+            type="checkbox"
+            className="mt-1 h-4 w-4 rounded border-gray-300"
+            defaultChecked={!!showsVisitorPhotos}
+            onChange={(e) => handleVisitorPhotos(e.target.checked)}
+          />
+          <span>An diesem Tisch können Besucherfotos gezeigt werden</span>
+        </label>
+        <p className="m-0 ml-6 mt-1 text-sm text-gray-500">
+          Der Tisch wird dann auf dem Tischplan mit einem F markiert und steht auf den Laufzetteln,
+          die Besucher am Fotoautomaten bekommen.
+        </p>
+      </section>
+    )
+  }
+
   const Actions = () => {
     if (!currentUser) {
       return <></>
@@ -187,6 +242,7 @@ const Table = () => {
   if (!onThisTableExhibits?.length && !onAnyTableExhibits?.length) {
     return (
       <article>
+        <VisitorPhotos />
         <ExhibitorCard exhibitor={exhibitor} />
         <OtherExhibits
           exhibits={otherExhibitorExhibits}
@@ -199,6 +255,7 @@ const Table = () => {
   if (onThisTableExhibits?.length) {
     return (
       <article>
+        <VisitorPhotos />
         <OneOrMoreExhibits exhibits={onThisTableExhibits} />
         <OtherExhibits
           exhibits={otherExhibitorExhibits}
@@ -209,6 +266,7 @@ const Table = () => {
   }
   return (
     <article>
+      <VisitorPhotos />
       <OneOrMoreExhibits exhibits={noTableExhibits} />
       <OtherExhibits
         exhibits={onAnyTableExhibits}
