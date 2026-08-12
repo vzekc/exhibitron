@@ -15,7 +15,15 @@ import {
   renderNotForYou,
   renderPrivacyPage,
 } from './pages.js'
-import { cameraAssetType, isCameraAsset, readCameraAsset, renderCameraPage } from './camera.js'
+import {
+  cameraAssetType,
+  cameraStamp,
+  isCameraAsset,
+  isLanguage,
+  isStep,
+  readCameraAsset,
+  renderCameraPage,
+} from './camera.js'
 import { buildReceiptSvg, ditherAtkinson, rasteriseSvg, rgbaToGray } from './receipt.js'
 import { receiptPdf } from './pdf.js'
 import {
@@ -303,6 +311,39 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
     reply.header('Cache-Control', 'private, max-age=300')
     reply.type(cameraAssetType(asset))
     return readCameraAsset(asset)
+  })
+
+  /*
+   * The step, in the address: /foto/kamera/de/live is the screen that
+   * screens/de/live.html draws. The page reads it to know where to start, and
+   * writes it as it moves, so that a reload comes back to the same screen and
+   * the address names the template to open while editing it.
+   */
+  app.get<{ Params: { lang: string; step: string } }>(
+    '/foto/kamera/:lang/:step',
+    async (request, reply) => {
+      noIndex(reply)
+      if (!asExhibitor(request)) {
+        return reply.code(403).type('text/html').send(renderNotForYou())
+      }
+
+      const { lang, step } = request.params
+      if (!isStep(step) || !(await isLanguage(lang))) {
+        return reply.code(404).type('text/html').send(renderNotFound())
+      }
+      return reply.type('text/html').send(await renderCameraPage())
+    },
+  )
+
+  /*
+   * When the screens were last written. The page asks while it is being worked
+   * on and reloads itself when the answer changes; a save therefore shows up
+   * without touching the browser, on the step that is already open.
+   */
+  app.get('/foto/kamera/stamp', async (request, reply) => {
+    if (!asExhibitor(request)) return reply.code(403).send({ error: 'not an exhibitor' })
+    reply.header('Cache-Control', 'no-store')
+    return reply.send({ stamp: await cameraStamp() })
   })
 
   /*

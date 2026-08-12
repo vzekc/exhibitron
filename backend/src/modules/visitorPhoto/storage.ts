@@ -10,7 +10,15 @@ import { createHash, randomBytes, timingSafeEqual } from 'crypto'
  * it is for — c64.prg, amiga-ham.adf, photo.jpg. Nothing repeats the id.
  */
 
-export const PHOTO_ROOT = process.env.VISITOR_PHOTO_ROOT ?? '/var/lib/exhibitron/visitor-photos'
+/*
+ * Where the pictures go. The server owns a directory of its own for them,
+ * outside the backup; a development machine has no such directory and no right
+ * to make one, so it keeps them beside the code instead. Without that split,
+ * taking a photo locally fails on a permission error at the first mkdir.
+ */
+export const PHOTO_ROOT =
+  process.env.VISITOR_PHOTO_ROOT ??
+  (process.env.NODE_ENV === 'production' ? '/var/lib/exhibitron/visitor-photos' : 'visitor-photos')
 
 /* Ids and codes are drawn from an alphabet with no 0/O or 1/I in it. */
 const CODE = /^[A-HJ-NP-Z2-9]+$/

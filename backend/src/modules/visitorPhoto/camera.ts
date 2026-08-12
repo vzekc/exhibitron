@@ -30,6 +30,18 @@ const BOOTH_DIR = path.join(backendRoot, 'assets/booth')
 const SCREENS = ['attract', 'live', 'keep', 'printing', 'done', 'error'] as const
 
 /*
+ * A step is in the address, so that /foto/kamera/de/live is the screen the file
+ * screens/de/live.html draws — the same two names in the same order. Reloading
+ * comes back to the step you were on, and the address says which template to
+ * open while you are editing it.
+ */
+export const isStep = (name: string) => (SCREENS as readonly string[]).includes(name)
+
+export async function isLanguage(name: string) {
+  return (await installedLanguages()).includes(name)
+}
+
+/*
  * The language the booth returns to by itself, and the one this page starts in.
  * Everything installed is offered; nothing here enumerates them, so a third
  * language is a directory in the fotofix repository and a run of its sync
@@ -170,6 +182,22 @@ async function pageInputs(languages: string[]) {
 
 const pageSlot: { current?: Cached<string> } = {}
 
+/*
+ * What the page is built from, as one string. The page asks for it while it is
+ * being worked on and reloads itself when it changes, which is what makes a
+ * saved screen appear without touching the browser.
+ */
+export async function cameraStamp() {
+  return stamp(await pageInputs(await installedLanguages()))
+}
+
+/*
+ * Reloading on its own belongs to whoever is editing the screens, not to an
+ * exhibitor trying the booth out: in production the page is served without it
+ * and asks the server nothing.
+ */
+const WATCHING = process.env.NODE_ENV !== 'production'
+
 export async function renderCameraPage() {
   const languages = await installedLanguages().catch(() => {
     if (pageSlot.current) return null
@@ -240,19 +268,23 @@ ${sections}
 <div class="blit id-area sheet" id="photo-id" hidden></div>
 </div>
 
-<div class="buttonbox">
-  <button type="button" class="box-button" data-command="SHOOT" aria-label="Rote Taste">
-    <span class="cap red"></span>
-  </button>
-  <button type="button" class="box-button" data-command="SAVE" aria-label="Grüne Taste">
-    <span class="cap green"></span>
-  </button>
-  <button type="button" class="box-button" data-command="LANG" aria-label="Sprache">
-    <span class="cap blue"></span>
-  </button>
+<div class="controls">
+  <div class="buttonbox">
+    <button type="button" class="box-button" data-command="SHOOT" aria-label="Rote Taste">
+      <span class="cap red"></span>
+    </button>
+    <button type="button" class="box-button" data-command="SAVE" aria-label="Grüne Taste">
+      <span class="cap green"></span>
+    </button>
+    <button type="button" class="box-button" data-command="LANG" aria-label="Sprache">
+      <span class="cap blue"></span>
+    </button>
+  </div>
+
+  <p class="last-photo" id="last-photo" hidden>Letztes Foto: <a href="/foto/"></a></p>
 </div>
 </div>
-<script type="module" src="${script}"></script>
+<script type="module" src="${script}"${WATCHING ? ' data-watch="1"' : ''}></script>
 </body>
 </html>`
 }
