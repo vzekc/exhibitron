@@ -166,9 +166,15 @@ export async function createApp({
   await registerScheduleRoutes(app)
   await registerSeatplanRoutes(app)
 
-  /* The booth sends a JPEG as the raw body; nothing else here posts binary. */
-  app.addContentTypeParser('image/jpeg', { parseAs: 'buffer' }, (_request, body, done) =>
-    done(null, body),
+  /*
+   * The booth and the camera page send a JPEG as the raw body, and the machine
+   * that converts a photo sends each format back the same way; nothing else
+   * here posts binary.
+   */
+  app.addContentTypeParser(
+    ['image/jpeg', 'application/octet-stream'],
+    { parseAs: 'buffer' },
+    (_request, body, done) => done(null, body),
   )
   await registerVisitorPhotoRoutes(app)
 

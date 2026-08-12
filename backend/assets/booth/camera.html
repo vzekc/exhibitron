@@ -1,0 +1,269 @@
+<div class="stage">
+  <!-- ── attract ─────────────────────────────────────────────────────────── -->
+  <section class="screen" data-state="attract">
+    <div class="head">
+      <div class="wordmark">FOTO<em>FIX</em></div>
+      <div class="event">Classic Computing 2026<br />Celle</div>
+    </div>
+
+    <div class="full">
+      <div class="huge">Machen Sie<br />ein Foto!</div>
+      <div class="rule"></div>
+      <div class="sub">
+        Dieselbe Verarbeitung wie am Fotoautomaten im Eingang —<br />
+        nur mit der Kamera dieses Geräts. Sie bekommen einen<br />
+        Beleg als PDF, und Ihr Bild erscheint an den Tischen.
+      </div>
+    </div>
+
+    <div class="foot">
+      <div class="buttons">
+        <button class="button" data-command="SHOOT" type="button">
+          <span class="cap red beckon"></span>
+          <span class="label">Kamera einschalten<span>rote Taste</span></span>
+        </button>
+      </div>
+      <div class="tail">
+        Der Browser fragt gleich, ob er die Kamera benutzen darf.
+        <b>Ohne die Erlaubnis geht es nicht weiter.</b>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── live, and the countdown over it ─────────────────────────────────── -->
+  <section class="screen" data-state="live">
+    <div class="head">
+      <div class="wordmark">FOTO<em>FIX</em></div>
+      <div class="event">Classic Computing 2026<br />Celle</div>
+      <div class="lede">
+        Lassen Sie sich fotografieren — und nehmen Sie Ihr Bild als
+        <strong>Beleg</strong> mit.
+      </div>
+    </div>
+
+    <div class="side left">
+      <h2>So geht's</h2>
+      <div class="step">
+        <div class="n">1</div>
+        <p>Stellen Sie sich mittig vor die Kamera.</p>
+      </div>
+      <div class="step">
+        <div class="n">2</div>
+        <p>Rote Taste drücken — es wird von 3 heruntergezählt.</p>
+      </div>
+      <div class="step">
+        <div class="n">3</div>
+        <p>Bild behalten oder neu aufnehmen.</p>
+      </div>
+    </div>
+
+    <div class="side right">
+      <h2>Ihr Foto</h2>
+      <p class="note">gibt es als <b>Beleg</b> zum Herunterladen.</p>
+      <p class="note">
+        bekommt eine <b>Foto-ID</b>, mit der Sie es überall auf der Ausstellung wiederfinden.
+      </p>
+      <p class="note">
+        wird für die <b>alten Rechner</b> an den Tischen übersetzt — vom C64 bis zum Apple II.
+      </p>
+    </div>
+
+    <div class="viewfinder">
+      <video id="viewfinder" playsinline autoplay muted></video>
+      <div class="corner tl"></div>
+      <div class="corner tr"></div>
+      <div class="corner bl"></div>
+      <div class="corner br"></div>
+      <div class="count" id="count" hidden></div>
+    </div>
+
+    <div class="foot">
+      <div class="buttons">
+        <button class="button" data-command="SHOOT" type="button">
+          <span class="cap red"></span>
+          <span class="label">Foto aufnehmen<span>rote Taste</span></span>
+        </button>
+        <button class="button" data-command="SAVE" type="button">
+          <span class="cap off"></span>
+          <span class="label">Noch nichts zu bestätigen<span>grüne Taste</span></span>
+        </button>
+      </div>
+      <div class="tail">
+        Die Aufnahme wird als Beleg bereitgestellt und im Ausstellungsnetz veröffentlicht.
+      </div>
+    </div>
+  </section>
+
+  <!-- ── the frozen frame ────────────────────────────────────────────────── -->
+  <section class="screen" data-state="frozen">
+    <div class="head">
+      <div class="wordmark">FOTO<em>FIX</em></div>
+      <div class="event">Classic Computing 2026<br />Celle</div>
+      <div class="lede">
+        So sieht Ihr Foto aus. Es wird als Beleg bereitgestellt und im Ausstellungsnetz
+        veröffentlicht.
+      </div>
+    </div>
+
+    <div class="side left">
+      <h2>Nicht zufrieden?</h2>
+      <p class="note">
+        Rote Taste drücken — die Aufnahme wird verworfen und Sie können es sofort noch einmal
+        versuchen.
+      </p>
+    </div>
+
+    <div class="side right">
+      <h2>Zufrieden?</h2>
+      <p class="note">Grüne Taste drücken — das Foto wird gespeichert.</p>
+    </div>
+
+    <div class="viewfinder">
+      <canvas id="frozen" width="640" height="480"></canvas>
+      <div class="corner tl"></div>
+      <div class="corner tr"></div>
+      <div class="corner bl"></div>
+      <div class="corner br"></div>
+    </div>
+
+    <div class="foot">
+      <div class="question">Foto <em>behalten?</em></div>
+      <div class="buttons">
+        <button class="button" data-command="SHOOT" type="button">
+          <span class="cap red"></span>
+          <span class="label">Nein, neu aufnehmen<span>rote Taste</span></span>
+        </button>
+        <button class="button" data-command="SAVE" type="button">
+          <span class="cap green"></span>
+          <span class="label">Ja, behalten<span>grüne Taste</span></span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── while the upload is outstanding ─────────────────────────────────── -->
+  <section class="screen" data-state="saving">
+    <div class="head">
+      <div class="wordmark">FOTO<em>FIX</em></div>
+      <div class="event">Classic Computing 2026<br />Celle</div>
+      <div class="lede">
+        Ihr Foto wird übertragen und umgewandelt.
+        <strong>Bitte einen Moment warten.</strong>
+      </div>
+    </div>
+
+    <div class="side left">
+      <h2>Gerade passiert</h2>
+      <p class="note">Das Bild geht an die Ausstellungswebsite.</p>
+      <p class="note">
+        Es bekommt eine Foto-ID und wird in die Formate der alten Rechner übersetzt.
+      </p>
+    </div>
+
+    <div class="side right">
+      <h2>Gleich</h2>
+      <p class="note">steht Ihr <b>Beleg</b> als PDF bereit.</p>
+      <p class="note">Bitte laden Sie ihn herunter — den Löschcode darauf gibt es nur einmal.</p>
+    </div>
+
+    <div class="viewfinder">
+      <canvas id="saving" width="640" height="480"></canvas>
+      <div class="corner tl"></div>
+      <div class="corner tr"></div>
+      <div class="corner bl"></div>
+      <div class="corner br"></div>
+    </div>
+
+    <div class="foot">
+      <div class="question">Wird <em>gespeichert</em> …</div>
+      <div class="buttons">
+        <button class="button" data-command="SHOOT" type="button" disabled>
+          <span class="cap off"></span>
+          <span class="label">Läuft<span>rote Taste</span></span>
+        </button>
+        <button class="button" data-command="SAVE" type="button" disabled>
+          <span class="cap green working"></span>
+          <span class="label">Wird übertragen<span>grüne Taste</span></span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── done ────────────────────────────────────────────────────────────── -->
+  <section class="screen" data-state="done">
+    <div class="head">
+      <div class="wordmark">FOTO<em>FIX</em></div>
+      <div class="event">Classic Computing 2026<br />Celle</div>
+      <div class="lede">Fertig — bitte laden Sie Ihren <strong>Beleg</strong> herunter.</div>
+    </div>
+
+    <div class="side left">
+      <h2>Ihr Foto</h2>
+      <div class="idbox">
+        <div class="caption">Foto-ID</div>
+        <div class="slot" id="photo-id"></div>
+      </div>
+      <p class="note">
+        Damit zeigen die alten Rechner an den Tischen Ihr Foto.
+        <a id="photo-page" href="#">Seite mit allen Formaten</a>
+      </p>
+    </div>
+
+    <div class="side right">
+      <h2>Foto wieder löschen?</h2>
+      <div class="codebox">
+        <div class="caption">Löschcode</div>
+        <div class="slot" id="delete-code"></div>
+      </div>
+      <p class="note">
+        Damit löschen Sie Ihr Foto auf der Webseite. Er steht auch auf dem
+        <b>Beleg</b> — laden Sie ihn jetzt herunter, danach lässt er sich nicht mehr erzeugen.
+      </p>
+    </div>
+
+    <div class="viewfinder">
+      <canvas id="kept" width="640" height="480"></canvas>
+      <div class="corner tl"></div>
+      <div class="corner tr"></div>
+      <div class="corner bl"></div>
+      <div class="corner br"></div>
+    </div>
+
+    <div class="foot">
+      <div class="buttons">
+        <button class="button" data-command="SHOOT" type="button">
+          <span class="cap red"></span>
+          <span class="label">Noch ein Foto<span>rote Taste</span></span>
+        </button>
+        <button class="button" data-command="RECEIPT" type="button">
+          <span class="cap green"></span>
+          <span class="label">Beleg als PDF<span>grüne Taste</span></span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── error ───────────────────────────────────────────────────────────── -->
+  <section class="screen" data-state="error">
+    <div class="head">
+      <div class="wordmark">FOTO<em>FIX</em></div>
+      <div class="event">Classic Computing 2026<br />Celle</div>
+    </div>
+
+    <div class="full">
+      <div class="huge" style="color: var(--signal)">Kleine Störung</div>
+      <div class="rule" style="background: var(--signal)"></div>
+      <div class="sub" id="error-text">Das Foto konnte nicht gespeichert werden.</div>
+    </div>
+
+    <div class="foot">
+      <div class="buttons">
+        <button class="button" data-command="CLEAR" type="button">
+          <span class="cap red fault"></span>
+          <span class="label">Noch einmal versuchen<span>rote Taste</span></span>
+        </button>
+      </div>
+      <div class="tail">Ihre Aufnahme ist nicht verloren, solange diese Seite offen bleibt.</div>
+    </div>
+  </section>
+</div>

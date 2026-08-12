@@ -18,6 +18,8 @@ interface MenuItemProps {
   isActive?: boolean
   hasDropdown?: boolean
   newTab?: boolean
+  /* For a page the backend renders itself, which the router must not swallow. */
+  reloadDocument?: boolean
 }
 
 interface NavListProps {
@@ -43,6 +45,7 @@ const MenuItem = ({
   isActive,
   hasDropdown,
   newTab,
+  reloadDocument,
 }: MenuItemProps) => {
   const baseClasses = 'block rounded px-3 py-2 text-xl hover:bg-gray-100 dark:hover:bg-gray-700'
   const activeClasses = isActive
@@ -73,6 +76,7 @@ const MenuItem = ({
         to={to}
         className={combinedClasses}
         onClick={onClick}
+        reloadDocument={reloadDocument}
         target={newTab ? '_blank' : undefined}
         rel={newTab ? 'noopener noreferrer' : undefined}>
         {content}
@@ -174,6 +178,7 @@ const NavBar = () => {
     { to: '/user/profile', label: 'Profil' },
     { to: '/user/exhibit', label: 'Deine Exponate' },
     { to: '/user/exhibitorInfo', label: 'Infos für Mitwirkende' },
+    { to: '/foto/kamera', label: 'Fotoautomat ausprobieren' },
     { to: `https://www.classic-computing.de/${exhibitionKey}faq`, label: 'FAQ' },
     { to: '/user/help', label: 'Hilfe' },
     { type: 'divider' },
@@ -213,7 +218,9 @@ const NavBar = () => {
         key={item.to}
         to={item.to}
         onClick={() => onClose?.()}
-        newTab={item.to.startsWith('http')}>
+        newTab={item.to.startsWith('http')}
+        /* The camera page is rendered by the backend, not by the router. */
+        reloadDocument={item.to.startsWith('/foto/')}>
         {item.label}
       </MenuItem>
     )

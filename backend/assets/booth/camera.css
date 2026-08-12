@@ -1,0 +1,457 @@
+/*
+ * What the booth's stylesheet cannot know about: a browser.
+ *
+ * booth.css draws a 1280x1024 canvas, because that is the Indy's screen and
+ * every screen there is an image of exactly that size. Here the same canvas is
+ * a stage that is scaled to whatever the exhibitor is holding, and on a phone
+ * held upright it is let out of the frame and allowed to flow.
+ *
+ * Nothing here restates a colour or a typeface. Everything visible comes from
+ * booth.css, which is why the page looks like the machine in the entrance hall.
+ */
+
+html {
+  background: var(--paper);
+}
+
+/* booth.css pins the body to the Indy's screen; a browser window is not one. */
+body {
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── the canvas, scaled to fit ───────────────────────────────────────────── */
+
+.stage {
+  position: relative;
+  width: 1280px;
+  height: 1024px;
+  flex: 0 0 auto;
+  transform: scale(var(--scale, 1));
+  transform-origin: center center;
+}
+
+.screen {
+  position: absolute;
+  inset: 0;
+  display: none;
+}
+.screen[data-current] {
+  display: block;
+}
+
+/* ── the viewfinder holds a camera rather than a blit ────────────────────── */
+
+/*
+ * The video is mirrored, because posing in front of a picture of yourself only
+ * works if it moves the way a mirror does. What is uploaded is unmirrored, so
+ * that lettering in the room reads correctly on the slip — the same split the
+ * booth makes between what it shows and what it sends.
+ */
+.viewfinder video,
+.viewfinder canvas,
+.viewfinder img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: var(--paper);
+}
+.viewfinder video,
+.viewfinder canvas {
+  transform: scaleX(-1);
+}
+
+/* The framing marks belong on top of the picture, as they do on the booth. */
+.viewfinder .corner {
+  z-index: 1;
+}
+
+/*
+ * The countdown, over the live picture. The booth blits three digit sprites
+ * keyed against magenta; the same plate is drawn here with the same rule.
+ */
+.count {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  width: 132px;
+  height: 132px;
+  margin: -66px 0 0 -66px;
+  background: var(--paper);
+  box-shadow: inset 0 0 0 5px var(--sgi);
+  color: var(--ink);
+  font-size: 104px;
+  font-weight: 700;
+  line-height: 132px;
+  text-align: center;
+}
+
+/* ── the caps, as things to press ────────────────────────────────────────── */
+
+/*
+ * On the booth these are lamps in plastic buttons and the label says which one
+ * to reach for. Here the whole group is the button, so the label is part of
+ * the target rather than an instruction about a target somewhere else.
+ */
+button.button {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 10px 16px 10px 10px;
+  margin: -10px 0 0 -10px;
+  border-radius: 12px;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+button.button:focus-visible {
+  outline: 4px solid var(--sgi);
+  outline-offset: 2px;
+}
+/* Brightness rather than a ring: the dark cap wears its ring already. */
+button.button:hover:not(:disabled) .cap {
+  filter: brightness(1.25);
+}
+button.button:active:not(:disabled) {
+  transform: translateY(2px);
+}
+
+/*
+ * A button whose lamp is dark is a button the booth would ignore, so it is
+ * disabled rather than left to look pressable and do nothing. The label stays
+ * legible: it is telling you why there is nothing to press.
+ */
+button.button:disabled {
+  cursor: default;
+}
+button.button:disabled .label {
+  color: var(--dim);
+}
+
+/* ── the lamps ───────────────────────────────────────────────────────────── */
+
+/*
+ * The blink rates are the ones the button box runs, in ms of on-time and
+ * period: attract 250/2000, countdown 120/240, printing 200/400, error
+ * 150/300. Two duty cycles cover all four.
+ */
+@keyframes lamp-beckon {
+  0%,
+  12.5% {
+    opacity: 1;
+  }
+  12.6%,
+  100% {
+    opacity: 0.12;
+  }
+}
+@keyframes lamp-even {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  50.1%,
+  100% {
+    opacity: 0.12;
+  }
+}
+
+.cap.beckon {
+  animation: lamp-beckon 2s steps(1, end) infinite;
+}
+.cap.counting {
+  animation: lamp-even 240ms steps(1, end) infinite;
+}
+.cap.working {
+  animation: lamp-even 400ms steps(1, end) infinite;
+}
+.cap.fault {
+  animation: lamp-even 300ms steps(1, end) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cap.beckon,
+  .cap.counting,
+  .cap.working,
+  .cap.fault {
+    animation: none;
+  }
+}
+
+/* ── what the booth prints, and this page has to show instead ────────────── */
+
+/*
+ * The photo id and the deletion code.
+ *
+ * On the booth the id is blitted into an empty slot from glyph sprites, low on
+ * the screen where nothing else is; here the closing screen has two buttons
+ * down there, so both boxes stand in the columns beside the picture. They are
+ * text rather than sprites, and the code is on screen once and never again.
+ */
+.side .idbox,
+.side .codebox {
+  position: static;
+  width: auto;
+  margin-bottom: 22px;
+}
+.side .idbox .caption,
+.side .codebox .caption {
+  font-size: 20px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--dim);
+  text-align: center;
+}
+.side .idbox .slot,
+.side .codebox .slot {
+  position: static;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: auto;
+  margin-top: 10px;
+  padding: 14px 0;
+  font-weight: 700;
+  color: var(--ink);
+}
+/* Sized so that the widest run the alphabet can produce — six or eight Ms —
+   still stands clear of the column's edges. */
+.side .idbox .slot {
+  box-shadow: inset 0 0 0 4px var(--sgi);
+  font-size: 38px;
+  letter-spacing: 5px;
+  text-indent: 5px;
+}
+.side .codebox .slot {
+  box-shadow: inset 0 0 0 4px var(--signal);
+  font-size: 28px;
+  letter-spacing: 4px;
+  text-indent: 4px;
+}
+
+/* Links carry the accent the headings do rather than the browser's blue. */
+.side a {
+  color: var(--sgi);
+  font-weight: 700;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+/* Anything the page has to say that the booth never needed to. */
+.notice {
+  position: absolute;
+  left: 48px;
+  right: 48px;
+  bottom: 40px;
+  font-size: 21px;
+  line-height: 1.4;
+  color: var(--dim);
+}
+.notice b {
+  color: var(--ink);
+}
+.notice.bad b {
+  color: var(--signal);
+}
+
+/* ── upright, on a telephone ─────────────────────────────────────────────── */
+
+/*
+ * Below the width where the scaled canvas is still readable, the composition
+ * comes apart into the order it is read in: the picture, what to press, and
+ * the words around it. The type and the colours do not change, so it is still
+ * recognisably the same screen — it has simply stopped pretending to be a
+ * 1993 monitor.
+ */
+body.narrow {
+  display: block;
+  height: auto;
+  min-height: 100dvh;
+  overflow: auto;
+}
+
+.narrow .stage {
+  width: 100%;
+  height: auto;
+  min-height: 100dvh;
+  transform: none;
+  padding-bottom: 32px;
+}
+
+.narrow .screen[data-current] {
+  display: flex;
+  flex-direction: column;
+}
+
+.narrow .screen,
+.narrow .head,
+.narrow .side,
+.narrow .foot,
+.narrow .viewfinder,
+.narrow .idbox,
+.narrow .codebox,
+.narrow .notice,
+.narrow .full {
+  inset: auto;
+  width: auto;
+  height: auto;
+  left: auto;
+  right: auto;
+  top: auto;
+  bottom: auto;
+}
+
+.narrow .screen,
+.narrow .head,
+.narrow .side,
+.narrow .foot,
+.narrow .idbox,
+.narrow .codebox,
+.narrow .notice,
+.narrow .full {
+  position: static;
+}
+
+/* The picture and its framing marks stay a positioning context of their own:
+   the video fills the rectangle absolutely, and a static viewfinder would let
+   it escape and cover the whole page. */
+.narrow .viewfinder {
+  position: relative;
+}
+
+.narrow .head {
+  padding: 24px 20px 0;
+}
+.narrow .wordmark {
+  font-size: 46px;
+  letter-spacing: 8px;
+}
+.narrow .event {
+  position: static;
+  text-align: left;
+  margin-top: 6px;
+  font-size: 17px;
+}
+.narrow .lede {
+  margin-top: 18px;
+  font-size: 23px;
+  max-width: none;
+}
+
+/*
+ * The order it is read in on a telephone: who this is, the picture, what to
+ * press, and then the words around it. The columns beside the viewfinder are
+ * the part that can wait until after a scroll.
+ */
+.narrow .head {
+  order: 1;
+}
+.narrow .viewfinder {
+  order: 2;
+}
+.narrow .foot {
+  order: 3;
+}
+.narrow .side {
+  order: 4;
+}
+.narrow .idbox,
+.narrow .codebox,
+.narrow .notice {
+  order: 5;
+}
+
+/* The picture keeps its 4:3 shape, which is the shape the Indy takes. */
+.narrow .viewfinder {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  margin: 0;
+}
+.narrow .viewfinder .corner {
+  width: 26px;
+  height: 26px;
+  border-width: 4px;
+}
+
+.narrow .foot {
+  padding: 20px;
+  height: auto;
+}
+.narrow .buttons {
+  gap: 16px;
+  flex-direction: column;
+  align-items: stretch;
+}
+.narrow button.button {
+  width: 100%;
+  margin: 0;
+  padding: 14px;
+  box-shadow: inset 0 0 0 3px var(--dim);
+}
+.narrow .question {
+  font-size: 34px;
+  margin-bottom: 20px;
+}
+.narrow .foot .tail {
+  position: static;
+  margin-top: 22px;
+  font-size: 18px;
+}
+
+.narrow .side {
+  padding: 0 20px;
+  margin-top: 26px;
+}
+.narrow .side h2 {
+  font-size: 17px;
+}
+.narrow .step p,
+.narrow .note {
+  font-size: 18px;
+}
+
+.narrow .full {
+  padding: 40px 24px;
+}
+.narrow .full .huge {
+  font-size: 52px;
+}
+.narrow .full .sub {
+  font-size: 22px;
+  margin-top: 24px;
+}
+.narrow .full .rule {
+  margin: 32px 0;
+}
+.narrow .full br {
+  display: none;
+}
+
+.narrow .idbox,
+.narrow .codebox {
+  width: auto;
+  margin: 26px 20px 0;
+}
+.narrow .idbox .slot {
+  position: static;
+  width: auto;
+  height: 96px;
+  margin-top: 12px;
+  font-size: 54px;
+}
+.narrow .codebox .slot {
+  font-size: 34px;
+}
+.narrow .notice {
+  margin: 26px 20px 0;
+  font-size: 18px;
+}

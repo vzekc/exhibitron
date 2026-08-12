@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises'
 import * as path from 'path'
-import { createHash, timingSafeEqual } from 'crypto'
+import { createHash, randomBytes, timingSafeEqual } from 'crypto'
 
 /*
  * Where the pictures live: one directory per visitor, outside the database and
@@ -26,6 +26,22 @@ export function isWellFormedCode(code: string) {
 export function hashCode(code: string) {
   return createHash('sha256').update(code).digest('hex')
 }
+
+/*
+ * Ids and codes as the booth mints them, for a photo that did not come from the
+ * booth. Both are drawn from the crypto source: an id is not a secret, but a
+ * guessable one would let somebody walk the ids and find other people's photos,
+ * and the deletion code is the only thing standing between a stranger and
+ * somebody else's picture.
+ */
+const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+
+const draw = (length: number) =>
+  Array.from(randomBytes(length), (b) => ALPHABET[b % ALPHABET.length]).join('')
+
+export const generatePhotoId = () => draw(6)
+
+export const generateDeleteCode = () => draw(8)
 
 /* Compared without leaking, through timing, how much of a guess was right. */
 export function codeMatches(code: string, expectedHash: string) {

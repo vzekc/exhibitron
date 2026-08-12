@@ -1,3 +1,8 @@
 frontend/src/generated/
 backend/src/generated/
 backend/src/migrations/.snapshot-exhibitron.json
+
+# The booth's stylesheet is a verbatim copy from the fotofix repository, kept
+# in step by a script that compares the two. Reformatting it here would make
+# every check report a difference that is not one.
+backend/assets/booth/booth.css

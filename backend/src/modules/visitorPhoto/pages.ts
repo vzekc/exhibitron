@@ -23,19 +23,21 @@ const STYLE = `
   input[name=code] { font-family: ui-monospace, monospace; font-size: 1.1rem;
                      letter-spacing: .12em; padding: .4rem; text-transform: uppercase }
   .warn { color: #b3261e; font-weight: 600 }
+  .working { margin: 1.2rem 0; padding: .8rem 1rem; border: 1px solid; border-radius: .4rem }
   footer { margin-top: 3rem; font-size: .85rem; opacity: .75 }
 `
 
 const escape = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
-function page(title: string, body: string) {
+function page(title: string, body: string, refreshSeconds?: number) {
   return `<!doctype html>
 <html lang="de">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow, noarchive">
+${refreshSeconds ? `<meta http-equiv="refresh" content="${refreshSeconds}">` : ''}
 <title>${escape(title)}</title>
 <style>${STYLE}</style>
 </head>
@@ -49,12 +51,36 @@ ${body}
 </html>`
 }
 
+/*
+ * How long the formats may be on their way before the page stops saying "any
+ * moment now". The machine with the encoders on it fetches a photo within a
+ * couple of seconds and works through thirty formats; past this it is not busy,
+ * it is unreachable, and the page should say so rather than refresh for ever.
+ */
+const CONVERSION_PATIENCE_MS = 5 * 60 * 1000
+const REFRESH_SECONDS = 8
+
 export function renderPhotoPage(
   id: string,
   groups: { title: string; files: string[] }[],
   tables: number[],
-  problem?: string,
+  { converting, problem }: { converting?: { since: Date }; problem?: string } = {},
 ) {
+  const late = converting && Date.now() - converting.since.getTime() > CONVERSION_PATIENCE_MS
+
+  /*
+   * Until they arrive there is one file to offer, and saying nothing would make
+   * a photo that is halfway through look like a photo that came out thin.
+   */
+  const working = !converting
+    ? ''
+    : late
+      ? `<p class="working">Die Formate für die alten Rechner sind noch nicht da. Der
+  Rechner, der sie erzeugt, ist gerade nicht erreichbar — sie erscheinen hier,
+  sobald er wieder im Netz ist. Dein Foto selbst ist gespeichert.</p>`
+      : `<p class="working">Dein Foto wird gerade in die Formate der alten Rechner
+  umgewandelt. Das dauert einen Moment; diese Seite lädt sich von selbst neu.</p>`
+
   const downloads = groups
     .map(
       (g) => `<h2>${escape(g.title)}</h2>
@@ -78,10 +104,16 @@ export function renderPhotoPage(
 
 <img class="foto" src="/foto/${id}/datei/photo.jpg" alt="Das aufgenommene Foto">
 
+${working}
+
 <a class="zip" href="/foto/${id}/alle-formate.zip">Alle Formate als ZIP laden</a>
 
-<p>Dein Foto wurde in Formate umgewandelt, die alte Rechner anzeigen können.
-Lade dir herunter, was zu deinem Rechner passt.</p>
+${
+  converting
+    ? ''
+    : `<p>Dein Foto wurde in Formate umgewandelt, die alte Rechner anzeigen können.
+Lade dir herunter, was zu deinem Rechner passt.</p>`
+}
 
 ${downloads}
 
@@ -101,6 +133,7 @@ ${trail}
   </p>
   <p><small>Das Löschen lässt sich nicht rückgängig machen.</small></p>
 </form>`,
+    converting && !late ? REFRESH_SECONDS : undefined,
   )
 }
 
@@ -123,6 +156,18 @@ entfernt. Die Kopien auf den Rechnern der Ausstellung werden innerhalb einer
 Minute nachgezogen, sobald der Fotoautomat wieder im Netz ist.</p>
 <p>Der ausgedruckte Beleg in deiner Hand bleibt natürlich bei dir — den können
 wir nicht zurückholen.</p>`,
+  )
+}
+
+/* The camera page is for the people running the exhibition to try out. */
+export function renderNotForYou() {
+  return page(
+    'Nur für Mitwirkende',
+    `<h1>Nur für Mitwirkende</h1>
+<p>Die Kameraseite steht Mitwirkenden der Ausstellung offen, um den Fotoautomaten
+auszuprobieren. Bitte <a href="/login">melde dich an</a>.</p>
+<p>Fotos für Besucherinnen und Besucher macht der Fotoautomat im
+Eingangsbereich.</p>`,
   )
 }
 

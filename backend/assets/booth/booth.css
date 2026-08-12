@@ -1,0 +1,293 @@
+/*
+ * Copied from the fotofix repository, camera/assets/screens/booth.css, by
+ * camera/assets/sync-booth-css.mjs. Edit it there — an edit made here is lost
+ * the next time the two are brought back into step.
+ */
+/*
+ * Shared style for every booth screen. The canvas is exactly the Indy's
+ * 1280x1024, and the colours are the pinned entries from palette.txt — the
+ * build fails on anything outside the swatch it cannot fit.
+ *
+ * Read at two metres by someone standing at a cabinet, on a 1993 monitor:
+ * large type, high contrast, no thin strokes.
+ */
+
+:root {
+    --paper:  #16171c;
+    --ink:    #f2efe6;
+    --sgi:    #6f7fb5;
+    --signal: #d4502a;
+    --go:     #3f9c5a;
+    --dim:    #8b8b94;
+
+    /* The viewfinder rectangle, and the margins it leaves. */
+    --vf-x: 320px;
+    --vf-y: 272px;
+    --vf-w: 640px;
+    --vf-h: 480px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    width: 1280px;
+    height: 1024px;
+    overflow: hidden;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ── the band above the viewfinder ──────────────────────────────────────── */
+
+.head {
+    position: absolute;
+    top: 0; left: 0;
+    width: 1280px;
+    height: 272px;
+    padding: 44px 48px 0;
+}
+
+.wordmark {
+    font-size: 76px;
+    font-weight: 700;
+    letter-spacing: 14px;
+    line-height: 1;
+}
+.wordmark em { font-style: normal; color: var(--sgi); }
+
+.event {
+    position: absolute;
+    top: 58px; right: 48px;
+    text-align: right;
+    font-size: 22px;
+    line-height: 1.45;
+    color: var(--dim);
+    letter-spacing: 1px;
+}
+
+.lede {
+    margin-top: 26px;
+    font-size: 34px;
+    font-weight: 300;
+    line-height: 1.25;
+    max-width: 900px;
+}
+.lede strong { font-weight: 700; color: var(--sgi); }
+
+/* ── the columns beside the viewfinder ──────────────────────────────────── */
+
+.side {
+    position: absolute;
+    top: 272px;
+    width: 320px;
+    height: 480px;
+    padding: 6px 40px 0;
+}
+.side.left  { left: 0; }
+.side.right { right: 0; }
+
+.side h2 {
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--sgi);
+    padding-bottom: 10px;
+    border-bottom: 3px solid var(--sgi);
+    margin-bottom: 22px;
+}
+
+.step { display: flex; gap: 14px; margin-bottom: 24px; }
+.step .n {
+    flex: 0 0 34px;
+    height: 34px;
+    border-radius: 17px;
+    background: var(--sgi);
+    color: var(--paper);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 34px;
+    text-align: center;
+}
+.step p { font-size: 20px; line-height: 1.35; }
+
+.note { font-size: 20px; line-height: 1.4; margin-bottom: 20px; color: var(--ink); }
+.note b { color: var(--sgi); font-weight: 700; }
+
+/* ── the viewfinder frame ───────────────────────────────────────────────── */
+
+.viewfinder {
+    position: absolute;
+    left: var(--vf-x);
+    top: var(--vf-y);
+    width: var(--vf-w);
+    height: var(--vf-h);
+    background: var(--paper);
+    box-shadow: 0 0 0 4px var(--sgi);
+}
+/* Framing marks on the picture's own corners. The video is blitted over the
+   whole rectangle, so they show only while there is nothing to see — which is
+   what a framing mark is for. */
+.viewfinder .corner {
+    position: absolute;
+    width: 38px; height: 38px;
+    border: 5px solid var(--signal);
+}
+.viewfinder .tl { top: 0;    left: 0;  border-right: 0;  border-bottom: 0; }
+.viewfinder .tr { top: 0;    right: 0; border-left: 0;   border-bottom: 0; }
+.viewfinder .bl { bottom: 0; left: 0;  border-right: 0;  border-top: 0; }
+.viewfinder .br { bottom: 0; right: 0; border-left: 0;   border-top: 0; }
+
+/* ── the band below the viewfinder ──────────────────────────────────────── */
+
+.foot {
+    position: absolute;
+    left: 0; bottom: 0;
+    width: 1280px;
+    height: 272px;
+    padding: 34px 48px 0;
+}
+
+.buttons { display: flex; gap: 64px; align-items: flex-start; }
+
+.button { display: flex; gap: 20px; align-items: center; }
+.button .cap {
+    width: 62px; height: 62px;
+    border-radius: 31px;
+    flex: 0 0 62px;
+}
+.button .cap.red   { background: var(--signal); }
+.button .cap.green { background: var(--go); }
+.button .cap.off   { background: var(--paper); box-shadow: inset 0 0 0 4px var(--dim); }
+.button .label { font-size: 27px; font-weight: 700; line-height: 1.15; }
+.button .label span { display: block; font-size: 20px; font-weight: 300; color: var(--dim); }
+
+.foot .tail {
+    position: absolute;
+    left: 48px; right: 48px; bottom: 40px;
+    padding-top: 22px;
+    border-top: 3px solid var(--sgi);
+    font-size: 21px;
+    line-height: 1.4;
+    color: var(--dim);
+}
+.foot .tail b { color: var(--ink); font-weight: 700; }
+
+/* ── full-canvas screens: attract, error ────────────────────────────────── */
+
+.full {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 0 120px;
+}
+.full .huge {
+    font-size: 96px;
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -1px;
+}
+.full .sub {
+    margin-top: 40px;
+    font-size: 38px;
+    font-weight: 300;
+    line-height: 1.35;
+    color: var(--dim);
+}
+.full .rule {
+    width: 220px;
+    height: 5px;
+    background: var(--sgi);
+    margin: 54px 0;
+}
+
+/* ── sprite sheets ──────────────────────────────────────────────────────── */
+
+/*
+ * Sheets are laid out as a row of equal cells; the application slices them by
+ * cell width. They carry no language, so there is one of each.
+ */
+body.sheet {
+    display: flex;
+    width: auto;
+    height: auto;
+}
+
+/* The countdown is blitted over live video: everything outside the plate is
+   the key colour and the blit skips it, and the plate's own edge is hard,
+   because antialiasing needs a background the build can see. */
+body.sheet.keyed { background: #ff00ff; }
+
+.sheet .cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-weight: 700;
+}
+
+.sheet .digit { width: 160px; height: 160px; }
+.sheet .digit .plate {
+    width: 132px;
+    height: 132px;
+    background: var(--paper);
+    box-shadow: inset 0 0 0 5px var(--sgi);
+    color: var(--ink);
+    font-size: 104px;
+    line-height: 132px;
+    width: 132px;
+}
+
+/* The ID characters land on the closing screen's own background, so their
+   antialiasing is baked against the colour they will sit on. */
+.sheet .glyph {
+    width: 64px;
+    height: 96px;
+    color: var(--ink);
+    font-size: 72px;
+    line-height: 96px;
+}
+
+/* ── the question in the lower band ─────────────────────────────────────── */
+
+.question {
+    font-size: 54px;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 34px;
+}
+.question em { font-style: normal; color: var(--sgi); }
+
+/* ── the photo ID on the closing screen ─────────────────────────────────── */
+
+/* Positioned absolutely: screen.manifest names the same coordinates, and the
+   build refuses to ship a screen whose blit areas are not clear. */
+.idbox {
+    position: absolute;
+    left: 440px;
+    top: 812px;
+    width: 400px;
+}
+.idbox .caption {
+    font-size: 24px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--dim);
+    text-align: center;
+}
+/* The application blits the six characters into this space from glyph
+   sprites, so it stays empty in the shipped screen. */
+.idbox .slot {
+    position: absolute;
+    left: 0;
+    top: 52px;
+    width: 400px;
+    height: 112px;
+    box-shadow: inset 0 0 0 4px var(--sgi);
+}

@@ -63,7 +63,14 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,woff2}'],
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         navigateFallback: 'index.html',
-        navigateFallbackDenylist: [/^\/graphql/, /^\/api\//, /^\/auth\//],
+        /*
+         * The photo pages and the camera page are rendered by the backend and
+         * have no route in this application. Without them here the service
+         * worker answers a visit to one with index.html out of its cache, and
+         * an exhibitor who has used the site is shown "file not found" for a
+         * page that exists.
+         */
+        navigateFallbackDenylist: [/^\/graphql/, /^\/api\//, /^\/auth\//, /^\/foto\//],
         runtimeCaching: [
           {
             urlPattern: /\/api\/.*\/image\//,
