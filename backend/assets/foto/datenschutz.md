@@ -65,9 +65,10 @@ Foto-ID Bestandteil der Webadresse ist. Eine vollständige IP-Adresse könnte da
 zusätzlichen Bezug zwischen einer Person und einem Foto herstellen, etwa beim Aufruf einer
 Löschseite.
 
-Die Protokolle werden täglich gewechselt und nach **14 Tagen gelöscht**. Sie werden nicht zu anderen
-Zwecken ausgewertet, nicht mit anderen Daten zusammengeführt und nicht an Dritte weitergegeben. Sie
-dienen ausschließlich dem Betrieb der Anwendung sowie der Fehleranalyse.
+Die Protokolle werden nach **14 Tagen gelöscht**. Sie werden nicht zu
+anderen Zwecken ausgewertet, nicht mit anderen Daten zusammengeführt
+und nicht an Dritte weitergegeben. Sie dienen ausschließlich dem
+Betrieb der Anwendung sowie der Fehleranalyse.
 
 Bei einem Serverfehler kann in einem Fehlerprotokoll eine vollständige IP-Adresse enthalten sein.
 Auch diese Protokolle werden spätestens nach **14 Tagen gelöscht**.
