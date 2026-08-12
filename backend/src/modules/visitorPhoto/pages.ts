@@ -25,6 +25,11 @@ const STYLE = `
   .warn { color: #b3261e; font-weight: 600 }
   .working { margin: 1.2rem 0; padding: .8rem 1rem; border: 1px solid; border-radius: .4rem }
   footer { margin-top: 3rem; font-size: .85rem; opacity: .75 }
+  .doc h2 { font-size: 1.25rem; margin: 2rem 0 .4rem }
+  .doc h3 { font-size: 1.05rem; margin: 1.4rem 0 .3rem }
+  .doc ul { padding-left: 1.3rem }
+  .doc li { margin: .35rem 0 }
+  .doc hr { border: 0; border-top: 1px solid; opacity: .3; margin: 2rem 0 }
 `
 
 const escape = (s: string) =>
@@ -44,7 +49,7 @@ ${refreshSeconds ? `<meta http-equiv="refresh" content="${refreshSeconds}">` : '
 <body>
 ${body}
 <footer>
-  <a href="/datenschutz">Datenschutz</a> ·
+  <a href="/foto/datenschutz">Datenschutz</a> ·
   Fotos werden drei Monate nach der Ausstellung gelöscht.
 </footer>
 </body>
@@ -157,6 +162,19 @@ Minute nachgezogen, sobald der Fotoautomat wieder im Netz ist.</p>
 <p>Der ausgedruckte Beleg in deiner Hand bleibt natürlich bei dir — den können
 wir nicht zurückholen.</p>`,
   )
+}
+
+/*
+ * The Datenschutzerklärung for the photo booth.
+ *
+ * It describes the booth and nothing else — what the camera records, what the
+ * slip carries, how long a photo lives and how to have it removed. It is not
+ * this site's privacy notice, which is the forum's and is linked from the site
+ * footer, so it appears here and only here: on the pages a photo is reached
+ * from, where it is the relevant one.
+ */
+export function renderPrivacyPage(html: string) {
+  return page('Datenschutzerklärung — Fotoautomat', `<div class="doc">${html}</div>`)
 }
 
 /* The camera page is for the people running the exhibition to try out. */

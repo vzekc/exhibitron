@@ -79,9 +79,14 @@ body {
   display: none;
 }
 
-/* The countdown and the photo ID are the sprite sheets' own cells, so a browser
-   sets them in the same type the build bakes into the sheets. */
-#photo-id {
+/*
+ * The countdown and the photo ID are the sprite sheets' own cells, so a browser
+ * sets them in the same type the build bakes into the sheets.
+ *
+ * Guarded on :not([hidden]), because an id selector outweighs `.blit[hidden]`
+ * and would otherwise leave the photo ID painted over the viewfinder for ever.
+ */
+#photo-id:not([hidden]) {
   display: flex;
 }
 

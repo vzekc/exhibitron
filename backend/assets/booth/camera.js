@@ -78,7 +78,12 @@ function show(next) {
   clearTimeout(timer)
   timer = null
   if (next === 'keep') timer = setTimeout(() => command('SHOOT'), CONFIRM_TIMEOUT_MS)
-  if (next === 'done') timer = setTimeout(() => show('live'), DONE_MS)
+  /*
+   * The booth returns to the viewfinder, because the next visitor is already
+   * waiting at the cabinet. Nobody is queueing behind a browser, so a finished
+   * photo returns to the invitation and the next press starts cleanly.
+   */
+  if (next === 'done') timer = setTimeout(() => show('attract'), DONE_MS)
 
   /* Three minutes of nothing and the invitation comes back, as at the booth. */
   clearTimeout(idle)

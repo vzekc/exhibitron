@@ -1,5 +1,9 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { spawn } from 'child_process'
+import * as path from 'path'
+import { readFile } from 'fs/promises'
+import { fileURLToPath } from 'url'
+import { marked } from 'marked'
 import { initORM } from '../../db.js'
 import { VisitorPhoto } from './entity.js'
 import { Table } from '../table/entity.js'
@@ -9,6 +13,7 @@ import {
   renderDeletedConfirmation,
   renderNotFound,
   renderNotForYou,
+  renderPrivacyPage,
 } from './pages.js'
 import { cameraAssetType, isCameraAsset, readCameraAsset, renderCameraPage } from './camera.js'
 import { buildReceiptSvg, ditherAtkinson, rasteriseSvg, rgbaToGray } from './receipt.js'
@@ -78,6 +83,28 @@ function noIndex(reply: FastifyReply) {
  */
 const converting = (photo: VisitorPhoto) =>
   photo.source === 'web' && !photo.convertedAt ? { since: photo.createdAt } : undefined
+
+/*
+ * The booth's Datenschutzerklärung, written for the photo booth and for nothing
+ * else. It lives with this module rather than in the site's docs directory: the
+ * general one there is served to anybody who asks for a document by name, and
+ * this one is only ever the right answer on a page that a photo is reached
+ * from. The site's own privacy notice is the forum's, linked from the footer.
+ */
+const PRIVACY_DOC = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '../../..',
+  'assets/foto/datenschutz.md',
+)
+
+/* Read once: it is a document that changes when the code does, and a deployment
+   restarts this process. */
+let privacyHtml: string | undefined
+
+async function privacyPage() {
+  privacyHtml ??= renderPrivacyPage(await marked(await readFile(PRIVACY_DOC, 'utf8')))
+  return privacyHtml
+}
 
 export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
   const db = await initORM()
@@ -364,6 +391,12 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
   )
 
   /* ── the visitor ───────────────────────────────────────────────────────── */
+
+  /* Linked from the footer of every page here, and from nowhere else. */
+  app.get('/foto/datenschutz', async (_request, reply) => {
+    noIndex(reply)
+    return reply.type('text/html').send(await privacyPage())
+  })
 
   app.get<{ Params: { id: string } }>('/foto/:id', async (request, reply) => {
     noIndex(reply)
