@@ -5,10 +5,11 @@ type Exhibitor {
   exhibits: [Exhibit!]
   tables: [Table!]
   canSwitchExhibitor: Boolean!
+  showsVisitorPhotos: Boolean!
 }
 
 extend type Mutation {
-  updateExhibitor(id: Int!, topic: String): Exhibitor
+  updateExhibitor(id: Int!, topic: String, showsVisitorPhotos: Boolean): Exhibitor
   switchExhibitor(exhibitorId: Int!): Exhibitor
 }
 
