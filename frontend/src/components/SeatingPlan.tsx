@@ -377,9 +377,10 @@ export const SeatingPlan: React.FC = () => {
   }
 
   /*
-   * A small F in the corner of a table whose holder has said a machine on it can
-   * show a visitor's photo. Drawn into the table's own parent so it inherits the
-   * same transforms as the table it belongs to, and cleared first so that
+   * A red F badge in the corner of a table whose holder has said a machine on it
+   * can show a visitor's photo. Drawn into the table's own parent so it shares
+   * the coordinate system of the table it belongs to, with a white ring so it
+   * carries against whatever colour the table has, and cleared first so that
    * turning the flag off removes it.
    */
   const markPhotoTable = (tableElement: Element, shows: boolean) => {
@@ -393,20 +394,37 @@ export const SeatingPlan: React.FC = () => {
     const box = (tableElement as SVGGraphicsElement).getBBox()
     if (!box.width || !box.height) return
 
-    const size = Math.min(box.width, box.height) * 0.42
-    const inset = size * 0.2
-    const badge = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+    const short = Math.min(box.width, box.height)
+    const radius = short * 0.26
+    const pad = short * 0.07
+    const cx = box.x + box.width - radius - pad
+    const cy = box.y + radius + pad
 
+    const svgNS = 'http://www.w3.org/2000/svg'
+    const badge = document.createElementNS(svgNS, 'g')
     badge.setAttribute('data-photo-badge', tableElement.id)
-    badge.setAttribute('x', String(box.x + box.width - inset))
-    badge.setAttribute('y', String(box.y + size + inset))
-    badge.setAttribute('text-anchor', 'end')
-    badge.setAttribute('font-size', String(size))
-    badge.setAttribute('font-family', 'Liberation Sans, sans-serif')
-    badge.setAttribute('font-weight', 'bold')
-    badge.setAttribute('fill', '#b3261e')
     badge.setAttribute('pointer-events', 'none')
-    badge.textContent = 'F'
+
+    const disc = document.createElementNS(svgNS, 'circle')
+    disc.setAttribute('cx', String(cx))
+    disc.setAttribute('cy', String(cy))
+    disc.setAttribute('r', String(radius))
+    disc.setAttribute('fill', '#c62828')
+    disc.setAttribute('stroke', '#ffffff')
+    disc.setAttribute('stroke-width', String(radius * 0.14))
+
+    const letter = document.createElementNS(svgNS, 'text')
+    letter.setAttribute('x', String(cx))
+    letter.setAttribute('y', String(cy + radius * 0.42))
+    letter.setAttribute('text-anchor', 'middle')
+    letter.setAttribute('font-size', String(radius * 1.25))
+    letter.setAttribute('font-family', 'Liberation Sans, sans-serif')
+    letter.setAttribute('font-weight', 'bold')
+    letter.setAttribute('fill', '#ffffff')
+    letter.textContent = 'F'
+
+    badge.appendChild(disc)
+    badge.appendChild(letter)
     parent.appendChild(badge)
   }
 
