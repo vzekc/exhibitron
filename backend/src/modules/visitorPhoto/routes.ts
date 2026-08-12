@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { spawn } from 'child_process'
 import { initORM } from '../../db.js'
 import { VisitorPhoto } from './entity.js'
+import { Table } from '../table/entity.js'
 import {
   renderPhotoPage,
   renderDeletedPage,
@@ -120,6 +121,24 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
 
     const deleted = await photos.find({ deletedAt: { $ne: null } }, { fields: ['id'] })
     return reply.send({ deleted: deleted.map((p) => p.id) })
+  })
+
+  /*
+   * The tables the booth should print on a visitor's slip: those whose
+   * exhibitor has said their machine can show a photo. Printing numbers at
+   * random would send visitors to tables with nothing to show, which is what
+   * happens today.
+   */
+  app.get('/api/visitor-photo/tables', async (request, reply) => {
+    if (!boothAuthorised(request)) return reply.code(403).send({ error: 'not the booth' })
+
+    const exhibition = request.apolloContext.exhibition
+    const tables = await db.em.find(
+      Table,
+      { exhibition, exhibitor: { showsVisitorPhotos: true } },
+      { fields: ['number'], orderBy: { number: 'asc' } },
+    )
+    return reply.send({ tables: tables.map((t) => t.number) })
   })
 
   /* ── the visitor ───────────────────────────────────────────────────────── */
