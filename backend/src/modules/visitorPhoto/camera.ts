@@ -191,6 +191,30 @@ export async function cameraStamp() {
   return stamp(await pageInputs(await installedLanguages()))
 }
 
+/* How long a question about the screens is held before being answered with the
+   same answer, and how closely they are watched while it is held. */
+const HOLD_MS = 20_000
+const LOOK_EVERY_MS = 200
+
+/*
+ * The same, but answered only once it differs from what the asker already has.
+ *
+ * Asking once a second instead would be a request per second per open tab, and
+ * every request here opens a database transaction — enough of them to starve
+ * the ones that need it, which is how a slip once took thirty-five seconds to
+ * render. Holding the question answers sooner and asks sixty times less often.
+ */
+export async function stampAfter(since: string | undefined, gone: () => boolean) {
+  const deadline = Date.now() + HOLD_MS
+  let current = await cameraStamp()
+
+  while (since && current === since && Date.now() < deadline && !gone()) {
+    await new Promise((resolve) => setTimeout(resolve, LOOK_EVERY_MS))
+    current = await cameraStamp()
+  }
+  return current
+}
+
 /*
  * Reloading on its own belongs to whoever is editing the screens, not to an
  * exhibitor trying the booth out: in production the page is served without it

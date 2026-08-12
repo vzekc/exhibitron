@@ -479,21 +479,36 @@ function showId(id) {
  * Off in production: the server does not mark the page for it, and nothing here
  * runs.
  */
-function watchForEdits() {
+async function watchForEdits() {
   /* The server marks its own script tag when it is not running in production.
      `document.currentScript` is null in a module, so the tag is looked up. */
   if (!document.querySelector('script[data-watch]')) return
 
+  /*
+   * The server holds each question until the screens have changed, so this asks
+   * again as soon as it is answered rather than on a timer: a save comes back
+   * at once, and an idle editor makes a request every twenty seconds instead of
+   * one a second. Every request here opens a database transaction, and one a
+   * second was enough to starve the rest of the server.
+   */
   let known = null
-  setInterval(async () => {
-    const answer = await fetch('/foto/kamera/stamp').then(
+  for (;;) {
+    const answer = await fetch(
+      `/foto/kamera/stamp${known === null ? '' : `?since=${encodeURIComponent(known)}`}`,
+    ).then(
       (r) => (r.ok ? r.json() : null),
       () => null,
     )
-    if (!answer) return
-    if (known === null) known = answer.stamp
-    else if (known !== answer.stamp) location.reload()
-  }, 1000)
+
+    /* A server that is restarting answers nothing; try again shortly rather
+       than spinning against a closed port. */
+    if (!answer) {
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+      continue
+    }
+    if (known !== null && known !== answer.stamp) return location.reload()
+    known = answer.stamp
+  }
 }
 
 start()

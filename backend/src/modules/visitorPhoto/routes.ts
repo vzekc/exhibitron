@@ -17,12 +17,12 @@ import {
 } from './pages.js'
 import {
   cameraAssetType,
-  cameraStamp,
   isCameraAsset,
   isLanguage,
   isStep,
   readCameraAsset,
   renderCameraPage,
+  stampAfter,
 } from './camera.js'
 import { buildReceiptSvg, ditherAtkinson, rasteriseSvg, rgbaToGray } from './receipt.js'
 import { receiptPdf } from './pdf.js'
@@ -339,11 +339,19 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
    * When the screens were last written. The page asks while it is being worked
    * on and reloads itself when the answer changes; a save therefore shows up
    * without touching the browser, on the step that is already open.
+   *
+   * The question is held until the answer differs from what the asker already
+   * has, so a save is answered the moment it lands and an idle editor asks
+   * three times a minute rather than sixty. Every request here opens a database
+   * transaction, and sixty a minute was enough to starve the ones that need it.
    */
-  app.get('/foto/kamera/stamp', async (request, reply) => {
+  app.get<{ Querystring: { since?: string } }>('/foto/kamera/stamp', async (request, reply) => {
     if (!asExhibitor(request)) return reply.code(403).send({ error: 'not an exhibitor' })
+
     reply.header('Cache-Control', 'no-store')
-    return reply.send({ stamp: await cameraStamp() })
+    /* A browser that has gone away should not be waited for. */
+    const stamp = await stampAfter(request.query.since, () => reply.raw.destroyed)
+    return reply.send({ stamp })
   })
 
   /*
