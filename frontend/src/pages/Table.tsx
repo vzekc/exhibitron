@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useExhibitor } from '@contexts/ExhibitorContext.ts'
 import { FragmentOf, graphql } from 'gql.tada'
 import { useApolloClient, useMutation, useQuery } from '@apollo/client'
@@ -10,6 +10,7 @@ import ExhibitChip from '@components/ExhibitChip.tsx'
 import ChipContainer from '@components/ChipContainer.tsx'
 import ActionBar from '@components/ActionBar.tsx'
 import Button from '@components/Button.tsx'
+import Confirm from '@components/Confirm.tsx'
 import { getDisplayName } from '@utils/displayName'
 import { showMessage } from '@components/MessageModalUtil.tsx'
 
@@ -72,6 +73,7 @@ const Table = () => {
   const navigate = useNavigate()
   const { exhibitor: currentUser } = useExhibitor()
   const { setDetailName } = useBreadcrumb()
+  const [showReleaseConfirm, setShowReleaseConfirm] = useState(false)
 
   useEffect(() => {
     setDetailName(location.pathname, 'Tisch ' + number)
@@ -94,12 +96,12 @@ const Table = () => {
     navigate(`/table/${tableId}`)
   }
 
-  const handleReleaseTable = async (tableId: number, e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault()
+  const handleReleaseTable = async (tableId: number) => {
+    setShowReleaseConfirm(false)
     const result = await releaseTable({ variables: { number: tableId } })
     if (result.errors?.length) {
       await showMessage(
-        'Tisch konnte nicht freigegeben werden',
+        'Tisch konnte nicht abgegeben werden',
         result.errors[0]?.message || 'Unbekannter Fehler',
         'OK',
       )
@@ -203,6 +205,15 @@ const Table = () => {
     )
   }
 
+  /*
+   * Giving the table up lives here rather than on the floor-plan panel, so that
+   * it stands apart from the photo-booth checkbox and the confirmation can say
+   * what it costs.
+   *
+   * Called as a function so that the confirmation keeps its place in the tree
+   * across renders: the <dialog> behind it has to be shown again when it
+   * remounts.
+   */
   const Actions = () => {
     if (!currentUser) {
       return <></>
@@ -214,16 +225,29 @@ const Table = () => {
           </Button>
         </ActionBar>
       )
-    } else if (
-      !onThisTableExhibits?.length &&
-      (currentUser.id === exhibitor.user.id || currentUser.user.isAdministrator)
-    ) {
+    } else if (currentUser.id === exhibitor.id || currentUser.user.isAdministrator) {
       return (
-        <ActionBar>
-          <Button variant="danger" onClick={handleReleaseTable.bind(null, tableNumber)}>
-            Tisch {tableNumber} freigeben
-          </Button>
-        </ActionBar>
+        <>
+          <ActionBar>
+            <Button variant="danger" onClick={() => setShowReleaseConfirm(true)}>
+              Tisch {tableNumber} abgeben
+            </Button>
+          </ActionBar>
+          <Confirm
+            isOpen={showReleaseConfirm}
+            title={`Tisch ${tableNumber} abgeben`}
+            message={
+              `Der Tisch ${tableNumber} wird danach als frei angezeigt und kann von anderen ` +
+              'Ausstellern belegt werden. Exponate, die auf diesem Tisch stehen, verlieren dabei ' +
+              'ihre Tischzuordnung. Um den Tisch für das Fotoprojekt anzubieten, genügt das ' +
+              'Häkchen bei „An diesem Tisch können Besucherfotos gezeigt werden“.'
+            }
+            confirm={`Tisch ${tableNumber} abgeben`}
+            cancel="Abbrechen"
+            onConfirm={() => void handleReleaseTable(tableNumber)}
+            onClose={() => setShowReleaseConfirm(false)}
+          />
+        </>
       )
     } else {
       return <></>
@@ -234,7 +258,7 @@ const Table = () => {
     return (
       <article>
         <h2>Der Tisch {number} ist nicht belegt.</h2>
-        <Actions />
+        {Actions()}
       </article>
     )
   }
@@ -248,6 +272,7 @@ const Table = () => {
           exhibits={otherExhibitorExhibits}
           title={`Exponate von ${getDisplayName(exhibitor.user)}`}
         />
+        {Actions()}
       </article>
     )
   }
@@ -261,6 +286,7 @@ const Table = () => {
           exhibits={otherExhibitorExhibits}
           title={`Weitere Exponate von ${getDisplayName(exhibitor.user)}`}
         />
+        {Actions()}
       </article>
     )
   }
@@ -272,6 +298,7 @@ const Table = () => {
         exhibits={onAnyTableExhibits}
         title={`Exponate von ${getDisplayName(exhibitor.user)} auf anderen Tischen`}
       />
+      {Actions()}
     </article>
   )
 }

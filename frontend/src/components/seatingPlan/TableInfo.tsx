@@ -7,6 +7,7 @@ import ExhibitChip from '../ExhibitChip'
 import { FragmentOf } from 'gql.tada'
 import { graphql } from 'gql.tada'
 import { useMutation } from '@apollo/client'
+import { Link } from 'react-router-dom'
 import TableChip from '@components/TableChip.tsx'
 import { showMessage } from '@components/MessageModalUtil.tsx'
 
@@ -57,14 +58,6 @@ const UPDATE_TABLE = graphql(`
   }
 `)
 
-const RELEASE_TABLE = graphql(`
-  mutation ReleaseTable($number: Int!) {
-    releaseTable(number: $number) {
-      id
-    }
-  }
-`)
-
 type TableInfo = {
   showsVisitorPhotos: boolean
   exhibitor: FragmentOf<typeof ExhibitorChip.fragment>
@@ -102,7 +95,6 @@ const TableInfoPanel: React.FC<TableInfoPanelProps> = ({
   currentExhibitorId,
 }) => {
   const [selectedExhibitorId, setSelectedExhibitorId] = useState<number | null>(null)
-  const [showReleaseConfirmation, setShowReleaseConfirmation] = useState(false)
   const style: React.CSSProperties = {
     position: 'absolute',
     top: `${position.top}px`,
@@ -118,17 +110,13 @@ const TableInfoPanel: React.FC<TableInfoPanelProps> = ({
   }
 
   const isTableOwner = currentExhibitorId && tableInfo?.exhibitor.id === currentExhibitorId
-  const canReleaseTable = isAdmin || isTableOwner
+  const canManageTable = isAdmin || isTableOwner
 
   const [claimTable] = useMutation(CLAIM_TABLE, {
     refetchQueries: [GET_TABLES],
   })
 
   const [assignTable] = useMutation(ASSIGN_TABLE, {
-    refetchQueries: [GET_TABLES],
-  })
-
-  const [releaseTable] = useMutation(RELEASE_TABLE, {
     refetchQueries: [GET_TABLES],
   })
 
@@ -181,22 +169,6 @@ const TableInfoPanel: React.FC<TableInfoPanelProps> = ({
     }
   }
 
-  const handleReleaseTable = async () => {
-    const result = await releaseTable({
-      variables: { number: selectedTable },
-    })
-    if (result.errors?.length) {
-      setShowReleaseConfirmation(false)
-      await showMessage(
-        'Tisch konnte nicht freigegeben werden',
-        result.errors[0]?.message || 'Unbekannter Fehler',
-      )
-      return
-    }
-    setShowReleaseConfirmation(false)
-    onClose()
-  }
-
   return (
     <div
       className="table-info-panel fixed z-50 max-w-[400px] overflow-hidden rounded-t-xl bg-gray-100 shadow-lg md:relative md:rounded-lg"
@@ -247,7 +219,13 @@ const TableInfoPanel: React.FC<TableInfoPanelProps> = ({
             </div>
           )}
 
-          {tableInfo && canReleaseTable && (
+          {/*
+           * The photo-booth flag is the one setting the panel offers, because it
+           * is read off the floor plan: whoever looks at the plan is asking which
+           * tables carry the badge. Everything else about the table lives on the
+           * table's own page, which the chip above links to.
+           */}
+          {tableInfo && canManageTable && (
             <div className="space-y-1">
               <label className="flex items-start gap-2 text-sm">
                 <input
@@ -260,34 +238,15 @@ const TableInfoPanel: React.FC<TableInfoPanelProps> = ({
               </label>
               <p className="text-xs m-0 text-gray-500">
                 Der Tisch steht dann auf den Laufzetteln, die Besucher am Fotoautomaten bekommen.
+                Die Einstellung wird sofort gespeichert.
+              </p>
+              <p className="text-xs m-0 pt-1 text-gray-500">
+                <Link className="underline" to={`/table/${selectedTable}`}>
+                  Tisch {selectedTable} verwalten
+                </Link>
               </p>
             </div>
           )}
-
-          {tableInfo && canReleaseTable && (
-            <Button variant="danger" onClick={() => setShowReleaseConfirmation(true)}>
-              Tisch freigeben
-            </Button>
-          )}
-        </div>
-      )}
-
-      {showReleaseConfirmation && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-            <h3 className="mb-4 text-lg font-medium">Tisch {selectedTable} freigeben</h3>
-            <p className="mb-4 text-gray-600">
-              Bist Du sicher, dass Du den Tisch {selectedTable} freigeben möchtest?
-            </p>
-            <div className="flex justify-end gap-2">
-              <Button variant="secondary" onClick={() => setShowReleaseConfirmation(false)}>
-                Abbrechen
-              </Button>
-              <Button variant="danger" onClick={handleReleaseTable}>
-                Freigeben
-              </Button>
-            </div>
-          </div>
         </div>
       )}
     </div>
