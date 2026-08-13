@@ -407,10 +407,14 @@ const SerialTokens = () => {
 
       {problem && <p className="my-2 text-sm text-red-600">{problem}</p>}
 
-      <div className="my-3 flex flex-wrap items-center gap-2">
+      <p className="mt-4 text-sm">
+        Gib dem Token einen Namen, an dem du es in der Liste wiedererkennst — das Token selbst
+        siehst du nur einmal.
+      </p>
+      <div className="my-2 flex flex-wrap items-center gap-2">
         <input
           value={label}
-          placeholder="Name, z.B. Thinkpad zuhause"
+          placeholder="z.B. Thinkpad"
           onChange={(event) => setLabel(event.target.value)}
         />
         <Button onClick={() => void create()} disabled={!label.trim()}>

@@ -72,8 +72,10 @@ export async function requestPort(): Promise<SerialPort> {
 export class SerialBridge {
   private socket: WebSocket | null = null
   private writer: WritableStreamDefaultWriter<Uint8Array> | null = null
+  private reader: ReadableStreamDefaultReader<Uint8Array> | null = null
   private reading = false
   private stopping = false
+  private stopped = false
 
   /*
    * The gate the writer waits at. An XOFF from the machine is acted on here,
@@ -179,6 +181,7 @@ export class SerialBridge {
      */
     while (this.port.readable && !this.stopping) {
       const reader = this.port.readable.getReader()
+      this.reader = reader
       try {
         for (;;) {
           const { value, done } = await reader.read()
@@ -188,6 +191,7 @@ export class SerialBridge {
       } catch (error) {
         this.noteLineError(error)
       } finally {
+        this.reader = null
         reader.releaseLock()
       }
     }
@@ -253,6 +257,8 @@ export class SerialBridge {
    * and no more.
    */
   private async toSerial(data: Uint8Array) {
+    /* The exhibition's own output, which is most of what there is to see. */
+    this.events.onData(data)
     if (!this.port.writable) return
     if (!this.writer) this.writer = this.port.writable.getWriter()
 
@@ -305,16 +311,39 @@ export class SerialBridge {
 
   private async releaseSerial() {
     this.stopping = true
+
+    /* Let go of anyone parked on an XOFF that will now never be lifted. */
+    const waiting = this.waiters
+    this.waiters = []
+    for (const wake of waiting) wake()
+
     this.writer?.releaseLock()
     this.writer = null
-    /* Cancelling ends the pump loop, which releases the reader it holds. */
-    if (this.port.readable?.locked) await this.port.readable.cancel().catch(() => {})
-    while (this.reading) await new Promise((resolve) => setTimeout(resolve, 5))
+
+    /*
+     * Cancel the reader that is held, not the stream it is locked to —
+     * `readable.cancel()` on a locked stream throws, and the pump would then
+     * sit in `read()` for ever with nothing after this ever running.
+     */
+    if (this.reader) {
+      await this.reader.cancel().catch(() => {})
+      this.reader = null
+    }
+
+    const until = Date.now() + 2000
+    while (this.reading && Date.now() < until) {
+      await new Promise((resolve) => setTimeout(resolve, 5))
+    }
+
     await this.port.close().catch(() => {})
     this.stopping = false
   }
 
   async stop(detail?: string) {
+    /* Both the exit frame and the close that follows it arrive here. */
+    if (this.stopped) return
+    this.stopped = true
+
     if (this.socket) {
       this.socket.onclose = null
       this.socket.onerror = null
