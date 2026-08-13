@@ -93,7 +93,7 @@ export async function removePhotoFiles(id: string) {
  * remembers to edit this list.
  */
 const GROUPS: { title: string; match: RegExp }[] = [
-  { title: 'Bildformate', match: /^(photo\.jpg|pcx|gif|bmp|ppm|tiff)/ },
+  { title: 'Bildformate', match: /^(photo\.jpg|png|pcx|gif|bmp|ppm|pgm|pbm|xbm|tiff)/ },
   { title: 'C64', match: /^c64/ },
   { title: 'Amiga', match: /^amiga/ },
   { title: 'Apple', match: /^apple2/ },
