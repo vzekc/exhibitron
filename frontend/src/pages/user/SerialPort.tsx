@@ -384,10 +384,13 @@ const SerialTokens = () => {
       </pre>
       <p className="text-sm">
         Das Programm heruntergeladen, das Token in eine Datei gelegt, fertig. Heruntergeladene
-        Programme sind gesperrt: unter macOS nimmt{' '}
-        <code>xattr -d com.apple.quarantine fotofix-serial</code> die Sperre weg, unter Windows{' '}
-        <code>Unblock-File -Path .\fotofix-serial.exe</code>.
+        Programme sind gesperrt; die Sperre nimmt man so weg:
       </p>
+      {/* Ein Template-Literal, weil JSX Zeilenumbrüche in Text zu Leerzeichen macht. */}
+      <pre className="my-2 overflow-x-auto rounded bg-gray-100 p-2 text-sm dark:bg-gray-800">
+        {`xattr -d com.apple.quarantine fotofix-serial   # macOS
+Unblock-File -Path .\\fotofix-serial.exe        # Windows`}
+      </pre>
 
       <p className="my-3">
         <a
