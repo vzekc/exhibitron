@@ -82,16 +82,15 @@ function noIndex(reply: FastifyReply) {
 }
 
 /*
- * A photo taken on the camera page arrives as a bare JPEG and waits for the
- * machine with the encoders to fetch it, which is a wait the page has to
- * account for rather than showing a single download and looking complete.
- *
- * A booth photo is not waiting for anything: the machine that received it did
- * the converting, and the formats it holds are served over the exhibition's own
- * network rather than sent here.
+ * Every photo arrives here as a bare JPEG and waits for the machine with the
+ * encoders on it, whichever camera took it: the booth pushes the picture before
+ * it prints the receipt, so that the page exists by the time a visitor can scan
+ * the code on their slip, and the formats follow when they have been made. That
+ * is a wait the page has to account for rather than showing a single download
+ * and looking complete.
  */
 const converting = (photo: VisitorPhoto) =>
-  photo.source === 'web' && !photo.convertedAt ? { since: photo.createdAt } : undefined
+  photo.convertedAt ? undefined : { since: photo.createdAt }
 
 /*
  * The booth's Datenschutzerklärung, written for the photo booth and for nothing
@@ -166,17 +165,18 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
   })
 
   /*
-   * A photo taken on the camera page arrives as a bare JPEG: the encoders are
-   * on the machine at the booth, and it is the one that fetches what is waiting
-   * here, converts it and pushes the results back. Until it has, the photo's
-   * page says so.
+   * The photos that have no formats yet, oldest first. The encoders live on the
+   * machine at the booth, and this list is what it works from: it fetches a
+   * camera-page photo, converts whatever it does not already hold, and pushes
+   * the files back. A photo stays on the list until it says it is done, so a
+   * transfer that broke off is finished by the round after it.
    */
   app.get('/api/visitor-photo/pending', async (request, reply) => {
     if (!boothAuthorised(request)) return reply.code(403).send({ error: 'not the booth' })
 
     const exhibition = request.apolloContext.exhibition
     const waiting = await photos.find(
-      { exhibition, source: 'web', convertedAt: null, deletedAt: null },
+      { exhibition, convertedAt: null, deletedAt: null },
       { fields: ['id'], orderBy: { createdAt: 'asc' } },
     )
     return reply.send({ pending: waiting.map((p) => p.id) })
