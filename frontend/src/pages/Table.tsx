@@ -101,7 +101,7 @@ const Table = () => {
     const result = await releaseTable({ variables: { number: tableId } })
     if (result.errors?.length) {
       await showMessage(
-        'Tisch konnte nicht abgegeben werden',
+        'Tisch konnte nicht freigegeben werden',
         result.errors[0]?.message || 'Unbekannter Fehler',
         'OK',
       )
@@ -230,19 +230,19 @@ const Table = () => {
         <>
           <ActionBar>
             <Button variant="danger" onClick={() => setShowReleaseConfirm(true)}>
-              Tisch {tableNumber} abgeben
+              Tisch {tableNumber} freigeben
             </Button>
           </ActionBar>
           <Confirm
             isOpen={showReleaseConfirm}
-            title={`Tisch ${tableNumber} abgeben`}
+            title={`Tisch ${tableNumber} freigeben`}
             message={
               `Der Tisch ${tableNumber} wird danach als frei angezeigt und kann von anderen ` +
               'Ausstellern belegt werden. Exponate, die auf diesem Tisch stehen, verlieren dabei ' +
               'ihre Tischzuordnung. Um den Tisch für das Fotoprojekt anzubieten, genügt das ' +
               'Häkchen bei „An diesem Tisch können Besucherfotos gezeigt werden“.'
             }
-            confirm={`Tisch ${tableNumber} abgeben`}
+            confirm={`Tisch ${tableNumber} freigeben`}
             cancel="Abbrechen"
             onConfirm={() => void handleReleaseTable(tableNumber)}
             onClose={() => setShowReleaseConfirm(false)}
