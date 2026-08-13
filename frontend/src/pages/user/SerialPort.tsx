@@ -389,11 +389,17 @@ const SerialTokens = () => {
         <code>Unblock-File -Path .\fotofix-serial.exe</code>.
       </p>
 
-      <p className="my-3 text-sm">
-        <a href={RELEASES} target="_blank" rel="noreferrer">
-          Programmdateien für Windows, macOS und Linux
-        </a>{' '}
-        — eine Datei je System, sonst nichts.
+      <p className="my-3">
+        <a
+          href={RELEASES}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-2 rounded bg-teal-600/80 px-4 py-2 text-white no-underline hover:bg-teal-600">
+          fotofix-serial herunterladen
+        </a>
+      </p>
+      <p className="text-sm text-gray-500">
+        Eine Datei je System — Windows, macOS und Linux, jeweils Intel und ARM.
       </p>
 
       {fresh && (
