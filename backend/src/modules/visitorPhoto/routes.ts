@@ -18,6 +18,7 @@ import {
 import {
   cameraAssetType,
   isCameraAsset,
+  readSample,
   isLanguage,
   isStep,
   readCameraAsset,
@@ -300,6 +301,19 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
       return reply.code(403).type('text/html').send(renderNotForYou())
     }
     return reply.type('text/html').send(await renderCameraPage())
+  })
+
+  /* The faces the invitation shows. Named rather than listed here: the page
+     was given the listing when it was rendered. */
+  app.get<{ Params: { file: string } }>('/foto/kamera/samples/:file', async (request, reply) => {
+    if (!asExhibitor(request)) return reply.code(403).send({ error: 'not an exhibitor' })
+
+    const body = await readSample(request.params.file)
+    if (!body) return reply.code(404).send({ error: 'unknown' })
+
+    reply.header('Cache-Control', 'private, max-age=3600')
+    reply.type('image/png')
+    return body
   })
 
   app.get<{ Params: { asset: string } }>('/foto/kamera/:asset', async (request, reply) => {

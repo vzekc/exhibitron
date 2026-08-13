@@ -20,7 +20,7 @@ id_slot    = 448,872,384,96
 
 # Which screens carry which rectangle. Every installed language has all of
 # them; the sprite sheets carry none.
-screen attract
+screen attract   viewfinder
 screen live      viewfinder
 screen keep      viewfinder
 screen printing  viewfinder

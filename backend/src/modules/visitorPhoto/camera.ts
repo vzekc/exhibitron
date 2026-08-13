@@ -24,6 +24,16 @@ import { fileURLToPath } from 'url'
 const backendRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), '../../..')
 const BOOTH_DIR = path.join(backendRoot, 'assets/booth')
 
+/*
+ * The faces the invitation shows in place of a viewfinder. They are put on the
+ * machine rather than into the repository — a few hundred photographs of other
+ * people, republished whenever more are converted — so this reads them from
+ * where they were put. faces/publish.mjs in the fotofix repository makes them
+ * and copies them across; BOOTH_SAMPLES_DIR points a development checkout at
+ * its own copy.
+ */
+const SAMPLES_DIR = process.env.BOOTH_SAMPLES_DIR ?? '/var/lib/exhibitron/booth-samples'
+
 /* The states the booth has, and the screen each one shows. `countdown` is not
    here: it is `live` with a digit over the viewfinder, which is what the booth
    does too. */
@@ -58,6 +68,23 @@ async function installedLanguages() {
   return languages.sort((a, b) =>
     a === DEFAULT_LANGUAGE ? -1 : b === DEFAULT_LANGUAGE ? 1 : a.localeCompare(b),
   )
+}
+
+/* What the invitation can show, newest listing wins: publishing more faces is
+   dropping files there, with nothing to restart. */
+export async function sampleNames() {
+  try {
+    return (await readdir(SAMPLES_DIR)).filter((name) => name.endsWith('.png')).sort()
+  } catch {
+    return [] /* none published: the invitation shows an empty viewfinder */
+  }
+}
+
+/* Read one by the name it was listed under, and by no other: the parameter
+   comes from the address bar. */
+export async function readSample(name: string) {
+  if (!(await sampleNames()).includes(name)) return null
+  return readFile(path.join(SAMPLES_DIR, name))
 }
 
 export const CAMERA_ASSETS = ['booth.css', 'camera.css', 'camera.js'] as const
@@ -172,6 +199,7 @@ async function version(name: CameraAsset) {
 async function pageInputs(languages: string[]) {
   return [
     BOOTH_DIR,
+    SAMPLES_DIR,
     path.join(BOOTH_DIR, 'screen.manifest'),
     ...CAMERA_ASSETS.map((name) => path.join(BOOTH_DIR, name)),
     ...languages.flatMap((lang) =>
@@ -232,12 +260,15 @@ export async function renderCameraPage() {
   return cached(pageSlot, await pageInputs(languages), () => buildCameraPage(languages))
 }
 
+const attribute = (value: string) => value.replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+
 async function buildCameraPage(languages: string[]) {
-  const [manifestText, booth, camera, script] = await Promise.all([
+  const [manifestText, booth, camera, script, samples] = await Promise.all([
     readFile(path.join(BOOTH_DIR, 'screen.manifest'), 'utf8'),
     version('booth.css'),
     version('camera.css'),
     version('camera.js'),
+    sampleNames(),
   ])
 
   const rects = parseManifest(manifestText)
@@ -280,9 +311,10 @@ async function buildCameraPage(languages: string[]) {
 <div class="stage">
 ${sections}
 
-<div class="blit viewfinder-area" id="picture">
+<div class="blit viewfinder-area" id="picture" data-samples="${attribute(JSON.stringify(samples))}">
   <video id="viewfinder" playsinline autoplay muted></video>
   <canvas id="frozen" width="${vfW}" height="${vfH}"></canvas>
+  <img id="sample" alt="" hidden>
 </div>
 
 <div class="blit countdown-area sheet" id="countdown" hidden>

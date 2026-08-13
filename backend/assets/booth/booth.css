@@ -20,6 +20,18 @@
     --go:     #3f9c5a;
     --dim:    #8b8b94;
 
+    /* The flags on the language button. Each nation's own colours, pinned so
+       they land in the palette exactly; white and black come from the fixed
+       slots. */
+    --gb-blue: #012169;
+    --gb-red:  #c8102e;
+    --de-red:  #dd0000;
+    --de-gold: #ffce00;
+    --nl-red:  #ae1c28;
+    --nl-blue: #21468b;
+    --fr-blue: #0055a4;
+    --fr-red:  #ef4135;
+
     /* The viewfinder rectangle, and the margins it leaves. */
     --vf-x: 320px;
     --vf-y: 272px;
@@ -72,7 +84,7 @@ body {
     font-size: 34px;
     font-weight: 300;
     line-height: 1.25;
-    max-width: 900px;
+    max-width: 1080px;
 }
 .lede strong { font-weight: 700; color: var(--sgi); }
 
@@ -142,15 +154,25 @@ body {
 
 /* ── the band below the viewfinder ──────────────────────────────────────── */
 
+/*
+ * The band stacks upwards from the bottom edge, so the button row stands in
+ * the same place on every screen and the visitor's eye finds the caps where it
+ * left them. Whatever else the band carries is set above the row.
+ */
 .foot {
     position: absolute;
     left: 0; bottom: 0;
     width: 1280px;
     height: 272px;
-    padding: 34px 48px 0;
+    padding: 34px 48px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
 }
+.foot .tail    { order: 1; }
+.foot .buttons { order: 2; }
 
-.buttons { display: flex; gap: 64px; align-items: flex-start; }
+.buttons { display: flex; gap: 64px; align-items: center; }
 
 .button { display: flex; gap: 20px; align-items: center; }
 .button .cap {
@@ -161,12 +183,39 @@ body {
 .button .cap.red   { background: var(--signal); }
 .button .cap.green { background: var(--go); }
 .button .cap.off   { background: var(--paper); box-shadow: inset 0 0 0 4px var(--dim); }
+.button .cap.blue  { background: var(--sgi); }
 .button .label { font-size: 27px; font-weight: 700; line-height: 1.15; }
-.button .label span { display: block; font-size: 20px; font-weight: 300; color: var(--dim); }
+
+/*
+ * The language button stands at the far end of the row, and says what it does
+ * by showing the languages it leads to rather than a word in the one being
+ * left. The flags are drawn rather than photographed, so they quantize into
+ * flat slots and stay readable at 45 x 30 on a 1993 monitor.
+ */
+.button.language { margin-left: auto; }
+
+.flags { display: flex; gap: 12px; }
+.flag {
+    width: 45px;
+    height: 30px;
+    background-size: 100% 100%;
+    outline: 2px solid var(--dim);
+}
+.flag.gb {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 40' shape-rendering='crispEdges'%3E%3Crect width='60' height='40' fill='%23012169'/%3E%3Cpath d='M0 0 60 40M60 0 0 40' stroke='%23ffffff' stroke-width='9'/%3E%3Cpath d='M0 0 60 40M60 0 0 40' stroke='%23c8102e' stroke-width='4'/%3E%3Cpath d='M30 0V40M0 20H60' stroke='%23ffffff' stroke-width='14'/%3E%3Cpath d='M30 0V40M0 20H60' stroke='%23c8102e' stroke-width='8'/%3E%3C/svg%3E");
+}
+.flag.de {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 40'%3E%3Crect width='60' height='14' fill='%23000000'/%3E%3Crect y='13' width='60' height='14' fill='%23dd0000'/%3E%3Crect y='26' width='60' height='14' fill='%23ffce00'/%3E%3C/svg%3E");
+}
+.flag.nl {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 40'%3E%3Crect width='60' height='14' fill='%23ae1c28'/%3E%3Crect y='13' width='60' height='14' fill='%23ffffff'/%3E%3Crect y='26' width='60' height='14' fill='%2321468b'/%3E%3C/svg%3E");
+}
+.flag.fr {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 40'%3E%3Crect width='21' height='40' fill='%230055a4'/%3E%3Crect x='20' width='21' height='40' fill='%23ffffff'/%3E%3Crect x='40' width='20' height='40' fill='%23ef4135'/%3E%3C/svg%3E");
+}
 
 .foot .tail {
-    position: absolute;
-    left: 48px; right: 48px; bottom: 40px;
+    margin-bottom: 26px;
     padding-top: 22px;
     border-top: 3px solid var(--sgi);
     font-size: 21px;
@@ -187,6 +236,10 @@ body {
     text-align: center;
     padding: 0 120px;
 }
+/* Where a button row follows, the row's own band belongs to it: the text
+   centres in the space above and keeps clear of the caps however long it
+   runs. */
+.full:has(+ .foot) { padding-bottom: 150px; }
 .full .huge {
     font-size: 96px;
     font-weight: 700;
@@ -263,6 +316,9 @@ body.sheet.keyed { background: #ff00ff; }
     margin-bottom: 34px;
 }
 .question em { font-style: normal; color: var(--sgi); }
+
+/* Standing in the button row itself, it takes the row's own baseline. */
+.buttons .question { margin-bottom: 0; }
 
 /* ── the photo ID on the closing screen ─────────────────────────────────── */
 

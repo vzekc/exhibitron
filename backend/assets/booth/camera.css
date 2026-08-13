@@ -80,6 +80,24 @@ body {
 }
 
 /*
+ * A face on the invitation fills the same rectangle, and is not mirrored: it is
+ * a picture of somebody else, taken by one of the machines in the exhibition,
+ * not a reflection of whoever is standing here.
+ */
+#picture img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  background: var(--paper);
+  image-rendering: pixelated;
+}
+#picture img[hidden] {
+  display: none;
+}
+
+/*
  * The countdown and the photo ID are the sprite sheets' own cells, so a browser
  * sets them in the same type the build bakes into the sheets.
  *

@@ -19,11 +19,14 @@ const COUNTDOWN_STEP_MS = 1000
 const CONFIRM_TIMEOUT_MS = 30_000
 const DONE_MS = 6_000
 const ATTRACT_AFTER_MS = 180_000
+/* How long one face stays on the invitation — sample_every in fotofix.conf. */
+const SAMPLE_MS = 6_000
 
 const stage = document.querySelector('.stage')
 const video = document.getElementById('viewfinder')
 const frozen = document.getElementById('frozen')
 const picture = document.getElementById('picture')
+const sampleEl = document.getElementById('sample')
 const countdownEl = document.getElementById('countdown')
 const photoIdEl = document.getElementById('photo-id')
 
@@ -53,8 +56,35 @@ let counting = false
 let timer = null
 let idle = null
 
-/* Which screens the picture is drawn on, as screen.manifest says. */
-const SHOWS_PICTURE = new Set(['live', 'keep', 'printing', 'done'])
+/* Which screens the picture is drawn on, as screen.manifest says. The
+   invitation is among them: it carries a face where the viewfinder goes. */
+const SHOWS_PICTURE = new Set(['attract', 'live', 'keep', 'printing', 'done'])
+
+/*
+ * The faces the invitation shows, as the page was given them. One is picked at
+ * random and never the one already up, so the change is always visible; the
+ * booth does the same thing with the same pictures.
+ */
+const SAMPLES = JSON.parse(picture.dataset.samples || '[]')
+let sample = -1
+let sampleTimer = null
+
+function showSample() {
+  if (SAMPLES.length === 0) return
+  let pick = Math.floor(Math.random() * SAMPLES.length)
+  if (SAMPLES.length > 1 && pick === sample) pick = (pick + 1) % SAMPLES.length
+  sample = pick
+  sampleEl.src = `/foto/kamera/samples/${SAMPLES[pick]}`
+}
+
+function rotateSamples(on) {
+  clearInterval(sampleTimer)
+  sampleTimer = null
+  sampleEl.hidden = !on
+  if (!on) return
+  showSample()
+  sampleTimer = setInterval(showSample, SAMPLE_MS)
+}
 
 /* ── the screens ──────────────────────────────────────────────────────────── */
 
@@ -66,12 +96,12 @@ const SHOWS_PICTURE = new Set(['live', 'keep', 'printing', 'done'])
  */
 function show(next, { keepLanguage = false, hold = false } = {}) {
   /*
-   * The language goes back to the booth's own on every arrival at LIVE and
-   * ATTRACT, so the next person in front of it starts where the booth starts.
-   * Pressing it again once you are there sticks, which is how a visitor takes
-   * their photo in English.
+   * The language goes back to the booth's own when the invitation returns, so
+   * the next person in front of it starts where the booth starts. A language
+   * chosen anywhere else holds for the rest of the visit: someone who picks
+   * English on the invitation takes their photo in English.
    */
-  if (!keepLanguage && next !== state && (next === 'live' || next === 'attract')) {
+  if (!keepLanguage && next !== state && next === 'attract') {
     language = DEFAULT_LANGUAGE
   }
 
@@ -79,7 +109,9 @@ function show(next, { keepLanguage = false, hold = false } = {}) {
   paint()
 
   picture.hidden = !SHOWS_PICTURE.has(next)
-  frozen.hidden = next === 'live'
+  rotateSamples(next === 'attract')
+  video.hidden = next === 'attract'
+  frozen.hidden = next === 'live' || next === 'attract'
   countdownEl.hidden = true
   photoIdEl.hidden = next !== 'done'
 
