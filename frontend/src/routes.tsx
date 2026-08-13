@@ -38,6 +38,7 @@ import LAN from './pages/LAN.tsx'
 import EmailExhibitors from '@pages/admin/EmailExhibitors.tsx'
 import WelcomePdf from '@pages/admin/WelcomePdf.tsx'
 import SeatplanImport from '@pages/admin/SeatplanImport.tsx'
+import SerialPort from './pages/user/SerialPort.tsx'
 
 const routes: RouteObject[] = [
   { path: '/register', element: <Register /> },
@@ -76,6 +77,7 @@ const routes: RouteObject[] = [
           { path: 'exhibit', element: <UserExhibits /> },
           { path: 'exhibit/:id', element: <ExhibitEditor /> },
           { path: 'import-exhibits', element: <ImportExhibits /> },
+          { path: 'serial', element: <SerialPort /> },
           { path: 'help', element: <Documentation name="aussteller-dokumentation" /> },
         ],
       },

@@ -16,6 +16,7 @@ import { registerServerSideHtmlRoutes } from './modules/serverSideHtml/routes.js
 import { registerScheduleRoutes } from './modules/schedule/routes.js'
 import { registerSeatplanRoutes } from './modules/seatplan/routes.js'
 import { registerVisitorPhotoRoutes } from './modules/visitorPhoto/routes.js'
+import { registerSerialRoutes } from './modules/serial/routes.js'
 import { startCleanupScheduler } from './app/cleanup.js'
 
 const registerErrorHandler = (app: FastifyInstance) => {
@@ -177,6 +178,7 @@ export async function createApp({
     (_request, body, done) => done(null, body),
   )
   await registerVisitorPhotoRoutes(app)
+  await registerSerialRoutes(app)
 
   return app
 }

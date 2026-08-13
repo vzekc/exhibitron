@@ -32,11 +32,19 @@ const createServer = async () =>
 // would otherwise starve the requests that do need one.
 const STATIC_ROUTE = '/*'
 
+// Routes that upgrade to a websocket and then outlive the request that opened
+// them. A serial session lasts as long as somebody is logged in over it —
+// hours — and onSend never runs for one, so a transaction started here would
+// be held open for all of that, owning a pool connection and blocking vacuum.
+// These routes read the database while they are still a request, and carry no
+// transaction into the socket.
+const UPGRADING_ROUTES = new Set(['/api/serial/agent', '/api/serial/data', '/api/serial/session'])
+
 const needsDatabaseContext = (request: FastifyRequest) => {
   const routeUrl = request.routeOptions?.url
   // An unmatched route is answered by the not-found handler, which serves
   // index.html or a JSON 404.
-  return routeUrl !== undefined && routeUrl !== STATIC_ROUTE
+  return routeUrl !== undefined && routeUrl !== STATIC_ROUTE && !UPGRADING_ROUTES.has(routeUrl)
 }
 
 // Settles the request transaction exactly once. Both the normal response path

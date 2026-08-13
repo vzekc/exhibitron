@@ -34,6 +34,7 @@
     "@fastify/oauth2": "^7.9.0",
     "@fastify/session": "^10.9.0",
     "@fastify/static": "^7.0.4",
+    "@fastify/websocket": "^8",
     "@graphql-tools/merge": "^9.0.22",
     "@hey-api/client-axios": "^0.6.1",
     "@mikro-orm/core": "^6.4.9",
@@ -63,6 +64,7 @@
     "react-dom": "^19.0.0",
     "sharp": "^0.33.5",
     "ts-pattern": "^5.6.2",
+    "ws": "^8.21.3",
     "zod": "^3.24.2"
   },
   "devDependencies": {
@@ -91,6 +93,7 @@
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@types/slug": "^5.0.9",
+    "@types/ws": "^8.18.1",
     "chokidar": "^3.5.3",
     "eslint": "^9.21.0",
     "eslint-typescript": "^1.1.0",
