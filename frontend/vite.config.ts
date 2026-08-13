@@ -61,6 +61,12 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,woff2}'],
+        /*
+         * Reloads the pages that a previous version of the site left open, so
+         * that a deployment reaches them without anyone having to know about
+         * reloading. See public/sw-reload.js.
+         */
+        importScripts: ['/sw-reload.js'],
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         navigateFallback: 'index.html',
         /*

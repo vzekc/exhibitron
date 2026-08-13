@@ -7,6 +7,9 @@ import { BrowserRouter } from 'react-router-dom'
 import { ApolloProvider } from '@apollo/client'
 import client from './apolloClient.ts'
 import { ExhibitionProvider } from './contexts/ExhibitionProvider.tsx'
+import { watchForUpdates } from './serviceWorkerUpdates.ts'
+
+watchForUpdates()
 
 const root = ReactDOM.createRoot(document.getElementById('root')!)
 root.render(
