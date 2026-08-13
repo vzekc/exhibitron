@@ -18,8 +18,8 @@ import {
 /*
  * Die Seite, auf der ein Aussteller seine Maschine an die Ausstellung hängt.
  *
- * Am einen Ende des Nullmodems steht der alte Rechner, am anderen der serielle
- * Anschluss dieses Computers. Was hier eingestellt wird, gilt für diese
+ * Am einen Ende des Nullmodems steht das Ausstellungsstück, am anderen der
+ * serielle Anschluss dieses Computers. Was hier eingestellt wird, gilt für diese
  * Leitung — Geschwindigkeit, Format, Flusskontrolle —, denn dies ist die
  * Maschine, an der die Leitung hängt. Über das Netz geht nur der Datenstrom.
  */
@@ -183,9 +183,9 @@ const SerialPortPage = () => {
 
       <Card>
         <p>
-          Der alte Rechner hängt über ein Nullmodem am seriellen Anschluss dieses Computers. Diese
-          Seite legt die Anmeldung der Ausstellung auf diesen Anschluss — dieselbe, die im Saal an
-          den seriellen Ports steht.
+          Dein Ausstellungsstück hängt über ein Nullmodem am seriellen Anschluss dieses Computers.
+          Diese Seite legt die Anmeldung der Ausstellung auf diesen Anschluss — dieselbe, die im
+          Saal an den seriellen Ports steht.
         </p>
         <p className="mt-2">
           Anmeldung: <code>foto</code> / <code>foto</code>. Die Fotos liegen unter der Foto-ID vom
@@ -311,9 +311,9 @@ const SerialPortPage = () => {
       <Card className="mt-4">
         <h2 className="mb-2 text-lg font-semibold">Mitschnitt</h2>
         <p className="mb-2 text-sm">
-          Was über die Leitung geht, steht auch hier — und hier kann getippt werden, wenn der alte
-          Rechner gerade nicht angeschlossen ist. So lässt sich unterscheiden, ob es an der
-          Gegenstelle liegt oder am Kabel.
+          Was über die Leitung geht, steht auch hier — und hier kann getippt werden, wenn dein
+          Ausstellungsstück gerade nicht angeschlossen ist. So lässt sich unterscheiden, ob es an
+          der Gegenstelle liegt oder am Kabel.
         </p>
         <div ref={termHost} className="overflow-x-auto" />
       </Card>
