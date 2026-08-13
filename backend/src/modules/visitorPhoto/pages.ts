@@ -11,6 +11,19 @@ const STYLE = `
   .id { font-family: ui-monospace, monospace; font-size: 1.3rem; letter-spacing: .15em }
   img.foto { width: 100%; height: auto; border-radius: .4rem; margin: 1rem 0 }
   h2 { font-size: 1.05rem; margin: 1.4rem 0 .3rem }
+  /* One row per machine: its name in a column of its own, its formats beside
+     it, so that a machine with more formats than fit on the line keeps them
+     under the first one rather than under its name. */
+  .downloads { display: grid; grid-template-columns: max-content 1fr;
+               gap: .5rem .6rem; align-items: baseline; margin: 1rem 0 }
+  .downloads .system { font-weight: 600 }
+  /* On a narrow screen the names take the width the file names need, so they
+     go above their formats and the indent alone holds them together. */
+  @media (max-width: 30rem) {
+    .downloads { display: block }
+    .downloads .system { margin-top: .7rem }
+    .downloads ul.files { margin: .25rem 0 0 .8rem }
+  }
   ul.files { list-style: none; padding: 0; margin: 0;
              display: flex; flex-wrap: wrap; gap: .4rem }
   ul.files a { display: inline-block; padding: .25rem .6rem; border: 1px solid;
@@ -86,14 +99,17 @@ export function renderPhotoPage(
       : `<p class="working">Dein Foto wird gerade in die Formate der alten Rechner
   umgewandelt. Das dauert einen Moment; diese Seite lädt sich von selbst neu.</p>`
 
-  const downloads = groups
-    .map(
-      (g) => `<h2>${escape(g.title)}</h2>
+  const downloads =
+    groups.length === 0
+      ? ''
+      : `<div class="downloads">${groups
+          .map(
+            (g) => `<div class="system">${escape(g.title)}:</div>
   <ul class="files">${g.files
     .map((f) => `<li><a href="/foto/${id}/datei/${encodeURIComponent(f)}">${escape(f)}</a></li>`)
     .join('')}</ul>`,
-    )
-    .join('\n')
+          )
+          .join('\n')}</div>`
 
   const trail =
     tables.length > 0

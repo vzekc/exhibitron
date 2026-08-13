@@ -86,22 +86,24 @@ export async function removePhotoFiles(id: string) {
 }
 
 /*
- * The downloads, in the order a visitor would look for them: their own picture
- * first, then the machines, grouped by make. A file that matches no group is
- * still offered — a new encoder should appear on the page the day it is added,
- * not the day somebody remembers to edit this list.
+ * The downloads, in the order a visitor would look for them: the picture in
+ * formats any machine of today reads, then one line per machine of the
+ * exhibition. A file that matches no group is still offered — a new encoder
+ * should appear on the page the day it is added, not the day somebody
+ * remembers to edit this list.
  */
 const GROUPS: { title: string; match: RegExp }[] = [
-  { title: 'Das Foto', match: /^photo\.jpg$/ },
-  { title: 'Commodore', match: /^(c64|amiga)/ },
+  { title: 'Bildformate', match: /^(photo\.jpg|pcx|gif|bmp|ppm|tiff)/ },
+  { title: 'C64', match: /^c64/ },
+  { title: 'Amiga', match: /^amiga/ },
   { title: 'Apple', match: /^apple2/ },
   { title: 'Atari', match: /^atari/ },
-  { title: 'MSX und Amstrad', match: /^(msx|cpc)/ },
+  { title: 'MSX', match: /^msx/ },
+  { title: 'Amstrad', match: /^cpc/ },
   { title: 'Texas Instruments', match: /^ti99/ },
   { title: 'PC', match: /^(cga|mga|vga)/ },
   { title: 'Terminals', match: /^(ascii-terminal|tektronix|vt24)/ },
   { title: 'Drucker', match: /^ascii-print/ },
-  { title: 'Bildformate', match: /^(pcx|gif|bmp|ppm|tiff)/ },
   { title: 'Der Beleg', match: /^beleg\.png$/ },
 ]
 
