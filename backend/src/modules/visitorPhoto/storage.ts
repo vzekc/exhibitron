@@ -99,7 +99,8 @@ const GROUPS: { title: string; match: RegExp }[] = [
   { title: 'MSX und Amstrad', match: /^(msx|cpc)/ },
   { title: 'Texas Instruments', match: /^ti99/ },
   { title: 'PC', match: /^(cga|mga|vga)/ },
-  { title: 'Terminals und Drucker', match: /^(ascii|tektronix)/ },
+  { title: 'Terminals', match: /^(ascii-terminal|tektronix|vt24)/ },
+  { title: 'Drucker', match: /^ascii-print/ },
   { title: 'Bildformate', match: /^(pcx|gif|bmp|ppm|tiff)/ },
   { title: 'Der Beleg', match: /^beleg\.png$/ },
 ]
