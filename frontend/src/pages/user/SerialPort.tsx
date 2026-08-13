@@ -13,6 +13,7 @@ import {
   type Counters,
   type Flow,
   type LineSettings,
+  type Mode,
 } from '@utils/serialBridge'
 
 /*
@@ -73,6 +74,7 @@ const SerialPortPage = () => {
     [],
   )
   const [agent, setAgent] = useState('')
+  const [mode, setMode] = useState<Mode>('login')
   const [counters, setCounters] = useState<Counters>({
     toWire: 0,
     fromWire: 0,
@@ -139,11 +141,11 @@ const SerialPortPage = () => {
       onCounters: setCounters,
     })
     bridgeRef.current = bridge
-    await bridge.start(agent || undefined).catch((error: Error) => {
+    await bridge.start(agent || undefined, mode).catch((error: Error) => {
       setState('stopped')
       setDetail(error.message)
     })
-  }, [line, agent])
+  }, [line, agent, mode])
 
   const disconnect = useCallback(async () => {
     await bridgeRef.current?.stop('getrennt')
@@ -241,6 +243,17 @@ const SerialPortPage = () => {
           </label>
 
           <label>
+            Betriebsart
+            <select
+              value={mode}
+              disabled={running}
+              onChange={(event) => setMode(event.target.value as Mode)}>
+              <option value="login">Anmeldung</option>
+              <option value="kermit">Kermit-Server</option>
+            </select>
+          </label>
+
+          <label>
             Terminal
             <select
               value={line.term}
@@ -267,6 +280,15 @@ const SerialPortPage = () => {
               ))}
             </select>
           </label>
+        )}
+
+        {mode === 'kermit' && (
+          <p className="mt-3 text-sm">
+            Der Anschluss antwortet direkt mit einem Kermit-Server, ohne Anmeldung. Das Gegenstück
+            holt Dateien mit <code>get K7NP4M/photo.jpg</code> und beendet den Server mit{' '}
+            <code>finish</code>. Im Saal legt der Terminalserver fest, welcher Anschluss so
+            betrieben wird.
+          </p>
         )}
 
         {line.flow === 'xonxoff' && (

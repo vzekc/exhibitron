@@ -209,6 +209,31 @@ describe('the relay', () => {
     control.close()
   })
 
+  /*
+   * Which of the two things a port is, on its way to the agent. Anything the
+   * relay does not recognise is a login, because that is the safe end to be
+   * wrong at: a prompt asks who you are, a Kermit server does not.
+   */
+  test.each([
+    ['kermit', 'kermit'],
+    ['login', 'login'],
+    [undefined, 'login'],
+    ['something-else', 'login'],
+  ])('asks for mode %s and gets %s', async (asked, expected) => {
+    forgetEverything()
+    const control = await connectAgent('travelstar')
+
+    const query = asked === undefined ? '' : `?mode=${encodeURIComponent(asked)}`
+    const client = openSocket(`/api/serial/session${query}`, clientToken)
+    await opened(client)
+
+    const open = await nextText(control)
+    expect(open.mode).toBe(expected)
+
+    client.close()
+    control.close()
+  })
+
   test('closes the client when the agent goes away', async () => {
     forgetEverything()
     const control = await connectAgent('travelstar')

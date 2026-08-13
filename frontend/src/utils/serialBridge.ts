@@ -12,6 +12,13 @@
 
 export type Flow = 'none' | 'hardware' | 'xonxoff'
 
+/*
+ * What the port answers with. At the show this belongs to the port and is
+ * settled at the terminal server; here it is a choice, because there is no
+ * terminal server to settle it.
+ */
+export type Mode = 'login' | 'kermit'
+
 export type LineSettings = {
   baudRate: number
   dataBits: 7 | 8
@@ -101,12 +108,13 @@ export class SerialBridge {
     private events: BridgeEvents,
   ) {}
 
-  async start(agent?: string) {
+  async start(agent?: string, mode: Mode = 'login') {
     this.events.onState('connecting')
     await this.port.open(this.openOptions())
 
     const scheme = window.location.protocol === 'https:' ? 'wss' : 'ws'
     const query = new URLSearchParams({
+      mode,
       term: this.line.term,
       cols: String(this.line.cols),
       rows: String(this.line.rows),

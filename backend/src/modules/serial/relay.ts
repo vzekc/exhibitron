@@ -117,11 +117,12 @@ export function requestSession(options: {
   agent: Agent
   client: Socket
   exhibitorId: number
+  mode: string
   term: string
   cols: number
   rows: number
 }) {
-  const { sid, agent, client, exhibitorId, term, cols, rows } = options
+  const { sid, agent, client, exhibitorId, mode, term, cols, rows } = options
 
   const timer = setTimeout(() => failWaiting(sid, 'the agent did not answer'), DIAL_TIMEOUT_MS)
 
@@ -138,7 +139,7 @@ export function requestSession(options: {
     if (waiting.delete(sid)) clearTimeout(timer)
   })
 
-  say(agent.socket, { t: 'open', sid, term, cols, rows })
+  say(agent.socket, { t: 'open', sid, mode, term, cols, rows })
 }
 
 /* The agent has dialled back for a session somebody is waiting on. */

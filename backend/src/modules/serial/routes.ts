@@ -40,7 +40,22 @@ const DEFAULT_TERM = 'vt100'
 const DEFAULT_COLS = 80
 const DEFAULT_ROWS = 24
 
-type SessionQuery = { agent?: string; term?: string; cols?: string; rows?: string }
+type SessionQuery = {
+  agent?: string
+  mode?: string
+  term?: string
+  cols?: string
+  rows?: string
+}
+
+/*
+ * What the port is: somewhere to log in, or the Kermit protocol on its own for
+ * a machine whose terminal program is all it has. At the show this belongs to
+ * the port and is settled at the terminal server; here the client names it,
+ * because there is no terminal server to name it for them.
+ */
+const MODES = ['login', 'kermit']
+const DEFAULT_MODE = 'login'
 
 /*
  * A websocket is answered by closing it, not by a status code.
@@ -208,6 +223,7 @@ export async function registerSerialRoutes(app: FastifyInstance) {
         agent,
         client: socket,
         exhibitorId,
+        mode: MODES.includes(request.query.mode ?? '') ? request.query.mode! : DEFAULT_MODE,
         term: request.query.term || DEFAULT_TERM,
         cols: positive(request.query.cols, DEFAULT_COLS),
         rows: positive(request.query.rows, DEFAULT_ROWS),
