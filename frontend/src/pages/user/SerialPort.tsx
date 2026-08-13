@@ -128,6 +128,13 @@ const SerialPortPage = () => {
       onState: (next, why) => {
         setState(next)
         setDetail(why ?? '')
+        /*
+         * Ein zurückgesetztes Terminal, sobald die Sitzung endet: was übrig
+         * bleibt, gehört einer Verbindung, die es nicht mehr gibt, und ein
+         * Programm auf der Gegenseite kann es in jedem Modus hinterlassen
+         * haben. Warum die Sitzung endete, steht in der Zeile darunter.
+         */
+        if (next === 'stopped') termRef.current?.reset()
       },
       onCounters: setCounters,
     })
