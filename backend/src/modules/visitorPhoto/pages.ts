@@ -31,7 +31,8 @@ const STYLE = `
   .zip { display: inline-block; margin: .8rem 0; padding: .5rem 1rem;
          border: 2px solid; border-radius: .4rem; font-weight: 600; text-decoration: none }
   .tables { display: flex; flex-wrap: wrap; gap: .4rem; padding: 0; list-style: none }
-  .tables li { padding: .2rem .7rem; border: 1px solid; border-radius: .3rem }
+  .tables li { border: 1px solid; border-radius: .3rem }
+  .tables a { display: inline-block; padding: .2rem .8rem; text-decoration: none }
   form.delete { margin-top: 2.5rem; padding-top: 1.2rem; border-top: 1px solid }
   input[name=code] { font-family: ui-monospace, monospace; font-size: 1.1rem;
                      letter-spacing: .12em; padding: .4rem; text-transform: uppercase }
@@ -115,7 +116,7 @@ export function renderPhotoPage(
     tables.length > 0
       ? `<h2>Dein Laufzettel</h2>
   <p>An diesen Tischen kann dein Foto gezeigt werden:</p>
-  <ul class="tables">${tables.map((n) => `<li>Tisch ${n}</li>`).join('')}</ul>`
+  <ul class="tables">${tables.map((n) => `<li><a href="/table/${n}">${n}</a></li>`).join('')}</ul>`
       : ''
 
   return page(
