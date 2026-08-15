@@ -15,6 +15,8 @@ import {
   type LineSettings,
   type Mode,
 } from '@utils/serialBridge'
+import { KermitMonitor, type KermitEvent } from '@utils/kermit'
+import { kermitLine, kermitOpening } from '@utils/kermitTranscript'
 
 /*
  * Die Seite, auf der ein Aussteller seine Maschine an die Ausstellung hängt.
@@ -88,6 +90,9 @@ const SerialPortPage = () => {
   const bridgeRef = useRef<SerialBridge | null>(null)
   const termRef = useRef<Terminal | null>(null)
   const termHost = useRef<HTMLDivElement | null>(null)
+  /* Set for a session in Kermit mode, and the thing that reads its stream. */
+  const kermitRef = useRef<KermitMonitor | null>(null)
+  const idleRef = useRef<number>(0)
 
   const supported = webSerialAvailable()
 
@@ -101,7 +106,10 @@ const SerialPortPage = () => {
       theme: { background: '#101010' },
     })
     term.open(termHost.current)
-    term.onData((text) => bridgeRef.current?.typed(text))
+    /* Typed characters belong to a login; in a packet stream they are damage. */
+    term.onData((text) => {
+      if (!kermitRef.current) bridgeRef.current?.typed(text)
+    })
     termRef.current = term
     return () => {
       term.dispose()
@@ -125,8 +133,39 @@ const SerialPortPage = () => {
 
   const connect = useCallback(async () => {
     if (!portRef.current) return
+
+    /*
+     * Ein Kermit-Server schickt Pakete, keine Zeichen. Sie durch die
+     * Terminalemulation zu schicken zeigt nichts und hinterlässt sie in dem
+     * Zustand, in den die Steuerzeichen im Paketinhalt sie versetzt haben —
+     * also wird der Datenstrom gelesen und Paket für Paket aufgeschrieben.
+     */
+    const monitor = mode === 'kermit' ? new KermitMonitor() : null
+    kermitRef.current = monitor
+    if (monitor) for (const opening of kermitOpening()) termRef.current?.writeln(opening)
+
+    const write = (event: KermitEvent) => termRef.current?.writeln(kermitLine(event))
+
+    /*
+     * Ein paar Zeichen, die zu keinem Paket gehören, wartet der Leser ab — es
+     * könnte der Anfang von mehr sein. Verstummt die Leitung danach, holt
+     * dieser Takt sie trotzdem auf den Schirm.
+     */
+    if (monitor) {
+      const ticking = window.setInterval(() => monitor.idle().forEach(write), 500)
+      idleRef.current = ticking
+    }
+
     const bridge = new SerialBridge(portRef.current, line, {
-      onData: (chunk) => termRef.current?.write(chunk),
+      onData: (chunk, origin) => {
+        const term = termRef.current
+        if (!term) return
+        if (!monitor) {
+          term.write(chunk)
+          return
+        }
+        monitor.feed(origin, chunk).forEach(write)
+      },
       onState: (next, why) => {
         setState(next)
         setDetail(why ?? '')
@@ -136,7 +175,11 @@ const SerialPortPage = () => {
          * Programm auf der Gegenseite kann es in jedem Modus hinterlassen
          * haben. Warum die Sitzung endete, steht in der Zeile darunter.
          */
-        if (next === 'stopped') termRef.current?.reset()
+        if (next === 'stopped') {
+          kermitRef.current = null
+          window.clearInterval(idleRef.current)
+          termRef.current?.reset()
+        }
       },
       onCounters: setCounters,
     })
@@ -312,12 +355,14 @@ const SerialPortPage = () => {
               Trennen
             </Button>
           )}
-          <Button
-            variant="secondary"
-            disabled={state !== 'running'}
-            onClick={() => bridgeRef.current?.typed('\r')}>
-            Eingabetaste senden
-          </Button>
+          {mode === 'login' && (
+            <Button
+              variant="secondary"
+              disabled={state !== 'running'}
+              onClick={() => bridgeRef.current?.typed('\r')}>
+              Eingabetaste senden
+            </Button>
+          )}
         </div>
 
         <p className="mt-3 text-sm">
@@ -339,11 +384,19 @@ const SerialPortPage = () => {
 
       <Card className="mt-4">
         <h2 className="mb-2 text-lg font-semibold">Mitschnitt</h2>
-        <p className="mb-2 text-sm">
-          Was über die Leitung geht, steht auch hier — und hier kann getippt werden, wenn dein
-          Ausstellungsstück gerade nicht angeschlossen ist. So lässt sich unterscheiden, ob es an
-          der Gegenstelle liegt oder am Kabel.
-        </p>
+        {mode === 'kermit' ? (
+          <p className="mb-2 text-sm">
+            Im Kermit-Betrieb steht hier das Protokoll: eine Zeile je Paket, mit Absender, Typ und
+            Inhalt. Zeichen, die zu keinem Paket gehören, stehen als Bytes da — an ihnen ist zu
+            erkennen, ob Geschwindigkeit, Format oder Kabel nicht stimmen.
+          </p>
+        ) : (
+          <p className="mb-2 text-sm">
+            Was über die Leitung geht, steht auch hier — und hier kann getippt werden, wenn dein
+            Ausstellungsstück gerade nicht angeschlossen ist. So lässt sich unterscheiden, ob es an
+            der Gegenstelle liegt oder am Kabel.
+          </p>
+        )}
         <div ref={termHost} className="overflow-x-auto" />
       </Card>
 

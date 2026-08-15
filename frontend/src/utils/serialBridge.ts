@@ -10,6 +10,8 @@
  * rate the agent paces itself to.
  */
 
+import type { Origin } from './kermit'
+
 export type Flow = 'none' | 'hardware' | 'xonxoff'
 
 /*
@@ -33,7 +35,13 @@ export type LineSettings = {
 export type BridgeState = 'idle' | 'connecting' | 'running' | 'stopped'
 
 export type BridgeEvents = {
-  onData: (chunk: Uint8Array) => void
+  /*
+   * Both directions, said apart: `machine` is what came off the wire, and
+   * `exhibition` what came back from the session. A stream of characters reads
+   * the same either way, but a stream of packets is only legible as a
+   * conversation between two ends.
+   */
+  onData: (chunk: Uint8Array, origin: Origin) => void
   onState: (state: BridgeState, detail?: string) => void
   onCounters: (counters: Counters) => void
 }
@@ -227,7 +235,7 @@ export class SerialBridge {
       payload = new Uint8Array(kept)
     }
 
-    this.events.onData(value)
+    this.events.onData(value, 'machine')
     if (payload.length && this.socket?.readyState === WebSocket.OPEN) {
       this.socket.send(payload)
     }
@@ -266,7 +274,7 @@ export class SerialBridge {
    */
   private async toSerial(data: Uint8Array) {
     /* The exhibition's own output, which is most of what there is to see. */
-    this.events.onData(data)
+    this.events.onData(data, 'exhibition')
     if (!this.port.writable) return
     if (!this.writer) this.writer = this.port.writable.getWriter()
 
