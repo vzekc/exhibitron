@@ -39,6 +39,7 @@ import EmailExhibitors from '@pages/admin/EmailExhibitors.tsx'
 import WelcomePdf from '@pages/admin/WelcomePdf.tsx'
 import SeatplanImport from '@pages/admin/SeatplanImport.tsx'
 import SerialPort from './pages/user/SerialPort.tsx'
+import VisitorPhoto from './pages/VisitorPhoto.tsx'
 
 const routes: RouteObject[] = [
   { path: '/register', element: <Register /> },
@@ -81,6 +82,8 @@ const routes: RouteObject[] = [
           { path: 'help', element: <Documentation name="aussteller-dokumentation" /> },
         ],
       },
+      /* Wohin der QR-Code des Laufzettels führt. */
+      { path: '/foto/:id', element: <VisitorPhoto /> },
       { path: '/requestPasswordReset', element: <RequestPasswordReset /> },
       { path: '/resetPassword', element: <ResetPassword /> },
       // Protected admin routes

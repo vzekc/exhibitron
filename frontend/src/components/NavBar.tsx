@@ -4,6 +4,7 @@ import { useExhibitor } from '@contexts/ExhibitorContext.ts'
 import { useExhibition } from '@contexts/ExhibitionContext.ts'
 import DropdownMenu from './DropdownMenu.tsx'
 import SearchTableNumber from './SearchTableNumber.tsx'
+import SearchPhotoId from './SearchPhotoId.tsx'
 import { getBookmarks } from '@utils/bookmarks.ts'
 import Breadcrumbs from './Breadcrumbs.tsx'
 import { gql, useMutation } from '@apollo/client'
@@ -27,6 +28,7 @@ interface UserMenuEntry {
   to?: string
   label?: string
   type?: 'divider' | 'heading' | 'logout'
+  newTab?: boolean
 }
 
 interface NavListProps {
@@ -187,7 +189,7 @@ const NavBar = () => {
     { to: '/user/exhibitorInfo', label: 'Infos für Mitwirkende' },
     { type: 'divider' },
     { type: 'heading', label: 'fotofix' },
-    { to: '/foto/kamera', label: 'Fotoautomat' },
+    { to: '/foto/kamera', label: 'Fotoautomat', newTab: true },
     { to: '/user/serial', label: 'Seriell-Tester' },
     { type: 'divider' },
     { to: `https://www.classic-computing.de/${exhibitionKey}faq`, label: 'FAQ' },
@@ -238,7 +240,7 @@ const NavBar = () => {
         key={key}
         to={item.to}
         onClick={() => onClose?.()}
-        newTab={item.to.startsWith('http')}
+        newTab={item.newTab ?? item.to.startsWith('http')}
         /* The camera page is rendered by the backend, not by the router. */
         reloadDocument={item.to.startsWith('/foto/')}>
         {item.label}
@@ -348,6 +350,9 @@ const NavBar = () => {
                   className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
                   <Icon name={hasBookmarks ? 'bookmarked' : 'bookmark'} alt="Bookmarks" />
                 </Link>
+              </li>
+              <li className="hidden shrink-0 sm:block">
+                <SearchPhotoId />
               </li>
               <li className="shrink-0">
                 <SearchTableNumber />

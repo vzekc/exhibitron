@@ -7,6 +7,7 @@ import { marked } from 'marked'
 import { initORM } from '../../db.js'
 import { VisitorPhoto } from './entity.js'
 import { Table } from '../table/entity.js'
+import { isModernBrowser } from '../serverSideHtml/browser-detection.js'
 import {
   renderPhotoPage,
   renderDeletedPage,
@@ -455,15 +456,86 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
 
   /* ── the visitor ───────────────────────────────────────────────────────── */
 
+  /*
+   * The same page as `/foto/:id` renders, for the site to draw itself. A photo
+   * that was deleted says so and nothing else: the id stays a valid address for
+   * as long as the row does, and the answer to it is that there is nothing here.
+   */
+  app.get<{ Params: { id: string } }>('/api/visitor-photo/:id/page', async (request, reply) => {
+    noIndex(reply)
+    const { id } = request.params
+    if (!isWellFormedId(id)) return reply.code(404).send({ error: 'unknown' })
+
+    const photo = await photos.findOne({ id })
+    if (!photo) return reply.code(404).send({ error: 'unknown' })
+    if (photo.deletedAt) return reply.send({ id, deleted: true })
+
+    const files = await listPhotoFiles(id)
+    return reply.send({
+      id,
+      deleted: false,
+      converting: !!converting(photo),
+      groups: groupFiles(files),
+      tables: photo.tables,
+    })
+  })
+
+  /*
+   * Deletion for the embedded page. It asks for the same proof and counts the
+   * attempts the same way as the form on the plain page; only the answer is
+   * JSON rather than a rendered page.
+   */
+  app.post<{ Params: { id: string }; Body: { code?: string } }>(
+    '/api/visitor-photo/:id/loeschen',
+    async (request, reply) => {
+      noIndex(reply)
+      const { id } = request.params
+      const code = String(request.body?.code ?? '')
+        .toUpperCase()
+        .replace(/\s+/g, '')
+
+      if (!isWellFormedId(id)) return reply.code(404).send({ error: 'unknown' })
+
+      const photo = await photos.findOne({ id })
+      if (!photo) return reply.code(404).send({ error: 'unknown' })
+      if (photo.deletedAt) return reply.send({ deleted: true })
+
+      if (tooManyAttempts(id)) {
+        return reply.code(429).send({ error: 'Zu viele Versuche. Bitte später noch einmal.' })
+      }
+      if (!isWellFormedCode(code) || !codeMatches(code, photo.codeHash)) {
+        return reply.code(400).send({
+          error: 'Der Code stimmt nicht. Er steht auf dem Laufzettel unter „Foto wieder löschen?“.',
+        })
+      }
+
+      await removePhotoFiles(id)
+      photo.deletedAt = new Date()
+      await db.em.persistAndFlush(photo)
+      request.log.info({ id }, 'visitor asked for their photo to be deleted')
+
+      return reply.send({ deleted: true })
+    },
+  )
+
   /* Linked from the footer of every page here, and from nowhere else. */
   app.get('/foto/datenschutz', async (_request, reply) => {
     noIndex(reply)
     return reply.type('text/html').send(await privacyPage())
   })
 
+  /*
+   * The slip's QR code leads here, and what arrives is either a visitor's phone
+   * or a machine from the hall. A browser that can run the site gets the site,
+   * which draws the photo inside the exhibition's own pages; everything older
+   * gets the plain page, which is the only one it could render anyway.
+   */
   app.get<{ Params: { id: string } }>('/foto/:id', async (request, reply) => {
     noIndex(reply)
     const { id } = request.params
+    if (isWellFormedId(id) && isModernBrowser(request)) {
+      return reply.type('text/html').sendFile('index.html')
+    }
     if (!isWellFormedId(id)) return reply.code(404).type('text/html').send(renderNotFound())
 
     const photo = await photos.findOne({ id })
