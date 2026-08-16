@@ -192,44 +192,55 @@ export async function registerSerialRoutes(app: FastifyInstance) {
        */
       socket.pause()
 
-      const exhibitorId = await exhibitorFor(request)
-      if (exhibitorId === null) {
-        deny(socket, UNAUTHORISED, 'log in as an exhibitor, or give a token that is still good')
-        return
-      }
+      /*
+       * This handler owns the socket, so it owns anything thrown inside it: a
+       * rejected promise here takes the connection down without a close frame,
+       * and the client is left with a connection that vanished and no reason
+       * for it. Every failure leaves by the same door as a refusal.
+       */
+      try {
+        const exhibitorId = await exhibitorFor(request)
+        if (exhibitorId === null) {
+          deny(socket, UNAUTHORISED, 'log in as an exhibitor, or give a token that is still good')
+          return
+        }
 
-      const agent = findAgent(request.query.agent)
-      if (!agent) {
-        deny(
-          socket,
-          UNAVAILABLE,
-          request.query.agent
-            ? `no agent named ${request.query.agent} is connected`
-            : 'no agent is connected',
-        )
-        return
-      }
-      if (agent.sessions >= agent.maxSessions) {
-        deny(socket, UNAVAILABLE, `${agent.name} is full`)
-        return
-      }
-      if (sessionsFor(exhibitorId) >= SESSIONS_PER_EXHIBITOR) {
-        deny(socket, UNAVAILABLE, 'you already have as many sessions open as this allows')
-        return
-      }
+        const agent = findAgent(request.query.agent)
+        if (!agent) {
+          deny(
+            socket,
+            UNAVAILABLE,
+            request.query.agent
+              ? `no agent named ${request.query.agent} is connected`
+              : 'no agent is connected',
+          )
+          return
+        }
+        if (agent.sessions >= agent.maxSessions) {
+          deny(socket, UNAVAILABLE, `${agent.name} is full`)
+          return
+        }
+        if (sessionsFor(exhibitorId) >= SESSIONS_PER_EXHIBITOR) {
+          deny(socket, UNAVAILABLE, 'you already have as many sessions open as this allows')
+          return
+        }
 
-      requestSession({
-        sid: randomUUID(),
-        agent,
-        client: socket,
-        exhibitorId,
-        mode: MODES.includes(request.query.mode ?? '') ? request.query.mode! : DEFAULT_MODE,
-        term: request.query.term || DEFAULT_TERM,
-        cols: positive(request.query.cols, DEFAULT_COLS),
-        rows: positive(request.query.rows, DEFAULT_ROWS),
-      })
+        requestSession({
+          sid: randomUUID(),
+          agent,
+          client: socket,
+          exhibitorId,
+          mode: MODES.includes(request.query.mode ?? '') ? request.query.mode! : DEFAULT_MODE,
+          term: request.query.term || DEFAULT_TERM,
+          cols: positive(request.query.cols, DEFAULT_COLS),
+          rows: positive(request.query.rows, DEFAULT_ROWS),
+        })
 
-      socket.resume()
+        socket.resume()
+      } catch (error) {
+        app.log.error({ err: error }, 'serial: the session could not be opened')
+        deny(socket, UNAVAILABLE, 'the relay could not open the session')
+      }
     },
   )
 

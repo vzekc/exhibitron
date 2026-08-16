@@ -161,7 +161,13 @@ const SerialPortPage = () => {
         const term = termRef.current
         if (!term) return
         if (!monitor) {
-          term.write(chunk)
+          /*
+           * Eine Anmeldung echot selbst: was das Ausstellungsstück tippt, kommt
+           * von der Gegenseite zurück. Der Schirm zeigt deshalb die eine
+           * Richtung, die ein Terminal an der Leitung auch sähe — sonst steht
+           * jedes Zeichen zweimal da.
+           */
+          if (origin === 'exhibition') term.write(chunk)
           return
         }
         monitor.feed(origin, chunk).forEach(write)
