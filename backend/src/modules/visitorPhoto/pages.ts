@@ -107,7 +107,7 @@ export function renderPhotoPage(
           .map(
             (g) => `<div class="system">${escape(g.title)}:</div>
   <ul class="files">${g.files
-    .map((f) => `<li><a href="/foto/${id}/datei/${encodeURIComponent(f)}">${escape(f)}</a></li>`)
+    .map((f) => `<li><a href="/foto/${id}/${encodeURIComponent(f)}">${escape(f)}</a></li>`)
     .join('')}</ul>`,
           )
           .join('\n')}</div>`
@@ -124,7 +124,7 @@ export function renderPhotoPage(
     `<h1>Dein Foto</h1>
 <p class="id">${escape(id)}</p>
 
-<img class="foto" src="/foto/${id}/datei/photo.jpg" alt="Das aufgenommene Foto">
+<img class="foto" src="/foto/${id}/photo.jpg" alt="Das aufgenommene Foto">
 
 ${working}
 

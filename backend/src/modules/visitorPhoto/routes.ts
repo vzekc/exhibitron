@@ -548,24 +548,21 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
       .send(renderPhotoPage(id, groupFiles(files), photo.tables, { converting: converting(photo) }))
   })
 
-  app.get<{ Params: { id: string; file: string } }>(
-    '/foto/:id/datei/:file',
-    async (request, reply) => {
-      noIndex(reply)
-      const { id, file } = request.params
-      if (!isWellFormedId(id)) return reply.code(404).send({ error: 'unknown' })
+  app.get<{ Params: { id: string; file: string } }>('/foto/:id/:file', async (request, reply) => {
+    noIndex(reply)
+    const { id, file } = request.params
+    if (!isWellFormedId(id)) return reply.code(404).send({ error: 'unknown' })
 
-      const photo = await photos.findOne({ id })
-      if (!photo || photo.deletedAt) return reply.code(404).send({ error: 'unknown' })
+    const photo = await photos.findOne({ id })
+    if (!photo || photo.deletedAt) return reply.code(404).send({ error: 'unknown' })
 
-      const files = await listPhotoFiles(id)
-      if (!files.includes(file)) return reply.code(404).send({ error: 'unknown' })
+    const files = await listPhotoFiles(id)
+    if (!files.includes(file)) return reply.code(404).send({ error: 'unknown' })
 
-      reply.header('Content-Disposition', `attachment; filename="${id}-${file}"`)
-      reply.type(file.endsWith('.jpg') ? 'image/jpeg' : 'application/octet-stream')
-      return readPhotoFile(id, file)
-    },
-  )
+    reply.header('Content-Disposition', `attachment; filename="${id}-${file}"`)
+    reply.type(file.endsWith('.jpg') ? 'image/jpeg' : 'application/octet-stream')
+    return readPhotoFile(id, file)
+  })
 
   /*
    * Everything in one file. The formats are already compressed binaries, so it

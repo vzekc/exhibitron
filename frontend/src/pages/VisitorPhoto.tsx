@@ -141,7 +141,7 @@ const VisitorPhoto = () => {
       </div>
 
       <img
-        src={`/foto/${page.id}/datei/photo.jpg`}
+        src={`/foto/${page.id}/photo.jpg`}
         alt="Das aufgenommene Foto"
         className="w-full max-w-2xl rounded-lg shadow-md"
       />
@@ -175,7 +175,7 @@ const VisitorPhoto = () => {
                   <li key={file}>
                     <a
                       className="inline-block rounded border border-gray-300 px-2 py-1 font-mono text-sm text-blue-700 hover:bg-gray-100 dark:border-gray-600 dark:text-blue-400 dark:hover:bg-gray-700"
-                      href={`/foto/${page.id}/datei/${encodeURIComponent(file)}`}>
+                      href={`/foto/${page.id}/${encodeURIComponent(file)}`}>
                       {file}
                     </a>
                   </li>
