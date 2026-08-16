@@ -66,8 +66,16 @@ export function registerAgent(agent: Agent) {
   agents.set(agent.name, agent)
 }
 
+/*
+ * A registration that has already been replaced takes nothing with it: the
+ * socket that dialled again belongs to the same agent, and the session it was
+ * asked for is dialled back by that same process. Where the agent really has
+ * gone, the dial timeout says so a few seconds later.
+ */
 export function unregisterAgent(agent: Agent) {
-  if (agents.get(agent.name) === agent) agents.delete(agent.name)
+  if (agents.get(agent.name) !== agent) return
+  agents.delete(agent.name)
+
   /* Anybody still waiting on it will never be dialled. */
   for (const entry of [...waiting.values()]) {
     if (entry.agent === agent) failWaiting(entry.sid, 'the agent went away')

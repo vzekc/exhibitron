@@ -251,6 +251,46 @@ describe('the relay', () => {
     control.close()
   })
 
+  /*
+   * An agent that dials a second control socket replaces its own registration,
+   * and the older one closes. An exhibitor waiting for that agent to dial back
+   * is served by the process that replaced it, so the replacement is not the
+   * agent going away.
+   */
+  test('keeps a waiting client when the agent registers again', async () => {
+    forgetEverything()
+    const first = await connectAgent('travelstar')
+
+    const client = openSocket('/api/serial/session', clientToken)
+    await opened(client)
+    const open = await nextText(first)
+
+    /* The same agent, dialling again; the older registration is closed. */
+    const firstClosed = closed(first)
+    const second = await connectAgent('travelstar')
+    await firstClosed
+
+    let gone = false
+    client.once('close', () => {
+      gone = true
+    })
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    expect(gone).toBe(false)
+
+    /* And the session still joins on the id the first socket was given. */
+    const data = openSocket(`/api/serial/data?sid=${String(open.sid)}`, AGENT_TOKEN)
+    await opened(data)
+
+    const eightBit = Buffer.from([0x00, 0x80, 0xff])
+    const toClient = nextBinary(client)
+    data.send(eightBit, { binary: true })
+    expect(Buffer.compare(await toClient, eightBit)).toBe(0)
+
+    client.close()
+    data.close()
+    second.close()
+  })
+
   test('refuses a data socket for a session nobody asked for', async () => {
     const data = openSocket('/api/serial/data?sid=invented', AGENT_TOKEN)
     await opened(data)
