@@ -110,9 +110,9 @@ const SearchTableNumber = () => {
             type="text"
             value={searchQuery}
             onChange={handleSearchChange}
-            placeholder="Tisch #"
+            placeholder="Tisch Nr"
             maxLength={3}
-            className="w-14 min-w-0 shrink border border-gray-300 bg-white px-2 py-1 text-gray-900 placeholder-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
+            className="w-20 min-w-0 shrink border border-gray-300 bg-white px-2 py-1 text-gray-900 placeholder-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
           />
           <button
             type="submit"

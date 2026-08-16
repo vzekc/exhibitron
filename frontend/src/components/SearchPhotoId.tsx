@@ -35,18 +35,18 @@ const SearchPhotoId = () => {
         type="text"
         value={photoId}
         onChange={handleChange}
-        placeholder="Foto-ID"
+        placeholder="Foto ID"
         maxLength={ID_LENGTH}
         autoComplete="off"
         spellCheck={false}
         aria-label="Foto-ID vom Laufzettel"
-        className="w-24 min-w-0 shrink border border-gray-300 bg-white px-2 py-1 font-mono uppercase text-gray-900 placeholder-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
+        className="w-24 min-w-0 shrink border border-gray-300 bg-white px-2 py-1 font-mono text-gray-900 placeholder-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
       />
       <button
         type="submit"
         aria-label="Foto anzeigen"
         className="shrink-0 border border-gray-300 bg-gray-100 px-2 py-1 hover:bg-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600">
-        <Icon name="search-table" alt="Foto anzeigen" />
+        <Icon name="photo-id" alt="Foto anzeigen" />
       </button>
     </form>
   )

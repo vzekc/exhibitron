@@ -1,0 +1,9 @@
+<svg height="512" width="512" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Ein Ausweis: der Rahmen der Karte, ein Bildchen darauf und die Zeilen daneben. -->
+  <path fill-rule="evenodd" d="M14 20 H86 A8 8 0 0 1 94 28 V72 A8 8 0 0 1 86 80 H14 A8 8 0 0 1 6 72 V28 A8 8 0 0 1 14 20 Z M18 26 A4 4 0 0 0 14 30 V70 A4 4 0 0 0 18 74 H82 A4 4 0 0 0 86 70 V30 A4 4 0 0 0 82 26 Z"/>
+  <circle cx="34" cy="43" r="7.5"/>
+  <path d="M34 53 c-6.9 0-12.5 5.2-12.5 11.6 0 0.8 0.7 1.4 1.5 1.4 h22 c0.8 0 1.5-0.6 1.5-1.4 C46.5 58.2 40.9 53 34 53 Z"/>
+  <rect x="55" y="38" width="26" height="5" rx="2.5"/>
+  <rect x="55" y="48" width="26" height="5" rx="2.5"/>
+  <rect x="55" y="58" width="17" height="5" rx="2.5"/>
+</svg>
