@@ -172,9 +172,9 @@ Required:
 - `DATABASE_URL` - PostgreSQL connection string
 - `ADMIN_EMAIL`, `SMTP_HOST`, `SMTP_USERNAME`, `SMTP_PASSWORD` - Email config
 
-For the serial login relay (`modules/serial`), which joins an exhibitor to the login on travelstar:
+For the serial login relay (`modules/serial`), which joins an exhibitor to the login on fotofix:
 
-- `SERIAL_AGENT_TOKEN` - what the agent on travelstar authenticates with. Unset means no agent can
+- `SERIAL_AGENT_TOKEN` - what the agent on fotofix authenticates with. Unset means no agent can
   register, and the feature is simply off.
 
 ## Websocket routes take no request transaction

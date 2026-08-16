@@ -15,7 +15,7 @@ import { forgetEverything } from './relay.js'
  * The relay against the real agent, from the other repository.
  *
  * Everything else is either side of the protocol tested against a stub. This
- * runs the agent that will be on travelstar, so that the two halves are known
+ * runs the agent that will be on fotofix, so that the two halves are known
  * to agree about what they say to each other.
  *
  * The agent lives in the fotofix repository, which is a separate checkout and
@@ -64,7 +64,7 @@ beforeAll(async () => {
       ...process.env,
       FOTOFIX_SERIAL_ENDPOINT: base,
       FOTOFIX_SERIAL_TOKEN: AGENT_TOKEN,
-      FOTOFIX_SERIAL_NAME: 'travelstar',
+      FOTOFIX_SERIAL_NAME: 'fotofix',
       FOTOFIX_SERIAL_COMMAND: 'stty raw -echo; exec /bin/sh',
     },
     stdio: ['ignore', 'inherit', 'inherit'],

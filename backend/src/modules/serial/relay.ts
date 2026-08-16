@@ -10,7 +10,7 @@ export type Socket = SocketStream['socket']
 /*
  * The relay: what joins an exhibitor to a login on a machine it cannot reach.
  *
- * travelstar sits on a hall's network with no inbound route, so it dials here
+ * fotofix sits on a hall's network with no inbound route, so it dials here
  * and holds one socket open. When somebody connects, that socket is asked for
  * a session, and the agent dials back a second time carrying the id it was
  * given. This end never opens a connection to anything.

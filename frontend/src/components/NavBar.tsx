@@ -22,6 +22,13 @@ interface MenuItemProps {
   reloadDocument?: boolean
 }
 
+/* An entry in the user menu: a link, a rule, a group label, or the logout. */
+interface UserMenuEntry {
+  to?: string
+  label?: string
+  type?: 'divider' | 'heading' | 'logout'
+}
+
 interface NavListProps {
   items: React.ReactNode[]
   className?: string
@@ -173,12 +180,16 @@ const NavBar = () => {
   ]
 
   // Common user menu items
-  const commonUserMenuItems = [
+  const commonUserMenuItems: UserMenuEntry[] = [
     { to: '/user/account', label: 'Konto' },
     { to: '/user/profile', label: 'Profil' },
     { to: '/user/exhibit', label: 'Deine Exponate' },
     { to: '/user/exhibitorInfo', label: 'Infos für Mitwirkende' },
-    { to: '/foto/kamera', label: 'Fotoautomat ausprobieren' },
+    { type: 'divider' },
+    { type: 'heading', label: 'fotofix' },
+    { to: '/foto/kamera', label: 'Fotoautomat' },
+    { to: '/user/serial', label: 'Seriell-Tester' },
+    { type: 'divider' },
     { to: `https://www.classic-computing.de/${exhibitionKey}faq`, label: 'FAQ' },
     { to: '/user/help', label: 'Hilfe' },
     { type: 'divider' },
@@ -196,14 +207,23 @@ const NavBar = () => {
     { to: '/admin/seatplan', label: 'Tischplan' },
   ]
 
-  const renderUserMenuItem = (item: (typeof commonUserMenuItems)[0], onClose?: () => void) => {
+  const renderUserMenuItem = (item: UserMenuEntry, key: React.Key, onClose?: () => void) => {
     if (item.type === 'divider') {
-      return <hr key="divider" className="my-1 border-gray-200 dark:border-gray-700" />
+      return <hr key={key} className="my-1 border-gray-200 dark:border-gray-700" />
+    }
+    if (item.type === 'heading') {
+      return (
+        <li
+          key={key}
+          className="px-3 pt-2 text-sm font-semibold tracking-wide text-gray-500 dark:text-gray-400">
+          {item.label}
+        </li>
+      )
     }
     if (item.type === 'logout') {
       return (
         <MenuItem
-          key="logout"
+          key={key}
           onClick={(e) => {
             handleLogout(e)
             onClose?.()
@@ -215,7 +235,7 @@ const NavBar = () => {
     if (!item.to) return null
     return (
       <MenuItem
-        key={item.to}
+        key={key}
         to={item.to}
         onClick={() => onClose?.()}
         newTab={item.to.startsWith('http')}
@@ -273,7 +293,7 @@ const NavBar = () => {
               )}
             </div>
           }>
-          {commonUserMenuItems.map((item) => renderUserMenuItem(item))}
+          {commonUserMenuItems.map((item, index) => renderUserMenuItem(item, index))}
         </DropdownMenu>,
       ]
     : [
@@ -368,8 +388,8 @@ const NavBar = () => {
                     Benutzer
                   </h3>
                   <ul className="space-y-2">
-                    {commonUserMenuItems.map((item) =>
-                      renderUserMenuItem(item, () => setIsMobileMenuOpen(false)),
+                    {commonUserMenuItems.map((item, index) =>
+                      renderUserMenuItem(item, index, () => setIsMobileMenuOpen(false)),
                     )}
                   </ul>
                 </div>

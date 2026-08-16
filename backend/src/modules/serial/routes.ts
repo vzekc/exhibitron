@@ -23,7 +23,7 @@ import { bearerOf, hash, MAX_LABEL_LENGTH, MAX_TOKENS_PER_EXHIBITOR, mint } from
  * The serial login, from this end.
  *
  * An exhibitor's machine sits on a null modem at home; the login it talks to
- * is on travelstar, in a hall this server cannot reach. The agent there dials
+ * is on fotofix, in a hall this server cannot reach. The agent there dials
  * out and holds a socket open, and these routes join one to the other.
  *
  * Every database read happens while this is still an HTTP request. MikroORM's
@@ -32,7 +32,7 @@ import { bearerOf, hash, MAX_LABEL_LENGTH, MAX_TOKENS_PER_EXHIBITOR, mint } from
  * itself touches nothing.
  */
 
-/* What travelstar's agent is allowed to say, and nobody else. Read when a
+/* What fotofix's agent is allowed to say, and nobody else. Read when a
    connection arrives, so the environment may be set up after this loads. */
 const agentToken = () => process.env.SERIAL_AGENT_TOKEN ?? ''
 

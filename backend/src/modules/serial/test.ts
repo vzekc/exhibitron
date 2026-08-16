@@ -108,7 +108,7 @@ afterAll(async () => {
 
 /*
  * An agent that registers and answers what it is asked for, standing in for
- * travelstar. What it does with the pty is its own business; from here it is
+ * fotofix. What it does with the pty is its own business; from here it is
  * a socket that dials back with the id it was given.
  */
 async function connectAgent(name: string, maxSessions = 16) {
@@ -174,7 +174,7 @@ describe('the relay', () => {
    */
   test('joins a client to an agent, and keeps frame types intact', async () => {
     forgetEverything()
-    const control = await connectAgent('travelstar')
+    const control = await connectAgent('fotofix')
 
     const client = openSocket('/api/serial/session?term=vt220&cols=132&rows=50', clientToken)
     await opened(client)
@@ -221,7 +221,7 @@ describe('the relay', () => {
     ['something-else', 'login'],
   ])('asks for mode %s and gets %s', async (asked, expected) => {
     forgetEverything()
-    const control = await connectAgent('travelstar')
+    const control = await connectAgent('fotofix')
 
     const query = asked === undefined ? '' : `?mode=${encodeURIComponent(asked)}`
     const client = openSocket(`/api/serial/session${query}`, clientToken)
@@ -236,7 +236,7 @@ describe('the relay', () => {
 
   test('closes the client when the agent goes away', async () => {
     forgetEverything()
-    const control = await connectAgent('travelstar')
+    const control = await connectAgent('fotofix')
 
     const client = openSocket('/api/serial/session', clientToken)
     await opened(client)
@@ -259,7 +259,7 @@ describe('the relay', () => {
    */
   test('keeps a waiting client when the agent registers again', async () => {
     forgetEverything()
-    const first = await connectAgent('travelstar')
+    const first = await connectAgent('fotofix')
 
     const client = openSocket('/api/serial/session', clientToken)
     await opened(client)
@@ -267,7 +267,7 @@ describe('the relay', () => {
 
     /* The same agent, dialling again; the older registration is closed. */
     const firstClosed = closed(first)
-    const second = await connectAgent('travelstar')
+    const second = await connectAgent('fotofix')
     await firstClosed
 
     let gone = false
