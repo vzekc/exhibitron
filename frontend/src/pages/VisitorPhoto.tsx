@@ -36,15 +36,40 @@ const VisitorPhoto = () => {
   const load = useCallback(async () => {
     const response = await fetch(`/api/visitor-photo/${encodeURIComponent(id)}/page`)
     if (!response.ok) {
+      setPage(null)
       setMissing(true)
       return
     }
+    setMissing(false)
     setPage(await response.json())
   }, [id])
 
+  /*
+   * Eine andere ID fängt von vorn an. React Router lässt diese Seite stehen und
+   * tauscht nur den Parameter aus, also muss hier fallen, was zur vorigen ID
+   * gehörte — sonst bliebe die Auskunft „gibt es nicht" über dem nächsten Foto
+   * stehen. Der Zähler bricht ab, was noch unterwegs ist, damit eine langsame
+   * Antwort keine neuere überschreibt.
+   */
   useEffect(() => {
-    void load()
-  }, [load])
+    let current = true
+    setPage(null)
+    setMissing(false)
+    setProblem(null)
+    setCode('')
+    void (async () => {
+      const response = await fetch(`/api/visitor-photo/${encodeURIComponent(id)}/page`)
+      if (!current) return
+      if (!response.ok) {
+        setMissing(true)
+        return
+      }
+      setPage(await response.json())
+    })()
+    return () => {
+      current = false
+    }
+  }, [id])
 
   useEffect(() => {
     if (!page || page.deleted || !page.converting) return
