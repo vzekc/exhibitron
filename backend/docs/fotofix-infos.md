@@ -131,8 +131,9 @@ FTP, SMB und DECnet arbeiten auf der Ebene, auf der auch die Halle zusammenhäng
 im Retrostar-Netz des VzEkC, in dem der Fotoserver mit einer Bridge steht. Wer dort drin ist,
 erreicht ihn von zu Hause aus unter denselben Namen wie später am Tisch: `fotofix`, `\\FOTOFIX` und
 `FOTOFX::`. Status und Zugang:
-[retrostar.classic-computing.de](https://retrostar.classic-computing.de/) — schreibt uns, dann
-klären wir das.
+[retrostar.classic-computing.de](https://retrostar.classic-computing.de/). Bei Fragen meldet Euch
+per E-Mail an [hans@huebner.org](mailto:hans@huebner.org) oder im
+[Forum](https://forum.classic-computing.de/).
 
 ## DECnet im Detail
 
@@ -155,14 +156,14 @@ ihn in der laufenden Sitzung gültig. Die Nummer allein tut es auch — `1001::`
 $! Dateien einer ID auflisten
 $ DIRECTORY FOTOFX::"MUSTER/*"
 
-$! Foto holen
-$ COPY FOTOFX::"MUSTER/photo.jpg" *
+$! Foto holen — der Zielname steht ausgeschrieben da
+$ COPY FOTOFX::"MUSTER/photo.jpg" PHOTO.JPG
 
 $! ASCII-Kunst direkt auf das Terminal
 $ TYPE FOTOFX::"MUSTER/ascii-terminal.txt"
 
 $! ... und dasselbe über die Knotennummer
-$ COPY 1001::"MUSTER/c64.prg" *
+$ COPY 1001::"MUSTER/c64.prg" C64.PRG
 ```
 
 Worauf es bei der Dateiangabe ankommt:
@@ -171,8 +172,9 @@ Worauf es bei der Dateiangabe ankommt:
 | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Die Angabe ist ein Pfad in Anführungszeichen          | `FOTOFX::"MUSTER/photo.jpg"` — so liest DCL den Schrägstrich als Teil des Namens, und die Angabe erreicht den Server klein geschrieben, wie die Dateien auf der Platte heißen |
 | Die Foto-ID ist der erste Pfadschritt                 | Innerhalb einer ID wirkt `*` wie gewohnt: `DIRECTORY FOTOFX::"MUSTER/*"`                                                                                                      |
+| `COPY` braucht den Zielnamen                          | Der Name auf der eigenen Seite steht ausgeschrieben da: `COPY FOTOFX::"MUSTER/photo.jpg" PHOTO.JPG`. Ein `*` an dieser Stelle holt die Datei nicht                            |
 | Jede Datei kommt als Bytestrom mit ihrer wahren Länge | Ein JPEG, ein Diskettenabbild oder ein ROM kommt Byte für Byte so an, wie es auf der Platte liegt                                                                             |
-| Anmeldedaten sind frei wählbar                        | Der Server bedient jeden Client — `COPY` ohne weitere Angaben genügt                                                                                                          |
+| Anmeldedaten sind frei wählbar                        | Der Server bedient jeden Client                                                                                                                                               |
 
 ## Serielle Strecke
 
@@ -207,19 +209,6 @@ $ fotofix-serial --port /dev/ttyUSB0 --speed 9600 --format 8N1 \
 - Der Mitschnitt im Fenster zeigt den Datenstrom als das, was er ist: eine Zeile je Kermit-Paket
   oder eine Zeile je Textzeile mit benannten Steuerzeichen. Daran seht Ihr sofort, ob Server und
   Kabel zusammenspielen.
-
-## Worauf es ankommt
-
-Sechs Handgriffe, mit denen der Abruf auf Anhieb sitzt.
-
-| Wobei                       | Was gilt                                                                                                             |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| FTP: hineinwechseln         | `cd MUSTER` führt in die Foto-ID; dort listet `ls` alle Formate                                                      |
-| FTP: Programme und Bilder   | `binary` vor dem `get` — dann kommt die Datei Byte für Byte an                                                       |
-| FTP: Texte auf DOS und CP/M | `ascii` vor dem `get` — der Server setzt die Zeilenenden auf CRLF                                                    |
-| SMB unter Windows           | Der Server spricht SMB1; in aktuellen Windows-Versionen schaltet Ihr den SMB1-Client als Windows-Feature dazu        |
-| DECnet                      | Anführungszeichen und Kleinschreibung: `FOTOFX::"MUSTER/c64.prg"`                                                    |
-| Serielle Leitung            | Geschwindigkeit und Format an beiden Enden gleich; der Mitschnitt im Brückenfenster zeigt, sobald sie zusammenpassen |
 
 ## Anmelden
 
