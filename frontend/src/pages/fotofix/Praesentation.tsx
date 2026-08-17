@@ -609,10 +609,12 @@ const slides: React.ReactNode[] = [
       <div>
         <H3>Anmeldung</H3>
         <Plain>
-          <Item>Tischnummer für den Laufzettel melden</Item>
+          <Item>
+            Tisch im Tischplan als Foto-Tisch markieren — dann steht er auf den Laufzetteln
+          </Item>
           <Item>Stempel bestellen, gern mit eigenem Logo</Item>
           <Item>
-            Anmeldeschluss: <span className="text-gray-400">25. September 2026</span>
+            Stempelschluss: <span className="text-gray-400">25. September 2026</span>
           </Item>
         </Plain>
       </div>

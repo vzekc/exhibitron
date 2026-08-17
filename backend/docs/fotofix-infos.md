@@ -27,7 +27,7 @@ wie gewohnt.
 - Ein Exponat, das ein Bild anzeigen kann.
 - Einen Weg an die Datei: Netzwerkkarte, serielle Schnittstelle, oder eine Diskette, die Ihr am
   Tisch beschreibt.
-- Eine Tischnummer für den Laufzettel und einen Stempel für das Kästchen daneben.
+- Euren Tisch, hier als Foto-Tisch markiert, und einen Stempel für das Kästchen daneben.
 
 **Wir stellen bereit**
 
@@ -223,18 +223,22 @@ Sechs Handgriffe, mit denen der Abruf auf Anhieb sitzt.
 
 ## Anmelden
 
-Damit Euer Tisch auf die Laufzettel kommt, brauchen wir drei Angaben:
+**Euren Tisch meldet Ihr selbst an.** Auf der Seite Eures Tisches — und ebenso im
+[Tischplan](/table) — steht das Kästchen „An diesem Tisch können Besucherfotos gezeigt werden“.
+Sobald es gesetzt ist, trägt der Tischplan für Euren Tisch ein **F**, und seine Nummer wird auf die
+Laufzettel gedruckt. Der Automat liest die Liste beim Drucken, ein Haken während der Ausstellung
+wirkt also ab dem nächsten Zettel, und zurücknehmen könnt Ihr ihn genauso.
 
-- **Eure Tischnummer** — sie wird als Kästchen gedruckt.
+Von uns braucht Ihr zwei Dinge:
+
 - **Euren Stempel** — jeder teilnehmende Aussteller bekommt einen eigenen, gern mit Eurem Logo. Wir
   lassen sie Ende September anfertigen und bringen sie mit.
 - **Euer Format**, falls es noch fehlt — sagt uns, was Eure Maschine liest, dann bauen wir die
   Umrechnung.
 
-**Anmeldeschluss: 25. September 2026.** Danach ist der Laufzettel gesetzt und die Stempel sind in
-Auftrag.
+**Stempelschluss: 25. September 2026.** Danach sind die Stempel in Auftrag.
 
-Fragen und Anmeldung: [hans@huebner.org](mailto:hans@huebner.org)
+Fragen: [hans@huebner.org](mailto:hans@huebner.org)
 
 ---
 
