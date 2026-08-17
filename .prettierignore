@@ -14,3 +14,7 @@ backend/assets/booth/*/keep.html
 backend/assets/booth/*/printing.html
 backend/assets/booth/*/done.html
 backend/assets/booth/*/error.html
+
+# The talk and the connection instructions the fotofix menu links to are
+# verbatim copies from the fotofix repository too, kept in step the same way.
+frontend/public/fotofix/

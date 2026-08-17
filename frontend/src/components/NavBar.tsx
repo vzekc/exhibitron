@@ -23,12 +23,15 @@ interface MenuItemProps {
   reloadDocument?: boolean
 }
 
-/* An entry in the user menu: a link, a rule, a group label, or the logout. */
-interface UserMenuEntry {
+/* An entry in a dropdown: a link, a rule, a group label, or the logout. */
+interface MenuEntry {
   to?: string
   label?: string
   type?: 'divider' | 'heading' | 'logout'
   newTab?: boolean
+  /* For a page outside the router: one the backend renders, or one that lies
+     under public/ as a file. */
+  reloadDocument?: boolean
 }
 
 interface NavListProps {
@@ -182,20 +185,28 @@ const NavBar = () => {
   ]
 
   // Common user menu items
-  const commonUserMenuItems: UserMenuEntry[] = [
+  const commonUserMenuItems: MenuEntry[] = [
     { to: '/user/account', label: 'Konto' },
     { to: '/user/profile', label: 'Profil' },
     { to: '/user/exhibit', label: 'Deine Exponate' },
     { to: '/user/exhibitorInfo', label: 'Infos für Mitwirkende' },
     { type: 'divider' },
-    { type: 'heading', label: 'fotofix' },
-    { to: '/foto/kamera', label: 'Fotoautomat', newTab: true },
-    { to: '/user/serial', label: 'Seriell-Tester' },
-    { type: 'divider' },
     { to: `https://www.classic-computing.de/${exhibitionKey}faq`, label: 'FAQ' },
     { to: '/user/help', label: 'Hilfe' },
     { type: 'divider' },
     { type: 'logout', label: 'Logout' },
+  ]
+
+  /* The fotofix pages, which are for the people exhibiting and are shown to
+     them. The talk and the connection instructions are written in the fotofix
+     repository and copied to `public/fotofix` by
+     `vortrag/sync-vortrag-pages.mjs` there; those two and the camera page carry
+     a design of their own, so they open in a tab of their own. */
+  const commonFotofixMenuItems: MenuEntry[] = [
+    { to: '/fotofix/praesentation.html', label: 'Präsentation', newTab: true },
+    { to: '/fotofix/infos.html', label: 'Infos', newTab: true },
+    { to: '/foto/kamera', label: 'Web-Kamera', newTab: true, reloadDocument: true },
+    { to: '/user/serial', label: 'Seriell-Tester' },
   ]
 
   // Common admin menu items
@@ -209,7 +220,7 @@ const NavBar = () => {
     { to: '/admin/seatplan', label: 'Tischplan' },
   ]
 
-  const renderUserMenuItem = (item: UserMenuEntry, key: React.Key, onClose?: () => void) => {
+  const renderMenuEntry = (item: MenuEntry, key: React.Key, onClose?: () => void) => {
     if (item.type === 'divider') {
       return <hr key={key} className="my-1 border-gray-200 dark:border-gray-700" />
     }
@@ -241,8 +252,7 @@ const NavBar = () => {
         to={item.to}
         onClick={() => onClose?.()}
         newTab={item.newTab ?? item.to.startsWith('http')}
-        /* The camera page is rendered by the backend, not by the router. */
-        reloadDocument={item.to.startsWith('/foto/')}>
+        reloadDocument={item.reloadDocument}>
         {item.label}
       </MenuItem>
     )
@@ -259,6 +269,13 @@ const NavBar = () => {
         {item.label}
       </MenuItem>
     )),
+    ...(exhibitor
+      ? [
+          <DropdownMenu key="fotofix" label={<MenuItem hasDropdown>fotofix</MenuItem>}>
+            {commonFotofixMenuItems.map((item, index) => renderMenuEntry(item, index))}
+          </DropdownMenu>,
+        ]
+      : []),
     ...(exhibitor?.user.isAdministrator
       ? [
           <DropdownMenu key="admin" label={<MenuItem hasDropdown>Administration</MenuItem>}>
@@ -295,7 +312,7 @@ const NavBar = () => {
               )}
             </div>
           }>
-          {commonUserMenuItems.map((item, index) => renderUserMenuItem(item, index))}
+          {commonUserMenuItems.map((item, index) => renderMenuEntry(item, index))}
         </DropdownMenu>,
       ]
     : [
@@ -387,6 +404,18 @@ const NavBar = () => {
                   </li>
                 ))}
               </ul>
+              {exhibitor && (
+                <div className="mt-6 border-t border-gray-200 pt-4 dark:border-gray-700">
+                  <h3 className="mb-2 text-sm font-semibold text-gray-500 dark:text-gray-400">
+                    fotofix
+                  </h3>
+                  <ul className="space-y-2">
+                    {commonFotofixMenuItems.map((item, index) =>
+                      renderMenuEntry(item, index, () => setIsMobileMenuOpen(false)),
+                    )}
+                  </ul>
+                </div>
+              )}
               {exhibitor ? (
                 <div className="mt-6 border-t border-gray-200 pt-4 dark:border-gray-700">
                   <h3 className="mb-2 text-sm font-semibold text-gray-500 dark:text-gray-400">
@@ -394,7 +423,7 @@ const NavBar = () => {
                   </h3>
                   <ul className="space-y-2">
                     {commonUserMenuItems.map((item, index) =>
-                      renderUserMenuItem(item, index, () => setIsMobileMenuOpen(false)),
+                      renderMenuEntry(item, index, () => setIsMobileMenuOpen(false)),
                     )}
                   </ul>
                 </div>

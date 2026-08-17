@@ -163,6 +163,21 @@ Only what a browser makes impossible may differ, and only as mechanism, never as
 - the fault screen is released by the red button, because there is no control port to send `CLEAR`
   over.
 
+## The fotofix menu
+
+The `fotofix` dropdown in `NavBar.tsx` holds the four pages about the installation: Präsentation and
+Infos, Web-Kamera (`/foto/kamera`) and the Seriell-Tester (`/user/serial`). They are for the people
+exhibiting, so the dropdown appears for somebody logged in, as the Administration one does. The first
+three carry a design of their own and open in a tab of their own; the Seriell-Tester is a page of
+this site.
+
+Präsentation and Infos are `frontend/public/fotofix/praesentation.html` and `infos.html`, copied from
+the fotofix repository (`vortrag/`) by `sync-vortrag-pages.mjs` there, together with the pictures the
+slides name; its `--check` fails when the two have drifted, and `.prettierignore` keeps this side
+from reformatting a copy. Edit them in fotofix and run the script — an edit made here is lost at the
+next run. A slide that names a new picture needs nothing added to the script: it reads each page for
+what it asks for.
+
 ## Environment Variables (backend/.env)
 
 Required:

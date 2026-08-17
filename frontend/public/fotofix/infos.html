@@ -1,0 +1,729 @@
+<!--
+Copied from the fotofix repository, vortrag/fotofix-anschluss.html, by
+vortrag/sync-vortrag-pages.mjs. Edit it there — an edit made here is lost
+the next time the two are brought back into step.
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exponat anschließen</title>
+<style>
+  /* Licht zuerst. Der Grund ist das Thermopapier des Laufzettels, die Akzent-
+     farbe das Blau der Indy, die Graustufen tragen einen Blaustich mit. */
+  :root {
+    --paper:      #f7f5f1;
+    --surface:    #ffffff;
+    --surface-2:  #efece6;
+    --ink:        #16202a;
+    --ink-2:      #4a5a68;
+    --ink-3:      #7d8b96;
+    --rule:       #d9d5cc;
+    --rule-2:     #c3beb2;
+    --indy:       #1a6c9b;
+    --indy-soft:  #e2eff6;
+    --term-bg:    #101a22;
+    --term-fg:    #d3e3ec;
+    --term-dim:   #6e8593;
+    --term-cmd:   #7fc9a0;
+
+    --display: "Futura", "Avenir Next", "Helvetica Neue", sans-serif;
+    --body: "Avenir Next", "Segoe UI", "Helvetica Neue", system-ui, sans-serif;
+    --mono: "SF Mono", "Menlo", "DejaVu Sans Mono", "Consolas", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:     #0f171e;
+      --surface:   #16212b;
+      --surface-2: #1c2935;
+      --ink:       #e6edf2;
+      --ink-2:     #a6b6c2;
+      --ink-3:     #7c8d9a;
+      --rule:      #2a3844;
+      --rule-2:    #3b4c5a;
+      --indy:      #67b6e2;
+      --indy-soft: #16303f;
+      --term-bg:   #0a1219;
+      --term-fg:   #cfe1eb;
+      --term-dim:  #6b8090;
+      --term-cmd:  #7ecfa4;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:     #0f171e;
+    --surface:   #16212b;
+    --surface-2: #1c2935;
+    --ink:       #e6edf2;
+    --ink-2:     #a6b6c2;
+    --ink-3:     #7c8d9a;
+    --rule:      #2a3844;
+    --rule-2:    #3b4c5a;
+    --indy:      #67b6e2;
+    --indy-soft: #16303f;
+    --term-bg:   #0a1219;
+    --term-fg:   #cfe1eb;
+    --term-dim:  #6b8090;
+    --term-cmd:  #7ecfa4;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.62;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  .wrap {
+    display: grid;
+    grid-template-columns: 15rem minmax(0, 1fr);
+    gap: 0 4rem;
+    max-width: 74rem;
+    margin: 0 auto;
+    padding: 0 2rem 8rem;
+  }
+
+  /* Der Index steht mit, solange Platz ist. */
+  nav {
+    position: sticky; top: 0; align-self: start;
+    max-height: 100svh; overflow-y: auto;
+    padding: 3.2rem 0 3rem;
+  }
+  nav .brand {
+    font-family: var(--display); font-weight: 600;
+    font-size: 1.15rem; letter-spacing: 0.02em;
+    padding-bottom: 0.9rem; margin-bottom: 0.9rem;
+    border-bottom: 1px solid var(--rule-2);
+  }
+  nav ol { list-style: none; margin: 0; padding: 0;
+           display: flex; flex-direction: column; gap: 0.15rem; }
+  nav a {
+    display: block; padding: 0.24rem 0;
+    font-size: 0.86rem; color: var(--ink-2); text-decoration: none;
+    border-left: 2px solid transparent; padding-left: 0.7rem;
+    margin-left: -0.7rem;
+  }
+  nav a:hover { color: var(--indy); border-left-color: var(--rule-2); }
+
+  main { padding: 3.2rem 0 0; min-width: 0; }
+
+  header.top { margin-bottom: 3.4rem; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 0.72rem;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--indy); margin: 0 0 0.9rem;
+  }
+  h1 {
+    font-family: var(--display); font-weight: 600;
+    font-size: clamp(2.1rem, 4.4vw, 3rem); line-height: 1.08;
+    letter-spacing: -0.01em; margin: 0 0 1rem; text-wrap: balance;
+  }
+  .standfirst {
+    font-size: 1.16rem; color: var(--ink-2);
+    max-width: 44ch; margin: 0;
+  }
+
+  section { margin-bottom: 3.6rem; scroll-margin-top: 1.5rem; }
+  h2 {
+    font-family: var(--display); font-weight: 600;
+    font-size: 1.6rem; line-height: 1.15; letter-spacing: -0.005em;
+    margin: 0 0 1.2rem; padding-top: 1.4rem;
+    border-top: 2px solid var(--ink); text-wrap: balance;
+  }
+  h3 {
+    font-family: var(--display); font-weight: 600;
+    font-size: 1.06rem; margin: 2rem 0 0.5rem;
+  }
+  h3:first-child { margin-top: 0; }
+  p { margin: 0 0 1rem; max-width: 66ch; }
+  p.note { color: var(--ink-2); font-size: 0.95rem; }
+  a { color: var(--indy); }
+
+  ul.plain { list-style: none; margin: 0 0 1rem; padding: 0;
+             display: flex; flex-direction: column; gap: 0.5rem; }
+  ul.plain li { position: relative; padding-left: 1.3rem; max-width: 66ch; }
+  ul.plain li::before {
+    content: "—"; position: absolute; left: 0; color: var(--indy);
+  }
+
+  code {
+    font-family: var(--mono); font-size: 0.87em;
+    background: var(--surface-2); border: 1px solid var(--rule);
+    border-radius: 3px; padding: 0.05em 0.35em;
+    white-space: nowrap;
+  }
+  strong { font-weight: 600; }
+
+  /* Tabellen sind hier die Hauptsache: Adressen, Dateinamen, Regeln. */
+  .scroll { overflow-x: auto; margin: 0 0 1.2rem;
+            border: 1px solid var(--rule); border-radius: 5px;
+            background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 0.93rem; }
+  th, td {
+    text-align: left; padding: 0.62rem 1rem;
+    border-bottom: 1px solid var(--rule); vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  th {
+    font-family: var(--mono); font-weight: 500;
+    font-size: 0.7rem; letter-spacing: 0.13em; text-transform: uppercase;
+    color: var(--ink-3); background: var(--surface-2);
+    border-bottom: 1px solid var(--rule-2); white-space: nowrap;
+  }
+  td code { background: transparent; border: 0; padding: 0; color: var(--ink); }
+  td.file code { color: var(--indy); }
+  td.sys { white-space: nowrap; font-weight: 600; }
+
+  pre {
+    font-family: var(--mono); font-size: 0.82rem; line-height: 1.66;
+    background: var(--term-bg); color: var(--term-fg);
+    border-radius: 5px; padding: 1rem 1.1rem;
+    overflow-x: auto; margin: 0 0 1.2rem;
+    tab-size: 4;
+  }
+  pre .c { color: var(--term-dim); }
+  pre .p { color: var(--term-cmd); }
+  pre b   { color: #fff; font-weight: 400; }
+
+  .box {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-radius: 6px; padding: 1.3rem 1.5rem; margin: 0 0 1.4rem;
+  }
+  .box > :last-child { margin-bottom: 0; }
+  .box.mark { border-left: 3px solid var(--indy); background: var(--indy-soft); }
+  .box h3 { margin-top: 0; }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem;
+         margin-bottom: 1.4rem; }
+  .two .box { margin: 0; }
+
+  footer {
+    border-top: 2px solid var(--ink); padding-top: 1.4rem;
+    color: var(--ink-2); font-size: 0.9rem;
+  }
+  footer .id {
+    font-family: var(--mono); font-size: 0.78rem; color: var(--ink-3);
+    margin-top: 0.8rem;
+  }
+
+  a:focus-visible { outline: 2px solid var(--indy); outline-offset: 2px; }
+
+  @media (max-width: 62rem) {
+    .wrap { grid-template-columns: 1fr; gap: 0; padding: 0 1.2rem 5rem; }
+    nav { position: static; max-height: none; padding: 2.2rem 0 0; }
+    nav ol { flex-flow: row wrap; gap: 0.1rem 1rem; }
+    nav a { padding-left: 0; margin-left: 0; border-left: 0; }
+    main { padding-top: 2rem; }
+    .two { grid-template-columns: 1fr; }
+    body { font-size: 16px; }
+  }
+</style>
+
+<div class="wrap">
+<nav>
+  <div class="brand">FotoFix<br>für Aussteller</div>
+  <ol>
+    <li><a href="#kurz">Kurz gesagt</a></li>
+    <li><a href="#brauchen">Was Ihr braucht</a></li>
+    <li><a href="#zugang">Zugangswege</a></li>
+    <li><a href="#dateien">Dateien und Namen</a></li>
+    <li><a href="#test">Von zu Hause testen</a></li>
+    <li><a href="#decnet">DECnet im Detail</a></li>
+    <li><a href="#seriell">Serielle Strecke</a></li>
+    <li><a href="#ankommt">Worauf es ankommt</a></li>
+    <li><a href="#anmelden">Anmelden</a></li>
+  </ol>
+</nav>
+
+<main>
+<header class="top">
+  <p class="eyebrow">Classic Computing 2026 · Celle</p>
+  <h1>Exponat anschließen</h1>
+  <p class="standfirst">
+    Ein Besucher kommt mit seinem Laufzettel an Euren Tisch und nennt eine
+    sechsstellige Foto-ID. Euer Exponat holt das Bild und zeigt es an. Diese
+    Seite sagt, was dafür bereitsteht und wie Ihr es heute schon ausprobiert.
+  </p>
+</header>
+
+<section id="kurz">
+  <h2>Kurz gesagt</h2>
+  <p>
+    Der Dateiserver heißt <code>fotofix.classic-computing.de</code>. Jede
+    Foto-ID ist dort ein Verzeichnis, und darin liegt dasselbe Bild in 56
+    Formaten unter festen Namen:
+  </p>
+  <pre>K7NP4M/<b>photo.jpg</b>            <span class="c">das Original, 640 × 480</span>
+K7NP4M/<b>c64.prg</b>              <span class="c">LOAD und RUN, Bild steht</span>
+K7NP4M/<b>amiga-ham.adf</b>        <span class="c">bootfähige Diskette</span>
+K7NP4M/<b>ascii-terminal.txt</b>   <span class="c">80 × 24, für jedes Terminal</span></pre>
+  <p>
+    Abgeholt wird über FTP, HTTP, SMB, DECnet oder eine serielle Leitung. Die
+    Foto-ID vom Laufzettel ist dabei der Schlüssel: mit ihr steht das
+    Verzeichnis offen, und darin listet und holt jedes Protokoll wie gewohnt.
+  </p>
+</section>
+
+<section id="brauchen">
+  <h2>Was Ihr braucht</h2>
+  <div class="two">
+    <div class="box">
+      <h3>Ihr bringt mit</h3>
+      <ul class="plain">
+        <li>Ein Exponat, das ein Bild anzeigen kann.</li>
+        <li>
+          Einen Weg an die Datei: Netzwerkkarte, serielle Schnittstelle, oder
+          eine Diskette, die Ihr am Tisch beschreibt.
+        </li>
+        <li>
+          Eine Tischnummer für den Laufzettel und einen Stempel für das
+          Kästchen daneben.
+        </li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>Wir stellen bereit</h3>
+      <ul class="plain">
+        <li>Den Automaten am Eingang und die Besucher mit dem Zettel in der Hand.</li>
+        <li>Den Dateiserver mit allen Formaten, im Netz und seriell.</li>
+        <li>
+          Eine Testumgebung, gegen die Ihr ab sofort von zu Hause aus arbeiten
+          könnt.
+        </li>
+        <li>
+          Die Umrechnung in Euer Format — sagt uns, was Eure Maschine liest.
+        </li>
+      </ul>
+    </div>
+  </div>
+  <p class="note">
+    Bei Euch bleiben zwei Schritte übrig: die Datei holen und sie anzeigen.
+    Aufnahme, Umrechnung und Verteilung sind erledigt, bevor der Besucher an
+    Euren Tisch kommt.
+  </p>
+</section>
+
+<section id="zugang">
+  <h2>Zugangswege</h2>
+  <p>
+    Fünf Wege auf dieselben Dateien. Der Name
+    <code>fotofix.classic-computing.de</code> gilt dabei überall: aus dem
+    Internet beantwortet ihn der Server der Ausstellungswebsite, im Retrostar
+    und in der Halle die Maschine vor Ort. Eine einmal getippte HTTP-Zeile
+    funktioniert damit vorher wie nachher.
+  </p>
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr><th>Protokoll</th><th>Adresse</th><th>Anmeldung</th><th>Erreichbar</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="sys">HTTP</td>
+          <td><code>http://fotofix.classic-computing.de/K7NP4M/</code></td>
+          <td>ohne</td>
+          <td>aus dem Internet, im Retrostar und in der Halle</td>
+        </tr>
+        <tr>
+          <td class="sys">FTP</td>
+          <td><code>fotofix</code>, Port 21</td>
+          <td>anonymous, Passwort frei</td>
+          <td>im Retrostar und in der Halle</td>
+        </tr>
+        <tr>
+          <td class="sys">SMB</td>
+          <td><code>\\FOTOFIX\fotos\K7NP4M</code></td>
+          <td>Gast</td>
+          <td>im Retrostar und in der Halle, SMB1 über NetBIOS</td>
+        </tr>
+        <tr>
+          <td class="sys">DECnet</td>
+          <td><code>FOTOFX::"K7NP4M/photo.jpg"</code></td>
+          <td>frei wählbar</td>
+          <td>im Retrostar und in der Halle, Knoten 1001</td>
+        </tr>
+        <tr>
+          <td class="sys">Seriell</td>
+          <td>Terminalserver am Tisch</td>
+          <td>Konto <code>foto</code></td>
+          <td>in der Halle, von zu Hause über die Brücke</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">
+    HTTP genügt, um Euren Abrufweg zu bauen: Pfade und Dateinamen sind
+    dieselben, die FTP, SMB und DECnet ausliefern. Wer im Retrostar ist, prüft
+    zusätzlich das Protokoll, das sein Exponat später wirklich spricht.
+  </p>
+  <p class="note">
+    Neben den Fotos steht das Retro-Dateiarchiv bereit: über HTTP unter
+    <code>/pub/</code>, über SMB als Freigabe <code>ftp</code>.
+  </p>
+</section>
+
+<section id="dateien">
+  <h2>Dateien und Namen</h2>
+  <p>
+    Jede Foto-ID ist ein Verzeichnis. Darin liegt das Original als
+    <code>photo.jpg</code>, und daneben liegen 56 Umrechnungen davon. Jede trägt
+    einen festen Namen, der die Zielmaschine nennt — drei Ziele schreiben
+    <code>.com</code>, fünf <code>.adf</code> und vier <code>.dsk</code>, der
+    Name entscheidet also.
+  </p>
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr><th>System</th><th>Dateien</th><th>Was drin ist</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="sys">Commodore C64</td>
+          <td class="file"><code>c64.prg</code></td>
+          <td>BASIC-Starter, 6502-Anzeiger, 320 × 200 monochrom</td>
+        </tr>
+        <tr>
+          <td class="sys">MS-DOS</td>
+          <td class="file"><code>cga.com</code><br><code>mga.com</code><br><code>vga.com</code></td>
+          <td>640 × 200 mono · Hercules 720 × 348 · Mode 13h 320 × 200 × 256</td>
+        </tr>
+        <tr>
+          <td class="sys">Atari ST</td>
+          <td class="file"><code>atari-st.tos</code></td>
+          <td>GEMDOS-Programm, 320 × 200 × 16</td>
+        </tr>
+        <tr>
+          <td class="sys">Amiga</td>
+          <td class="file"><code>amiga.iff</code><br><code>amiga-lores.adf</code><br><code>amiga-lores-lace.adf</code><br><code>amiga-hires.adf</code><br><code>amiga-hires-lace.adf</code><br><code>amiga-ham.adf</code></td>
+          <td>
+            IFF ILBM für Multiview; dazu fünf bootfähige Disketten mit eigenem
+            Bootblock — lo-res, hi-res, interlaced und HAM6, alle PAL
+          </td>
+        </tr>
+        <tr>
+          <td class="sys">Apple II</td>
+          <td class="file"><code>apple2-hgr-mono.dsk</code><br><code>apple2-hgr-color.dsk</code><br><code>apple2-dhgr-mono.dsk</code><br><code>apple2-dhgr-color.dsk</code></td>
+          <td>bootfähige Disketten; DHGR läuft auf dem IIe mit 128K</td>
+        </tr>
+        <tr>
+          <td class="sys">TI-99/4A</td>
+          <td class="file"><code>ti994a.rpk</code></td>
+          <td>32-KB-Modul, TMS9918A-Bitmap, Menü mono/farbig</td>
+        </tr>
+        <tr>
+          <td class="sys">Atari 2600</td>
+          <td class="file"><code>atari2600-mono.a26</code><br><code>atari2600-color.a26</code></td>
+          <td>4-KB-Cartridge, Playfield im Strahlentakt, 40 × 192</td>
+        </tr>
+        <tr>
+          <td class="sys">MSX</td>
+          <td class="file"><code>msx.rom</code></td>
+          <td>256-KB-Cartridge, erkennt MSX1/2/2+/turbo R, SCREEN 2/8/12</td>
+        </tr>
+        <tr>
+          <td class="sys">Amstrad/Schneider CPC</td>
+          <td class="file"><code>cpc.rom</code><br><code>cpc-mono.rom</code></td>
+          <td>16-KB-Erweiterungs-ROM mit Autostart, Mode 0 und Mode 2</td>
+        </tr>
+        <tr>
+          <td class="sys">NKC mit GDP64</td>
+          <td class="file"><code>nkc-gdp64.pbm</code></td>
+          <td>512 × 256 mono für den KERMIMG-Anzeiger im ROM</td>
+        </tr>
+        <tr>
+          <td class="sys">Videotex</td>
+          <td class="file"><code>minitel.vdt</code><br><code>minitel-mono.vdt</code><br><code>btx.cept</code><br><code>btx-basic.cept</code><br><code>btx-drcs.cept</code><br><code>btx-drcs-double.cept</code></td>
+          <td>
+            Télétel-Seiten für das Minitel 1B und CEPT-Seiten für den
+            BTX-Decoder, die das Terminal beim Empfang aufbaut: 80 × 66
+            Mosaikblöcke über den ganzen Schirm, in den Graustufen des Minitel
+            bzw. in sechzehn aus dem Foto gewonnenen Farben; die
+            DRCS-Fassungen laden einen eigenen Zeichensatz und tragen damit ein
+            echtes 144 × 70-Bitmap, wahlweise in doppelter Größe
+          </td>
+        </tr>
+        <tr>
+          <td class="sys">Terminals</td>
+          <td class="file"><code>ascii-terminal.txt</code><br><code>ascii-terminal-full.txt</code><br><code>vt240.six</code> · <code>vt241.six</code><br><code>tektronix-4010.tek</code><br><code>tektronix-4014.tek</code><br><code>tektronix-trace-4010.tek</code><br><code>tektronix-trace-4014.tek</code></td>
+          <td>
+            ASCII-Kunst 80 × 24 in zwei Zeichenvorräten; Sixel 800 × 240 in vier
+            Graustufen bzw. vier Farben; Speicherröhre als Schraffur oder als
+            Umrisszeichnung
+          </td>
+        </tr>
+        <tr>
+          <td class="sys">Drucker</td>
+          <td class="file"><code>ascii-print-80.prn</code><br><code>ascii-print-80-full.prn</code><br><code>ascii-print-132.prn</code><br><code>ascii-print-132-full.prn</code><br><code>nec-p6-60.prn</code> … <code>nec-p6-360.prn</code></td>
+          <td>
+            ASCII-Kunst für 80 und 132 Spalten, mit Überdruck für mehr
+            Graustufen; für den NEC Pinwriter P6 ein fertiger Druckauftrag auf
+            A4 in fünf Dichten — an den Drucker schicken, Blatt kommt heraus
+          </td>
+        </tr>
+        <tr>
+          <td class="sys">Austauschformate</td>
+          <td class="file"><code>photo.jpg</code><br><code>png.png</code> · <code>gif.gif</code><br><code>pcx.pcx</code> · <code>pcx-color.pcx</code><br><code>ppm-24.ppm</code> · <code>ppm-16.ppm</code><br><code>ppm-8.ppm</code> · <code>ppm-48.ppm</code><br><code>pgm-8.pgm</code> · <code>pbm.pbm</code><br><code>xbm.xbm</code></td>
+          <td>
+            640 × 480 für jede Maschine mit eigenem Bildlader; XBM als C-Quelle,
+            die ein X-Client übersetzen kann
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">
+    Jeder mitgelieferte Anzeiger schreibt zwei Bildunterschriften im Zeichensatz
+    der Zielmaschine: oben links „Classic Computing 2026 – Celle“, unten rechts
+    den Systemnamen. Die Austauschformate sind das Foto allein.
+  </p>
+</section>
+
+<section id="test">
+  <h2>Von zu Hause testen</h2>
+
+  <h3>Die Test-ID <code>MUSTER</code></h3>
+  <p>
+    Unter dieser ID liegt dauerhaft ein Beispielfoto in allen Formaten. Damit
+    baut Ihr Euren Abrufweg, lange bevor der erste Besucher vor der Kamera
+    steht.
+  </p>
+  <pre><span class="c"># HTTP — von überall, auch ohne Retrostar</span>
+<span class="p">$</span> curl -O http://fotofix.classic-computing.de/MUSTER/c64.prg
+<span class="p">$</span> lynx http://fotofix.classic-computing.de/MUSTER/</pre>
+  <p>
+    Damit steht der Abrufweg: Pfad und Dateiname sind hier dieselben, die Euer
+    Exponat später am Tisch verlangt. Wer im Retrostar ist, prüft dazu das
+    Protokoll, das die Maschine wirklich spricht:
+  </p>
+  <pre><span class="c"># FTP — binary für Programme und Bilder</span>
+<span class="p">$</span> ftp fotofix
+Name: <b>anonymous</b>
+Password: <span class="c">(beliebig)</span>
+<span class="p">ftp></span> cd MUSTER
+<span class="p">ftp></span> binary
+<span class="p">ftp></span> get amiga-ham.adf
+<span class="c">#   ascii statt binary liefert Textdateien mit CRLF —</span>
+<span class="c">#   so, wie ein DOS- oder CP/M-Client sie erwartet</span>
+
+<span class="c"># SMB — als Gast</span>
+<span class="p">$</span> smbclient //FOTOFIX/fotos -N -c 'cd MUSTER; get msx.rom'</pre>
+
+  <h3>Ein eigenes Testfoto machen</h3>
+  <p>
+    Im Ausstellerbereich der Ausstellungswebsite gibt es unter
+    <a href="https://2026.classic-computing.de/foto/kamera">2026.classic-computing.de/foto/kamera</a>
+    den Automaten als Webseite: Foto mit der Webcam aufnehmen, ID bekommen, und
+    der Server rechnet dieselben 56 Formate daraus. Die Dateien landen im
+    selben Verzeichnisbaum — Euer Exponat holt Euer Testfoto genauso ab wie
+    später das eines Besuchers. Dafür braucht Ihr Euren Ausstellerzugang.
+  </p>
+
+  <h3>Das Retrostar-Netz</h3>
+  <p>
+    FTP, SMB und DECnet arbeiten auf der Ebene, auf der auch die Halle
+    zusammenhängt, und leben deshalb im Retrostar-Netz des VzEKC, in dem der
+    Fotoserver mit einer Bridge steht. Wer dort drin ist, erreicht ihn von zu
+    Hause aus unter denselben Namen wie später am Tisch:
+    <code>fotofix</code>, <code>\\FOTOFIX</code> und <code>FOTOFX::</code>.
+    Status und Zugang:
+    <a href="https://retrostar.classic-computing.de/">retrostar.classic-computing.de</a>
+    — schreibt uns, dann klären wir das.
+  </p>
+</section>
+
+<section id="decnet">
+  <h2>DECnet im Detail</h2>
+  <p>
+    Der Knoten heißt <strong>FOTOFX</strong> und trägt die Nummer
+    <strong>1001</strong>. Tragt ihn einmal in Eure Knotendatenbank ein, dann
+    nimmt jedes Kommando den Namen an:
+  </p>
+  <pre><span class="p">$</span> MCR NCP
+<span class="p">NCP></span> DEFINE NODE 1001 NAME FOTOFX   <span class="c">! in die Datenbank auf Platte</span>
+<span class="p">NCP></span> SET NODE 1001 NAME FOTOFX      <span class="c">! sofort gültig</span>
+<span class="p">NCP></span> SHOW NODE FOTOFX
+<span class="p">NCP></span> EXIT</pre>
+  <p>
+    <code>DEFINE</code> schreibt den Eintrag auf Platte, sodass er den nächsten
+    Systemstart überlebt; <code>SET</code> macht ihn in der laufenden Sitzung
+    gültig. Die Nummer allein tut es auch — <code>1001::</code> steht überall
+    dort, wo <code>FOTOFX::</code> steht.
+  </p>
+  <pre><span class="c">$! Dateien einer ID auflisten</span>
+<span class="p">$</span> DIRECTORY FOTOFX::"MUSTER/*"
+
+<span class="c">$! Foto holen</span>
+<span class="p">$</span> COPY FOTOFX::"MUSTER/photo.jpg" *
+
+<span class="c">$! ASCII-Kunst direkt auf das Terminal</span>
+<span class="p">$</span> TYPE FOTOFX::"MUSTER/ascii-terminal.txt"
+
+<span class="c">$! ... und dasselbe über die Knotennummer</span>
+<span class="p">$</span> COPY 1001::"MUSTER/c64.prg" *</pre>
+  <p>Worauf es bei der Dateiangabe ankommt:</p>
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr><th>Regel</th><th>Wirkung</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Die Angabe ist ein Pfad in Anführungszeichen</td>
+          <td>
+            <code>FOTOFX::"MUSTER/photo.jpg"</code> — so liest DCL den
+            Schrägstrich als Teil des Namens, und die Angabe erreicht den Server
+            klein geschrieben, wie die Dateien auf der Platte heißen
+          </td>
+        </tr>
+        <tr>
+          <td>Die Foto-ID ist der erste Pfadschritt</td>
+          <td>
+            Innerhalb einer ID wirkt <code>*</code> wie gewohnt:
+            <code>DIRECTORY FOTOFX::"MUSTER/*"</code>
+          </td>
+        </tr>
+        <tr>
+          <td>Jede Datei kommt als Bytestrom mit ihrer wahren Länge</td>
+          <td>
+            Ein JPEG, ein Diskettenabbild oder ein ROM kommt Byte für Byte so
+            an, wie es auf der Platte liegt
+          </td>
+        </tr>
+        <tr>
+          <td>Anmeldedaten sind frei wählbar</td>
+          <td>
+            Der Server bedient jeden Client — <code>COPY</code> ohne weitere
+            Angaben genügt
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="seriell">
+  <h2>Serielle Strecke</h2>
+  <p>
+    Exponate mit serieller Schnittstelle holen ihr Foto über den Terminalserver
+    in der Halle. Ein Port meldet sich entweder mit einem <code>login</code> —
+    Konto <code>foto</code>, Heimatverzeichnis sind die Fotos — oder direkt mit
+    einem <strong>Kermit-Server</strong>, für Maschinen, deren ganze Ausstattung
+    ein Terminalprogramm ist. Zum Übertragen liegen <code>kermit</code>,
+    <code>sz</code>, <code>sx</code> und <code>sb</code> bereit.
+  </p>
+  <h3>Von zu Hause: <code>fotofix-serial</code></h3>
+  <p>
+    Damit Ihr das vorher üben könnt, gibt es eine Brücke. Euer Retro-Rechner
+    behält sein Nullmodemkabel; am anderen Ende steht statt des Terminalservers
+    ein Rechner mit Internet, der die Bytes weiterträgt. Was Ihr dabei zu sehen
+    bekommt, ist dasselbe Image, das später in der Halle läuft.
+  </p>
+  <pre>Retro-Rechner ──Nullmodem──> USB-Seriell ──> Brücke ──Internet──> fotofix</pre>
+  <p>
+    Die Brücke läuft im Browser (Chrome oder Firefox, Web Serial) oder als
+    einzelne Programmdatei unter Linux, Windows und macOS. Beides findet Ihr im
+    Ausstellerbereich der Ausstellungswebsite.
+  </p>
+  <pre><span class="p">$</span> fotofix-serial --list
+<span class="p">$</span> fotofix-serial --port /dev/ttyUSB0 --speed 9600 --format 8N1 \
+                 --flow xonxoff --term vt100 --size 80x24</pre>
+  <ul class="plain">
+    <li>
+      Geschwindigkeit, Format und Flusskontrolle stellt Ihr an Eurer Seite ein —
+      dort liegt das Kabel. Sie sind während der Sitzung umstellbar.
+    </li>
+    <li>
+      Für Binärübertragungen über ein Dreidrahtkabel nehmt <code>sz -e</code>
+      oder gleich Kermit: beide maskieren Steuerzeichen und kommen damit sauber
+      durch XON/XOFF.
+    </li>
+    <li>
+      Der Mitschnitt im Fenster zeigt den Datenstrom als das, was er ist: eine
+      Zeile je Kermit-Paket oder eine Zeile je Textzeile mit benannten
+      Steuerzeichen. Daran seht Ihr sofort, ob Server und Kabel zusammenspielen.
+    </li>
+  </ul>
+</section>
+
+<section id="ankommt">
+  <h2>Worauf es ankommt</h2>
+  <p>Sechs Handgriffe, mit denen der Abruf auf Anhieb sitzt.</p>
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr><th>Wobei</th><th>Was gilt</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="sys">FTP: hineinwechseln</td>
+          <td><code>cd MUSTER</code> führt in die Foto-ID; dort listet
+              <code>ls</code> alle Formate</td>
+        </tr>
+        <tr>
+          <td class="sys">FTP: Programme und Bilder</td>
+          <td><code>binary</code> vor dem <code>get</code> — dann kommt die
+              Datei Byte für Byte an</td>
+        </tr>
+        <tr>
+          <td class="sys">FTP: Texte auf DOS und CP/M</td>
+          <td><code>ascii</code> vor dem <code>get</code> — der Server setzt
+              die Zeilenenden auf CRLF</td>
+        </tr>
+        <tr>
+          <td class="sys">SMB unter Windows</td>
+          <td>Der Server spricht SMB1; in aktuellen Windows-Versionen schaltet
+              Ihr den SMB1-Client als Windows-Feature dazu</td>
+        </tr>
+        <tr>
+          <td class="sys">DECnet</td>
+          <td>Anführungszeichen und Kleinschreibung:
+              <code>FOTOFX::"MUSTER/c64.prg"</code></td>
+        </tr>
+        <tr>
+          <td class="sys">Serielle Leitung</td>
+          <td>Geschwindigkeit und Format an beiden Enden gleich; der Mitschnitt
+              im Brückenfenster zeigt, sobald sie zusammenpassen</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="anmelden">
+  <h2>Anmelden</h2>
+  <p>Damit Euer Tisch auf die Laufzettel kommt, brauchen wir drei Angaben:</p>
+  <ul class="plain">
+    <li><strong>Eure Tischnummer</strong> — sie wird als Kästchen gedruckt.</li>
+    <li>
+      <strong>Euren Stempel</strong> — jeder teilnehmende Aussteller bekommt
+      einen eigenen, gern mit Eurem Logo. Wir lassen sie Ende September
+      anfertigen und bringen sie mit.
+    </li>
+    <li>
+      <strong>Euer Format</strong>, falls es noch fehlt — sagt uns, was Eure
+      Maschine liest, dann bauen wir die Umrechnung.
+    </li>
+  </ul>
+  <div class="box mark">
+    <p>
+      <strong>Anmeldeschluss: 25. September 2026.</strong> Danach ist der
+      Laufzettel gesetzt und die Stempel sind in Auftrag.
+    </p>
+    <p style="margin-bottom:0">
+      Fragen und Anmeldung: <a href="mailto:hans@huebner.org">hans@huebner.org</a>
+    </p>
+  </div>
+</section>
+
+<footer>
+  <p>
+    Die Fotos liegen auf dem Ausstellungsserver. Besucher löschen ihr Foto
+    selbst über einen Code auf dem Laufzettel, und drei Monate nach der
+    Ausstellung wird der Bestand gelöscht. Die Datenschutzerklärung steht unter
+    <a href="https://2026.classic-computing.de/foto/datenschutz">/foto/datenschutz</a>.
+  </p>
+  <p class="id">FotoFix · Classic Computing 2026 · Celle</p>
+</footer>
+</main>
+</div>
