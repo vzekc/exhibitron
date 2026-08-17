@@ -40,9 +40,12 @@ import WelcomePdf from '@pages/admin/WelcomePdf.tsx'
 import SeatplanImport from '@pages/admin/SeatplanImport.tsx'
 import SerialPort from './pages/user/SerialPort.tsx'
 import VisitorPhoto from './pages/VisitorPhoto.tsx'
+import Praesentation from './pages/fotofix/Praesentation.tsx'
 
 const routes: RouteObject[] = [
   { path: '/register', element: <Register /> },
+  /* Der Vortrag füllt den Schirm und trägt deshalb die Navigation nicht. */
+  { path: '/fotofix/praesentation', element: <Praesentation /> },
   {
     path: '/login',
     element: (
@@ -67,6 +70,7 @@ const routes: RouteObject[] = [
       { path: '/table/:number', element: <Table /> },
       { path: '/tables', element: <Tables /> },
       { path: '/lan', element: <LAN /> },
+      { path: '/fotofix/infos', element: <Documentation name="fotofix-infos" /> },
       // Protected user routes
       {
         path: '/user',

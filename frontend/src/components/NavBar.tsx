@@ -198,13 +198,12 @@ const NavBar = () => {
   ]
 
   /* The fotofix pages, which are for the people exhibiting and are shown to
-     them. The talk and the connection instructions are written in the fotofix
-     repository and copied to `public/fotofix` by
-     `vortrag/sync-vortrag-pages.mjs` there; those two and the camera page carry
-     a design of their own, so they open in a tab of their own. */
+     them. The talk fills the screen for a projector and the camera page is
+     drawn by the backend, so those two open in a tab of their own; Infos and
+     the Seriell-Tester are pages of this site. */
   const commonFotofixMenuItems: MenuEntry[] = [
-    { to: '/fotofix/praesentation.html', label: 'Präsentation', newTab: true },
-    { to: '/fotofix/infos.html', label: 'Infos', newTab: true },
+    { to: '/fotofix/praesentation', label: 'Präsentation', newTab: true },
+    { to: '/fotofix/infos', label: 'Infos' },
     { to: '/foto/kamera', label: 'Web-Kamera', newTab: true, reloadDocument: true },
     { to: '/user/serial', label: 'Seriell-Tester' },
   ]

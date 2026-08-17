@@ -14,6 +14,8 @@ const breadcrumbMap: { [key: string]: string } = {
   '/user/exhibit': 'Deine Exponate',
   '/user/exhibitorInfo': 'Infos für Mitwirkende',
   '/user/help': 'Hilfe',
+  '/user/serial': 'Seriell-Tester',
+  '/fotofix/infos': 'Exponat anschließen',
   '/admin': 'Verwaltung',
   '/admin/page': 'Seiten',
   '/admin/registration': 'Anmeldungen',

@@ -171,13 +171,13 @@ exhibiting, so the dropdown appears for somebody logged in, as the Administratio
 three carry a design of their own and open in a tab of their own; the Seriell-Tester is a page of
 this site.
 
-Präsentation and Infos are `frontend/public/fotofix/praesentation.html` and `infos.html`, and they
-are written in the fotofix repository, under `exhibitor-docs/` and under the same two names. Its
-pre-push hook copies them here, with the pictures the slides name, and commits and pushes them, so
-they arrive as a commit of their own whenever that repository's main is pushed. `sync-pages.mjs`
-there does the copying and its `--check` fails when the two have drifted; `.prettierignore` keeps
-this side from reformatting a copy. Edit them in fotofix — an edit made here is lost at the next
-run.
+Both documents are pages of this site. Infos is `backend/docs/fotofix-infos.md`, rendered by
+`Documentation` the way `/user/help` is, so it is drawn by the site's own components and needs no
+styling of its own. Präsentation is `pages/fotofix/Praesentation.tsx`: eleven slides for a projector,
+so it fills the screen and its route sits outside `MainLayout`, in the site's type and colours rather
+than a design of its own. Its pictures are `frontend/public/fotofix/`; which one stands on which
+slide is listed in `talk-material/fotoliste.md` in the fotofix repository, where the photographs are
+made.
 
 ## Environment Variables (backend/.env)
 
