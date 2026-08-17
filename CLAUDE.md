@@ -171,12 +171,13 @@ exhibiting, so the dropdown appears for somebody logged in, as the Administratio
 three carry a design of their own and open in a tab of their own; the Seriell-Tester is a page of
 this site.
 
-Präsentation and Infos are `frontend/public/fotofix/praesentation.html` and `infos.html`, copied from
-the fotofix repository (`vortrag/`) by `sync-vortrag-pages.mjs` there, together with the pictures the
-slides name; its `--check` fails when the two have drifted, and `.prettierignore` keeps this side
-from reformatting a copy. Edit them in fotofix and run the script — an edit made here is lost at the
-next run. A slide that names a new picture needs nothing added to the script: it reads each page for
-what it asks for.
+Präsentation and Infos are `frontend/public/fotofix/praesentation.html` and `infos.html`, and they
+are written in the fotofix repository, under `exhibitor-docs/` and under the same two names. Its
+pre-push hook copies them here, with the pictures the slides name, and commits and pushes them, so
+they arrive as a commit of their own whenever that repository's main is pushed. `sync-pages.mjs`
+there does the copying and its `--check` fails when the two have drifted; `.prettierignore` keeps
+this side from reformatting a copy. Edit them in fotofix — an edit made here is lost at the next
+run.
 
 ## Environment Variables (backend/.env)
 
