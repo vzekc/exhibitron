@@ -133,7 +133,7 @@ erreicht ihn von zu Hause aus unter denselben Namen wie später am Tisch: `fotof
 `FOTOFX::`. Status und Zugang:
 [retrostar.classic-computing.de](https://retrostar.classic-computing.de/). Bei Fragen meldet Euch
 per E-Mail an [hans@huebner.org](mailto:hans@huebner.org) oder im
-[Forum](https://forum.classic-computing.de/).
+[Thread im Forum](https://forum.classic-computing.de/forum/index.php?thread/40431-fotofix-pr%C3%A4sentation-informationen-f%C3%BCr-aussteller/).
 
 ## DECnet im Detail
 
