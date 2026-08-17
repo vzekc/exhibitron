@@ -132,7 +132,8 @@ im Retrostar-Netz des VzEkC, in dem der Fotoserver mit einer Bridge steht. Wer d
 erreicht ihn von zu Hause aus unter denselben Namen wie später am Tisch: `fotofix`, `\\FOTOFIX` und
 `FOTOFX::`. Status und Zugang:
 [retrostar.classic-computing.de](https://retrostar.classic-computing.de/). Bei Fragen meldet Euch
-per E-Mail an [hans@huebner.org](mailto:hans@huebner.org) oder im [Thread im Forum].
+per E-Mail an [hans@huebner.org](mailto:hans@huebner.org) oder im
+[Thread im Forum](https://forum.classic-computing.de/forum/index.php?thread/40431-fotofix-pr%C3%A4sentation-informationen-f%C3%BCr-aussteller/).
 
 ## DECnet im Detail
 
@@ -226,13 +227,11 @@ Von uns braucht Ihr zwei Dinge:
 
 **Stempelschluss: 25. September 2026.** Danach sind die Stempel in Auftrag.
 
-Fragen: [hans@huebner.org](mailto:hans@huebner.org) oder [Thread im Forum]
+Fragen: [hans@huebner.org](mailto:hans@huebner.org) oder
+[Thread im Forum](https://forum.classic-computing.de/forum/index.php?thread/40431-fotofix-pr%C3%A4sentation-informationen-f%C3%BCr-aussteller/)
 
 ---
 
 Die Fotos liegen auf dem Ausstellungsserver. Besucher löschen ihr Foto selbst über einen Code auf
 dem Laufzettel, und drei Monate nach der Ausstellung wird der Bestand gelöscht. Die
 Datenschutzerklärung steht unter [/foto/datenschutz](/foto/datenschutz).
-
-[thread im forum]:
-  https://forum.classic-computing.de/forum/index.php?thread/40431-fotofix-pr%C3%A4sentation-informationen-f%C3%BCr-aussteller/
