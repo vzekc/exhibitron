@@ -2,9 +2,11 @@
 
 ## Verantwortliche Stelle
 
-Verein zum Erhalt klassischer Computer e. V. (VzEkC e. V.)
-
-- Hans Hübner, Vorstandsvorsitzender Strelitzer Str. 63 10115 Berlin
+Verein zum Erhalt klassischer Computer e. V. (VzEkC e. V.)\
+Hans Hübner\
+Vorstandsvorsitzender\
+Strelitzer Str. 63\
+10115 Berlin
 
 Bei Fragen zur Verarbeitung personenbezogener Daten genügt eine Nachricht an
 [info@classic-computing.de](mailto:info@classic-computing.de).
