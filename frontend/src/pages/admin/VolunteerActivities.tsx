@@ -50,7 +50,9 @@ const GET_ACTIVITIES = graphql(`
 
 const VolunteerActivities = () => {
   const navigate = useNavigate()
-  const { loading, error, data } = useQuery(GET_ACTIVITIES)
+  /* Coming back from the editor, the cached list would still show what was
+     there before it was edited. */
+  const { loading, error, data } = useQuery(GET_ACTIVITIES, { fetchPolicy: 'cache-and-network' })
 
   if (loading) return <LoadInProgress />
   if (error) return <div>Fehler: {error.message}</div>

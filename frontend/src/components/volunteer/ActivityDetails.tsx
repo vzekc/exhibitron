@@ -21,7 +21,9 @@ const ActivityDetails = ({ activity, onClose }: ActivityDetailsProps) => (
 
       {activity.description && <ServerHtmlContent html={activity.description} />}
 
-      {activity.contact && <ContactHint contact={activity.contact.user} />}
+      {activity.contact && (
+        <ContactHint contact={activity.contact.user} activityName={activity.name} />
+      )}
 
       <div className="flex justify-end">
         <Button variant="secondary" onClick={onClose}>

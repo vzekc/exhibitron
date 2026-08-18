@@ -13,6 +13,7 @@ import TextEditor, { TextEditorHandle } from '@components/TextEditor'
 import LoadInProgress from '@components/LoadInProgress'
 import { TableRow, TableCell } from '@components/Table'
 import PlainTable from '@components/volunteer/PlainTable'
+import QuarterHourSelect from '@components/volunteer/QuarterHourSelect'
 import { showMessage } from '@components/MessageModalUtil'
 import { showConfirm } from '@components/ConfirmUtil'
 import { toLocalDateString } from '@utils/date'
@@ -47,6 +48,7 @@ const GET_EXHIBITORS = graphql(`
   query GetExhibitorsForVolunteerActivity {
     getCurrentExhibition {
       id
+      startDate
       exhibitors {
         id
         user {
@@ -97,8 +99,6 @@ const DELETE_PERIOD = graphql(`
   }
 `)
 
-const today = toLocalDateString(new Date())
-
 const VolunteerActivityEditor = () => {
   const { key } = useParams()
   const navigate = useNavigate()
@@ -129,12 +129,22 @@ const VolunteerActivityEditor = () => {
   const [summary, setSummary] = useState('')
   const [contactId, setContactId] = useState<number | null>(null)
 
-  const [periodDate, setPeriodDate] = useState(today)
+  const [periodDate, setPeriodDate] = useState('')
+  /* Left alone, the day of a new period is the first day of the exhibition —
+     which is where most of them are. Once somebody picks another, it stays. */
+  const dateChosen = useRef(false)
   const [periodFrom, setPeriodFrom] = useState('10:00')
   const [periodTo, setPeriodTo] = useState('18:00')
   const [neededCount, setNeededCount] = useState('')
 
   const activity = data?.getVolunteerActivity
+  const exhibitionStart = exhibitorData?.getCurrentExhibition?.startDate as string | undefined
+
+  useEffect(() => {
+    if (!dateChosen.current && exhibitionStart) {
+      setPeriodDate(toLocalDateString(new Date(exhibitionStart)))
+    }
+  }, [exhibitionStart])
 
   useEffect(() => {
     if (!activity) return
@@ -304,29 +314,20 @@ const VolunteerActivityEditor = () => {
                 <input
                   type="date"
                   value={periodDate}
-                  onChange={(e) => setPeriodDate(e.target.value)}
+                  onChange={(e) => {
+                    dateChosen.current = true
+                    setPeriodDate(e.target.value)
+                  }}
                   className="rounded-md border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-800"
                 />
               </label>
               <label>
                 <span className="block text-sm text-gray-600 dark:text-gray-400">Von</span>
-                <input
-                  type="time"
-                  step={900}
-                  value={periodFrom}
-                  onChange={(e) => setPeriodFrom(e.target.value)}
-                  className="rounded-md border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-800"
-                />
+                <QuarterHourSelect value={periodFrom} onChange={setPeriodFrom} />
               </label>
               <label>
                 <span className="block text-sm text-gray-600 dark:text-gray-400">Bis</span>
-                <input
-                  type="time"
-                  step={900}
-                  value={periodTo}
-                  onChange={(e) => setPeriodTo(e.target.value)}
-                  className="rounded-md border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-800"
-                />
+                <QuarterHourSelect value={periodTo} onChange={setPeriodTo} from={periodFrom} />
               </label>
               <label>
                 <span className="block text-sm text-gray-600 dark:text-gray-400">

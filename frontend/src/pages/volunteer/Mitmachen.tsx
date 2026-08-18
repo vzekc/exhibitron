@@ -231,7 +231,9 @@ const Mitmachen = () => {
             <p>
               {weekday(ownShift.startTime)}, {clock(ownShift.startTime)}–{clock(ownShift.endTime)}
             </p>
-            {ownShift.contact && <ContactHint contact={ownShift.contact} />}
+            {ownShift.contact && (
+              <ContactHint contact={ownShift.contact} activityName={ownShift.activityName} />
+            )}
             <div className="flex justify-end gap-2">
               <Button variant="secondary" onClick={() => setOwnShift(null)}>
                 Schließen

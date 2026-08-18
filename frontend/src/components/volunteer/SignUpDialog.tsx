@@ -4,6 +4,7 @@ import { graphql } from 'gql.tada'
 import Modal from '@components/Modal'
 import Button from '@components/Button'
 import { showMessage } from '@components/MessageModalUtil'
+import QuarterHourSelect from './QuarterHourSelect'
 import { clock, duration, weekday } from './coverage'
 import type { CalendarActivity, CalendarPeriod, OwnShift } from './VolunteerCalendar'
 
@@ -28,6 +29,9 @@ interface SignUpDialogProps {
   onClose: () => void
   onBooked: () => void
 }
+
+const clockValue = (date: Date) =>
+  `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
 
 /* Quarter hours, as the server counts them. */
 const roundToQuarter = (date: Date) => {
@@ -104,18 +108,20 @@ const SignUpDialog = ({
 
         <label className="block">
           <span className="text-sm text-gray-600 dark:text-gray-400">Ab wann kannst du?</span>
-          <input
-            type="time"
-            step={900}
-            value={`${String(start.getHours()).padStart(2, '0')}:${String(start.getMinutes()).padStart(2, '0')}`}
-            onChange={(e) => {
-              const [hours, minutesPart] = e.target.value.split(':').map(Number)
-              const next = new Date(start)
-              next.setHours(hours, minutesPart, 0, 0)
-              setStart(next)
-            }}
-            className="mt-1 block rounded-md border border-gray-300 px-3 py-2 dark:border-gray-600 dark:bg-gray-800"
-          />
+          <span className="mt-1 block">
+            <QuarterHourSelect
+              value={clockValue(start)}
+              /* Only times the period actually covers, up to its last quarter. */
+              from={clockValue(new Date(period.startTime))}
+              to={clockValue(new Date(periodEnd.getTime() - 15 * 60_000))}
+              onChange={(picked) => {
+                const [hours, minutesPart] = picked.split(':').map(Number)
+                const next = new Date(start)
+                next.setHours(hours, minutesPart, 0, 0)
+                setStart(next)
+              }}
+            />
+          </span>
         </label>
 
         <div>
