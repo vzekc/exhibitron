@@ -65,10 +65,14 @@ jobs:
 
       - name: Start the built server
         env:
-          DATABASE_URL: postgres://postgres:geheim@localhost:5432/testdb
+          # One migration grants rights on the database by name, so the check
+          # runs against a database called like the real one.
+          PGPASSWORD: geheim
+          DATABASE_URL: postgres://postgres:geheim@localhost:5432/exhibitron
           SESSION_SECRET: only-for-this-run-and-long-enough-for-fastify
           NODE_ENV: production
         run: |
+          psql -h localhost -U postgres -c 'create database exhibitron'
           cd backend
           npx mikro-orm-esm migration:up
           node dist/server.js &
