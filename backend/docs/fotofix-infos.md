@@ -7,7 +7,7 @@ schon ausprobiert.
 ## Kurz gesagt
 
 Der Dateiserver heißt `fotofix.classic-computing.de`. Jede Foto-ID ist dort ein Verzeichnis, und
-darin liegt dasselbe Bild in 63 Formaten unter festen Namen:
+darin liegt dasselbe Bild in 64 Formaten unter festen Namen:
 
 ```
 K7NP4M/photo.jpg            das Original, 640 × 480
@@ -62,13 +62,13 @@ Neben den Fotos steht das Retro-Dateiarchiv bereit: über HTTP unter `/pub/`, ü
 
 ## Dateien und Namen
 
-Jede Foto-ID ist ein Verzeichnis. Darin liegt das Original als `photo.jpg`, und daneben liegen 63
+Jede Foto-ID ist ein Verzeichnis. Darin liegt das Original als `photo.jpg`, und daneben liegen 64
 Umrechnungen davon. Jede trägt einen festen Namen, der die Zielmaschine nennt — drei Ziele schreiben
 `.com`, fünf `.adf` und vier `.dsk`, der Name entscheidet also.
 
 | System                | Dateien                                                                                                                                                                       | Was drin ist                                                                                                                                                                                                                                                                                                                                                           |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Commodore C64         | `c64.prg`, `c64-hires-raw.prg`, `c64-grey.prg`, `c64-grey-raw.prg`, `c64-koala.koa`, `c64-koala-prg.prg`, `c64-petscii.prg`                                                | Hi-res 320 × 200 monochrom als Programm und als nacktes Bitmap ab `$2000`; Multicolor 160 × 200 in vier Graustufen, gepackt mit Anzeiger und ebenfalls nackt ab `$2000`; Koala Painter in allen sechzehn Farben als `.koa` und mit Anzeiger davor; farbiges PETSCII als BASIC-Programm |
+| Commodore C64         | `c64.prg`, `c64-hires-raw.prg`, `c64-grey.prg`, `c64-grey-raw.prg`, `c64-koala.koa`, `c64-koala-prg.prg`, `c64-petscii.prg`, `c64-petscii-text.txt`                                                | Hi-res 320 × 200 monochrom als Programm und als nacktes Bitmap ab `$2000`; Multicolor 160 × 200 in vier Graustufen, gepackt mit Anzeiger und ebenfalls nackt ab `$2000`; Koala Painter in allen sechzehn Farben als `.koa` und mit Anzeiger davor; farbiges PETSCII als BASIC-Programm und als reiner Zeichenstrom, den ein Terminalprogramm auf den Schirm schreibt |
 | MS-DOS                | `cga.com`, `mga.com`, `vga.com`                                                                                                                                               | 640 × 200 mono · Hercules 720 × 348 · Mode 13h 320 × 200 × 256                                                                                                                                                                                                                                                                                                         |
 | Atari ST              | `atari-st.tos`                                                                                                                                                                | GEMDOS-Programm, 320 × 200 × 16                                                                                                                                                                                                                                                                                                                                        |
 | Amiga                 | `amiga.iff`, `amiga-lores.adf`, `amiga-lores-lace.adf`, `amiga-hires.adf`, `amiga-hires-lace.adf`, `amiga-ham.adf`                                                            | IFF ILBM für Multiview; dazu fünf bootfähige Disketten mit eigenem Bootblock — lo-res, hi-res, interlaced und HAM6, alle PAL                                                                                                                                                                                                                                           |
@@ -124,7 +124,7 @@ $ smbclient //FOTOFIX/fotos -N -c 'cd MUSTER; get msx.rom'
 ### Ein eigenes Testfoto machen
 
 Im Ausstellerbereich gibt es unter [Web-Kamera](/foto/kamera) den Automaten als Webseite: Foto mit
-der Webcam aufnehmen, ID bekommen, und der Server rechnet dieselben 63 Formate daraus. Die Dateien
+der Webcam aufnehmen, ID bekommen, und der Server rechnet dieselben 64 Formate daraus. Die Dateien
 landen im selben Verzeichnisbaum — Euer Exponat holt Euer Testfoto genauso ab wie später das eines
 Besuchers.
 
