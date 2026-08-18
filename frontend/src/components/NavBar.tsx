@@ -182,6 +182,7 @@ const NavBar = () => {
     { to: '/schedule', label: 'Zeitplan' },
     { to: '/table', label: 'Tische' },
     { to: '/lan', label: 'LAN' },
+    { to: '/mitmachen', label: 'Mitmachen' },
   ]
 
   // Common user menu items
@@ -355,7 +356,9 @@ const NavBar = () => {
           <div className="flex justify-between py-2">
             <div className="flex min-w-0 items-center">
               <MobileMenuButton />
-              <div className="hidden items-center md:flex">
+              {/* The list scrolls when the window is too narrow for every
+                  entry, rather than sliding under the buttons on the right. */}
+              <div className="hidden min-w-0 items-center overflow-x-auto md:flex">
                 <NavList items={desktopNavItems} />
               </div>
             </div>
