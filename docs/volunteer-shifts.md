@@ -151,6 +151,9 @@ confirmed — so this covers a booking entered for somebody else.
 
 ### Conflicts
 
+A stretch that begins where one of the same volunteer's own shifts ends, or ends where one begins,
+is not a second shift: the two become one, and filling the gap between two joins all three.
+
 A booking is refused when it overlaps, for the same user:
 
 - another volunteer booking, whatever the activity;
@@ -272,7 +275,8 @@ Public, no login:
 - **`/mitmachen`** — the overview calendar. Without a session it says so and offers registration;
   nothing can be booked. The name of an activity opens what there is to do about it, as a dialog
   over the plan rather than as another page.
-- **`/mitmachen/registrieren`** — name and address for somebody who has no account here.
+- **`/mitmachen/registrieren`** — the forum login first, and below it name, address and a password
+  for somebody who has no forum account either.
 - **`/mitmachen/bestaetigen?token=…`** — the landing page of the verification mail, mirroring
   `/resetPassword`.
 

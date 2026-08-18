@@ -90,6 +90,33 @@ export const bookSlot = async (context: Context, user: User, input: SlotInput) =
     )
   }
 
+  /*
+   * A stretch that begins where one of this volunteer's own ends, or ends
+   * where one begins, is the same shift said twice. They become one, however
+   * many they are — filling a gap between two joins all three.
+   */
+  const touching = ownBookings.filter(
+    (booking) =>
+      booking.period.id === period.id &&
+      (endOf(booking.startTime, booking.durationMinutes).getTime() === start.getTime() ||
+        booking.startTime.getTime() === end.getTime()),
+  )
+  if (touching.length) {
+    const [kept, ...swallowed] = touching
+    const from = new Date(Math.min(start.getTime(), ...touching.map((b) => b.startTime.getTime())))
+    const to = new Date(
+      Math.max(
+        end.getTime(),
+        ...touching.map((b) => endOf(b.startTime, b.durationMinutes).getTime()),
+      ),
+    )
+    kept.startTime = from
+    kept.durationMinutes = Math.round((to.getTime() - from.getTime()) / 60_000)
+    swallowed.forEach((booking) => db.em.remove(booking))
+    await db.em.flush()
+    return kept
+  }
+
   const booking = db.em.create(VolunteerBooking, {
     period,
     user,

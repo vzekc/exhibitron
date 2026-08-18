@@ -151,6 +151,7 @@ const BOOK = graphql(`
       id
       startTime
       endTime
+      durationMinutes
       isMine
       confirmed
     }
@@ -761,5 +762,139 @@ describe('volunteer', () => {
         }),
       ).toBeNull()
     })
+  })
+  graphqlTest('somebody who helps can remove their account again', async (graphqlRequest, app) => {
+    const activityId = await seedActivity()
+    const periodId = await firstPeriodId(activityId)
+
+    await graphqlRequest(REGISTER, {
+      input: { name: 'Weg Damit', email: 'wegdamit@example.com', password: 'sehr geheim' },
+    })
+    const confirmed = await app.inject({
+      method: 'POST',
+      url: '/graphql',
+      headers: { 'content-type': 'application/json', host: 'localhost:3000' },
+      payload: JSON.stringify({
+        query: `mutation { confirmVolunteerEmail(token: "${await tokenOf('wegdamit@example.com')}") }`,
+      }),
+    })
+    const setCookie = confirmed.headers['set-cookie']
+    const session = {
+      userId: 0,
+      cookie: Array.isArray(setCookie) ? setCookie[0] : (setCookie ?? ''),
+    }
+
+    await graphqlRequest(
+      BOOK,
+      { input: { periodId, startTime: at(0, 15).toISOString(), durationMinutes: 60 } },
+      session,
+    )
+
+    const DELETE = graphql(`
+      mutation DeleteMyVolunteerAccount {
+        deleteMyVolunteerAccount
+      }
+    `)
+
+    /* Not without being somebody. */
+    const anonymous = await graphqlRequest(DELETE)
+    expect(anonymous.errors?.[0]?.message).toContain('melde dich an')
+
+    const gone = await graphqlRequest(DELETE, {}, session)
+    expect(gone.errors).toBeUndefined()
+
+    const db = await initORM()
+    await RequestContext.create(db.em, async () => {
+      expect(await db.em.count(User, { email: 'wegdamit@example.com' })).toBe(0)
+      /* The shift went with the account. */
+      expect(await db.em.count(VolunteerBooking, { user: { email: 'wegdamit@example.com' } })).toBe(
+        0,
+      )
+    })
+  })
+
+  graphqlTest('an exhibitor keeps their account', async (graphqlRequest) => {
+    await seedActivity()
+    const daffy = await login('daffy@example.com')
+
+    const refused = await graphqlRequest(
+      graphql(`
+        mutation DeleteExhibitorAccount {
+          deleteMyVolunteerAccount
+        }
+      `),
+      {},
+      daffy,
+    )
+    expect(refused.errors?.[0]?.message).toContain('Ausstelleranmeldung')
+  })
+  graphqlTest('a shift next to one of your own becomes one shift', async (graphqlRequest, app) => {
+    const activityId = await seedActivity()
+    const periodId = await firstPeriodId(activityId)
+
+    /* Somebody of this test's own, so that nothing else has booked for them. */
+    await graphqlRequest(REGISTER, {
+      input: { name: 'Stück Für Stück', email: 'stueckweise@example.com', password: 'sehr geheim' },
+    })
+    const confirmed = await app.inject({
+      method: 'POST',
+      url: '/graphql',
+      headers: { 'content-type': 'application/json', host: 'localhost:3000' },
+      payload: JSON.stringify({
+        query: `mutation { confirmVolunteerEmail(token: "${await tokenOf('stueckweise@example.com')}") }`,
+      }),
+    })
+    const setCookie = confirmed.headers['set-cookie']
+    const session = {
+      userId: 0,
+      cookie: Array.isArray(setCookie) ? setCookie[0] : (setCookie ?? ''),
+    }
+
+    const first = await graphqlRequest(
+      BOOK,
+      { input: { periodId, startTime: at(0, 15).toISOString(), durationMinutes: 60 } },
+      session,
+    )
+    expect(first.errors).toBeUndefined()
+
+    /* The hour after joins on. */
+    const after = await graphqlRequest(
+      BOOK,
+      { input: { periodId, startTime: at(0, 16).toISOString(), durationMinutes: 60 } },
+      session,
+    )
+    expect(after.errors).toBeUndefined()
+    expect(hours(after.data!.bookVolunteerSlot.startTime)).toBe(15)
+    expect(hours(after.data!.bookVolunteerSlot.endTime)).toBe(17)
+
+    /* And so does a quarter of an hour in front of it. */
+    const before = await graphqlRequest(
+      BOOK,
+      {
+        input: {
+          periodId,
+          startTime: new Date(at(0, 15).getTime() - 15 * 60_000).toISOString(),
+          durationMinutes: 15,
+        },
+      },
+      session,
+    )
+    expect(before.errors).toBeUndefined()
+    expect(before.data!.bookVolunteerSlot.durationMinutes).toBe(135)
+
+    /* One shift, not three. */
+    const mine = await graphqlRequest(
+      graphql(`
+        query GetMyShiftsAfterMerging {
+          getMyVolunteerBookings {
+            id
+            durationMinutes
+          }
+        }
+      `),
+      {},
+      session,
+    )
+    expect(mine.data!.getMyVolunteerBookings).toHaveLength(1)
   })
 })

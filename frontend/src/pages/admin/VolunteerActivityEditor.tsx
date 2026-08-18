@@ -112,11 +112,17 @@ const VolunteerActivityEditor = () => {
   })
   const { data: exhibitorData } = useQuery(GET_EXHIBITORS)
 
-  const [createActivity] = useMutation(CREATE_ACTIVITY)
-  const [updateActivity] = useMutation(UPDATE_ACTIVITY)
-  const [deleteActivity] = useMutation(DELETE_ACTIVITY)
-  const [createPeriod] = useMutation(CREATE_PERIOD)
-  const [deletePeriod] = useMutation(DELETE_PERIOD)
+  /* The list and the plan both draw from what is edited here, so they are
+     asked again rather than left with what they had. */
+  const seenElsewhere = {
+    refetchQueries: ['GetVolunteerActivitiesForAdmin', 'GetVolunteerPlan'],
+    awaitRefetchQueries: true,
+  }
+  const [createActivity] = useMutation(CREATE_ACTIVITY, seenElsewhere)
+  const [updateActivity] = useMutation(UPDATE_ACTIVITY, seenElsewhere)
+  const [deleteActivity] = useMutation(DELETE_ACTIVITY, seenElsewhere)
+  const [createPeriod] = useMutation(CREATE_PERIOD, seenElsewhere)
+  const [deletePeriod] = useMutation(DELETE_PERIOD, seenElsewhere)
 
   const [name, setName] = useState('')
   const [activityKey, setActivityKey] = useState('')

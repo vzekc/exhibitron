@@ -9,6 +9,7 @@ import {
   VolunteerPeriodResolvers,
 } from '../../generated/graphql.js'
 import { VolunteerActivity, VolunteerBooking, VolunteerPeriod } from './entity.js'
+import { Exhibitor } from '../exhibitor/entity.js'
 import { computeCoverage } from './coverage.js'
 import { isAdmin, requireAdmin, requireNotFrozen } from '../../db.js'
 import {
@@ -23,6 +24,7 @@ import {
   makeBookingConfirmedEmail,
   makeCancellationEmail,
   makeVerificationEmail,
+  makeVolunteerGoneEmail,
 } from './emails.jsx'
 import { sendEmail } from '../common/sendEmail.js'
 import { RegisterVolunteerOutcome } from '../../generated/graphql.js'
@@ -303,6 +305,56 @@ const publicVolunteerMutations: MutationResolvers<Context> = {
     }
 
     await db.em.remove(booking).flush()
+    return true
+  },
+
+  deleteMyVolunteerAccount: async (_, _args, { db, user, session }) => {
+    if (!user) throw new AuthError('Bitte melde dich an')
+
+    /*
+     * An exhibitor's account carries their exhibits, their tables and their
+     * talks, and taking it away here would take those with it. Only accounts
+     * that exist for helping are removed this way.
+     */
+    if (await db.em.count(Exhibitor, { user })) {
+      throw new BadRequestError(
+        'Dieses Konto gehört zu einer Ausstelleranmeldung. Wende dich bitte an die Orga.',
+      )
+    }
+
+    const bookings = await db.em.find(
+      VolunteerBooking,
+      { user },
+      {
+        populate: [
+          'period',
+          'period.activity',
+          'period.activity.exhibition',
+          'period.activity.contact.user',
+        ],
+      },
+    )
+
+    /* One mail per person responsible, listing what they have lost. */
+    const byContact = new Map<string, VolunteerBooking[]>()
+    for (const booking of bookings) {
+      const contact = booking.period.activity.contact?.user.email
+      if (!contact) continue
+      byContact.set(contact, [...(byContact.get(contact) ?? []), booking])
+    }
+    for (const [contact, theirs] of byContact) {
+      await sendEmail(
+        makeVolunteerGoneEmail(
+          contact,
+          user.fullName,
+          theirs,
+          theirs[0].period.activity.exhibition.title,
+        ),
+      )
+    }
+
+    await db.em.remove(user).flush()
+    session.userId = undefined
     return true
   },
 }

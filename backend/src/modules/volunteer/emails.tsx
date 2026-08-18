@@ -155,3 +155,27 @@ export const makeReminderEmail = (
     </article>,
   ),
 })
+
+export const makeVolunteerGoneEmail = (
+  contactEmail: string,
+  volunteerName: string,
+  bookings: VolunteerBooking[],
+  exhibitionTitle: string,
+) => ({
+  to: [contactEmail],
+  subject: `${volunteerName} hilft doch nicht mit`,
+  body: makeEmailBody(
+    <article>
+      <h1>Eine Helferin oder ein Helfer ist abgesprungen</h1>
+      <p>
+        {volunteerName} hat das Konto bei der {exhibitionTitle} gelöscht. Diese Schichten sind damit
+        wieder frei:
+      </p>
+      <ul>
+        {bookings.map((booking) => (
+          <Shift key={booking.id} booking={booking} />
+        ))}
+      </ul>
+    </article>,
+  ),
+})

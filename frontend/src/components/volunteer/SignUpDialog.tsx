@@ -17,7 +17,8 @@ const BOOK_SLOT = graphql(`
   }
 `)
 
-const DURATIONS = [60, 90, 120, 180, 240]
+/* Short ones matter: the gap before one's next shift may be a quarter hour. */
+const DURATIONS = [15, 30, 45, 60, 90, 120, 180, 240]
 
 interface SignUpDialogProps {
   activity: CalendarActivity
@@ -44,7 +45,7 @@ const SignUpDialog = ({
   onBooked,
 }: SignUpDialogProps) => {
   const [start, setStart] = useState(() => roundToQuarter(startTime))
-  const [minutes, setMinutes] = useState(120)
+  const [minutes, setMinutes] = useState(0)
 
   const [bookSlot, { loading: booking }] = useMutation(BOOK_SLOT)
 
@@ -68,10 +69,12 @@ const SignUpDialog = ({
   )
   const durations = available.length ? available : [15]
 
+  /* Two hours unless less is left, and whatever was picked once it was. */
+  const suggested = durations.filter((candidate) => candidate <= 120).at(-1) ?? durations[0]
   const slot = {
     periodId: period.id,
     startTime: start.toISOString(),
-    durationMinutes: durations.includes(minutes) ? minutes : durations[0],
+    durationMinutes: durations.includes(minutes) ? minutes : suggested,
   }
 
   const book = async () => {

@@ -65,6 +65,21 @@ const hourOf = (value: string) => {
 const overlaps = (aFrom: string, aTo: string, bFrom: string, bTo: string) =>
   new Date(aFrom) < new Date(bTo) && new Date(bFrom) < new Date(aTo)
 
+/* The moment under the pointer, rounded down to the quarter hour the server
+   counts in. */
+const quarterHourAt = (
+  event: React.MouseEvent<HTMLElement>,
+  stretch: { startTime: string; endTime: string },
+) => {
+  const box = event.currentTarget.getBoundingClientRect()
+  const from = new Date(stretch.startTime).getTime()
+  const to = new Date(stretch.endTime).getTime()
+  const across = box.width ? (event.clientX - box.left) / box.width : 0
+  const at = from + Math.min(Math.max(across, 0), 1) * (to - from)
+  const quarter = 15 * 60_000
+  return new Date(Math.max(from, Math.floor(at / quarter) * quarter))
+}
+
 /* A stretch this long has room for its numbers written into it. */
 const LABELLED_HOURS = 1.5
 
@@ -252,12 +267,21 @@ const VolunteerCalendar = ({
                                overlay has something to say. */
                             aria-disabled={!canBook || taken}
                             onMouseMove={(event) => showHover(event, period, stretch)}
-                            onClick={() => {
+                            onClick={(event) => {
+                              /* Where in the stretch the pointer went down, to
+                                 the quarter hour: a stretch can be hours wide,
+                                 and somebody clicking its left end means the
+                                 time under their finger, not its beginning. */
+                              const clicked = quarterHourAt(event, stretch)
+
                               /* A time one is already down for opens what one
                                  is down for, rather than a second sign-up. */
-                              const [mine] = shiftsIn(stretch.startTime, stretch.endTime)
+                              const [mine] = shiftsIn(
+                                clicked.toISOString(),
+                                new Date(clicked.getTime() + 1).toISOString(),
+                              )
                               if (mine) return onShowShift?.(mine)
-                              if (canBook) onPick?.(activity, period, new Date(stretch.startTime))
+                              if (canBook) onPick?.(activity, period, clicked)
                             }}
                             className={`absolute top-0 h-full overflow-hidden rounded-sm text-[10px] leading-5 text-gray-700 dark:text-gray-100 ${coverageFill[status]} ${
                               canBook && !taken ? 'cursor-pointer' : 'cursor-default'

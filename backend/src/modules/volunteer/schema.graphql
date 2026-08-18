@@ -131,6 +131,11 @@ extend type Mutation {
   """
   confirmVolunteerEmail(token: String!): Boolean!
   cancelVolunteerBooking(id: Int!): Boolean!
+  """
+  Removes the account of whoever is signed in, with every shift they had
+  taken on. The people responsible for those activities are told.
+  """
+  deleteMyVolunteerAccount: Boolean!
   createVolunteerActivity(input: CreateVolunteerActivityInput!): VolunteerActivity!
   updateVolunteerActivity(id: Int!, input: UpdateVolunteerActivityInput!): VolunteerActivity!
   deleteVolunteerActivity(id: Int!): Boolean!

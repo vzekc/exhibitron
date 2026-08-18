@@ -40,6 +40,7 @@ import WelcomePdf from '@pages/admin/WelcomePdf.tsx'
 import SeatplanImport from '@pages/admin/SeatplanImport.tsx'
 import Mitmachen from '@pages/volunteer/Mitmachen.tsx'
 import RegisterHelper from '@pages/volunteer/RegisterHelper.tsx'
+import HelperAccount from '@pages/volunteer/HelperAccount.tsx'
 import ConfirmVolunteerEmail from '@pages/volunteer/ConfirmEmail.tsx'
 import VolunteerActivities from '@pages/admin/VolunteerActivities.tsx'
 import VolunteerActivityEditor from '@pages/admin/VolunteerActivityEditor.tsx'
@@ -77,6 +78,7 @@ const routes: RouteObject[] = [
       { path: '/lan', element: <LAN /> },
       { path: '/mitmachen', element: <Mitmachen /> },
       { path: '/mitmachen/registrieren', element: <RegisterHelper /> },
+      { path: '/mitmachen/konto', element: <HelperAccount /> },
       { path: '/mitmachen/bestaetigen', element: <ConfirmVolunteerEmail /> },
       { path: '/fotofix/infos', element: <Documentation name="fotofix-infos" /> },
       // Protected user routes

@@ -343,7 +343,7 @@ const NavBar = () => {
               </div>
             }>
             {[
-              { to: '/mitmachen', label: 'Mitmachen' },
+              { to: '/mitmachen/konto', label: 'Mein Konto' },
               { type: 'divider' as const },
               { type: 'logout' as const, label: 'Logout' },
             ].map((item, index) => renderMenuEntry(item, index))}

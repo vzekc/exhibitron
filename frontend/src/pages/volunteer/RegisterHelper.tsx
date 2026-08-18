@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useMutation } from '@apollo/client'
 import { graphql } from 'gql.tada'
-import { Link } from 'react-router-dom'
 import Card from '@components/Card'
 import PageHeading from '@components/PageHeading'
 import Button from '@components/Button'
@@ -79,6 +78,17 @@ const RegisterHelper = () => {
     }
   }
 
+  if (sent) {
+    return (
+      <>
+        <PageHeading>Beim Mitmachen anmelden</PageHeading>
+        <Card>
+          <p>{sent}</p>
+        </Card>
+      </>
+    )
+  }
+
   return (
     <>
       <PageHeading>Beim Mitmachen anmelden</PageHeading>
@@ -98,55 +108,48 @@ const RegisterHelper = () => {
       </Card>
 
       <Card>
-        {sent ? (
-          <p>{sent}</p>
-        ) : (
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold">Kein Konto im Forum?</h2>
-            <p className="text-gray-600 dark:text-gray-400">
-              Dann registriere Dich hier mit Namen, E-Mail-Adresse und einem Kennwort. Du bekommst
-              einen Link, mit dem Du die Adresse bestätigst — danach meldest Du Dich damit an und
-              kannst Dich eintragen.
-            </p>
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Kein Konto im Forum?</h2>
+          <p className="text-gray-600 dark:text-gray-400">
+            Dann registriere Dich hier mit Namen, E-Mail-Adresse und einem Kennwort. Du bekommst
+            einen Link, mit dem Du die Adresse bestätigst — danach meldest Du Dich damit an und
+            kannst Dich eintragen.
+          </p>
 
-            <label className="block">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Dein Name</span>
-              <FormInput value={name} onChange={(e) => setName(e.target.value)} />
-            </label>
+          <label className="block">
+            <span className="text-sm text-gray-600 dark:text-gray-400">Dein Name</span>
+            <FormInput value={name} onChange={(e) => setName(e.target.value)} />
+          </label>
 
-            <label className="block">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Deine E-Mail-Adresse</span>
-              <FormInput type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            </label>
+          <label className="block">
+            <span className="text-sm text-gray-600 dark:text-gray-400">Deine E-Mail-Adresse</span>
+            <FormInput type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          </label>
 
-            <label className="block">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Kennwort</span>
-              <FormInput
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </label>
+          <label className="block">
+            <span className="text-sm text-gray-600 dark:text-gray-400">Kennwort</span>
+            <FormInput
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </label>
 
-            <label className="block">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Kennwort wiederholen</span>
-              <FormInput
-                type="password"
-                value={passwordRepeat}
-                onChange={(e) => setPasswordRepeat(e.target.value)}
-              />
-            </label>
+          <label className="block">
+            <span className="text-sm text-gray-600 dark:text-gray-400">Kennwort wiederholen</span>
+            <FormInput
+              type="password"
+              value={passwordRepeat}
+              onChange={(e) => setPasswordRepeat(e.target.value)}
+            />
+          </label>
 
-            <div className="flex gap-2">
-              <Button onClick={register} disabled={loading}>
-                Registrieren
-              </Button>
-              <Link to="/mitmachen" className="self-center text-blue-700 dark:text-blue-300">
-                Zurück zum Plan
-              </Link>
-            </div>
+          <div>
+            <Button onClick={register} disabled={loading}>
+              Registrieren
+            </Button>
           </div>
-        )}
+        </div>
       </Card>
     </>
   )
