@@ -30,6 +30,8 @@ import { ConferenceSession } from './modules/conferenceSession/entity.js'
 import { ConferenceSessionRepository } from './modules/conferenceSession/repository.js'
 import { Host } from './modules/host/entity.js'
 import { HostRepository } from './modules/host/repository.js'
+import { VolunteerActivity } from './modules/volunteer/entity.js'
+import { VolunteerRepository } from './modules/volunteer/repository.js'
 import { loadDatabaseFunctions } from './db/loader.js'
 
 export interface Services {
@@ -49,6 +51,7 @@ export interface Services {
   room: RoomRepository
   conferenceSession: ConferenceSessionRepository
   host: HostRepository
+  volunteer: VolunteerRepository
 }
 
 let ormCache: MikroORM
@@ -75,6 +78,7 @@ export function createServicesFromEm(em: SqlEntityManager): Services {
     room: em.getRepository(Room),
     conferenceSession: em.getRepository(ConferenceSession),
     host: em.getRepository(Host),
+    volunteer: em.getRepository(VolunteerActivity),
   }
 }
 
@@ -115,6 +119,7 @@ export async function initORM(options?: Options): Promise<Services> {
     room: em.getRepository(Room),
     conferenceSession: em.getRepository(ConferenceSession),
     host: em.getRepository(Host),
+    volunteer: em.getRepository(VolunteerActivity),
   }
 }
 

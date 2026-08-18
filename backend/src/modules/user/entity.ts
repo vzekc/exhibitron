@@ -84,6 +84,14 @@ export class User extends BaseEntity<
   @Property({ nullable: true, lazy: true })
   passwordResetTokenExpires?: Date
 
+  /*
+   * When this address was shown to belong to the person using it. Set for an
+   * account created through an approved registration or a forum login, and by
+   * a volunteer clicking the link in their first mail.
+   */
+  @Property({ nullable: true })
+  emailVerifiedAt?: Date
+
   @Property({ type: 'text' })
   bio: string = ''
 
