@@ -25,7 +25,7 @@ import {
   makeCancellationEmail,
   makeVerificationEmail,
   makeVolunteerGoneEmail,
-} from './emails.jsx'
+} from './emails.js'
 import { sendEmail } from '../common/sendEmail.js'
 import { RegisterVolunteerOutcome } from '../../generated/graphql.js'
 
