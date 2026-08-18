@@ -40,7 +40,7 @@ const ConfirmEmail = () => {
         return
       }
       /* The session is now this volunteer's, so everything else knows them. */
-      window.location.href = '/mitmachen/meine-schichten'
+      window.location.href = '/mitmachen'
     }
     void run()
   }, [confirmEmail, token, navigate])

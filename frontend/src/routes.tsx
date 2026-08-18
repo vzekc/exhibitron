@@ -39,7 +39,6 @@ import EmailExhibitors from '@pages/admin/EmailExhibitors.tsx'
 import WelcomePdf from '@pages/admin/WelcomePdf.tsx'
 import SeatplanImport from '@pages/admin/SeatplanImport.tsx'
 import Mitmachen from '@pages/volunteer/Mitmachen.tsx'
-import MyShifts from '@pages/volunteer/MyShifts.tsx'
 import RegisterHelper from '@pages/volunteer/RegisterHelper.tsx'
 import ConfirmVolunteerEmail from '@pages/volunteer/ConfirmEmail.tsx'
 import VolunteerActivities from '@pages/admin/VolunteerActivities.tsx'
@@ -77,7 +76,6 @@ const routes: RouteObject[] = [
       { path: '/tables', element: <Tables /> },
       { path: '/lan', element: <LAN /> },
       { path: '/mitmachen', element: <Mitmachen /> },
-      { path: '/mitmachen/meine-schichten', element: <MyShifts /> },
       { path: '/mitmachen/registrieren', element: <RegisterHelper /> },
       { path: '/mitmachen/bestaetigen', element: <ConfirmVolunteerEmail /> },
       { path: '/fotofix/infos', element: <Documentation name="fotofix-infos" /> },

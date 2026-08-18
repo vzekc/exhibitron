@@ -1,7 +1,7 @@
 import Modal from '@components/Modal'
 import Button from '@components/Button'
 import ServerHtmlContent from '@components/ServerHtmlContent'
-import { clock, coverageChip, joinAdjacent, wantsPeople, weekday } from './coverage'
+import { clock, weekday } from './coverage'
 import type { CalendarActivity, CalendarPeriod } from './VolunteerCalendar'
 
 interface ActivityDetailsProps {
@@ -29,37 +29,26 @@ const ActivityDetails = ({ activity, canBook, onClose, onPick }: ActivityDetails
       )}
 
       <ul className="space-y-2">
-        {activity.periods.map((period) => {
-          const gaps = joinAdjacent(period.coverage.filter(wantsPeople))
-          return (
-            <li
-              key={period.id}
-              className="flex flex-wrap items-center gap-2 border-t border-gray-100 pt-2 dark:border-gray-700">
-              <span className="font-medium">
-                {weekday(period.startTime)}, {clock(period.startTime)}–{clock(period.endTime)}
-              </span>
-              <span className="text-sm text-gray-500 dark:text-gray-400">
-                {period.neededCount
-                  ? `${period.neededCount} Leute gebraucht`
-                  : 'beliebig viele willkommen'}
-                {period.note ? ` — ${period.note}` : ''}
-              </span>
-              <span
-                className={`text-xs rounded px-2 py-1 ${coverageChip[gaps.length ? 'under' : 'met']}`}>
-                {gaps.length
-                  ? `noch frei: ${gaps
-                      .map((gap) => `${clock(gap.startTime)}–${clock(gap.endTime)}`)
-                      .join(', ')}`
-                  : 'besetzt'}
-              </span>
-              {canBook && (
-                <Button onClick={() => onPick?.(activity, period, new Date(period.startTime))}>
-                  Eintragen
-                </Button>
-              )}
-            </li>
-          )
-        })}
+        {activity.periods.map((period) => (
+          <li
+            key={period.id}
+            className="flex flex-wrap items-center gap-2 border-t border-gray-100 pt-2 dark:border-gray-700">
+            <span className="font-medium">
+              {weekday(period.startTime)}, {clock(period.startTime)}–{clock(period.endTime)}
+            </span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              {period.neededCount
+                ? `${period.neededCount} Leute gebraucht`
+                : 'beliebig viele willkommen'}
+              {period.note ? ` — ${period.note}` : ''}
+            </span>
+            {canBook && (
+              <Button onClick={() => onPick?.(activity, period, new Date(period.startTime))}>
+                Eintragen
+              </Button>
+            )}
+          </li>
+        ))}
       </ul>
 
       <div className="flex justify-end">

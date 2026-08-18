@@ -344,7 +344,6 @@ const NavBar = () => {
             }>
             {[
               { to: '/mitmachen', label: 'Mitmachen' },
-              { to: '/mitmachen/meine-schichten', label: 'Meine Schichten' },
               { type: 'divider' as const },
               { type: 'logout' as const, label: 'Logout' },
             ].map((item, index) => renderMenuEntry(item, index))}

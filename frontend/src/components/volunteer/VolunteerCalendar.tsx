@@ -45,6 +45,8 @@ export interface OwnShift {
   startTime: string
   endTime: string
   activityName: string
+  note?: string | null
+  contactName?: string | null
 }
 
 interface VolunteerCalendarProps {
@@ -53,6 +55,7 @@ interface VolunteerCalendarProps {
   canBook?: boolean
   onPick?: (activity: CalendarActivity, period: CalendarPeriod, startTime: Date) => void
   onShowDetails?: (activity: CalendarActivity) => void
+  onShowShift?: (shift: OwnShift) => void
 }
 
 const hourOf = (value: string) => {
@@ -75,15 +78,18 @@ const isQuietHour = (hour: number) => hour % 2 === 1
 const OWN_SHIFT_HATCH =
   'repeating-linear-gradient(45deg, rgba(17, 24, 39, 0.55) 0 3px, transparent 3px 8px)'
 
+/* Who else is there, and when — the one thing the bar itself cannot say. */
 interface HoverCard {
   x: number
   y: number
-  activity: string
   time: string
-  status: string
   people: string[]
-  mine?: string
 }
+
+/* The plan is drawn from this hour to that one whatever the periods say, so
+   that every day is the same width and the same hour sits in the same place. */
+const DAY_START = 8
+const DAY_END = 22
 
 /*
  * The plan of all days at once: a day per row, the clock from left to right,
@@ -105,6 +111,7 @@ const VolunteerCalendar = ({
   canBook = false,
   onPick,
   onShowDetails,
+  onShowShift,
 }: VolunteerCalendarProps) => {
   const frame = useRef<HTMLDivElement>(null)
   const [hover, setHover] = useState<HoverCard | null>(null)
@@ -116,12 +123,15 @@ const VolunteerCalendar = ({
     return [...new Set(dates)].sort()
   }, [activities])
 
+  /* A period outside the usual day still has to fit, so the frame gives way
+     to it rather than cutting it off. */
   const { startHour, endHour } = useMemo(() => {
     const periods = activities.flatMap((activity) => activity.periods)
-    if (!periods.length) return { startHour: 9, endHour: 22 }
     return {
-      startHour: Math.floor(Math.min(...periods.map((period) => hourOf(period.startTime)))),
-      endHour: Math.ceil(Math.max(...periods.map((period) => hourOf(period.endTime)))),
+      startHour: Math.floor(
+        Math.min(DAY_START, ...periods.map((period) => hourOf(period.startTime))),
+      ),
+      endHour: Math.ceil(Math.max(DAY_END, ...periods.map((period) => hourOf(period.endTime)))),
     }
   }, [activities])
 
@@ -144,38 +154,34 @@ const VolunteerCalendar = ({
   const shiftsIn = (from: string, to: string) =>
     ownShifts.filter((shift) => overlaps(from, to, shift.startTime, shift.endTime))
 
-  const showHover = (
-    event: React.MouseEvent,
-    activity: CalendarActivity,
-    period: CalendarPeriod,
-    stretch: CoverageSpan,
-  ) => {
+  const showHover = (event: React.MouseEvent, period: CalendarPeriod, stretch: CoverageSpan) => {
     const box = frame.current?.getBoundingClientRect()
     if (!box) return
 
-    const mine = shiftsIn(stretch.startTime, stretch.endTime)
+    /* Names are only there for somebody who is logged in, and one's own shift
+       is hatched anyway — what is worth saying is who else is there. */
+    const people = [
+      ...new Set(
+        (period.bookings ?? [])
+          .filter(
+            (booking) =>
+              !booking.isMine &&
+              overlaps(stretch.startTime, stretch.endTime, booking.startTime, booking.endTime),
+          )
+          .map((booking) => booking.name)
+          .filter((name): name is string => !!name),
+      ),
+    ]
+    if (!people.length) {
+      setHover(null)
+      return
+    }
+
     setHover({
       x: event.clientX - box.left,
       y: event.clientY - box.top,
-      activity: activity.name,
       time: `${clock(stretch.startTime)}–${clock(stretch.endTime)}`,
-      status: `${coverageLabel[stretch.status as CoverageStatus]}${
-        stretch.needed ? ` (${stretch.count} von ${stretch.needed})` : ''
-      }`,
-      /* Names are only there for somebody who is logged in. */
-      people: (period.bookings ?? [])
-        .filter((booking) =>
-          overlaps(stretch.startTime, stretch.endTime, booking.startTime, booking.endTime),
-        )
-        .map((booking) => booking.name)
-        .filter((name): name is string => !!name),
-      mine: mine.length
-        ? mine
-            .map(
-              (shift) => `${shift.activityName}, ${clock(shift.startTime)}–${clock(shift.endTime)}`,
-            )
-            .join('; ')
-        : undefined,
+      people,
     })
   }
 
@@ -246,12 +252,14 @@ const VolunteerCalendar = ({
                                already signed up for is exactly when the
                                overlay has something to say. */
                             aria-disabled={!canBook || taken}
-                            onMouseMove={(event) => showHover(event, activity, period, stretch)}
-                            onClick={() =>
-                              canBook &&
-                              !taken &&
-                              onPick?.(activity, period, new Date(stretch.startTime))
-                            }
+                            onMouseMove={(event) => showHover(event, period, stretch)}
+                            onClick={() => {
+                              /* A time one is already down for opens what one
+                                 is down for, rather than a second sign-up. */
+                              const [mine] = shiftsIn(stretch.startTime, stretch.endTime)
+                              if (mine) return onShowShift?.(mine)
+                              if (canBook) onPick?.(activity, period, new Date(stretch.startTime))
+                            }}
                             className={`absolute top-0 h-full overflow-hidden rounded-sm text-[10px] leading-5 text-gray-700 dark:text-gray-100 ${coverageFill[status]} ${
                               canBook && !taken ? 'cursor-pointer' : 'cursor-default'
                             }`}
@@ -297,25 +305,22 @@ const VolunteerCalendar = ({
             {coverageLabel[status]}
           </span>
         ))}
-        <span className="flex items-center gap-2">
-          <span
-            className="inline-block h-3 w-6 rounded-sm bg-gray-200 ring-2 ring-gray-900 dark:bg-gray-700 dark:ring-white"
-            style={{ backgroundImage: OWN_SHIFT_HATCH }}
-          />
-          deine Schicht
-        </span>
+        {canBook && (
+          <span className="flex items-center gap-2">
+            <span
+              className="inline-block h-3 w-6 rounded-sm bg-gray-200 ring-2 ring-gray-900 dark:bg-gray-700 dark:ring-white"
+              style={{ backgroundImage: OWN_SHIFT_HATCH }}
+            />
+            deine Schicht
+          </span>
+        )}
       </div>
 
       {hover && (
         <div
           className="text-xs pointer-events-none absolute z-20 max-w-64 rounded-md bg-gray-900/95 px-3 py-2 text-white shadow-lg"
           style={{ left: Math.max(0, hover.x - 60), top: hover.y + 16 }}>
-          <div className="font-semibold">{hover.activity}</div>
-          <div>
-            {hover.time} — {hover.status}
-          </div>
-          {hover.people.length > 0 && <div className="mt-1">dabei: {hover.people.join(', ')}</div>}
-          {hover.mine && <div className="mt-1 font-semibold">Du hilfst hier: {hover.mine}</div>}
+          {hover.time} · {hover.people.join(', ')}
         </div>
       )}
     </div>

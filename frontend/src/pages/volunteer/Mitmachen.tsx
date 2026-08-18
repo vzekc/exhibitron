@@ -1,7 +1,11 @@
 import { useState } from 'react'
-import { useQuery } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client'
 import { graphql } from 'gql.tada'
 import { Link } from 'react-router-dom'
+import Button from '@components/Button'
+import Modal from '@components/Modal'
+import { showConfirm } from '@components/ConfirmUtil'
+import { showMessage } from '@components/MessageModalUtil'
 import Card from '@components/Card'
 import PageHeading from '@components/PageHeading'
 import LoadInProgress from '@components/LoadInProgress'
@@ -29,6 +33,12 @@ const GET_PLAN = graphql(`
         activity {
           id
           name
+          contact {
+            id
+            user {
+              fullName
+            }
+          }
         }
       }
     }
@@ -71,6 +81,12 @@ const GET_PLAN = graphql(`
   }
 `)
 
+const CANCEL_BOOKING = graphql(`
+  mutation CancelVolunteerBookingFromPlan($id: Int!) {
+    cancelVolunteerBooking(id: $id)
+  }
+`)
+
 const Mitmachen = () => {
   const { loading, error, data, refetch } = useQuery(GET_PLAN, { fetchPolicy: 'cache-and-network' })
   const [picked, setPicked] = useState<{
@@ -79,6 +95,8 @@ const Mitmachen = () => {
     startTime: Date
   } | null>(null)
   const [shown, setShown] = useState<CalendarActivity | null>(null)
+  const [ownShift, setOwnShift] = useState<OwnShift | null>(null)
+  const [cancelBooking] = useMutation(CANCEL_BOOKING)
 
   if (loading && !data) return <LoadInProgress />
   if (error) return <div>Fehler: {error.message}</div>
@@ -92,7 +110,27 @@ const Mitmachen = () => {
     startTime: booking.startTime as string,
     endTime: booking.endTime as string,
     activityName: booking.period.activity.name,
+    note: booking.period.note,
+    contactName: booking.period.activity.contact?.user.fullName,
   }))
+
+  const cancel = async (shift: OwnShift) => {
+    if (
+      !(await showConfirm(
+        'Schicht absagen',
+        `Soll „${shift.activityName}“ am ${weekday(shift.startTime)} um ${clock(shift.startTime)} wirklich abgesagt werden?`,
+      ))
+    ) {
+      return
+    }
+    const result = await cancelBooking({ variables: { id: shift.id } })
+    if (result.errors?.length) {
+      await showMessage('Das ging nicht', result.errors[0]?.message ?? 'Unbekannter Fehler', 'OK')
+      return
+    }
+    setOwnShift(null)
+    await refetch()
+  }
 
   return (
     <>
@@ -106,15 +144,15 @@ const Mitmachen = () => {
         </p>
 
         {!isLoggedIn && (
-          <p className="mb-4 flex flex-wrap items-center gap-4">
-            <Link
-              to="/mitmachen/registrieren"
-              className="rounded bg-blue-600/80 px-4 py-2 text-white hover:bg-blue-600">
-              Als Helfer registrieren
-            </Link>
+          <p className="mb-4 text-gray-600 dark:text-gray-400">
             <Link to="/login" className="text-blue-700 dark:text-blue-300">
-              Ich habe schon ein Konto
+              Melde Dich an
             </Link>
+            , wenn Du schon als Aussteller registriert bist, oder{' '}
+            <Link to="/mitmachen/registrieren" className="text-blue-700 dark:text-blue-300">
+              registriere
+            </Link>{' '}
+            Dich als Helfer.
           </p>
         )}
 
@@ -124,6 +162,7 @@ const Mitmachen = () => {
           canBook={isLoggedIn}
           onPick={(activity, period, startTime) => setPicked({ activity, period, startTime })}
           onShowDetails={setShown}
+          onShowShift={setOwnShift}
         />
 
         <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
@@ -134,33 +173,41 @@ const Mitmachen = () => {
       {isLoggedIn && (
         <Card className="mb-4">
           <h2 className="mb-2 text-xl font-semibold">Deine Schichten</h2>
-          {bookings.length ? (
-            <ul className="space-y-1">
-              {bookings.map((booking) => (
-                <li key={booking.id} className="flex flex-wrap gap-3">
-                  <span className="font-medium">{booking.period.activity.name}</span>
-                  <span>
-                    {weekday(booking.startTime as string)}, {clock(booking.startTime as string)}–
-                    {clock(booking.endTime as string)}
-                  </span>
-                  {booking.period.note && (
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
-                      {booking.period.note}
+          {ownShifts.length ? (
+            <>
+              <ul className="space-y-1">
+                {ownShifts.map((shift) => (
+                  <li key={shift.id} className="flex flex-wrap items-center gap-3">
+                    <span className="font-medium">{shift.activityName}</span>
+                    <span>
+                      {weekday(shift.startTime)}, {clock(shift.startTime)}–{clock(shift.endTime)}
                     </span>
-                  )}
-                </li>
-              ))}
-            </ul>
+                    {shift.note && (
+                      <span className="text-sm text-gray-500 dark:text-gray-400">{shift.note}</span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => cancel(shift)}
+                      className="text-sm text-red-700 hover:underline dark:text-red-300">
+                      absagen
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3 text-sm">
+                <a
+                  href="/api/volunteer/shifts.ics"
+                  download="meine-schichten.ics"
+                  className="text-blue-700 dark:text-blue-300">
+                  In den eigenen Kalender übernehmen (.ics)
+                </a>
+              </p>
+            </>
           ) : (
             <p className="text-gray-600 dark:text-gray-400">
               Du bist noch für nichts eingetragen. Such dir oben eine Zeit aus.
             </p>
           )}
-          <p className="mt-3 text-sm">
-            <Link to="/mitmachen/meine-schichten" className="text-blue-700 dark:text-blue-300">
-              Schichten absagen oder in den eigenen Kalender übernehmen
-            </Link>
-          </p>
         </Card>
       )}
 
@@ -174,6 +221,30 @@ const Mitmachen = () => {
             setPicked({ activity, period, startTime })
           }}
         />
+      )}
+
+      {ownShift && (
+        <Modal isOpen onClose={() => setOwnShift(null)} title={ownShift.activityName}>
+          <div className="space-y-4 p-4">
+            <p>
+              {weekday(ownShift.startTime)}, {clock(ownShift.startTime)}–{clock(ownShift.endTime)}
+            </p>
+            {ownShift.note && <p className="text-gray-600 dark:text-gray-400">{ownShift.note}</p>}
+            {ownShift.contactName && (
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Fragen? {ownShift.contactName} weiß Bescheid.
+              </p>
+            )}
+            <div className="flex justify-end gap-2">
+              <Button variant="secondary" onClick={() => setOwnShift(null)}>
+                Schließen
+              </Button>
+              <Button variant="danger" onClick={() => cancel(ownShift)}>
+                Absagen
+              </Button>
+            </div>
+          </div>
+        </Modal>
       )}
 
       {picked && (

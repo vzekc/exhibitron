@@ -74,7 +74,7 @@ export const sendVolunteerReminders = async (db: Services, now: Date) => {
           user.fullName,
           user.email,
           ownBookings,
-          siteUrlFor(exhibition) && `${siteUrlFor(exhibition)}/mitmachen/meine-schichten`,
+          siteUrlFor(exhibition) && `${siteUrlFor(exhibition)}/mitmachen`,
           exhibition.title,
         ),
       )

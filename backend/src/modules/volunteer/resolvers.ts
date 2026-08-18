@@ -188,7 +188,7 @@ const periodOf = async (context: Context, id: number) => {
   return period
 }
 
-const shiftsUrl = (siteUrl: string) => `${siteUrl}/mitmachen/meine-schichten`
+const shiftsUrl = (siteUrl: string) => `${siteUrl}/mitmachen`
 
 /* Everything the mails link to hangs off the one token. */
 const confirmUrl = (siteUrl: string, token: string) =>

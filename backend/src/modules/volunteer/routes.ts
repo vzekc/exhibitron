@@ -44,7 +44,7 @@ export const registerVolunteerRoutes = async (app: FastifyInstance) => {
       `${exhibition.title} — Meine Schichten`,
       exhibition.key,
       origin,
-      () => `${origin}/mitmachen/meine-schichten`,
+      () => `${origin}/mitmachen`,
     )
   })
 }

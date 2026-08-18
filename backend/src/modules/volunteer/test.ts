@@ -709,6 +709,6 @@ describe('volunteer', () => {
     expect(mine.headers['content-type']).toContain('text/calendar')
     expect(mine.payload).toContain('BEGIN:VEVENT')
     expect(mine.payload).toContain('Infotresen betreuen')
-    expect(mine.payload).toContain('/mitmachen/meine-schichten')
+    expect(mine.payload).toContain('/mitmachen')
   })
 })

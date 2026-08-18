@@ -75,8 +75,8 @@ export const makeBookingConfirmedEmail = (
         <Shift booking={booking} />
       </ul>
       <p>
-        Unter <a href={shiftsUrl}>Meine Schichten</a> stehen alle deine Schichten, und dort kannst
-        du auch wieder absagen, wenn etwas dazwischenkommt.
+        Unter <a href={shiftsUrl}>Mitmachen</a> stehen alle deine Schichten, und dort kannst du auch
+        wieder absagen, wenn etwas dazwischenkommt.
       </p>
     </article>,
   ),
