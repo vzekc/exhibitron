@@ -38,6 +38,8 @@ import LAN from './pages/LAN.tsx'
 import EmailExhibitors from '@pages/admin/EmailExhibitors.tsx'
 import WelcomePdf from '@pages/admin/WelcomePdf.tsx'
 import SeatplanImport from '@pages/admin/SeatplanImport.tsx'
+import VolunteerActivities from '@pages/admin/VolunteerActivities.tsx'
+import VolunteerActivityEditor from '@pages/admin/VolunteerActivityEditor.tsx'
 import SerialPort from './pages/user/SerialPort.tsx'
 import VisitorPhoto from './pages/VisitorPhoto.tsx'
 import Praesentation from './pages/fotofix/Praesentation.tsx'
@@ -104,6 +106,9 @@ const routes: RouteObject[] = [
           { path: 'emailExhibitors', element: <EmailExhibitors /> },
           { path: 'welcomePdf', element: <WelcomePdf /> },
           { path: 'seatplan', element: <SeatplanImport /> },
+          { path: 'mitmachen', element: <VolunteerActivities /> },
+          { path: 'mitmachen/neu', element: <VolunteerActivityEditor /> },
+          { path: 'mitmachen/:key', element: <VolunteerActivityEditor /> },
           { path: 'session/new', element: <SessionEditorPage /> },
           { path: 'session/:id', element: <SessionEditorPage /> },
         ],

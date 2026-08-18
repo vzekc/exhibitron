@@ -217,6 +217,7 @@ const NavBar = () => {
     { to: '/admin/tableLabels', label: 'Tisch-Labels' },
     { to: '/admin/welcomePdf', label: 'Willkommens-PDF' },
     { to: '/admin/seatplan', label: 'Tischplan' },
+    { to: '/admin/mitmachen', label: 'Mitmachen' },
   ]
 
   const renderMenuEntry = (item: MenuEntry, key: React.Key, onClose?: () => void) => {
