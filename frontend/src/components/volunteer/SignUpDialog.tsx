@@ -3,10 +3,9 @@ import { useMutation } from '@apollo/client'
 import { graphql } from 'gql.tada'
 import Modal from '@components/Modal'
 import Button from '@components/Button'
-import FormInput from '@components/FormInput'
 import { showMessage } from '@components/MessageModalUtil'
 import { clock, duration, weekday } from './coverage'
-import type { CalendarActivity, CalendarPeriod } from './VolunteerCalendar'
+import type { CalendarActivity, CalendarPeriod, OwnShift } from './VolunteerCalendar'
 
 const BOOK_SLOT = graphql(`
   mutation BookVolunteerSlot($input: BookVolunteerSlotInput!) {
@@ -18,22 +17,13 @@ const BOOK_SLOT = graphql(`
   }
 `)
 
-const REGISTER_VOLUNTEER = graphql(`
-  mutation RegisterVolunteer($input: RegisterVolunteerInput!) {
-    registerVolunteer(input: $input) {
-      outcome
-      message
-    }
-  }
-`)
-
 const DURATIONS = [60, 90, 120, 180, 240]
 
 interface SignUpDialogProps {
   activity: CalendarActivity
   period: CalendarPeriod
   startTime: Date
-  isLoggedIn: boolean
+  ownShifts?: OwnShift[]
   onClose: () => void
   onBooked: () => void
 }
@@ -49,25 +39,32 @@ const SignUpDialog = ({
   activity,
   period,
   startTime,
-  isLoggedIn,
+  ownShifts = [],
   onClose,
   onBooked,
 }: SignUpDialogProps) => {
   const [start, setStart] = useState(() => roundToQuarter(startTime))
   const [minutes, setMinutes] = useState(120)
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
 
   const [bookSlot, { loading: booking }] = useMutation(BOOK_SLOT)
-  const [registerVolunteer, { loading: registering }] = useMutation(REGISTER_VOLUNTEER)
 
   const periodEnd = new Date(period.endTime)
 
   useEffect(() => setStart(roundToQuarter(startTime)), [startTime])
 
-  /* Never offer more than the period has left. */
+  /*
+   * A shift ends where the period ends, and where the next shift of this
+   * volunteer begins — nobody can be in two places at once, and the server
+   * would refuse it anyway.
+   */
+  const nextOwnShift = ownShifts
+    .map((shift) => new Date(shift.startTime))
+    .filter((shiftStart) => shiftStart > start)
+    .sort((a, b) => a.getTime() - b.getTime())[0]
+  const latestEnd = nextOwnShift && nextOwnShift < periodEnd ? nextOwnShift : periodEnd
+
   const available = DURATIONS.filter(
-    (candidate) => start.getTime() + candidate * 60_000 <= periodEnd.getTime(),
+    (candidate) => start.getTime() + candidate * 60_000 <= latestEnd.getTime(),
   )
   const durations = available.length ? available : [15]
 
@@ -90,37 +87,6 @@ const SignUpDialog = ({
       )} bei „${activity.name}“.`,
       'OK',
     )
-    onBooked()
-  }
-
-  const register = async () => {
-    if (!name.trim() || !email.includes('@')) {
-      await showMessage(
-        'Fast',
-        'Bitte gib deinen Namen und eine E-Mail-Adresse an, damit wir dich erreichen können.',
-        'OK',
-      )
-      return
-    }
-
-    const result = await registerVolunteer({
-      variables: { input: { name: name.trim(), email: email.trim(), slot } },
-    })
-    if (result.errors?.length) {
-      await showMessage('Das ging nicht', result.errors[0]?.message ?? 'Unbekannter Fehler', 'OK')
-      return
-    }
-
-    const answer = result.data?.registerVolunteer
-    await showMessage(
-      answer?.outcome === 'verificationSent' ? 'Schau in deine E-Mail' : 'Bitte melde dich an',
-      answer?.message ?? '',
-      'OK',
-    )
-    if (answer?.outcome === 'useForumLogin') {
-      window.location.href = `/auth/forum?redirectUrl=${encodeURIComponent(window.location.pathname)}`
-      return
-    }
     onBooked()
   }
 
@@ -166,30 +132,18 @@ const SignUpDialog = ({
               </button>
             ))}
           </div>
-        </div>
-
-        {!isLoggedIn && (
-          <div className="space-y-3 border-t border-gray-200 pt-3 dark:border-gray-700">
-            <label className="block">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Dein Name</span>
-              <FormInput value={name} onChange={(e) => setName(e.target.value)} />
-            </label>
-            <label className="block">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Deine E-Mail-Adresse</span>
-              <FormInput type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            </label>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Wir schicken dir einen Link, mit dem du deine Anmeldung bestätigst. Wer ein Konto im
-              Forum hat, meldet sich besser damit an.
+          {nextOwnShift && nextOwnShift < periodEnd && (
+            <p className="text-xs mt-1 text-gray-500 dark:text-gray-400">
+              Ab {clock(nextOwnShift)} bist du schon woanders eingetragen.
             </p>
-          </div>
-        )}
+          )}
+        </div>
 
         <div className="flex justify-end gap-2">
           <Button variant="secondary" onClick={onClose}>
             Abbrechen
           </Button>
-          <Button onClick={isLoggedIn ? book : register} disabled={booking || registering}>
+          <Button onClick={book} disabled={booking}>
             Eintragen
           </Button>
         </div>

@@ -1,6 +1,8 @@
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import React, { useEffect, useState } from 'react'
 import { useExhibitor } from '@contexts/ExhibitorContext.ts'
+import { useQuery } from '@apollo/client'
+import { graphql } from 'gql.tada'
 import { useExhibition } from '@contexts/ExhibitionContext.ts'
 import DropdownMenu from './DropdownMenu.tsx'
 import SearchTableNumber from './SearchTableNumber.tsx'
@@ -110,6 +112,19 @@ const MenuItem = ({
 
 const NavBar = () => {
   const { exhibitor } = useExhibitor()
+  /* A volunteer who registered to help has an account but no exhibitor record,
+     and would otherwise be shown a Login button while being logged in. */
+  const { data: currentUser } = useQuery(
+    graphql(`
+      query GetCurrentUserForNavBar {
+        getCurrentUser {
+          id
+          fullName
+        }
+      }
+    `),
+  )
+  const isVolunteer = !exhibitor && !!currentUser?.getCurrentUser
   const { exhibition } = useExhibition()
   const location = useLocation()
   const [hasBookmarks, setHasBookmarks] = useState(getBookmarks().exhibits.length > 0)
@@ -316,11 +331,28 @@ const NavBar = () => {
           {commonUserMenuItems.map((item, index) => renderMenuEntry(item, index))}
         </DropdownMenu>,
       ]
-    : [
-        <Button key="login" onClick={handleLogin}>
-          Login
-        </Button>,
-      ]
+    : isVolunteer
+      ? [
+          <DropdownMenu
+            key="volunteer"
+            label={
+              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600">
+                <Icon name="user" alt="Menü" className="h-6 w-6 text-gray-600 dark:text-gray-400" />
+              </div>
+            }>
+            {[
+              { to: '/mitmachen', label: 'Mitmachen' },
+              { to: '/mitmachen/meine-schichten', label: 'Meine Schichten' },
+              { type: 'divider' as const },
+              { type: 'logout' as const, label: 'Logout' },
+            ].map((item, index) => renderMenuEntry(item, index))}
+          </DropdownMenu>,
+        ]
+      : [
+          <Button key="login" onClick={handleLogin}>
+            Login
+          </Button>,
+        ]
 
   const MobileMenuButton = () => (
     <button

@@ -138,7 +138,8 @@ A span is `none` (nobody), `under`, `met`, `over`, or `unlimited` (for a period 
 calendar, the activity page and the admin report all agree on the same arithmetic.
 
 Bookings by a user whose address is not yet verified are shown, marked as unconfirmed, and left out
-of the count until the address is verified.
+of the count. Nobody can make one through the site — a session only exists once the address is
+confirmed — so this covers a booking entered for somebody else.
 
 ### Conflicts
 
@@ -260,9 +261,10 @@ handling rule in `CLAUDE.md`.
 
 Public, no login:
 
-- **`/mitmachen`** — the dense overview calendar plus the list of activities. Each activity shows
-  its name, its one-line summary and a disclosure that reveals the long description.
-- **`/mitmachen/:key`** — one activity: description, contact, its periods, and the sign-up.
+- **`/mitmachen`** — the overview calendar. Without a session it says so and offers registration;
+  nothing can be booked. The name of an activity opens what there is to do about it, as a dialog
+  over the plan rather than as another page.
+- **`/mitmachen/registrieren`** — name and address for somebody who has no account here.
 - **`/mitmachen/bestaetigen?token=…`** — the landing page of the verification mail, mirroring
   `/resetPassword`.
 

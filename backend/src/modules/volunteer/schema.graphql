@@ -107,7 +107,6 @@ input BookVolunteerSlotInput {
 input RegisterVolunteerInput {
   name: String!
   email: String!
-  slot: BookVolunteerSlotInput!
 }
 
 enum RegisterVolunteerOutcome {

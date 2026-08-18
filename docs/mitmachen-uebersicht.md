@@ -55,10 +55,12 @@ Die Farben sagen, wie es steht:
 | **mehr als nötig** | zusätzliche Hilfe hat sich gemeldet                   |
 
 Ein Klick in den Kalender öffnet die Anmeldung für diese Tätigkeit, mit Beginn und Dauer schon
-ausgefüllt. Auf dem Telefon wird ein Tag nach dem anderen angezeigt.
+ausgefüllt. Ein Klick auf den **Namen einer Tätigkeit** zeigt, was dabei zu tun ist.
 
-Wer angemeldet ist, sieht zusätzlich die **Namen** der eingetragenen Personen. Ohne Anmeldung sind
-nur die Zahlen sichtbar.
+Wer angemeldet ist, sieht die **eigenen Schichten schraffiert** über den Farben liegen — und kann
+sich für diese Zeiten kein zweites Mal eintragen. Unter dem Kalender steht, was man übernommen hat.
+Fährt man mit der Maus über den Plan, sagt eine Einblendung, um welche Zeit es geht, wie es dort
+steht und **wer eingetragen ist**; ohne Anmeldung sind nur die Zahlen sichtbar.
 
 ## Wer sich eintragen kann
 

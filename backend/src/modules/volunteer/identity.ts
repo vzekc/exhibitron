@@ -41,8 +41,10 @@ export const identifyVolunteer = async (
         message: 'Zu dieser Adresse gibt es schon ein Konto. Bitte melde dich an.',
       }
     }
-    /* A volunteer who never clicked the link in their mail. They get a new one. */
+    /* A volunteer who never clicked the link in their mail. They get a new
+     * one — the old may have expired, and it is the only way back in. */
     existing.fullName = name
+    db.user.createPasswordResetToken(existing, exhibition.endDate.getTime())
     return { outcome: 'verificationSent', message: verificationSent(email), user: existing }
   }
 

@@ -208,6 +208,22 @@ const isVerified = async (email: string) => {
   return verified
 }
 
+/* The stretch of the Infotresen period that covers a given hour. */
+const spanAt = (result: { data?: unknown }, hour: number) => {
+  const data = result.data as {
+    getVolunteerActivities: {
+      key: string
+      periods: {
+        coverage: { startTime: unknown; endTime: unknown; count: number; unconfirmed: number }[]
+      }[]
+    }[]
+  }
+  const period = data.getVolunteerActivities.find((a) => a.key === 'infotresen')!.periods[0]
+  return period.coverage.find(
+    (span) => hours(span.startTime) <= hour && hours(span.endTime) > hour,
+  )!
+}
+
 /* The Date scalar arrives untyped from gql.tada; every value is an ISO string. */
 const hours = (value: unknown) => new Date(value as string).getHours()
 
@@ -575,57 +591,62 @@ describe('volunteer', () => {
     expect(odd.errors?.[0]?.message).toContain('Viertelstunde')
   })
 
-  graphqlTest('somebody without an account signs up and confirms', async (graphqlRequest) => {
-    const activityId = await seedActivity()
-    const periodId = await firstPeriodId(activityId)
+  graphqlTest(
+    'somebody without an account registers, confirms, and helps',
+    async (graphqlRequest, app) => {
+      const activityId = await seedActivity()
+      const periodId = await firstPeriodId(activityId)
 
-    const registered = await graphqlRequest(REGISTER, {
-      input: {
-        name: 'Erika Mustermann',
-        email: 'erika@example.com',
-        slot: { periodId, startTime: at(0, 15).toISOString(), durationMinutes: 120 },
-      },
-    })
-    expect(registered.errors).toBeUndefined()
-    expect(registered.data!.registerVolunteer.outcome).toBe('verificationSent')
-    expect(registered.data!.registerVolunteer.message).toContain('erika@example.com')
-    expect(await isVerified('erika@example.com')).toBe(false)
+      const registered = await graphqlRequest(REGISTER, {
+        input: { name: 'Erika Mustermann', email: 'erika@example.com' },
+      })
+      expect(registered.errors).toBeUndefined()
+      expect(registered.data!.registerVolunteer.outcome).toBe('verificationSent')
+      expect(registered.data!.registerVolunteer.message).toContain('erika@example.com')
+      expect(await isVerified('erika@example.com')).toBe(false)
 
-    /* The shift is held, and shows as not yet confirmed. */
-    const held = await graphqlRequest(ACTIVITIES)
-    const span = held
-      .data!.getVolunteerActivities!.find((a) => a.key === 'infotresen')!
-      .periods[0].coverage.find((s) => hours(s.startTime) === 15)!
-    expect([span.count, span.unconfirmed]).toEqual([0, 1])
+      /* Registering books nothing — it only opens the door. */
+      const before = await graphqlRequest(ACTIVITIES)
+      const untouched = spanAt(before, 15)
+      expect([untouched.count, untouched.unconfirmed]).toEqual([0, 0])
 
-    const confirmed = await graphqlRequest(
-      graphql(`
-        mutation ConfirmVolunteerEmail($token: String!) {
-          confirmVolunteerEmail(token: $token)
-        }
-      `),
-      { token: await tokenOf('erika@example.com') },
-    )
-    expect(confirmed.errors).toBeUndefined()
-    expect(await isVerified('erika@example.com')).toBe(true)
+      /* The link confirms the address and opens the session in one go, which
+         is why this goes through the server rather than the helper: the
+         cookie it sets is what lets the shift be taken. */
+      const confirmed = await app.inject({
+        method: 'POST',
+        url: '/graphql',
+        headers: { 'content-type': 'application/json', host: 'localhost:3000' },
+        payload: JSON.stringify({
+          query: `mutation { confirmVolunteerEmail(token: "${await tokenOf('erika@example.com')}") }`,
+        }),
+      })
+      expect(JSON.parse(confirmed.payload).errors).toBeUndefined()
+      expect(await isVerified('erika@example.com')).toBe(true)
 
-    const counted = await graphqlRequest(ACTIVITIES)
-    const now = counted
-      .data!.getVolunteerActivities!.find((a) => a.key === 'infotresen')!
-      .periods[0].coverage.find((s) => hours(s.startTime) === 15)!
-    expect([now.count, now.unconfirmed]).toEqual([1, 0])
-  })
+      const setCookie = confirmed.headers['set-cookie']
+      const session = {
+        userId: 0,
+        cookie: Array.isArray(setCookie) ? setCookie[0] : (setCookie ?? ''),
+      }
+      const booked = await graphqlRequest(
+        BOOK,
+        { input: { periodId, startTime: at(0, 15).toISOString(), durationMinutes: 120 } },
+        session,
+      )
+      expect(booked.errors).toBeUndefined()
+
+      const counted = await graphqlRequest(ACTIVITIES)
+      const span = spanAt(counted, 15)
+      expect([span.count, span.unconfirmed]).toEqual([1, 0])
+    },
+  )
 
   graphqlTest('a name from the forum belongs to the forum login', async (graphqlRequest) => {
-    const activityId = await seedActivity()
-    const periodId = await firstPeriodId(activityId)
+    await seedActivity()
 
     const result = await graphqlRequest(REGISTER, {
-      input: {
-        name: 'daffy',
-        email: 'someone.else@example.com',
-        slot: { periodId, startTime: at(0, 15).toISOString(), durationMinutes: 60 },
-      },
+      input: { name: 'daffy', email: 'someone.else@example.com' },
     })
     expect(result.errors).toBeUndefined()
     expect(result.data!.registerVolunteer.outcome).toBe('useForumLogin')
@@ -633,15 +654,10 @@ describe('volunteer', () => {
   })
 
   graphqlTest('an address that has an account goes to the login', async (graphqlRequest) => {
-    const activityId = await seedActivity()
-    const periodId = await firstPeriodId(activityId)
+    await seedActivity()
 
     const result = await graphqlRequest(REGISTER, {
-      input: {
-        name: 'Doppelgänger',
-        email: 'meistereder@example.com',
-        slot: { periodId, startTime: at(0, 15).toISOString(), durationMinutes: 60 },
-      },
+      input: { name: 'Doppelgänger', email: 'meistereder@example.com' },
     })
     expect(result.data!.registerVolunteer.outcome).toBe('useForumLogin')
   })

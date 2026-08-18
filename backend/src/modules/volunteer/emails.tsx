@@ -30,23 +30,19 @@ const Shift = ({ booking }: { booking: VolunteerBooking }) => (
 export const makeVerificationEmail = (
   name: string,
   email: string,
-  booking: VolunteerBooking,
   confirmUrl: string,
   forumUrl: string,
   exhibitionTitle: string,
 ) => ({
   to: [email],
-  subject: `Bitte bestätige deine Anmeldung zum Mitmachen bei der ${exhibitionTitle}`,
+  subject: `Bitte bestätige deine Anmeldung als Helfer bei der ${exhibitionTitle}`,
   body: makeEmailBody(
     <article>
       <h1>Hallo {name}!</h1>
-      <p>Du hast dich für diese Schicht eingetragen:</p>
-      <ul>
-        <Shift booking={booking} />
-      </ul>
       <p>
-        Damit sie zählt, brauchen wir einmal die Bestätigung, dass diese Adresse dir gehört. Danach
-        führt dieser Link jederzeit zu deinen Schichten.
+        Du möchtest bei der {exhibitionTitle} mithelfen. Bevor du dich für Schichten eintragen
+        kannst, brauchen wir einmal die Bestätigung, dass diese Adresse dir gehört. Danach führt
+        dieser Link jederzeit zu deinen Schichten.
       </p>
       <p>
         <a href={confirmUrl}>Anmeldung bestätigen</a>

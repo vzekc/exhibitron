@@ -231,30 +231,23 @@ const publicVolunteerMutations: MutationResolvers<Context> = {
     }
 
     const identity = await identifyVolunteer(context, { name, email })
-    if (!identity.user) {
-      return {
-        outcome: identity.outcome as RegisterVolunteerOutcome,
-        message: identity.message,
-      }
+    if (identity.user) {
+      /* Nothing is booked yet: the link in the mail is what turns the address
+       * into somebody who can sign up for shifts. */
+      await db.em.flush()
+      await db.em.populate(identity.user, ['passwordResetToken'])
+      const token = identity.user.passwordResetToken!
+
+      await sendEmail(
+        makeVerificationEmail(
+          name,
+          email,
+          confirmUrl(siteUrl, token),
+          forumUrl(siteUrl, token),
+          exhibition.title,
+        ),
+      )
     }
-
-    /* The slot is held straight away, and shows as unconfirmed until the
-     * address is. */
-    const booking = await bookSlot(context, identity.user, input.slot)
-    await db.em.populate(booking, ['period', 'period.activity'])
-    await db.em.populate(identity.user, ['passwordResetToken'])
-    const token = identity.user.passwordResetToken!
-
-    await sendEmail(
-      makeVerificationEmail(
-        name,
-        email,
-        booking,
-        confirmUrl(siteUrl, token),
-        forumUrl(siteUrl, token),
-        exhibition.title,
-      ),
-    )
 
     return {
       outcome: identity.outcome as RegisterVolunteerOutcome,
