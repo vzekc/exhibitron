@@ -18,7 +18,7 @@ import {
   UniqueConstraintError,
 } from '../common/errors.js'
 import { bookSlot } from './booking.js'
-import { identifyVolunteer, isMagicLinkAccount } from './identity.js'
+import { belongsToTheForum, identifyVolunteer } from './identity.js'
 import {
   makeBookingConfirmedEmail,
   makeCancellationEmail,
@@ -229,8 +229,11 @@ const publicVolunteerMutations: MutationResolvers<Context> = {
     if (!name || !email.includes('@')) {
       throw new BadRequestError('Bitte gib deinen Namen und eine gültige E-Mail-Adresse an')
     }
+    if (!input.password) {
+      throw new BadRequestError('Bitte wähle ein Kennwort')
+    }
 
-    const identity = await identifyVolunteer(context, { name, email })
+    const identity = await identifyVolunteer(context, { name, email, password: input.password })
     if (identity.user) {
       /* Nothing is booked yet: the link in the mail is what turns the address
        * into somebody who can sign up for shifts. */
@@ -263,16 +266,17 @@ const publicVolunteerMutations: MutationResolvers<Context> = {
     if (!user || !user.passwordResetTokenExpires || user.passwordResetTokenExpires < new Date()) {
       throw new PermissionDeniedError('Dieser Link gilt nicht mehr. Bitte trage dich erneut ein.')
     }
-    if (!isMagicLinkAccount(user)) {
-      throw new PermissionDeniedError(
-        'Dieses Konto hat eine eigene Anmeldung. Bitte melde dich damit an.',
-      )
+    if (belongsToTheForum(user)) {
+      throw new PermissionDeniedError('Dieses Konto gehört zum Forum. Bitte melde dich darüber an.')
     }
 
+    /* Clicking the link again is no mistake — it just has nothing left to
+     * confirm, and the site can go straight to the plan. */
+    const firstTime = !user.emailVerifiedAt
     user.emailVerifiedAt ??= new Date()
     await db.em.flush()
     session.userId = user.id
-    return true
+    return firstTime
   },
 
   cancelVolunteerBooking: async (_, { id }, context) => {

@@ -104,6 +104,7 @@ input BookVolunteerSlotInput {
 input RegisterVolunteerInput {
   name: String!
   email: String!
+  password: String!
 }
 
 enum RegisterVolunteerOutcome {
@@ -123,6 +124,11 @@ type RegisterVolunteerResult {
 extend type Mutation {
   bookVolunteerSlot(input: BookVolunteerSlotInput!): VolunteerBooking!
   registerVolunteer(input: RegisterVolunteerInput!): RegisterVolunteerResult!
+  """
+  Confirms the address behind the token and opens the session. True when this
+  was the first time — a link used again says false, and the site takes the
+  volunteer straight to the plan.
+  """
   confirmVolunteerEmail(token: String!): Boolean!
   cancelVolunteerBooking(id: Int!): Boolean!
   createVolunteerActivity(input: CreateVolunteerActivityInput!): VolunteerActivity!

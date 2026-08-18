@@ -40,8 +40,8 @@ export const makeVerificationEmail = (
       <h1>Hallo {name}!</h1>
       <p>
         Du möchtest bei der {exhibitionTitle} mithelfen. Bevor du dich für Schichten eintragen
-        kannst, brauchen wir einmal die Bestätigung, dass diese Adresse dir gehört. Danach führt
-        dieser Link jederzeit zu deinen Schichten.
+        kannst, brauchen wir einmal die Bestätigung, dass diese Adresse dir gehört. Danach meldest
+        du dich mit dieser Adresse und deinem Kennwort an.
       </p>
       <p>
         <a href={confirmUrl}>Anmeldung bestätigen</a>

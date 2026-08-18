@@ -15,10 +15,8 @@ const CONFIRM_EMAIL = graphql(`
 /*
  * Where the link in the verification mail lands. It confirms the address and
  * opens the session, so from here on this volunteer can sign up for shifts.
- *
- * A volunteer has no password — this link is what lets them back in. Whoever
- * would rather have one sets it here, with the same token, and from then on
- * logs in with an address and a password like everybody else.
+ * Afterwards they log in with the address and the password they chose while
+ * registering; a link clicked again simply carries them to the plan.
  */
 const ConfirmEmail = () => {
   const [searchParams] = useSearchParams()
@@ -43,7 +41,13 @@ const ConfirmEmail = () => {
         setProblem(result.errors[0]?.message ?? 'Unbekannter Fehler')
         return
       }
-      setConfirmed(true)
+      /* Only the first click has something to tell; later ones are somebody
+         coming back through the link in their mail. */
+      if (result.data?.confirmVolunteerEmail) {
+        setConfirmed(true)
+        return
+      }
+      window.location.href = '/mitmachen'
     }
     void run()
   }, [confirmEmail, token])
@@ -79,14 +83,7 @@ const ConfirmEmail = () => {
           </a>
         </p>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Du brauchst kein Passwort — dieser Link aus der E-Mail bringt Dich jederzeit zurück. Wenn
-          Du Dich lieber mit einem Passwort anmeldest, kannst Du{' '}
-          <Link
-            to={`/resetPassword?token=${encodeURIComponent(token)}`}
-            className="text-blue-700 dark:text-blue-300">
-            hier eins setzen
-          </Link>
-          .
+          Künftig meldest Du Dich mit Deiner E-Mail-Adresse und Deinem Kennwort an.
         </p>
       </Card>
     </>

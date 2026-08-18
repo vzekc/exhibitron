@@ -149,7 +149,7 @@ const Mitmachen = () => {
             <Link to="/login" className="text-blue-700 dark:text-blue-300">
               Melde Dich an
             </Link>
-            , wenn Du schon als Aussteller registriert bist, oder{' '}
+            , wenn Du schon als Aussteller oder Helfer registriert bist, oder{' '}
             <Link to="/mitmachen/registrieren" className="text-blue-700 dark:text-blue-300">
               registriere
             </Link>{' '}

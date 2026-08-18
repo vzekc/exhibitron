@@ -593,7 +593,7 @@ describe('volunteer', () => {
       const periodId = await firstPeriodId(activityId)
 
       const registered = await graphqlRequest(REGISTER, {
-        input: { name: 'Erika Mustermann', email: 'erika@example.com' },
+        input: { name: 'Erika Mustermann', email: 'erika@example.com', password: 'sehr geheim' },
       })
       expect(registered.errors).toBeUndefined()
       expect(registered.data!.registerVolunteer.outcome).toBe('verificationSent')
@@ -617,6 +617,7 @@ describe('volunteer', () => {
         }),
       })
       expect(JSON.parse(confirmed.payload).errors).toBeUndefined()
+      expect(JSON.parse(confirmed.payload).data.confirmVolunteerEmail).toBe(true)
       expect(await isVerified('erika@example.com')).toBe(true)
 
       const setCookie = confirmed.headers['set-cookie']
@@ -634,6 +635,20 @@ describe('volunteer', () => {
       const counted = await graphqlRequest(ACTIVITIES)
       const span = spanAt(counted, 15)
       expect([span.count, span.unconfirmed]).toEqual([1, 0])
+
+      /* The link has nothing left to confirm, and the chosen password works. */
+      const again = await app.inject({
+        method: 'POST',
+        url: '/graphql',
+        headers: { 'content-type': 'application/json', host: 'localhost:3000' },
+        payload: JSON.stringify({
+          query: `mutation { confirmVolunteerEmail(token: "${await tokenOf('erika@example.com')}") }`,
+        }),
+      })
+      expect(JSON.parse(again.payload).data.confirmVolunteerEmail).toBe(false)
+
+      const ownLogin = await login('erika@example.com', 'sehr geheim')
+      expect(ownLogin.cookie).toBeTruthy()
     },
   )
 
@@ -641,7 +656,7 @@ describe('volunteer', () => {
     await seedActivity()
 
     const result = await graphqlRequest(REGISTER, {
-      input: { name: 'daffy', email: 'someone.else@example.com' },
+      input: { name: 'daffy', email: 'someone.else@example.com', password: 'sehr geheim' },
     })
     expect(result.errors).toBeUndefined()
     expect(result.data!.registerVolunteer.outcome).toBe('useForumLogin')
@@ -652,7 +667,7 @@ describe('volunteer', () => {
     await seedActivity()
 
     const result = await graphqlRequest(REGISTER, {
-      input: { name: 'Doppelgänger', email: 'meistereder@example.com' },
+      input: { name: 'Doppelgänger', email: 'meistereder@example.com', password: 'sehr geheim' },
     })
     expect(result.data!.registerVolunteer.outcome).toBe('useForumLogin')
   })

@@ -85,8 +85,9 @@ The mail carries a second button, "Mit Forum-Konto verbinden", pointing at
 `/auth/forum?registrationToken=<token>` — the path exhibitor registration already uses, which sets
 the nickname and turns the account into a full forum login.
 
-The magic link stops working once the account has a password or a forum nickname; from then on the
-shift list asks for a normal login. Tokens expire at the end of the exhibition.
+The link keeps working until the end of the exhibition, and each use opens the session again — an
+address that was confirmed once needs no second confirmation. A token that belongs to a forum
+account is refused; those sign in over there.
 
 ### Names that belong to the forum
 

@@ -23,7 +23,7 @@ export interface VolunteerIdentity {
  */
 export const identifyVolunteer = async (
   context: Context,
-  { name, email }: { name: string; email: string },
+  { name, email, password }: { name: string; email: string; password: string },
 ): Promise<VolunteerIdentity> => {
   const { db, exhibition } = context
 
@@ -42,8 +42,10 @@ export const identifyVolunteer = async (
       }
     }
     /* A volunteer who never clicked the link in their mail. They get a new
-     * one — the old may have expired, and it is the only way back in. */
+     * one — the old may have expired — and the password they have just
+     * chosen, since the one from the first attempt was never used. */
     existing.fullName = name
+    await db.user.setPassword(existing, password)
     db.user.createPasswordResetToken(existing, exhibition.endDate.getTime())
     return { outcome: 'verificationSent', message: verificationSent(email), user: existing }
   }
@@ -58,10 +60,12 @@ export const identifyVolunteer = async (
 
   const user = db.user.create({ email, fullName: name, isAdministrator: false })
   db.em.persist(user)
+  await db.user.setPassword(user, password)
 
-  /* The token is the link in the mail: it confirms the address, it opens the
-   * shift list, and it is what the forum association reads. It lasts as long
-   * as the exhibition it was made for. */
+  /* The token is the link in the mail: it shows that the address belongs to
+   * this person, and it is what the forum association reads. It lasts as long
+   * as the exhibition it was made for. Afterwards they log in like anybody
+   * else, with the address and the password they chose. */
   db.user.createPasswordResetToken(user, exhibition.endDate.getTime())
 
   return { outcome: 'verificationSent', message: verificationSent(email), user }
@@ -70,9 +74,5 @@ export const identifyVolunteer = async (
 const verificationSent = (email: string) =>
   `Wir haben eine E-Mail an ${email} geschickt. Bitte bestätige darin deine Anmeldung.`
 
-/*
- * A volunteer account keeps its token so that the link in the mail stays the
- * way back to the shift list. Once the account has a password or a forum
- * nickname, it is a real login and the link stops working.
- */
-export const isMagicLinkAccount = (user: User) => !user.nickname && !user.password
+/* An account that came from the forum is signed into over there. */
+export const belongsToTheForum = (user: User) => !!user.nickname
