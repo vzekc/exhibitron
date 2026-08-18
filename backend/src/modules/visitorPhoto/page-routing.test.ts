@@ -1,4 +1,4 @@
-import { graphqlTest } from '../../test/server.js'
+import { graphqlTest, login } from '../../test/server.js'
 import { expect } from 'vitest'
 
 /*
@@ -60,4 +60,52 @@ graphqlTest('the page an unknown id names carries nothing', async (_execute, app
 
   expect(response.statusCode).toBe(404)
   expect(response.json()).toStrictEqual({ error: 'unknown' })
+})
+
+/*
+ * Die sechs Zeichen stehen auf dem Laufzettel in Großbuchstaben, getippt werden
+ * sie so, wie die Tastatur es gerade anbietet: das Telefon fängt klein an, ein
+ * Rechner der Ausstellung schreibt groß. Jede Schreibweise führt auf dasselbe
+ * Foto, und die Seite nennt die ID in der Form, in der sie vergeben wurde.
+ */
+const mixedCase = (id: string) =>
+  [...id].map((c, i) => (i % 2 ? c.toLowerCase() : c.toUpperCase())).join('')
+
+graphqlTest('die ID führt in jeder Schreibweise auf dasselbe Foto', async (_execute, app) => {
+  const exhibitor = await login('daffy@example.com')
+
+  const taken = await app.inject({
+    method: 'POST',
+    url: '/api/visitor-photo/kamera',
+    headers: {
+      'content-type': 'image/jpeg',
+      host: 'localhost:3000',
+      cookie: exhibitor.cookie,
+    },
+    payload: Buffer.from('ein Bild'),
+  })
+  expect(taken.statusCode).toBe(201)
+  const { id, code } = taken.json()
+
+  for (const written of [id.toLowerCase(), mixedCase(id)]) {
+    const page = await app.inject({ method: 'GET', url: `/api/visitor-photo/${written}/page` })
+    expect(page.statusCode).toBe(200)
+    expect(page.json().id).toBe(id)
+
+    const plain = await app.inject({
+      method: 'GET',
+      url: `/foto/${written}`,
+      headers: { 'user-agent': NETSCAPE, accept: 'text/html' },
+    })
+    expect(plain.statusCode).toBe(200)
+    expect(plain.body).toContain(id)
+  }
+
+  const deleted = await app.inject({
+    method: 'POST',
+    url: `/api/visitor-photo/${id.toLowerCase()}/loeschen`,
+    headers: { 'content-type': 'application/json' },
+    payload: { code },
+  })
+  expect(deleted.json()).toStrictEqual({ deleted: true })
 })

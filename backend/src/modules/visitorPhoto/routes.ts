@@ -37,6 +37,7 @@ import {
   isWellFormedCode,
   isWellFormedId,
   listPhotoFiles,
+  normalizePhotoId,
   photoDir,
   readPhotoFile,
   removePhotoFiles,
@@ -128,7 +129,7 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
   app.put<{ Params: { id: string } }>('/api/visitor-photo/:id', async (request, reply) => {
     if (!boothAuthorised(request)) return reply.code(403).send({ error: 'not the booth' })
 
-    const { id } = request.params
+    const id = normalizePhotoId(request.params.id)
     if (!isWellFormedId(id)) return reply.code(400).send({ error: 'malformed id' })
 
     const codeHash = String(request.headers['x-code-hash'] ?? '')
@@ -187,7 +188,7 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
   app.get<{ Params: { id: string } }>('/api/visitor-photo/:id/original', async (request, reply) => {
     if (!boothAuthorised(request)) return reply.code(403).send({ error: 'not the booth' })
 
-    const { id } = request.params
+    const id = normalizePhotoId(request.params.id)
     if (!isWellFormedId(id)) return reply.code(400).send({ error: 'malformed id' })
 
     const photo = await photos.findOne({ id })
@@ -207,7 +208,8 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
     async (request, reply) => {
       if (!boothAuthorised(request)) return reply.code(403).send({ error: 'not the booth' })
 
-      const { id, name } = request.params
+      const id = normalizePhotoId(request.params.id)
+      const { name } = request.params
       if (!isWellFormedId(id)) return reply.code(400).send({ error: 'malformed id' })
 
       /* The photo itself is what was uploaded here and stays authoritative; a
@@ -237,7 +239,7 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
     async (request, reply) => {
       if (!boothAuthorised(request)) return reply.code(403).send({ error: 'not the booth' })
 
-      const { id } = request.params
+      const id = normalizePhotoId(request.params.id)
       if (!isWellFormedId(id)) return reply.code(400).send({ error: 'malformed id' })
 
       const photo = await photos.findOne({ id })
@@ -424,7 +426,7 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
     '/foto/:id/beleg.pdf',
     async (request, reply) => {
       noIndex(reply)
-      const { id } = request.params
+      const id = normalizePhotoId(request.params.id)
       const code = String(request.body?.code ?? '')
         .toUpperCase()
         .replace(/\s+/g, '')
@@ -463,7 +465,7 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
    */
   app.get<{ Params: { id: string } }>('/api/visitor-photo/:id/page', async (request, reply) => {
     noIndex(reply)
-    const { id } = request.params
+    const id = normalizePhotoId(request.params.id)
     if (!isWellFormedId(id)) return reply.code(404).send({ error: 'unknown' })
 
     const photo = await photos.findOne({ id })
@@ -489,7 +491,7 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
     '/api/visitor-photo/:id/loeschen',
     async (request, reply) => {
       noIndex(reply)
-      const { id } = request.params
+      const id = normalizePhotoId(request.params.id)
       const code = String(request.body?.code ?? '')
         .toUpperCase()
         .replace(/\s+/g, '')
@@ -532,7 +534,7 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
    */
   app.get<{ Params: { id: string } }>('/foto/:id', async (request, reply) => {
     noIndex(reply)
-    const { id } = request.params
+    const id = normalizePhotoId(request.params.id)
     if (isWellFormedId(id) && isModernBrowser(request)) {
       return reply.type('text/html').sendFile('index.html')
     }
@@ -550,7 +552,8 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
 
   app.get<{ Params: { id: string; file: string } }>('/foto/:id/:file', async (request, reply) => {
     noIndex(reply)
-    const { id, file } = request.params
+    const id = normalizePhotoId(request.params.id)
+    const { file } = request.params
     if (!isWellFormedId(id)) return reply.code(404).send({ error: 'unknown' })
 
     const photo = await photos.findOne({ id })
@@ -570,7 +573,7 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
    */
   app.get<{ Params: { id: string } }>('/foto/:id/alle-formate.zip', async (request, reply) => {
     noIndex(reply)
-    const { id } = request.params
+    const id = normalizePhotoId(request.params.id)
     if (!isWellFormedId(id)) return reply.code(404).send({ error: 'unknown' })
 
     const photo = await photos.findOne({ id })
@@ -590,7 +593,7 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
     '/foto/:id/loeschen',
     async (request, reply) => {
       noIndex(reply)
-      const { id } = request.params
+      const id = normalizePhotoId(request.params.id)
       const code = String(request.body?.code ?? '')
         .toUpperCase()
         .replace(/\s+/g, '')

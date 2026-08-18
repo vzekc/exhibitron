@@ -27,6 +27,17 @@ export function isWellFormedId(id: string) {
   return id.length === 6 && CODE.test(id)
 }
 
+/*
+ * The id as the booth mints it, whatever case it arrived in.
+ *
+ * The six characters are printed on the slip in capitals and typed back in by
+ * hand — into a phone that offers a small letter first, into a machine of the
+ * exhibition whose keyboard has an opinion of its own. All of those name the
+ * same photo, so the case of an address says nothing and every id is brought
+ * to the one form the directories and the rows are written in.
+ */
+export const normalizePhotoId = (id: string) => id.toUpperCase()
+
 export function isWellFormedCode(code: string) {
   return code.length >= 6 && code.length <= 16 && CODE.test(code)
 }
