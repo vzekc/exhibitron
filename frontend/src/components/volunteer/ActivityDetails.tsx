@@ -2,20 +2,19 @@ import Modal from '@components/Modal'
 import Button from '@components/Button'
 import ServerHtmlContent from '@components/ServerHtmlContent'
 import { clock, weekday } from './coverage'
-import type { CalendarActivity, CalendarPeriod } from './VolunteerCalendar'
+import type { CalendarActivity } from './VolunteerCalendar'
 
 interface ActivityDetailsProps {
   activity: CalendarActivity
-  canBook?: boolean
   onClose: () => void
-  onPick?: (activity: CalendarActivity, period: CalendarPeriod, startTime: Date) => void
 }
 
 /*
  * What an activity is, opened from its name in the plan: the long text, who to
- * ask, and its periods with the times somebody is still missing.
+ * ask, and when help is wanted. Signing up happens in the plan, where one can
+ * see what is already taken — this only tells.
  */
-const ActivityDetails = ({ activity, canBook, onClose, onPick }: ActivityDetailsProps) => (
+const ActivityDetails = ({ activity, onClose }: ActivityDetailsProps) => (
   <Modal isOpen onClose={onClose} title={activity.name}>
     <div className="space-y-4 p-4">
       {activity.summary && <p className="text-gray-600 dark:text-gray-400">{activity.summary}</p>}
@@ -37,15 +36,12 @@ const ActivityDetails = ({ activity, canBook, onClose, onPick }: ActivityDetails
               {weekday(period.startTime)}, {clock(period.startTime)}–{clock(period.endTime)}
             </span>
             <span className="text-sm text-gray-500 dark:text-gray-400">
-              {period.neededCount
-                ? `${period.neededCount} Leute gebraucht`
-                : 'beliebig viele willkommen'}
+              {period.neededCount === 1
+                ? 'eine Person gebraucht'
+                : period.neededCount
+                  ? `${period.neededCount} Leute gebraucht`
+                  : 'beliebig viele willkommen'}
             </span>
-            {canBook && (
-              <Button onClick={() => onPick?.(activity, period, new Date(period.startTime))}>
-                Eintragen
-              </Button>
-            )}
           </li>
         ))}
       </ul>

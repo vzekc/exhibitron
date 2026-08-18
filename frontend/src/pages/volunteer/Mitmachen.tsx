@@ -212,17 +212,7 @@ const Mitmachen = () => {
         </Card>
       )}
 
-      {shown && (
-        <ActivityDetails
-          activity={shown}
-          canBook={isLoggedIn}
-          onClose={() => setShown(null)}
-          onPick={(activity, period, startTime) => {
-            setShown(null)
-            setPicked({ activity, period, startTime })
-          }}
-        />
-      )}
+      {shown && <ActivityDetails activity={shown} onClose={() => setShown(null)} />}
 
       {ownShift && (
         <Modal isOpen onClose={() => setOwnShift(null)} title={ownShift.activityName}>

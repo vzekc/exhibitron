@@ -156,20 +156,20 @@ const VolunteerCalendar = ({
     const box = frame.current?.getBoundingClientRect()
     if (!box) return
 
-    /* Names are only there for somebody who is logged in, and one's own shift
-       is hatched anyway — what is worth saying is who else is there. */
-    const people = [
+    /* Who is there, oneself first and by that name. Names reach a caller who
+       is logged in; for anybody else the list stays empty. */
+    const covering = (period.bookings ?? []).filter((booking) =>
+      overlaps(stretch.startTime, stretch.endTime, booking.startTime, booking.endTime),
+    )
+    const others = [
       ...new Set(
-        (period.bookings ?? [])
-          .filter(
-            (booking) =>
-              !booking.isMine &&
-              overlaps(stretch.startTime, stretch.endTime, booking.startTime, booking.endTime),
-          )
+        covering
+          .filter((booking) => !booking.isMine)
           .map((booking) => booking.name)
           .filter((name): name is string => !!name),
       ),
     ]
+    const people = covering.some((booking) => booking.isMine) ? ['Du', ...others] : others
     if (!people.length) {
       setHover(null)
       return
