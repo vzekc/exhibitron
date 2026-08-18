@@ -55,6 +55,40 @@ jobs:
           PGPASSWORD: geheim
         run: pnpm test
 
+      # The tests run through ts-node, which resolves imports against the
+      # sources. What is deployed is the build, where the file names differ —
+      # an import that only ts-node can follow takes the server down at
+      # startup with every test still green. So the built server is started
+      # here, against a database migrated from nothing, and has to answer.
+      - name: Build
+        run: pnpm build
+
+      - name: Start the built server
+        env:
+          DATABASE_URL: postgres://postgres:geheim@localhost:5432/testdb
+          SESSION_SECRET: only-for-this-run-and-long-enough-for-fastify
+          NODE_ENV: production
+        run: |
+          cd backend
+          npx mikro-orm-esm migration:up
+          node dist/server.js &
+          server=$!
+          for attempt in $(seq 1 30); do
+            if [ "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3001/)" != "000" ]; then
+              echo "the built server answered after ${attempt} tries"
+              kill $server
+              exit 0
+            fi
+            if ! kill -0 $server 2>/dev/null; then
+              echo "::error::the built server died during startup"
+              exit 1
+            fi
+            sleep 2
+          done
+          echo "::error::the built server did not answer within a minute"
+          kill $server 2>/dev/null
+          exit 1
+
   deploy:
     if: github.ref == 'refs/heads/main'
     needs: test
