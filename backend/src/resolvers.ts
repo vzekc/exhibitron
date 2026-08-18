@@ -12,6 +12,7 @@ import { roomResolvers } from './modules/room/resolvers.js'
 import { conferenceSessionResolvers } from './modules/conferenceSession/resolvers.js'
 import { hostResolvers } from './modules/host/resolvers.js'
 import { docResolvers } from './modules/doc/resolvers.js'
+import { volunteerResolvers } from './modules/volunteer/resolvers.js'
 import { mergeResolvers } from '@graphql-tools/merge'
 import { Resolvers } from './generated/graphql.js'
 
@@ -30,6 +31,7 @@ const resolvers: Resolvers = mergeResolvers([
   conferenceSessionResolvers,
   hostResolvers,
   docResolvers,
+  volunteerResolvers,
 ])
 
 export default resolvers

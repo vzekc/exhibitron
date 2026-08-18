@@ -1,0 +1,66 @@
+scalar Date
+
+type VolunteerActivity {
+  id: Int!
+  key: String!
+  name: String!
+  summary: String!
+  description: String
+  contact: Exhibitor
+  periods: [VolunteerPeriod!]!
+}
+
+type VolunteerPeriod {
+  id: Int!
+  activity: VolunteerActivity!
+  startTime: Date!
+  endTime: Date!
+  durationMinutes: Int!
+  """
+  How many people are wanted at any moment. Null means as many as register.
+  """
+  neededCount: Int
+  note: String
+  coverage: [VolunteerCoverageSpan!]!
+  bookings: [VolunteerBooking!]!
+}
+
+"""
+One stretch of a period through which the same people are helping.
+"""
+type VolunteerCoverageSpan {
+  startTime: Date!
+  endTime: Date!
+  count: Int!
+  unconfirmed: Int!
+  needed: Int
+  status: CoverageStatus!
+}
+
+enum CoverageStatus {
+  none
+  under
+  met
+  over
+  unlimited
+}
+
+type VolunteerBooking {
+  id: Int!
+  period: VolunteerPeriod!
+  startTime: Date!
+  endTime: Date!
+  durationMinutes: Int!
+  """
+  Who is helping, for a caller who is logged in. Null for everybody else.
+  """
+  name: String
+  confirmed: Boolean!
+  isMine: Boolean!
+}
+
+extend type Query {
+  getVolunteerActivities: [VolunteerActivity!]!
+  getVolunteerActivity(key: String!): VolunteerActivity
+  getMyVolunteerBookings: [VolunteerBooking!]!
+}
