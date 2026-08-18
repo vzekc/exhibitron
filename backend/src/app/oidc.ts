@@ -16,6 +16,19 @@ const woltlabAuth: ProviderConfiguration = {
 
 const administratorRanks = ['Vorstand', 'Administrator']
 
+/*
+ * Where to go once the forum has answered. Callers pass either a path or a
+ * whole address, and both are read against this site: a bare path would
+ * otherwise fail to parse and take the callback down with it, and an address
+ * pointing somewhere else would turn the login into a way of sending people
+ * off this site.
+ */
+export const resolveRedirect = (redirectUrl: string | undefined, origin: string) => {
+  const here = new URL(origin)
+  const target = new URL(redirectUrl ?? '/', here)
+  return target.origin === here.origin ? target : new URL('/', here)
+}
+
 const getOAuth2Credentials = (): Credentials | void => {
   const { OIDC_CLIENT_ID: id, OIDC_CLIENT_SECRET: secret } = process.env
 
@@ -107,7 +120,7 @@ export const register = async (app: FastifyInstance) => {
       createIfMissing: forumHelperSignup,
     })
 
-    const url = new URL(redirectUrl ?? '/')
+    const url = resolveRedirect(redirectUrl, `${request.protocol}://${request.headers.host}`)
     if (user === 'needsSetup') {
       url.pathname = '/register'
       url.search = 'forumMemberNeedsSetup'

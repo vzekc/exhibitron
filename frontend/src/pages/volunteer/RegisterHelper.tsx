@@ -23,7 +23,8 @@ const REGISTER_VOLUNTEER = graphql(`
  * and `redirectUrl` puts them on the plan afterwards rather than back on this
  * page, which is where the referer would send them.
  */
-const FORUM_LOGIN = `/auth/forum?helper=1&redirectUrl=${encodeURIComponent('/mitmachen')}`
+const forumLogin = () =>
+  `/auth/forum?helper=1&redirectUrl=${encodeURIComponent(`${window.location.origin}/mitmachen`)}`
 
 /*
  * How somebody without an account here gets one. Nearly everybody who comes
@@ -74,7 +75,7 @@ const RegisterHelper = () => {
 
     await showMessage('Bitte melde dich an', answer?.message ?? '', 'OK')
     if (answer?.outcome === 'useForumLogin') {
-      window.location.href = FORUM_LOGIN
+      window.location.href = forumLogin()
     }
   }
 
@@ -89,7 +90,7 @@ const RegisterHelper = () => {
         </p>
         <p className="mt-4">
           <a
-            href={FORUM_LOGIN}
+            href={forumLogin()}
             className="inline-block rounded bg-blue-600/80 px-4 py-3 text-lg text-white hover:bg-blue-600">
             Über das Forum anmelden
           </a>
