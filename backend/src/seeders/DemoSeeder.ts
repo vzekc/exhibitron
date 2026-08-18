@@ -7,6 +7,11 @@ import { Exhibition } from '../modules/exhibition/entity.js'
 import { Exhibitor } from '../modules/exhibitor/entity.js'
 import { Document } from '../modules/document/entity.js'
 import { Page } from '../modules/page/entity.js'
+import {
+  VolunteerActivity,
+  VolunteerBooking,
+  VolunteerPeriod,
+} from '../modules/volunteer/entity.js'
 
 export class DemoSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {
@@ -170,6 +175,101 @@ export class DemoSeeder extends Seeder {
     tables[3].exhibitor = exhibitors[2]
     tables[4].exhibitor = exhibitors[1]
     tables[5].exhibitor = exhibitors[1]
+
+    /*
+     * Somewhere to help, so that the calendar under /mitmachen has something to
+     * draw: the build-up on the day before, and the two stands during the
+     * exhibition. The days hang off the exhibition, whenever it is.
+     */
+    const day = (offset: number, hour: number) => {
+      const date = new Date(exhibition.startDate)
+      date.setDate(date.getDate() + offset)
+      date.setHours(hour, 0, 0, 0)
+      return date
+    }
+
+    const volunteerActivities = [
+      {
+        key: 'elektro-aufbau',
+        name: 'Elektro-Aufbau',
+        summary: 'Strom in die Halle bringen',
+        html: '<p>Kabeltrommeln ausrollen, Verteiler setzen, Tische anfahren. Wer sich mit Strom auskennt, ist besonders willkommen.</p>',
+        periods: [
+          { start: day(-1, 8), minutes: 360, needed: 4, note: 'Treffpunkt am Lastenaufzug' },
+        ],
+      },
+      {
+        key: 'infotresen',
+        name: 'Infotresen betreuen',
+        summary: 'Fragen beantworten, Programme verteilen',
+        html: '<p>Am Tresen im Eingang: Fragen beantworten, Programme verteilen, Fundsachen annehmen.</p>',
+        periods: [0, 1, 2].map((offset) => ({
+          start: day(offset, 10),
+          minutes: 480,
+          needed: 2,
+          note: offset === 0 ? 'Treffpunkt am Tresen' : undefined,
+        })),
+      },
+      {
+        key: 'fotofix',
+        name: 'Fotofix betreuen',
+        summary: 'Den Fotoautomaten im Blick behalten',
+        html: '<p>Papier nachlegen, Besuchern die Laufzettel erklären, und aufpassen, dass die Kiste läuft.</p>',
+        periods: [0, 1].map((offset) => ({
+          start: day(offset, 10),
+          minutes: 480,
+          needed: offset === 0 ? 1 : undefined,
+          note: undefined,
+        })),
+      },
+    ]
+
+    const periodsByKey = new Map<string, VolunteerPeriod>()
+    for (const [index, activityData] of volunteerActivities.entries()) {
+      const activity = em.create(VolunteerActivity, {
+        exhibition,
+        key: activityData.key,
+        name: activityData.name,
+        summary: activityData.summary,
+        ordering: index,
+        contact: exhibitors[index % exhibitors.length],
+        description: await documentRepository.ensureDocument(null, activityData.html, em),
+      })
+      for (const periodData of activityData.periods) {
+        const period = em.create(VolunteerPeriod, {
+          activity,
+          startTime: periodData.start,
+          durationMinutes: periodData.minutes,
+          neededCount: periodData.needed,
+          note: periodData.note,
+        })
+        periodsByKey.set(`${activityData.key}-${periodData.start.toISOString()}`, period)
+      }
+    }
+
+    /* A couple of people have signed up, so the plan shows every state. */
+    const firstInfotresen = periodsByKey.get(`infotresen-${day(0, 10).toISOString()}`)!
+    em.create(VolunteerBooking, {
+      period: firstInfotresen,
+      user: users[0],
+      startTime: day(0, 10),
+      durationMinutes: 180,
+    })
+    em.create(VolunteerBooking, {
+      period: firstInfotresen,
+      user: users[1],
+      startTime: day(0, 11),
+      durationMinutes: 240,
+    })
+    em.create(VolunteerBooking, {
+      period: periodsByKey.get(`elektro-aufbau-${day(-1, 8).toISOString()}`)!,
+      user: users[2],
+      startTime: day(-1, 8),
+      durationMinutes: 240,
+    })
+
+    /* Everybody in the demo data counts, so the colours are not all pale. */
+    users.forEach((user) => (user.emailVerifiedAt = new Date()))
 
     await em.persistAndFlush([...tables, ...users, ...exhibits, homePage])
   }

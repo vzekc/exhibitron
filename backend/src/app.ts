@@ -14,6 +14,7 @@ import { registerImageRoutes } from './modules/image/routes.js'
 import { registerExhibitImageRoutes } from './modules/exhibit/routes.js'
 import { registerServerSideHtmlRoutes } from './modules/serverSideHtml/routes.js'
 import { registerScheduleRoutes } from './modules/schedule/routes.js'
+import { registerVolunteerRoutes } from './modules/volunteer/routes.js'
 import { registerSeatplanRoutes } from './modules/seatplan/routes.js'
 import { registerVisitorPhotoRoutes } from './modules/visitorPhoto/routes.js'
 import { registerSerialRoutes } from './modules/serial/routes.js'
@@ -166,6 +167,7 @@ export async function createApp({
   await registerImageRoutes(app)
   await registerExhibitImageRoutes(app)
   await registerScheduleRoutes(app)
+  await registerVolunteerRoutes(app)
   await registerSeatplanRoutes(app)
 
   /*

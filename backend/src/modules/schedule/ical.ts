@@ -12,6 +12,9 @@ export function generateICalContent(
   exhibitionName: string,
   exhibitionKey: string,
   baseUrl: string,
+  /* Where an event points on the site. Talks point at themselves; volunteer
+     shifts point at the list they can be cancelled from. */
+  eventUrl: (session: Session) => string = (session) => `${baseUrl}/session/${session.id}`,
 ): string {
   const now = new Date()
   const icalContent = [
@@ -26,7 +29,7 @@ export function generateICalContent(
   sessions.forEach((session) => {
     const startDate = new Date(session.startTime)
     const endDate = new Date(session.endTime)
-    const sessionUrl = `${baseUrl}/session/${session.id}`
+    const sessionUrl = eventUrl(session)
     const summary = `[${exhibitionKey}] ${session.title}`
 
     icalContent.push(

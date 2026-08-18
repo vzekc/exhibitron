@@ -673,4 +673,26 @@ describe('volunteer', () => {
     expect(own.errors).toBeUndefined()
     expect(own.data!.cancelVolunteerBooking).toBe(true)
   })
+  graphqlTest('the own shifts come out as a calendar file', async (graphqlRequest, app) => {
+    await seedActivity()
+    const session = await login('daffy@example.com')
+
+    const anonymous = await app.inject({
+      method: 'GET',
+      url: '/api/volunteer/shifts.ics',
+      headers: { host: 'localhost:3000' },
+    })
+    expect(anonymous.statusCode).toBe(401)
+
+    const mine = await app.inject({
+      method: 'GET',
+      url: '/api/volunteer/shifts.ics',
+      headers: { host: 'localhost:3000', cookie: session.cookie },
+    })
+    expect(mine.statusCode).toBe(200)
+    expect(mine.headers['content-type']).toContain('text/calendar')
+    expect(mine.payload).toContain('BEGIN:VEVENT')
+    expect(mine.payload).toContain('Infotresen betreuen')
+    expect(mine.payload).toContain('/mitmachen/meine-schichten')
+  })
 })
