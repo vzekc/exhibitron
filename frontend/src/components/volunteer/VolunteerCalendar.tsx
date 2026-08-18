@@ -22,7 +22,6 @@ export interface CalendarPeriod {
   startTime: string
   endTime: string
   neededCount?: number | null
-  note?: string | null
   coverage: CoverageSpan[]
   bookings?: CalendarBooking[]
 }
@@ -45,7 +44,6 @@ export interface OwnShift {
   startTime: string
   endTime: string
   activityName: string
-  note?: string | null
   contactName?: string | null
 }
 

@@ -16,6 +16,8 @@ import VolunteerCalendar, {
 } from '@components/volunteer/VolunteerCalendar'
 import ActivityDetails from '@components/volunteer/ActivityDetails'
 import SignUpDialog from '@components/volunteer/SignUpDialog'
+import { TableRow, TableCell } from '@components/Table'
+import PlainTable from '@components/volunteer/PlainTable'
 import { clock, weekday } from '@components/volunteer/coverage'
 
 const GET_PLAN = graphql(`
@@ -29,7 +31,6 @@ const GET_PLAN = graphql(`
       endTime
       period {
         id
-        note
         activity {
           id
           name
@@ -59,7 +60,6 @@ const GET_PLAN = graphql(`
         startTime
         endTime
         neededCount
-        note
         coverage {
           startTime
           endTime
@@ -110,7 +110,6 @@ const Mitmachen = () => {
     startTime: booking.startTime as string,
     endTime: booking.endTime as string,
     activityName: booking.period.activity.name,
-    note: booking.period.note,
     contactName: booking.period.activity.contact?.user.fullName,
   }))
 
@@ -118,7 +117,9 @@ const Mitmachen = () => {
     if (
       !(await showConfirm(
         'Schicht absagen',
-        `Soll „${shift.activityName}“ am ${weekday(shift.startTime)} um ${clock(shift.startTime)} wirklich abgesagt werden?`,
+        `Willst Du „${shift.activityName}“ am ${weekday(shift.startTime)} um ${clock(shift.startTime)} wirklich absagen?`,
+        'Ja',
+        'Nein',
       ))
     ) {
       return
@@ -175,25 +176,25 @@ const Mitmachen = () => {
           <h2 className="mb-2 text-xl font-semibold">Deine Schichten</h2>
           {ownShifts.length ? (
             <>
-              <ul className="space-y-1">
+              <PlainTable headers={['Tätigkeit', 'Tag', 'Von–bis', '']}>
                 {ownShifts.map((shift) => (
-                  <li key={shift.id} className="flex flex-wrap items-center gap-3">
-                    <span className="font-medium">{shift.activityName}</span>
-                    <span>
-                      {weekday(shift.startTime)}, {clock(shift.startTime)}–{clock(shift.endTime)}
-                    </span>
-                    {shift.note && (
-                      <span className="text-sm text-gray-500 dark:text-gray-400">{shift.note}</span>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => cancel(shift)}
-                      className="text-sm text-red-700 hover:underline dark:text-red-300">
-                      absagen
-                    </button>
-                  </li>
+                  <TableRow key={shift.id}>
+                    <TableCell>{shift.activityName}</TableCell>
+                    <TableCell>{weekday(shift.startTime)}</TableCell>
+                    <TableCell>
+                      {clock(shift.startTime)}–{clock(shift.endTime)}
+                    </TableCell>
+                    <TableCell>
+                      <button
+                        type="button"
+                        onClick={() => cancel(shift)}
+                        className="text-sm text-red-700 hover:underline dark:text-red-300">
+                        absagen
+                      </button>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </ul>
+              </PlainTable>
               <p className="mt-3 text-sm">
                 <a
                   href="/api/volunteer/shifts.ics"
@@ -229,7 +230,6 @@ const Mitmachen = () => {
             <p>
               {weekday(ownShift.startTime)}, {clock(ownShift.startTime)}–{clock(ownShift.endTime)}
             </p>
-            {ownShift.note && <p className="text-gray-600 dark:text-gray-400">{ownShift.note}</p>}
             {ownShift.contactName && (
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Fragen? {ownShift.contactName} weiß Bescheid.

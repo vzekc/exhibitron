@@ -23,7 +23,6 @@ export const shiftTime = (booking: VolunteerBooking) => {
 const Shift = ({ booking }: { booking: VolunteerBooking }) => (
   <li>
     <strong>{booking.period.activity.name}</strong>, {shiftTime(booking)}
-    {booking.period.note && <> — {booking.period.note}</>}
   </li>
 )
 

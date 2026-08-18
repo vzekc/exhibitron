@@ -38,7 +38,6 @@ const GET_ACTIVITY = graphql(`
         endTime
         durationMinutes
         neededCount
-        note
       }
     }
   }
@@ -128,7 +127,6 @@ const VolunteerActivityEditor = () => {
   const [periodFrom, setPeriodFrom] = useState('10:00')
   const [periodTo, setPeriodTo] = useState('18:00')
   const [neededCount, setNeededCount] = useState('')
-  const [note, setNote] = useState('')
 
   const activity = data?.getVolunteerActivity
 
@@ -188,7 +186,6 @@ const VolunteerActivityEditor = () => {
           startTime: startTime.toISOString(),
           durationMinutes,
           neededCount: neededCount ? Number(neededCount) : null,
-          note: note.trim() || null,
         },
       },
     })
@@ -196,7 +193,6 @@ const VolunteerActivityEditor = () => {
       await complain(result.errors[0]?.message ?? 'Unbekannter Fehler')
       return
     }
-    setNote('')
     await refetch()
   }
 
@@ -278,7 +274,7 @@ const VolunteerActivityEditor = () => {
         <>
           <PageHeading>Zeiträume</PageHeading>
           <Card>
-            <PlainTable headers={['Tag', 'Von–bis', 'Dauer', 'Gebraucht', 'Hinweis', '']}>
+            <PlainTable headers={['Tag', 'Von–bis', 'Dauer', 'Gebraucht', '']}>
               {activity.periods.map((period) => (
                 <TableRow key={period.id}>
                   <TableCell>{weekday(period.startTime as string)}</TableCell>
@@ -287,7 +283,6 @@ const VolunteerActivityEditor = () => {
                   </TableCell>
                   <TableCell>{duration(period.durationMinutes)}</TableCell>
                   <TableCell>{period.neededCount ?? 'beliebig viele'}</TableCell>
-                  <TableCell>{period.note ?? ''}</TableCell>
                   <TableCell>
                     <Button variant="danger" onClick={() => removePeriod(period.id)}>
                       Löschen
@@ -339,17 +334,7 @@ const VolunteerActivityEditor = () => {
                   className="w-40"
                 />
               </label>
-              <label className="grow">
-                <span className="block text-sm text-gray-600 dark:text-gray-400">Hinweis</span>
-                <FormInput
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  placeholder="Treffpunkt am Lastenaufzug"
-                />
-              </label>
-              <Button icon="add" onClick={addPeriod}>
-                Zeitraum hinzufügen
-              </Button>
+              <Button onClick={addPeriod}>Zeitraum hinzufügen</Button>
             </div>
           </Card>
         </>

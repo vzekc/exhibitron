@@ -55,7 +55,6 @@ const seedActivity = async () => {
       startTime: at(0, 10),
       durationMinutes: 8 * 60,
       neededCount: 2,
-      note: 'Treffpunkt am Tresen',
     })
     db.em.create(VolunteerBooking, {
       period,
@@ -97,7 +96,6 @@ const ACTIVITIES = graphql(`
         startTime
         endTime
         neededCount
-        note
         coverage {
           startTime
           endTime
@@ -138,7 +136,6 @@ const CREATE_PERIOD = graphql(`
       endTime
       durationMinutes
       neededCount
-      note
       coverage {
         count
         needed
@@ -385,7 +382,6 @@ describe('volunteer', () => {
           startTime: at(-1, 8).toISOString(),
           durationMinutes: 6 * 60,
           neededCount: 4,
-          note: 'Treffpunkt am Lastenaufzug',
         },
       },
       session,
@@ -394,7 +390,6 @@ describe('volunteer', () => {
     expect(period.data!.createVolunteerPeriod).toMatchObject({
       durationMinutes: 360,
       neededCount: 4,
-      note: 'Treffpunkt am Lastenaufzug',
     })
 
     /* Nobody has signed up yet, so the whole period wants people. */

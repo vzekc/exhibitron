@@ -386,7 +386,6 @@ const adminVolunteerMutations: MutationResolvers<Context> = {
       startTime: input.startTime,
       durationMinutes: input.durationMinutes,
       neededCount: input.neededCount ?? undefined,
-      note: input.note ?? undefined,
     })
 
     await db.em.persist(period).flush()
@@ -407,7 +406,6 @@ const adminVolunteerMutations: MutationResolvers<Context> = {
       period.durationMinutes = input.durationMinutes
     }
     if (input.neededCount !== undefined) period.neededCount = input.neededCount ?? undefined
-    if (input.note !== undefined) period.note = input.note ?? undefined
 
     await db.em.flush()
     return period

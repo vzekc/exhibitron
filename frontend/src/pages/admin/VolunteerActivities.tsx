@@ -73,9 +73,7 @@ const VolunteerActivities = () => {
       <PageHeading>Mitmachen</PageHeading>
 
       <ActionBar>
-        <Button icon="add" onClick={() => navigate('/admin/mitmachen/neu')}>
-          Neue Tätigkeit
-        </Button>
+        <Button onClick={() => navigate('/admin/mitmachen/neu')}>Neue Tätigkeit</Button>
       </ActionBar>
 
       <Card>

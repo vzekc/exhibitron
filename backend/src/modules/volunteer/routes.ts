@@ -30,7 +30,7 @@ export const registerVolunteerRoutes = async (app: FastifyInstance) => {
       title: booking.period.activity.name,
       startTime: booking.startTime,
       endTime: new Date(booking.startTime.getTime() + booking.durationMinutes * 60_000),
-      room: booking.period.note ?? '',
+      room: '',
       presenters: booking.period.activity.contact
         ? [booking.period.activity.contact.user.fullName]
         : [],

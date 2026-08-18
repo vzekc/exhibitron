@@ -40,7 +40,6 @@ const ActivityDetails = ({ activity, canBook, onClose, onPick }: ActivityDetails
               {period.neededCount
                 ? `${period.neededCount} Leute gebraucht`
                 : 'beliebig viele willkommen'}
-              {period.note ? ` — ${period.note}` : ''}
             </span>
             {canBook && (
               <Button onClick={() => onPick?.(activity, period, new Date(period.startTime))}>

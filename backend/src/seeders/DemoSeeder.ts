@@ -203,12 +203,7 @@ export class DemoSeeder extends Seeder {
         name: 'Infotresen betreuen',
         summary: 'Fragen beantworten, Programme verteilen',
         html: '<p>Am Tresen im Eingang: Fragen beantworten, Programme verteilen, Fundsachen annehmen.</p>',
-        periods: [0, 1, 2].map((offset) => ({
-          start: day(offset, 10),
-          minutes: 480,
-          needed: 2,
-          note: offset === 0 ? 'Treffpunkt am Tresen' : undefined,
-        })),
+        periods: [0, 1, 2].map((offset) => ({ start: day(offset, 10), minutes: 480, needed: 2 })),
       },
       {
         key: 'fotofix',
@@ -219,7 +214,6 @@ export class DemoSeeder extends Seeder {
           start: day(offset, 10),
           minutes: 480,
           needed: offset === 0 ? 1 : undefined,
-          note: undefined,
         })),
       },
     ]
@@ -241,7 +235,6 @@ export class DemoSeeder extends Seeder {
           startTime: periodData.start,
           durationMinutes: periodData.minutes,
           neededCount: periodData.needed,
-          note: periodData.note,
         })
         periodsByKey.set(`${activityData.key}-${periodData.start.toISOString()}`, period)
       }

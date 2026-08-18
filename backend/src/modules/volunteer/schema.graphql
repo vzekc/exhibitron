@@ -20,7 +20,6 @@ type VolunteerPeriod {
   How many people are wanted at any moment. Null means as many as register.
   """
   neededCount: Int
-  note: String
   coverage: [VolunteerCoverageSpan!]!
   bookings: [VolunteerBooking!]!
 }
@@ -88,14 +87,12 @@ input CreateVolunteerPeriodInput {
   startTime: Date!
   durationMinutes: Int!
   neededCount: Int
-  note: String
 }
 
 input UpdateVolunteerPeriodInput {
   startTime: Date
   durationMinutes: Int
   neededCount: Int
-  note: String
 }
 
 input BookVolunteerSlotInput {

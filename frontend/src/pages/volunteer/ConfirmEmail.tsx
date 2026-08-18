@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useMutation } from '@apollo/client'
 import { graphql } from 'gql.tada'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import Card from '@components/Card'
 import PageHeading from '@components/PageHeading'
 import LoadInProgress from '@components/LoadInProgress'
@@ -13,15 +13,19 @@ const CONFIRM_EMAIL = graphql(`
 `)
 
 /*
- * Where the link in the verification mail lands. It confirms the address, logs
- * the volunteer in, and hands them their shift list.
+ * Where the link in the verification mail lands. It confirms the address and
+ * opens the session, so from here on this volunteer can sign up for shifts.
+ *
+ * A volunteer has no password — this link is what lets them back in. Whoever
+ * would rather have one sets it here, with the same token, and from then on
+ * logs in with an address and a password like everybody else.
  */
 const ConfirmEmail = () => {
   const [searchParams] = useSearchParams()
-  const navigate = useNavigate()
   const token = searchParams.get('token') ?? ''
   const [confirmEmail] = useMutation(CONFIRM_EMAIL)
   const [problem, setProblem] = useState('')
+  const [confirmed, setConfirmed] = useState(false)
   const attempted = useRef(false)
 
   useEffect(() => {
@@ -39,23 +43,50 @@ const ConfirmEmail = () => {
         setProblem(result.errors[0]?.message ?? 'Unbekannter Fehler')
         return
       }
-      /* The session is now this volunteer's, so everything else knows them. */
-      window.location.href = '/mitmachen'
+      setConfirmed(true)
     }
     void run()
-  }, [confirmEmail, token, navigate])
+  }, [confirmEmail, token])
 
-  if (!problem) return <LoadInProgress />
+  if (problem) {
+    return (
+      <>
+        <PageHeading>Anmeldung bestätigen</PageHeading>
+        <Card>
+          <p>{problem}</p>
+          <p className="mt-2">
+            <Link to="/mitmachen" className="text-blue-700 dark:text-blue-300">
+              Zurück zum Plan
+            </Link>
+          </p>
+        </Card>
+      </>
+    )
+  }
+
+  if (!confirmed) return <LoadInProgress />
 
   return (
     <>
-      <PageHeading>Anmeldung bestätigen</PageHeading>
-      <Card>
-        <p>{problem}</p>
-        <p className="mt-2">
-          <Link to="/mitmachen" className="text-blue-700 dark:text-blue-300">
-            Zurück zum Mitmachen
+      <PageHeading>Danke!</PageHeading>
+      <Card className="space-y-3">
+        <p>Deine E-Mail-Adresse ist bestätigt. Du kannst Dich jetzt für Schichten eintragen.</p>
+        <p>
+          <a
+            href="/mitmachen"
+            className="inline-block rounded bg-blue-600/80 px-4 py-2 text-white hover:bg-blue-600">
+            Weiter zum Plan
+          </a>
+        </p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          Du brauchst kein Passwort — dieser Link aus der E-Mail bringt Dich jederzeit zurück. Wenn
+          Du Dich lieber mit einem Passwort anmeldest, kannst Du{' '}
+          <Link
+            to={`/resetPassword?token=${encodeURIComponent(token)}`}
+            className="text-blue-700 dark:text-blue-300">
+            hier eins setzen
           </Link>
+          .
         </p>
       </Card>
     </>

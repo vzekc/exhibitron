@@ -72,10 +72,6 @@ export class VolunteerPeriod extends BaseEntity {
   @Property({ nullable: true })
   neededCount?: number
 
-  /* Where to turn up: 'Treffpunkt Halle 10, Osteingang'. */
-  @Property({ columnType: 'text', nullable: true })
-  note?: string
-
   @OneToMany(() => VolunteerBooking, (booking) => booking.period)
   bookings = new Collection<VolunteerBooking>(this)
 }
