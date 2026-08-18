@@ -68,6 +68,7 @@ export const register = async (app: FastifyInstance) => {
   interface AuthForumQuery {
     redirectUrl?: string
     registrationToken?: string
+    helper?: string
   }
 
   app.get(
@@ -75,6 +76,9 @@ export const register = async (app: FastifyInstance) => {
     async (request: FastifyRequest<{ Querystring: AuthForumQuery }>, reply) => {
       request.session.registrationToken = request.query.registrationToken
       request.session.redirectUrl = request.query.redirectUrl || request.headers.referer || '/'
+      /* Set by the volunteer pages: a forum member who wants to help gets an
+         account here, rather than being sent to the exhibitor registration. */
+      request.session.forumHelperSignup = request.query.helper === '1'
 
       const authUrl = await app.forumOAuth2.generateAuthorizationUri(request, reply)
       return reply.redirect(authUrl)
@@ -82,22 +86,25 @@ export const register = async (app: FastifyInstance) => {
   )
 
   app.get('/auth/callback', async function (request: FastifyRequest, reply) {
-    const { registrationToken, redirectUrl } = request.session
+    const { registrationToken, redirectUrl, forumHelperSignup } = request.session
     delete request.session.redirectUrl
     delete request.session.registrationToken
+    delete request.session.forumHelperSignup
 
     const { token } = await this.forumOAuth2.getAccessTokenFromAuthorizationCodeFlow(request)
 
     // Retrieve user info from IdP
     const userInfo = await getUserInfo(token.access_token)
 
-    const { nickname, rank } = userInfo
+    const { nickname, email, rank } = userInfo
     const isAdministrator = administratorRanks.includes(rank)
 
     const user = await db.user.associateForumUser({
       nickname,
       registrationToken,
       isAdministrator,
+      email,
+      createIfMissing: forumHelperSignup,
     })
 
     const url = new URL(redirectUrl ?? '/')

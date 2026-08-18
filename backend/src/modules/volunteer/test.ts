@@ -721,4 +721,45 @@ describe('volunteer', () => {
     expect(mine.payload).toContain('Infotresen betreuen')
     expect(mine.payload).toContain('/mitmachen')
   })
+  graphqlTest('a forum member who comes to help gets an account', async () => {
+    const db = await initORM()
+    await RequestContext.create(db.em, async () => {
+      /* What the callback does once the forum has said who this is. */
+      const created = await db.user.associateForumUser({
+        nickname: 'neuling',
+        email: 'neuling@forum.example',
+        isAdministrator: false,
+        createIfMissing: true,
+      })
+      expect(created).not.toBeNull()
+      expect(created).not.toBe('needsSetup')
+      const user = created as User
+      expect(user.fullName).toBe('neuling')
+      /* The forum has the address confirmed, so shifts count straight away. */
+      expect(user.emailVerifiedAt).toBeTruthy()
+
+      /* Somebody who registered by hand keeps their account and gains the name. */
+      const known = await db.em.findOneOrFail(User, { nickname: 'donald' })
+      known.nickname = undefined
+      await db.em.flush()
+
+      const linked = (await db.user.associateForumUser({
+        nickname: 'donald',
+        email: known.email,
+        isAdministrator: false,
+        createIfMissing: true,
+      })) as User
+      expect(linked.id).toBe(known.id)
+      expect(linked.nickname).toBe('donald')
+
+      /* Without that permission nothing is opened. */
+      expect(
+        await db.user.associateForumUser({
+          nickname: 'niemand',
+          email: 'niemand@forum.example',
+          isAdministrator: false,
+        }),
+      ).toBeNull()
+    })
+  })
 })

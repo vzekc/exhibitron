@@ -35,5 +35,6 @@ declare module '@fastify/session' {
     canSwitchExhibitor?: boolean
     redirectUrl?: string
     registrationToken?: string
+    forumHelperSignup?: boolean
   }
 }

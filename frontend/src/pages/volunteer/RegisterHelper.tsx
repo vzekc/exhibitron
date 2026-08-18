@@ -18,10 +18,19 @@ const REGISTER_VOLUNTEER = graphql(`
 `)
 
 /*
- * Registering as a helper, for somebody who has no account here. Name, address
- * and a password of their own — so that afterwards they log in like everybody
- * else. What comes back says what to do next: look in the mail, or use the
- * login that already exists.
+ * Signing in over at the forum. `helper=1` says that whoever comes back this
+ * way wants to help, so an account is opened for them if they have none here —
+ * and `redirectUrl` puts them on the plan afterwards rather than back on this
+ * page, which is where the referer would send them.
+ */
+const FORUM_LOGIN = `/auth/forum?helper=1&redirectUrl=${encodeURIComponent('/mitmachen')}`
+
+/*
+ * How somebody without an account here gets one. Nearly everybody who comes
+ * has a forum account, so that stands first and large; the address and a
+ * password of one's own are for the few who do not, and afterwards they log in
+ * like everybody else. What comes back from registering says what to do next:
+ * look in the mail, or use the login that already exists.
  */
 const RegisterHelper = () => {
   const [name, setName] = useState('')
@@ -65,23 +74,38 @@ const RegisterHelper = () => {
 
     await showMessage('Bitte melde dich an', answer?.message ?? '', 'OK')
     if (answer?.outcome === 'useForumLogin') {
-      window.location.href = `/auth/forum?redirectUrl=${encodeURIComponent('/mitmachen')}`
+      window.location.href = FORUM_LOGIN
     }
   }
 
   return (
     <>
-      <PageHeading>Als Helfer registrieren</PageHeading>
+      <PageHeading>Beim Mitmachen anmelden</PageHeading>
+
+      <Card className="mb-4">
+        <h2 className="text-xl font-semibold">Du hast ein Konto im Forum?</h2>
+        <p className="mt-2 text-gray-600 dark:text-gray-400">
+          Dann melde Dich damit an — mehr ist nicht nötig, Du kannst Dich sofort eintragen.
+        </p>
+        <p className="mt-4">
+          <a
+            href={FORUM_LOGIN}
+            className="inline-block rounded bg-blue-600/80 px-4 py-3 text-lg text-white hover:bg-blue-600">
+            Über das Forum anmelden
+          </a>
+        </p>
+      </Card>
 
       <Card>
         {sent ? (
           <p>{sent}</p>
         ) : (
           <div className="space-y-4">
+            <h2 className="text-xl font-semibold">Kein Konto im Forum?</h2>
             <p className="text-gray-600 dark:text-gray-400">
-              Damit Du Dich für Schichten eintragen kannst, brauchen wir einen Namen, eine
-              E-Mail-Adresse und ein Kennwort. Du bekommst einen Link, mit dem Du die Adresse
-              bestätigst — danach meldest Du Dich damit an und kannst Dich eintragen.
+              Dann registriere Dich hier mit Namen, E-Mail-Adresse und einem Kennwort. Du bekommst
+              einen Link, mit dem Du die Adresse bestätigst — danach meldest Du Dich damit an und
+              kannst Dich eintragen.
             </p>
 
             <label className="block">
@@ -111,14 +135,6 @@ const RegisterHelper = () => {
                 onChange={(e) => setPasswordRepeat(e.target.value)}
               />
             </label>
-
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Wer ein Konto im Forum classic-computing.de hat, meldet sich besser damit an —{' '}
-              <a href="/auth/forum" className="text-blue-700 dark:text-blue-300">
-                über das Forum anmelden
-              </a>
-              .
-            </p>
 
             <div className="flex gap-2">
               <Button onClick={register} disabled={loading}>

@@ -17,6 +17,14 @@ type AssociateForumUserOptions = {
   nickname: string
   isAdministrator: boolean
   registrationToken?: string
+  /*
+   * The address the forum holds, and permission to open an account with it.
+   * Somebody who comes to help has no reason to be an exhibitor first, so the
+   * volunteer pages ask for this; every other way in still expects the account
+   * to be there already.
+   */
+  email?: string
+  createIfMissing?: boolean
 }
 
 export class UserRepository extends EntityRepository<User> {
@@ -66,7 +74,7 @@ export class UserRepository extends EntityRepository<User> {
   }
 
   async associateForumUser(options: AssociateForumUserOptions): Promise<AssociateForumUserResult> {
-    const { nickname, isAdministrator, registrationToken } = options
+    const { nickname, isAdministrator, registrationToken, email, createIfMissing } = options
     const em = this.getEntityManager()
 
     if (registrationToken) {
@@ -136,6 +144,41 @@ export class UserRepository extends EntityRepository<User> {
       },
       { populate: ['email'] },
     )
+    if (createIfMissing && email) {
+      /* An account may exist under this address without the forum name on it
+         yet — an exhibitor who registered by hand. Then the two are the same
+         person and the name is simply added. */
+      const byEmail = await this.findOne({ email })
+      if (byEmail?.nickname && byEmail.nickname !== nickname) {
+        /* That address belongs to somebody who signs in under another forum
+           name. Two people, one address — nothing to do here automatically. */
+        logger.warn(
+          `Forum user ${nickname} has the address of ${byEmail.nickname}; not opening an account`,
+        )
+        return null
+      }
+      if (byEmail) {
+        logger.info(`Linking forum user ${nickname} to the account of ${email}`)
+        byEmail.nickname = nickname
+        byEmail.emailVerifiedAt ??= new Date()
+        if (isAdministrator) byEmail.isAdministrator = true
+        await em.flush()
+        return byEmail
+      }
+
+      logger.info(`Opening an account for forum user ${nickname} (${email})`)
+      const created = this.create({
+        email,
+        fullName: nickname,
+        nickname,
+        isAdministrator,
+      })
+      /* The forum has the address confirmed already. */
+      created.emailVerifiedAt = new Date()
+      await em.persistAndFlush(created)
+      return created
+    }
+
     if (registration) {
       const registeredUser = await this.findOne({ email: registration.email })
       if (registeredUser) {

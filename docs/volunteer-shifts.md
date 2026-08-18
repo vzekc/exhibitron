@@ -85,6 +85,13 @@ The mail carries a second button, "Mit Forum-Konto verbinden", pointing at
 `/auth/forum?registrationToken=<token>` — the path exhibitor registration already uses, which sets
 the nickname and turns the account into a full forum login.
 
+Most people who come to help have a forum account, so `/mitmachen/registrieren` leads with it and
+keeps the address and password below as the way in for everybody else. The link carries `helper=1`,
+which lets `associateForumUser` open an account for a forum member who has none here — with the
+nickname, the address the forum holds, and `emailVerifiedAt` set, since the forum has confirmed it.
+Every other way into the forum login still expects the account to exist, and an address that already
+belongs to a different nickname is left alone.
+
 The link keeps working until the end of the exhibition, and each use opens the session again — an
 address that was confirmed once needs no second confirmation. A token that belongs to a forum
 account is refused; those sign in over there.
