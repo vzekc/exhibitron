@@ -11,18 +11,13 @@ import { Page } from '../modules/page/entity.js'
 export class DemoSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {
     const tables = []
-    const exhibition = em.create(Exhibition, {
-      key: 'cc2025',
-      title: 'Classic Computing 2025',
-      hostMatch: 'localhost|2025\\.classic-computing\\.de',
-      startDate: '2025-09-11',
-      endDate: '2025-09-14',
-      frozen: false,
-    })
+
+    /* The exhibitions come from the migrations. cc2026 is the one that answers
+     * on localhost, so the demo data hangs off it. */
+    const exhibition = await em.getRepository(Exhibition).findOneOrFail({ key: 'cc2026' })
 
     for (let number = 1; number <= 10; number++) {
-      const table = em.create(Table, { exhibition, id: number, number })
-      tables.push(table)
+      tables.push(em.create(Table, { exhibition, number }))
     }
 
     const users = [
@@ -72,13 +67,13 @@ export class DemoSeeder extends Seeder {
       title: 'Demo Home Page',
       content: await documentRepository.ensureDocument(
         null,
-        '<h1>Welcome to the Classic Computing 2025 Exhibition</h1><p>This is a demo of our exhibition platform.</p>',
+        '<h1>Welcome to the Classic Computing 2026 Exhibition</h1><p>This is a demo of our exhibition platform.</p>',
+        em,
       ),
     })
 
     const exhibitData = [
       {
-        id: 1,
         exhibition,
         title: 'Bildschirmtext',
         touchMe: false,
@@ -87,7 +82,6 @@ export class DemoSeeder extends Seeder {
         exhibitor: exhibitors[0],
       },
       {
-        id: 2,
         exhibition,
         title: 'TELEBAHN',
         touchMe: true,
@@ -97,7 +91,6 @@ export class DemoSeeder extends Seeder {
         exhibitor: exhibitors[0],
       },
       {
-        id: 3,
         exhibition,
         title: 'GIGI',
         touchMe: true,
@@ -106,7 +99,6 @@ export class DemoSeeder extends Seeder {
         exhibitor: exhibitors[0],
       },
       {
-        id: 4,
         exhibition,
         title: 'PDP-8',
         touchMe: false,
@@ -128,7 +120,6 @@ export class DemoSeeder extends Seeder {
         exhibitor: exhibitors[1],
       },
       {
-        id: 5,
         exhibition,
         title: 'Patcher',
         touchMe: true,
@@ -137,7 +128,6 @@ export class DemoSeeder extends Seeder {
         exhibitor: exhibitors[2],
       },
       {
-        id: 6,
         exhibition,
         title: 'Macintosh SE/30',
         touchMe: true,
@@ -153,7 +143,7 @@ export class DemoSeeder extends Seeder {
       exhibitData.map(async ({ html, extendedHtml, ...exhibitProps }) => {
         const exhibitObj: RequiredEntityData<Exhibit> = {
           ...exhibitProps,
-          description: await documentRepository.ensureDocument(null, html),
+          description: await documentRepository.ensureDocument(null, html, em),
         }
 
         // Add description extension if provided
@@ -161,6 +151,7 @@ export class DemoSeeder extends Seeder {
           exhibitObj.descriptionExtension = await documentRepository.ensureDocument(
             null,
             extendedHtml,
+            em,
           )
         }
 

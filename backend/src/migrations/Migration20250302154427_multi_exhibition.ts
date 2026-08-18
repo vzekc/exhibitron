@@ -17,6 +17,12 @@ ALTER TABLE "exhibition"
 INSERT INTO exhibition (id, created_at, updated_at, key, title)
 VALUES (1, NOW(), NOW(), 'cc2025', 'Classic Computing 2025');
 
+-- The insert names its own id, which leaves the sequence where it was. Hand it
+-- past the rows that are there, or the next exhibition created by a later
+-- migration or by the application collides with this one.
+SELECT setval(pg_get_serial_sequence('exhibition', 'id'),
+              coalesce((SELECT max(id) FROM exhibition), 0) + 1, false);
+
 CREATE TABLE "exhibitor"
 (
     "id"            SERIAL PRIMARY KEY,
@@ -34,6 +40,9 @@ ALTER TABLE "exhibitor"
 INSERT INTO exhibitor (id, created_at, exhibition_id, user_id)
 SELECT id, NOW(), 1, id
 FROM "user";
+
+SELECT setval(pg_get_serial_sequence('exhibitor', 'id'),
+              coalesce((SELECT max(id) FROM exhibitor), 0) + 1, false);
 
 ALTER TABLE "table"
     DROP CONSTRAINT "table_exhibitor_id_foreign";
