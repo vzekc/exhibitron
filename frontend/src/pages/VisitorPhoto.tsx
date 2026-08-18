@@ -16,7 +16,8 @@ import Button from '@components/Button.tsx'
  * genauso wie dort.
  */
 
-type Group = { title: string; files: string[] }
+type DescribedFile = { name: string; text: string }
+type Group = { title: string; files: DescribedFile[] }
 
 type PhotoPage =
   | { id: string; deleted: true }
@@ -170,14 +171,21 @@ const VisitorPhoto = () => {
           {page.groups.map((group) => (
             <div key={group.title}>
               <h2 className="mb-2 font-semibold text-gray-900 dark:text-gray-100">{group.title}</h2>
-              <ul className="flex flex-wrap gap-2">
+              {/* Eine Zeile je Datei: der Name zum Klicken, daneben, was drin
+                  ist — an c64-koala.koa sieht man das nicht. */}
+              <ul className="space-y-1">
                 {group.files.map((file) => (
-                  <li key={file}>
+                  <li key={file.name} className="sm:flex sm:items-baseline sm:gap-2">
                     <a
-                      className="inline-block rounded border border-gray-300 px-2 py-1 font-mono text-sm text-blue-700 hover:bg-gray-100 dark:border-gray-600 dark:text-blue-400 dark:hover:bg-gray-700"
-                      href={`/foto/${page.id}/${encodeURIComponent(file)}`}>
-                      {file}
+                      className="font-mono text-sm text-blue-700 underline hover:no-underline dark:text-blue-400"
+                      href={`/foto/${page.id}/${encodeURIComponent(file.name)}`}>
+                      {file.name}
                     </a>
+                    {file.text && (
+                      <span className="ml-4 block text-sm text-gray-600 sm:ml-0 sm:inline dark:text-gray-400">
+                        {file.text}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>

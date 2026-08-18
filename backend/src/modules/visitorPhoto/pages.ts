@@ -11,23 +11,19 @@ const STYLE = `
   .id { font-family: ui-monospace, monospace; font-size: 1.3rem; letter-spacing: .15em }
   img.foto { width: 100%; height: auto; border-radius: .4rem; margin: 1rem 0 }
   h2 { font-size: 1.05rem; margin: 1.4rem 0 .3rem }
-  /* One row per machine: its name in a column of its own, its formats beside
-     it, so that a machine with more formats than fit on the line keeps them
-     under the first one rather than under its name. */
-  .downloads { display: grid; grid-template-columns: max-content 1fr;
-               gap: .5rem .6rem; align-items: baseline; margin: 1rem 0 }
-  .downloads .system { font-weight: 600 }
-  /* On a narrow screen the names take the width the file names need, so they
-     go above their formats and the indent alone holds them together. */
-  @media (max-width: 30rem) {
-    .downloads { display: block }
-    .downloads .system { margin-top: .7rem }
-    .downloads ul.files { margin: .25rem 0 0 .8rem }
+  /* One line per file: the name to click, and beside it what it is — a
+     visitor cannot tell c64-koala.koa from c64-petscii.prg by the name. */
+  h2.system { margin: 1.6rem 0 .3rem }
+  ul.files { list-style: none; padding: 0; margin: 0 }
+  ul.files li { margin: .35rem 0 }
+  ul.files a { font-family: ui-monospace, monospace; text-decoration: none;
+               border-bottom: 1px solid }
+  ul.files .what { opacity: .8 }
+  /* Where the line will not fit, the description goes under its file name
+     rather than wrapping into the next one. */
+  @media (max-width: 34rem) {
+    ul.files .what { display: block; margin-left: 1rem; font-size: .9rem }
   }
-  ul.files { list-style: none; padding: 0; margin: 0;
-             display: flex; flex-wrap: wrap; gap: .4rem }
-  ul.files a { display: inline-block; padding: .25rem .6rem; border: 1px solid;
-               border-radius: .3rem; text-decoration: none; font-size: .9rem }
   .zip { display: inline-block; margin: .8rem 0; padding: .5rem 1rem;
          border: 2px solid; border-radius: .4rem; font-weight: 600; text-decoration: none }
   .tables { display: flex; flex-wrap: wrap; gap: .4rem; padding: 0; list-style: none }
@@ -81,7 +77,7 @@ const REFRESH_SECONDS = 8
 
 export function renderPhotoPage(
   id: string,
-  groups: { title: string; files: string[] }[],
+  groups: { title: string; files: { name: string; text: string }[] }[],
   tables: number[],
   { converting, problem }: { converting?: { since: Date }; problem?: string } = {},
 ) {
@@ -103,14 +99,19 @@ export function renderPhotoPage(
   const downloads =
     groups.length === 0
       ? ''
-      : `<div class="downloads">${groups
+      : groups
           .map(
-            (g) => `<div class="system">${escape(g.title)}:</div>
+            (g) => `<h2 class="system">${escape(g.title)}</h2>
   <ul class="files">${g.files
-    .map((f) => `<li><a href="/foto/${id}/${encodeURIComponent(f)}">${escape(f)}</a></li>`)
+    .map(
+      (f) =>
+        `<li><a href="/foto/${id}/${encodeURIComponent(f.name)}">${escape(f.name)}</a>${
+          f.text ? ` <span class="what">${escape(f.text)}</span>` : ''
+        }</li>`,
+    )
     .join('')}</ul>`,
           )
-          .join('\n')}</div>`
+          .join('\n')
 
   const trail =
     tables.length > 0

@@ -113,22 +113,76 @@ const GROUPS: { title: string; match: RegExp }[] = [
   { title: 'Amstrad', match: /^cpc/ },
   { title: 'Texas Instruments', match: /^ti99/ },
   { title: 'PC', match: /^(cga|mga|vga)/ },
-  { title: 'Terminals', match: /^(ascii-terminal|tektronix|vt24)/ },
-  { title: 'Drucker', match: /^ascii-print/ },
+  { title: 'Terminals', match: /^(ascii-terminal|ascii-tono|tektronix|vt24|minitel|btx)/ },
+  { title: 'Drucker', match: /^(ascii-print|nec-p6)/ },
   { title: 'Der Beleg', match: /^beleg\.png$/ },
 ]
 
-export function groupFiles(files: string[]) {
-  const shown = files.filter((f) => !f.endsWith('.sha256'))
-  const groups = GROUPS.map(({ title, match }) => ({
-    title,
-    files: shown.filter((f) => match.test(f)),
-  })).filter((g) => g.files.length > 0)
+/* One download: the file, and the line that says what it is. */
+export type DescribedFile = { name: string; text: string }
+export type FileGroup = { title: string; files: DescribedFile[] }
 
-  const claimed = new Set(groups.flatMap((g) => g.files))
-  const rest = shown.filter((f) => !claimed.has(f))
-  if (rest.length > 0) {
-    groups.push({ title: 'Weitere Formate', files: rest })
+/*
+ * The listing the conversion wrote beside the files, and the page it wrote for
+ * the file servers: both are plumbing rather than downloads, so neither is
+ * offered here.
+ */
+const MANIFEST = 'formate.json'
+const NOT_A_DOWNLOAD = new Set([MANIFEST, 'index.html'])
+
+type Manifest = { id?: string; dateien?: { name: string; system: string; text: string }[] }
+
+/*
+ * What each file is, as the converter said it: `formate.json` carries the
+ * machine every file belongs to and one line of German describing it. It is
+ * written by whatever made the files, so a format added to the converter
+ * describes itself here the day it is added, without this page knowing of it.
+ */
+async function readManifest(id: string): Promise<Manifest['dateien']> {
+  const raw = await fs.readFile(path.join(photoDir(id), MANIFEST), 'utf8').catch(() => null)
+  if (!raw) return undefined
+  try {
+    const parsed = JSON.parse(raw) as Manifest
+    return Array.isArray(parsed.dateien) ? parsed.dateien : undefined
+  } catch {
+    return undefined
   }
+}
+
+/* The files this photo has, grouped by machine and each with its line. */
+export async function describePhotoFiles(id: string): Promise<FileGroup[]> {
+  const present = new Set(
+    (await listPhotoFiles(id)).filter((f) => !f.endsWith('.sha256') && !NOT_A_DOWNLOAD.has(f)),
+  )
+  const groups: FileGroup[] = []
+  const put = (title: string, file: DescribedFile) => {
+    const group = groups.find((g) => g.title === title)
+    if (group) group.files.push(file)
+    else groups.push({ title, files: [file] })
+  }
+
+  /* First what the manifest knows, in the order it lists it. */
+  for (const entry of (await readManifest(id)) ?? []) {
+    if (!present.has(entry.name)) continue
+    present.delete(entry.name)
+    put(entry.system, { name: entry.name, text: entry.text })
+  }
+
+  /*
+   * Then the rest: the receipt, which the website makes rather than the
+   * converter, and — for a photo converted before there was a manifest — every
+   * format, grouped by its name alone and with nothing to say about itself.
+   */
+  const rest = [...present].sort()
+  for (const { title, match } of GROUPS) {
+    for (const name of rest.filter((n) => present.has(n) && match.test(n))) {
+      present.delete(name)
+      put(title, { name, text: '' })
+    }
+  }
+  for (const name of rest.filter((n) => present.has(n))) {
+    put('Weitere Formate', { name, text: '' })
+  }
+
   return groups
 }

@@ -32,7 +32,7 @@ import {
   codeMatches,
   generateDeleteCode,
   generatePhotoId,
-  groupFiles,
+  describePhotoFiles,
   hashCode,
   isWellFormedCode,
   isWellFormedId,
@@ -472,12 +472,11 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
     if (!photo) return reply.code(404).send({ error: 'unknown' })
     if (photo.deletedAt) return reply.send({ id, deleted: true })
 
-    const files = await listPhotoFiles(id)
     return reply.send({
       id,
       deleted: false,
       converting: !!converting(photo),
-      groups: groupFiles(files),
+      groups: await describePhotoFiles(id),
       tables: photo.tables,
     })
   })
@@ -544,10 +543,11 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
     if (!photo) return reply.code(404).type('text/html').send(renderNotFound())
     if (photo.deletedAt) return reply.type('text/html').send(renderDeletedPage())
 
-    const files = await listPhotoFiles(id)
-    return reply
-      .type('text/html')
-      .send(renderPhotoPage(id, groupFiles(files), photo.tables, { converting: converting(photo) }))
+    return reply.type('text/html').send(
+      renderPhotoPage(id, await describePhotoFiles(id), photo.tables, {
+        converting: converting(photo),
+      }),
+    )
   })
 
   app.get<{ Params: { id: string; file: string } }>('/foto/:id/:file', async (request, reply) => {
@@ -579,7 +579,9 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
     const photo = await photos.findOne({ id })
     if (!photo || photo.deletedAt) return reply.code(404).send({ error: 'unknown' })
 
-    const files = (await listPhotoFiles(id)).filter((f) => !f.endsWith('.sha256'))
+    const files = (await listPhotoFiles(id)).filter(
+      (f) => !f.endsWith('.sha256') && f !== 'formate.json',
+    )
     if (files.length === 0) return reply.code(404).send({ error: 'unknown' })
 
     reply.header('Content-Disposition', `attachment; filename="${id}.zip"`)
@@ -605,12 +607,11 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
       if (photo.deletedAt) return reply.type('text/html').send(renderDeletedPage())
 
       if (tooManyAttempts(id)) {
-        const files = await listPhotoFiles(id)
         return reply
           .code(429)
           .type('text/html')
           .send(
-            renderPhotoPage(id, groupFiles(files), photo.tables, {
+            renderPhotoPage(id, await describePhotoFiles(id), photo.tables, {
               converting: converting(photo),
               problem: 'Zu viele Versuche. Bitte später noch einmal.',
             }),
@@ -618,12 +619,11 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
       }
 
       if (!isWellFormedCode(code) || !codeMatches(code, photo.codeHash)) {
-        const files = await listPhotoFiles(id)
         return reply
           .code(400)
           .type('text/html')
           .send(
-            renderPhotoPage(id, groupFiles(files), photo.tables, {
+            renderPhotoPage(id, await describePhotoFiles(id), photo.tables, {
               converting: converting(photo),
               problem:
                 'Der Code stimmt nicht. Er steht auf dem Beleg unter „Foto wieder löschen?“.',
