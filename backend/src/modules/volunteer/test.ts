@@ -4,10 +4,20 @@ import { RequestContext } from '@mikro-orm/core'
 import { graphqlTest, login } from '../../test/server.js'
 import { initORM } from '../../db.js'
 import { Exhibition } from '../exhibition/entity.js'
+import { Exhibitor } from '../exhibitor/entity.js'
+import { ConferenceSession } from '../conferenceSession/entity.js'
 import { User } from '../user/entity.js'
 import { VolunteerActivity, VolunteerBooking, VolunteerPeriod } from './entity.js'
 
-const at = (day: number, hour: number) => new Date(2025, 8, day, hour, 0, 0)
+/*
+ * The exhibition this fixture describes is a month off, the way it is when
+ * somebody signs up: the tokens in the mails and the reminders both have
+ * something ahead of them. Day 0 is the first day, day -1 the build-up.
+ */
+const firstDay = new Date(new Date().setHours(0, 0, 0, 0) + 30 * 24 * 3600 * 1000)
+
+const at = (dayOffset: number, hour: number) =>
+  new Date(firstDay.getFullYear(), firstDay.getMonth(), firstDay.getDate() + dayOffset, hour)
 
 /*
  * One activity on the Saturday, wanted by two people from 10:00 to 18:00:
@@ -26,6 +36,8 @@ const seedActivity = async () => {
     }
 
     const exhibition = await db.em.findOneOrFail(Exhibition, { key: 'cc2025' })
+    exhibition.startDate = at(0, 0)
+    exhibition.endDate = at(3, 23)
     const daffy = await db.em.findOneOrFail(User, { nickname: 'daffy' })
     const donald = await db.em.findOneOrFail(User, { nickname: 'donald' })
     daffy.emailVerifiedAt = new Date()
@@ -40,7 +52,7 @@ const seedActivity = async () => {
     })
     const period = db.em.create(VolunteerPeriod, {
       activity,
-      startTime: at(13, 10),
+      startTime: at(0, 10),
       durationMinutes: 8 * 60,
       neededCount: 2,
       note: 'Treffpunkt am Tresen',
@@ -48,14 +60,23 @@ const seedActivity = async () => {
     db.em.create(VolunteerBooking, {
       period,
       user: daffy,
-      startTime: at(13, 10),
+      startTime: at(0, 10),
       durationMinutes: 3 * 60,
     })
     db.em.create(VolunteerBooking, {
       period,
       user: donald,
-      startTime: at(13, 11),
+      startTime: at(0, 11),
       durationMinutes: 2 * 60,
+    })
+
+    /* Daffy is also giving a talk that afternoon. */
+    db.em.create(ConferenceSession, {
+      exhibition,
+      title: 'CP/M auf dem Küchentisch',
+      startTime: at(0, 14),
+      durationMinutes: 60,
+      exhibitors: [await db.em.findOneOrFail(Exhibitor, { user: daffy })],
     })
 
     await db.em.flush()
@@ -126,6 +147,66 @@ const CREATE_PERIOD = graphql(`
     }
   }
 `)
+
+const BOOK = graphql(`
+  mutation BookVolunteerSlot($input: BookVolunteerSlotInput!) {
+    bookVolunteerSlot(input: $input) {
+      id
+      startTime
+      endTime
+      isMine
+      confirmed
+    }
+  }
+`)
+
+const REGISTER = graphql(`
+  mutation RegisterVolunteer($input: RegisterVolunteerInput!) {
+    registerVolunteer(input: $input) {
+      outcome
+      message
+    }
+  }
+`)
+
+const firstPeriodId = async (activityId: number) => {
+  const db = await initORM()
+  let periodId = 0
+  await RequestContext.create(db.em, async () => {
+    const period = await db.em.findOneOrFail(
+      VolunteerPeriod,
+      { activity: { id: activityId } },
+      { orderBy: { startTime: 'asc' } },
+    )
+    periodId = period.id
+  })
+  return periodId
+}
+
+/* What the link in the mail carries. */
+const tokenOf = async (email: string) => {
+  const db = await initORM()
+  let token = ''
+  await RequestContext.create(db.em, async () => {
+    const user = await db.em.findOneOrFail(
+      User,
+      { email },
+      { populate: ['passwordResetToken'], refresh: true },
+    )
+    token = user.passwordResetToken ?? ''
+  })
+  return token
+}
+
+const isVerified = async (email: string) => {
+  const db = await initORM()
+  let verified = false
+  await RequestContext.create(db.em, async () => {
+    const user = await db.em.findOneOrFail(User, { email }, { refresh: true })
+    verified = !!user.emailVerifiedAt
+  })
+  return verified
+}
 
 /* The Date scalar arrives untyped from gql.tada; every value is an ISO string. */
 const hours = (value: unknown) => new Date(value as string).getHours()
@@ -285,7 +366,7 @@ describe('volunteer', () => {
       {
         input: {
           activityId: activity.id,
-          startTime: at(12, 8).toISOString(),
+          startTime: at(-1, 8).toISOString(),
           durationMinutes: 6 * 60,
           neededCount: 4,
           note: 'Treffpunkt am Lastenaufzug',
@@ -350,7 +431,7 @@ describe('volunteer', () => {
     const empty = await graphqlRequest(
       CREATE_PERIOD,
       {
-        input: { activityId, startTime: at(13, 9).toISOString(), durationMinutes: 0 },
+        input: { activityId, startTime: at(0, 9).toISOString(), durationMinutes: 0 },
       },
       session,
     )
@@ -361,7 +442,7 @@ describe('volunteer', () => {
       {
         input: {
           activityId,
-          startTime: at(13, 9).toISOString(),
+          startTime: at(0, 9).toISOString(),
           durationMinutes: 60,
           neededCount: 0,
         },
@@ -429,5 +510,167 @@ describe('volunteer', () => {
     )
     expect(deleted.errors).toBeUndefined()
     expect(deleted.data!.deleteVolunteerActivity).toBe(true)
+  })
+
+  graphqlTest('an exhibitor helps for a time of their own choosing', async (graphqlRequest) => {
+    const activityId = await seedActivity()
+    const periodId = await firstPeriodId(activityId)
+    const session = await login('donald@example.com')
+
+    const booked = await graphqlRequest(
+      BOOK,
+      { input: { periodId, startTime: at(0, 16).toISOString(), durationMinutes: 90 } },
+      session,
+    )
+    expect(booked.errors).toBeUndefined()
+    expect(hours(booked.data!.bookVolunteerSlot.startTime)).toBe(16)
+    expect(booked.data!.bookVolunteerSlot.isMine).toBe(true)
+  })
+
+  graphqlTest('nobody is in two places at once', async (graphqlRequest) => {
+    const activityId = await seedActivity()
+    const periodId = await firstPeriodId(activityId)
+    const session = await login('daffy@example.com')
+
+    /* Daffy already helps from 10:00 to 13:00. */
+    const clash = await graphqlRequest(
+      BOOK,
+      { input: { periodId, startTime: at(0, 12).toISOString(), durationMinutes: 60 } },
+      session,
+    )
+    expect(clash.errors?.[0]?.message).toContain('Infotresen betreuen')
+
+    /* And gives a talk at 14:00. */
+    const talk = await graphqlRequest(
+      BOOK,
+      { input: { periodId, startTime: at(0, 13).toISOString(), durationMinutes: 120 } },
+      session,
+    )
+    expect(talk.errors?.[0]?.message).toContain('CP/M auf dem Küchentisch')
+  })
+
+  graphqlTest('a shift lies in its period and on the quarter hour', async (graphqlRequest) => {
+    const activityId = await seedActivity()
+    const periodId = await firstPeriodId(activityId)
+    const session = await login('donald@example.com')
+
+    const late = await graphqlRequest(
+      BOOK,
+      { input: { periodId, startTime: at(0, 17).toISOString(), durationMinutes: 120 } },
+      session,
+    )
+    expect(late.errors?.[0]?.message).toContain('bis 18:00')
+
+    const odd = await graphqlRequest(
+      BOOK,
+      {
+        input: {
+          periodId,
+          startTime: new Date(at(0, 13).getTime() + 20 * 60_000).toISOString(),
+          durationMinutes: 60,
+        },
+      },
+      session,
+    )
+    expect(odd.errors?.[0]?.message).toContain('Viertelstunde')
+  })
+
+  graphqlTest('somebody without an account signs up and confirms', async (graphqlRequest) => {
+    const activityId = await seedActivity()
+    const periodId = await firstPeriodId(activityId)
+
+    const registered = await graphqlRequest(REGISTER, {
+      input: {
+        name: 'Erika Mustermann',
+        email: 'erika@example.com',
+        slot: { periodId, startTime: at(0, 15).toISOString(), durationMinutes: 120 },
+      },
+    })
+    expect(registered.errors).toBeUndefined()
+    expect(registered.data!.registerVolunteer.outcome).toBe('verificationSent')
+    expect(registered.data!.registerVolunteer.message).toContain('erika@example.com')
+    expect(await isVerified('erika@example.com')).toBe(false)
+
+    /* The shift is held, and shows as not yet confirmed. */
+    const held = await graphqlRequest(ACTIVITIES)
+    const span = held
+      .data!.getVolunteerActivities!.find((a) => a.key === 'infotresen')!
+      .periods[0].coverage.find((s) => hours(s.startTime) === 15)!
+    expect([span.count, span.unconfirmed]).toEqual([0, 1])
+
+    const confirmed = await graphqlRequest(
+      graphql(`
+        mutation ConfirmVolunteerEmail($token: String!) {
+          confirmVolunteerEmail(token: $token)
+        }
+      `),
+      { token: await tokenOf('erika@example.com') },
+    )
+    expect(confirmed.errors).toBeUndefined()
+    expect(await isVerified('erika@example.com')).toBe(true)
+
+    const counted = await graphqlRequest(ACTIVITIES)
+    const now = counted
+      .data!.getVolunteerActivities!.find((a) => a.key === 'infotresen')!
+      .periods[0].coverage.find((s) => hours(s.startTime) === 15)!
+    expect([now.count, now.unconfirmed]).toEqual([1, 0])
+  })
+
+  graphqlTest('a name from the forum belongs to the forum login', async (graphqlRequest) => {
+    const activityId = await seedActivity()
+    const periodId = await firstPeriodId(activityId)
+
+    const result = await graphqlRequest(REGISTER, {
+      input: {
+        name: 'daffy',
+        email: 'someone.else@example.com',
+        slot: { periodId, startTime: at(0, 15).toISOString(), durationMinutes: 60 },
+      },
+    })
+    expect(result.errors).toBeUndefined()
+    expect(result.data!.registerVolunteer.outcome).toBe('useForumLogin')
+    expect(result.data!.registerVolunteer.message).toContain('Forum')
+  })
+
+  graphqlTest('an address that has an account goes to the login', async (graphqlRequest) => {
+    const activityId = await seedActivity()
+    const periodId = await firstPeriodId(activityId)
+
+    const result = await graphqlRequest(REGISTER, {
+      input: {
+        name: 'Doppelgänger',
+        email: 'meistereder@example.com',
+        slot: { periodId, startTime: at(0, 15).toISOString(), durationMinutes: 60 },
+      },
+    })
+    expect(result.data!.registerVolunteer.outcome).toBe('useForumLogin')
+  })
+
+  graphqlTest('everybody may drop their own shift, and only their own', async (graphqlRequest) => {
+    const activityId = await seedActivity()
+    const periodId = await firstPeriodId(activityId)
+    const donald = await login('donald@example.com')
+    const daffy = await login('daffy@example.com')
+
+    const booked = await graphqlRequest(
+      BOOK,
+      { input: { periodId, startTime: at(0, 13).toISOString(), durationMinutes: 60 } },
+      donald,
+    )
+    expect(booked.errors).toBeUndefined()
+    const { id } = booked.data!.bookVolunteerSlot
+
+    const CANCEL = graphql(`
+      mutation CancelVolunteerBooking($id: Int!) {
+        cancelVolunteerBooking(id: $id)
+      }
+    `)
+
+    const stranger = await graphqlRequest(CANCEL, { id }, daffy)
+    expect(stranger.errors?.[0]?.message).toContain('nicht deine Schicht')
+
+    const own = await graphqlRequest(CANCEL, { id }, donald)
+    expect(own.errors).toBeUndefined()
+    expect(own.data!.cancelVolunteerBooking).toBe(true)
   })
 })

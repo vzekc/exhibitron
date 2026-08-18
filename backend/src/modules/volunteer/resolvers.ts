@@ -10,8 +10,22 @@ import {
 } from '../../generated/graphql.js'
 import { VolunteerActivity, VolunteerBooking, VolunteerPeriod } from './entity.js'
 import { computeCoverage } from './coverage.js'
-import { requireAdmin, requireNotFrozen } from '../../db.js'
-import { BadRequestError, UniqueConstraintError } from '../common/errors.js'
+import { isAdmin, requireAdmin, requireNotFrozen } from '../../db.js'
+import {
+  AuthError,
+  BadRequestError,
+  PermissionDeniedError,
+  UniqueConstraintError,
+} from '../common/errors.js'
+import { bookSlot } from './booking.js'
+import { identifyVolunteer, isMagicLinkAccount } from './identity.js'
+import {
+  makeBookingConfirmedEmail,
+  makeCancellationEmail,
+  makeVerificationEmail,
+} from './emails.jsx'
+import { sendEmail } from '../common/sendEmail.js'
+import { RegisterVolunteerOutcome } from '../../generated/graphql.js'
 
 const endTimeOf = ({ startTime, durationMinutes }: VolunteerPeriod | VolunteerBooking) =>
   new Date(startTime.getTime() + durationMinutes * 60_000)
@@ -174,7 +188,129 @@ const periodOf = async (context: Context, id: number) => {
   return period
 }
 
-export const volunteerMutations: MutationResolvers<Context> = {
+const shiftsUrl = (siteUrl: string) => `${siteUrl}/mitmachen/meine-schichten`
+
+/* Everything the mails link to hangs off the one token. */
+const confirmUrl = (siteUrl: string, token: string) =>
+  `${siteUrl}/mitmachen/bestaetigen?token=${token}`
+
+const forumUrl = (siteUrl: string, token: string) =>
+  `${siteUrl}/auth/forum?registrationToken=${token}&redirectUrl=${encodeURIComponent(shiftsUrl(siteUrl))}`
+
+const publicVolunteerMutations: MutationResolvers<Context> = {
+  // @ts-expect-error ts2345
+  bookVolunteerSlot: async (_, { input }, context) => {
+    const { db, user, exhibition, siteUrl } = context
+    requireNotFrozen(exhibition)
+    if (!user) {
+      throw new AuthError('Bitte melde dich an oder trage dich mit Name und E-Mail-Adresse ein')
+    }
+
+    const booking = await bookSlot(context, user, input)
+    await db.em.populate(booking, ['period', 'period.activity'])
+    await sendEmail(
+      makeBookingConfirmedEmail(
+        user.fullName,
+        user.email,
+        booking,
+        shiftsUrl(siteUrl),
+        exhibition.title,
+      ),
+    )
+    return booking
+  },
+
+  registerVolunteer: async (_, { input }, context) => {
+    const { db, exhibition, siteUrl } = context
+    requireNotFrozen(exhibition)
+
+    const name = input.name.trim()
+    const email = input.email.trim()
+    if (!name || !email.includes('@')) {
+      throw new BadRequestError('Bitte gib deinen Namen und eine gültige E-Mail-Adresse an')
+    }
+
+    const identity = await identifyVolunteer(context, { name, email })
+    if (!identity.user) {
+      return {
+        outcome: identity.outcome as RegisterVolunteerOutcome,
+        message: identity.message,
+      }
+    }
+
+    /* The slot is held straight away, and shows as unconfirmed until the
+     * address is. */
+    const booking = await bookSlot(context, identity.user, input.slot)
+    await db.em.populate(booking, ['period', 'period.activity'])
+    await db.em.populate(identity.user, ['passwordResetToken'])
+    const token = identity.user.passwordResetToken!
+
+    await sendEmail(
+      makeVerificationEmail(
+        name,
+        email,
+        booking,
+        confirmUrl(siteUrl, token),
+        forumUrl(siteUrl, token),
+        exhibition.title,
+      ),
+    )
+
+    return {
+      outcome: identity.outcome as RegisterVolunteerOutcome,
+      message: identity.message,
+    }
+  },
+
+  confirmVolunteerEmail: async (_, { token }, { db, session }) => {
+    const user = await db.user.findOne(
+      { passwordResetToken: token },
+      { populate: ['password', 'passwordResetToken', 'passwordResetTokenExpires'] },
+    )
+    if (!user || !user.passwordResetTokenExpires || user.passwordResetTokenExpires < new Date()) {
+      throw new PermissionDeniedError('Dieser Link gilt nicht mehr. Bitte trage dich erneut ein.')
+    }
+    if (!isMagicLinkAccount(user)) {
+      throw new PermissionDeniedError(
+        'Dieses Konto hat eine eigene Anmeldung. Bitte melde dich damit an.',
+      )
+    }
+
+    user.emailVerifiedAt ??= new Date()
+    await db.em.flush()
+    session.userId = user.id
+    return true
+  },
+
+  cancelVolunteerBooking: async (_, { id }, context) => {
+    const { db, user, exhibition } = context
+    requireNotFrozen(exhibition)
+    if (!user) throw new AuthError('Bitte melde dich an')
+
+    const booking = await db.em.findOneOrFail(
+      VolunteerBooking,
+      { id, period: { activity: { exhibition } } },
+      { populate: ['user', 'period', 'period.activity', 'period.activity.contact.user'] },
+    )
+    if (booking.user.id !== user.id && !isAdmin(user, exhibition)) {
+      throw new PermissionDeniedError('Das ist nicht deine Schicht')
+    }
+
+    /* Somebody has to know that a shift starting today is free again. */
+    const hoursAway = (booking.startTime.getTime() - Date.now()) / 3_600_000
+    const contact = booking.period.activity.contact
+    if (hoursAway < 24 && contact) {
+      await sendEmail(
+        makeCancellationEmail(contact.user.email, booking.user.fullName, booking, exhibition.title),
+      )
+    }
+
+    await db.em.remove(booking).flush()
+    return true
+  },
+}
+
+const adminVolunteerMutations: MutationResolvers<Context> = {
   // @ts-expect-error ts2345
   createVolunteerActivity: async (_, { input }, context) => {
     const { db, user, exhibition } = context
@@ -300,6 +436,11 @@ export const volunteerMutations: MutationResolvers<Context> = {
     await db.em.remove(period).flush()
     return true
   },
+}
+
+export const volunteerMutations: MutationResolvers<Context> = {
+  ...publicVolunteerMutations,
+  ...adminVolunteerMutations,
 }
 
 export const volunteerResolvers = {

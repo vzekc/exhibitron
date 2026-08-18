@@ -98,7 +98,37 @@ input UpdateVolunteerPeriodInput {
   note: String
 }
 
+input BookVolunteerSlotInput {
+  periodId: Int!
+  startTime: Date!
+  durationMinutes: Int!
+}
+
+input RegisterVolunteerInput {
+  name: String!
+  email: String!
+  slot: BookVolunteerSlotInput!
+}
+
+enum RegisterVolunteerOutcome {
+  verificationSent
+  useForumLogin
+  useLogin
+}
+
+"""
+What somebody who is not logged in should do next.
+"""
+type RegisterVolunteerResult {
+  outcome: RegisterVolunteerOutcome!
+  message: String!
+}
+
 extend type Mutation {
+  bookVolunteerSlot(input: BookVolunteerSlotInput!): VolunteerBooking!
+  registerVolunteer(input: RegisterVolunteerInput!): RegisterVolunteerResult!
+  confirmVolunteerEmail(token: String!): Boolean!
+  cancelVolunteerBooking(id: Int!): Boolean!
   createVolunteerActivity(input: CreateVolunteerActivityInput!): VolunteerActivity!
   updateVolunteerActivity(id: Int!, input: UpdateVolunteerActivityInput!): VolunteerActivity!
   deleteVolunteerActivity(id: Int!): Boolean!

@@ -103,7 +103,7 @@ small:
 
 ```
 GET /index.php?exhibitron-nickname-exists/&nickname=<name>
-Authorization: Bearer <shared secret, EXHIBITRON_FORUM_API_TOKEN>
+Authorization: Bearer <shared secret, FORUM_API_TOKEN>
 → { "exists": true }
 ```
 
