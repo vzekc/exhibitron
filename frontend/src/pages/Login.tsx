@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useApolloClient, useLazyQuery, useMutation } from '@apollo/client'
+import { useApolloClient, useLazyQuery, useMutation, useQuery } from '@apollo/client'
 import { useExhibitor } from '@contexts/ExhibitorContext.ts'
 import { graphql } from 'gql.tada'
 import PageHeading from '@components/PageHeading'
@@ -16,6 +16,16 @@ type Inputs = {
 const IS_FORUM_USER = graphql(`
   query IsForumUser($email: String!) {
     isForumUser(email: $email)
+  }
+`)
+
+/* Somebody who only helps out has an account but no exhibitor record, so that
+   is not what says whether they are through. */
+const GET_CURRENT_USER = graphql(`
+  query GetCurrentUserForLogin {
+    getCurrentUser {
+      id
+    }
   }
 `)
 
@@ -35,6 +45,7 @@ const Login = () => {
   const [state, setState] = useState<State>('forumLogin')
   const apolloClient = useApolloClient()
   const { exhibitor, reloadExhibitor } = useExhibitor()
+  const { data: currentUser, refetch: reloadCurrentUser } = useQuery(GET_CURRENT_USER)
   const email = watch('email')
   const password = watch('password')
   const [isForumUser] = useLazyQuery(IS_FORUM_USER)
@@ -53,7 +64,8 @@ const Login = () => {
         if (data.login) {
           await apolloClient.clearStore()
           await reloadExhibitor()
-          // Redirect will happen in the useEffect above
+          await reloadCurrentUser()
+          // Redirect will happen in the useEffect below
         } else {
           setLoginFailed(true)
         }
@@ -108,12 +120,12 @@ const Login = () => {
 
   // If user is already logged in, redirect to the redirectUrl
   useEffect(() => {
-    if (exhibitor) {
+    if (exhibitor || currentUser?.getCurrentUser) {
       // Clear the redirectUrl from session storage
       sessionStorage.removeItem('redirectUrl')
       navigate(redirectUrl, { replace: true })
     }
-  }, [exhibitor, navigate, redirectUrl])
+  }, [exhibitor, currentUser, navigate, redirectUrl])
 
   // Process error parameter if present
   useEffect(() => {
