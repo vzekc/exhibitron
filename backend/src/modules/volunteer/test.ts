@@ -98,6 +98,35 @@ const ACTIVITIES = graphql(`
   }
 `)
 
+const CREATE_ACTIVITY = graphql(`
+  mutation CreateVolunteerActivity($input: CreateVolunteerActivityInput!) {
+    createVolunteerActivity(input: $input) {
+      id
+      key
+      name
+      description
+    }
+  }
+`)
+
+const CREATE_PERIOD = graphql(`
+  mutation CreateVolunteerPeriod($input: CreateVolunteerPeriodInput!) {
+    createVolunteerPeriod(input: $input) {
+      id
+      startTime
+      endTime
+      durationMinutes
+      neededCount
+      note
+      coverage {
+        count
+        needed
+        status
+      }
+    }
+  }
+`)
+
 /* The Date scalar arrives untyped from gql.tada; every value is an ISO string. */
 const hours = (value: unknown) => new Date(value as string).getHours()
 
@@ -229,5 +258,176 @@ describe('volunteer', () => {
     expect(hours(bookings[0].endTime)).toBe(13)
     expect(bookings[0].isMine).toBe(true)
     expect(bookings[0].period.activity.key).toBe('infotresen')
+  })
+  graphqlTest('an administrator lays out an activity and its periods', async (graphqlRequest) => {
+    const session = await login('admin@example.com')
+
+    const created = await graphqlRequest(
+      CREATE_ACTIVITY,
+      {
+        input: {
+          key: 'elektro-aufbau',
+          name: 'Elektro-Aufbau',
+          summary: 'Strom in die Halle bringen',
+          description: '<p>Kabeltrommeln, Verteiler, und wer sich damit auskennt.</p>',
+          ordering: 9,
+        },
+      },
+      session,
+    )
+    expect(created.errors).toBeUndefined()
+    const activity = created.data!.createVolunteerActivity!
+    expect(activity.name).toBe('Elektro-Aufbau')
+    expect(activity.description).toContain('Kabeltrommeln')
+
+    const period = await graphqlRequest(
+      CREATE_PERIOD,
+      {
+        input: {
+          activityId: activity.id,
+          startTime: at(12, 8).toISOString(),
+          durationMinutes: 6 * 60,
+          neededCount: 4,
+          note: 'Treffpunkt am Lastenaufzug',
+        },
+      },
+      session,
+    )
+    expect(period.errors).toBeUndefined()
+    expect(period.data!.createVolunteerPeriod).toMatchObject({
+      durationMinutes: 360,
+      neededCount: 4,
+      note: 'Treffpunkt am Lastenaufzug',
+    })
+
+    /* Nobody has signed up yet, so the whole period wants people. */
+    expect(period.data!.createVolunteerPeriod.coverage).toEqual([
+      expect.objectContaining({ count: 0, needed: 4, status: 'none' }),
+    ])
+  })
+
+  graphqlTest('only administrators lay out activities', async (graphqlRequest) => {
+    const daffy = await login('daffy@example.com')
+
+    for (const session of [undefined, daffy]) {
+      const result = await graphqlRequest(
+        CREATE_ACTIVITY,
+        {
+          input: { key: 'heimlich', name: 'Heimlich', summary: 'Nicht erlaubt' },
+        },
+        session,
+      )
+      expect(result.errors?.[0]?.message).toMatch(/administrator/i)
+    }
+  })
+
+  graphqlTest('a key belongs to one activity, and reads like a key', async (graphqlRequest) => {
+    const session = await login('admin@example.com')
+
+    const duplicate = await graphqlRequest(
+      CREATE_ACTIVITY,
+      {
+        input: { key: 'infotresen', name: 'Noch ein Infotresen', summary: 'Doppelt' },
+      },
+      session,
+    )
+    expect(duplicate.errors?.[0]?.message).toContain('infotresen')
+
+    const shouted = await graphqlRequest(
+      CREATE_ACTIVITY,
+      {
+        input: { key: 'Fotofix Betreuen', name: 'Fotofix', summary: 'Falsches Kürzel' },
+      },
+      session,
+    )
+    expect(shouted.errors?.[0]?.message).toContain('Kleinbuchstaben')
+  })
+
+  graphqlTest('a period lasts longer than nothing and wants somebody', async (graphqlRequest) => {
+    const session = await login('admin@example.com')
+    const activityId = await seedActivity()
+
+    const empty = await graphqlRequest(
+      CREATE_PERIOD,
+      {
+        input: { activityId, startTime: at(13, 9).toISOString(), durationMinutes: 0 },
+      },
+      session,
+    )
+    expect(empty.errors?.[0]?.message).toContain('null Minuten')
+
+    const nobody = await graphqlRequest(
+      CREATE_PERIOD,
+      {
+        input: {
+          activityId,
+          startTime: at(13, 9).toISOString(),
+          durationMinutes: 60,
+          neededCount: 0,
+        },
+      },
+      session,
+    )
+    expect(nobody.errors?.[0]?.message).toContain('mindestens eine Person')
+  })
+
+  graphqlTest(
+    'what somebody signed up for is not deleted underneath them',
+    async (graphqlRequest) => {
+      const session = await login('admin@example.com')
+      const activityId = await seedActivity()
+
+      const result = await graphqlRequest(
+        graphql(`
+          mutation DeleteVolunteerActivity($id: Int!) {
+            deleteVolunteerActivity(id: $id)
+          }
+        `),
+        { id: activityId },
+        session,
+      )
+      expect(result.errors?.[0]?.message).toContain('Schichten eingetragen')
+    },
+  )
+
+  graphqlTest('an activity nobody signed up for is changed and dropped', async (graphqlRequest) => {
+    const session = await login('admin@example.com')
+
+    const created = await graphqlRequest(
+      CREATE_ACTIVITY,
+      {
+        input: { key: 'abbau', name: 'Abbau', summary: 'Alles wieder einpacken', ordering: 9 },
+      },
+      session,
+    )
+    const { id } = created.data!.createVolunteerActivity!
+
+    const updated = await graphqlRequest(
+      graphql(`
+        mutation UpdateVolunteerActivity($id: Int!, $input: UpdateVolunteerActivityInput!) {
+          updateVolunteerActivity(id: $id, input: $input) {
+            summary
+          }
+        }
+      `),
+      { id, input: { summary: 'Alles wieder einpacken, am Sonntagabend' } },
+      session,
+    )
+    expect(updated.errors).toBeUndefined()
+    expect(updated.data!.updateVolunteerActivity.summary).toBe(
+      'Alles wieder einpacken, am Sonntagabend',
+    )
+
+    const deleted = await graphqlRequest(
+      graphql(`
+        mutation DeleteVolunteerActivity($id: Int!) {
+          deleteVolunteerActivity(id: $id)
+        }
+      `),
+      { id },
+      session,
+    )
+    expect(deleted.errors).toBeUndefined()
+    expect(deleted.data!.deleteVolunteerActivity).toBe(true)
   })
 })

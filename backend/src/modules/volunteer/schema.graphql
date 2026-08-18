@@ -64,3 +64,45 @@ extend type Query {
   getVolunteerActivity(key: String!): VolunteerActivity
   getMyVolunteerBookings: [VolunteerBooking!]!
 }
+
+input CreateVolunteerActivityInput {
+  key: String!
+  name: String!
+  summary: String!
+  description: String
+  contactId: Int
+  ordering: Int
+}
+
+input UpdateVolunteerActivityInput {
+  key: String
+  name: String
+  summary: String
+  description: String
+  contactId: Int
+  ordering: Int
+}
+
+input CreateVolunteerPeriodInput {
+  activityId: Int!
+  startTime: Date!
+  durationMinutes: Int!
+  neededCount: Int
+  note: String
+}
+
+input UpdateVolunteerPeriodInput {
+  startTime: Date
+  durationMinutes: Int
+  neededCount: Int
+  note: String
+}
+
+extend type Mutation {
+  createVolunteerActivity(input: CreateVolunteerActivityInput!): VolunteerActivity!
+  updateVolunteerActivity(id: Int!, input: UpdateVolunteerActivityInput!): VolunteerActivity!
+  deleteVolunteerActivity(id: Int!): Boolean!
+  createVolunteerPeriod(input: CreateVolunteerPeriodInput!): VolunteerPeriod!
+  updateVolunteerPeriod(id: Int!, input: UpdateVolunteerPeriodInput!): VolunteerPeriod!
+  deleteVolunteerPeriod(id: Int!): Boolean!
+}

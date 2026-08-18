@@ -422,8 +422,11 @@ resolvers keeps the one piece of real arithmetic testable without a server.
   `requireNotFrozen(exhibition)` as `conferenceSession` and `page` do.
 - `db.document.ensureDocument` for the long description, following
   `modules/conferenceSession/resolvers.ts`.
-- A period is refused when it lies outside its activity, when the duration is not positive, or when
-  `neededCount` is zero or negative — `BadRequestError` with a German message.
+- A period is refused when its duration is not positive or when `neededCount` is below one, and an
+  activity key that is not a slug or already taken in this exhibition is refused as well —
+  `BadRequestError` and `UniqueConstraintError` with German messages.
+- An activity or period that people have signed up for is not deleted: the answer names how many
+  shifts stand in the way, and they are cancelled first.
 - Tests for the guards and for the description round trip.
 
 ### 5. Booking, self-registration, verification
