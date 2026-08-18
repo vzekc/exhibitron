@@ -5,6 +5,8 @@ import { sendEmail } from '../modules/common/sendEmail.js'
 import { makeCleanupNotificationEmail } from './cleanupEmail.js'
 import { Exhibition } from '../modules/exhibition/entity.js'
 import { Registration } from '../modules/registration/entity.js'
+import { VolunteerBooking } from '../modules/volunteer/entity.js'
+import { Exhibitor } from '../modules/exhibitor/entity.js'
 import { RequestContext } from '@mikro-orm/core'
 
 const cleanupLogger = logger.child({ module: 'cleanup' })
@@ -13,7 +15,11 @@ const cleanupLogger = logger.child({ module: 'cleanup' })
 export const performCleanup = async (
   db: Services,
   exhibition: Exhibition,
-): Promise<{ deletedRegistrations: number }> => {
+): Promise<{
+  deletedRegistrations: number
+  deletedBookings: number
+  deletedVolunteers: number
+}> => {
   cleanupLogger.info(
     { exhibitionId: exhibition.id, title: exhibition.title },
     `Processing exhibition: ${exhibition.title}`,
@@ -28,12 +34,37 @@ export const performCleanup = async (
     `Deleted ${deletedCount} registrations`,
   )
 
-  // 2. Freeze the exhibition
+  // 2. Delete the volunteer shifts, and the accounts that exist only for them
+  const bookings = await db.em.find(
+    VolunteerBooking,
+    { period: { activity: { exhibition } } },
+    { populate: ['user'] },
+  )
+  const volunteers = new Set(bookings.map((booking) => booking.user))
+  bookings.forEach((booking) => db.em.remove(booking))
+  await db.em.flush()
+
+  let deletedVolunteers = 0
+  for (const user of volunteers) {
+    await db.em.populate(user, ['password'])
+    if (user.password || user.nickname) continue
+    if (await db.em.count(Exhibitor, { user })) continue
+    if (await db.em.count(VolunteerBooking, { user })) continue
+    db.em.remove(user)
+    deletedVolunteers++
+  }
+  await db.em.flush()
+  cleanupLogger.info(
+    { exhibitionId: exhibition.id, deletedBookings: bookings.length, deletedVolunteers },
+    `Deleted ${bookings.length} volunteer shifts and ${deletedVolunteers} volunteer accounts`,
+  )
+
+  // 3. Freeze the exhibition
   exhibition.frozen = true
   await db.em.flush()
   cleanupLogger.info({ exhibitionId: exhibition.id }, `Froze exhibition: ${exhibition.title}`)
 
-  // 3. Send email notification to all administrators (global + per-exhibition)
+  // 4. Send email notification to all administrators (global + per-exhibition)
   const globalAdmins = await db.user.find({ isAdministrator: true })
   await db.em.populate(exhibition, ['admins'])
   const exhibitionAdmins = exhibition.admins.getItems()
@@ -48,7 +79,7 @@ export const performCleanup = async (
     )
   }
 
-  return { deletedRegistrations: deletedCount }
+  return { deletedRegistrations: deletedCount, deletedBookings: bookings.length, deletedVolunteers }
 }
 
 // Scheduled cleanup - finds ended exhibitions automatically

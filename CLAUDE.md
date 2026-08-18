@@ -167,17 +167,17 @@ Only what a browser makes impossible may differ, and only as mechanism, never as
 
 The `fotofix` dropdown in `NavBar.tsx` holds the four pages about the installation: Präsentation and
 Infos, Web-Kamera (`/foto/kamera`) and the Seriell-Tester (`/user/serial`). They are for the people
-exhibiting, so the dropdown appears for somebody logged in, as the Administration one does. The first
-three carry a design of their own and open in a tab of their own; the Seriell-Tester is a page of
-this site.
+exhibiting, so the dropdown appears for somebody logged in, as the Administration one does. The
+first three carry a design of their own and open in a tab of their own; the Seriell-Tester is a page
+of this site.
 
 Both documents are pages of this site. Infos is `backend/docs/fotofix-infos.md`, rendered by
 `Documentation` the way `/user/help` is, so it is drawn by the site's own components and needs no
-styling of its own. Präsentation is `pages/fotofix/Praesentation.tsx`: eleven slides for a projector,
-so it fills the screen and its route sits outside `MainLayout`, in the site's type and colours rather
-than a design of its own. Its pictures are `frontend/public/fotofix/`; which one stands on which
-slide is listed in `talk-material/fotoliste.md` in the fotofix repository, where the photographs are
-made.
+styling of its own. Präsentation is `pages/fotofix/Praesentation.tsx`: eleven slides for a
+projector, so it fills the screen and its route sits outside `MainLayout`, in the site's type and
+colours rather than a design of its own. Its pictures are `frontend/public/fotofix/`; which one
+stands on which slide is listed in `talk-material/fotoliste.md` in the fotofix repository, where the
+photographs are made.
 
 ## Environment Variables (backend/.env)
 
@@ -187,6 +187,13 @@ Required:
 - `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` - WoltLab forum OAuth
 - `DATABASE_URL` - PostgreSQL connection string
 - `ADMIN_EMAIL`, `SMTP_HOST`, `SMTP_USERNAME`, `SMTP_PASSWORD` - Email config
+
+For the volunteer shifts (`modules/volunteer`), all optional:
+
+- `SITE_URL` - what the reminder mails link to, for a scheduled job that has no request to take a
+  host from. Falls back to the exhibition's `dnsZone`.
+- `FORUM_NICKNAME_API_URL`, `FORUM_API_TOKEN` - asks the forum whether a name is already taken
+  there. Unset means only the accounts exhibitron knows are checked.
 
 For the serial login relay (`modules/serial`), which joins an exhibitor to the login on fotofix:
 

@@ -108,3 +108,55 @@ export const makeCancellationEmail = (
     </article>,
   ),
 })
+
+export const makeDigestEmail = (
+  name: string,
+  email: string,
+  bookings: VolunteerBooking[],
+  shiftsUrl: string,
+  exhibitionTitle: string,
+) => ({
+  to: [email],
+  subject: `Deine Schichten morgen bei der ${exhibitionTitle}`,
+  body: makeEmailBody(
+    <article>
+      <h1>Hallo {name}!</h1>
+      <p>Morgen hilfst du hier mit:</p>
+      <ul>
+        {bookings.map((booking) => (
+          <Shift key={booking.id} booking={booking} />
+        ))}
+      </ul>
+      {bookings[0]?.period.activity.contact && (
+        <p>
+          Wenn etwas dazwischenkommt, sag bitte {bookings[0].period.activity.contact.user.fullName}{' '}
+          Bescheid.
+        </p>
+      )}
+      {shiftsUrl && (
+        <p>
+          <a href={shiftsUrl}>Meine Schichten</a>
+        </p>
+      )}
+    </article>,
+  ),
+})
+
+export const makeReminderEmail = (
+  name: string,
+  email: string,
+  booking: VolunteerBooking,
+  exhibitionTitle: string,
+) => ({
+  to: [email],
+  subject: `In einer Stunde: ${booking.period.activity.name}`,
+  body: makeEmailBody(
+    <article>
+      <h1>Gleich geht es los, {name}</h1>
+      <ul>
+        <Shift booking={booking} />
+      </ul>
+      <p>Danke, dass du bei der {exhibitionTitle} mithilfst!</p>
+    </article>,
+  ),
+})
