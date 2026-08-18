@@ -110,20 +110,22 @@ const MenuItem = ({
   )
 }
 
+/* Built once: a document made during a render is a new object every time, and
+   useQuery would subscribe again for each one. */
+const GET_CURRENT_USER = graphql(`
+  query GetCurrentUserForNavBar {
+    getCurrentUser {
+      id
+      fullName
+    }
+  }
+`)
+
 const NavBar = () => {
   const { exhibitor } = useExhibitor()
   /* A volunteer who registered to help has an account but no exhibitor record,
      and would otherwise be shown a Login button while being logged in. */
-  const { data: currentUser } = useQuery(
-    graphql(`
-      query GetCurrentUserForNavBar {
-        getCurrentUser {
-          id
-          fullName
-        }
-      }
-    `),
-  )
+  const { data: currentUser } = useQuery(GET_CURRENT_USER)
   const isVolunteer = !exhibitor && !!currentUser?.getCurrentUser
   const { exhibition } = useExhibition()
   const location = useLocation()
