@@ -15,6 +15,7 @@ import VolunteerCalendar, {
   type OwnShift,
 } from '@components/volunteer/VolunteerCalendar'
 import ActivityDetails from '@components/volunteer/ActivityDetails'
+import ContactHint from '@components/volunteer/ContactHint'
 import SignUpDialog from '@components/volunteer/SignUpDialog'
 import { TableRow, TableCell } from '@components/Table'
 import PlainTable from '@components/volunteer/PlainTable'
@@ -38,6 +39,11 @@ const GET_PLAN = graphql(`
             id
             user {
               fullName
+              nickname
+              email
+              contacts {
+                email
+              }
             }
           }
         }
@@ -53,6 +59,11 @@ const GET_PLAN = graphql(`
         id
         user {
           fullName
+          nickname
+          email
+          contacts {
+            email
+          }
         }
       }
       periods {
@@ -110,7 +121,7 @@ const Mitmachen = () => {
     startTime: booking.startTime as string,
     endTime: booking.endTime as string,
     activityName: booking.period.activity.name,
-    contactName: booking.period.activity.contact?.user.fullName,
+    contact: booking.period.activity.contact?.user,
   }))
 
   const cancel = async (shift: OwnShift) => {
@@ -220,11 +231,7 @@ const Mitmachen = () => {
             <p>
               {weekday(ownShift.startTime)}, {clock(ownShift.startTime)}–{clock(ownShift.endTime)}
             </p>
-            {ownShift.contactName && (
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Fragen? {ownShift.contactName} weiß Bescheid.
-              </p>
-            )}
+            {ownShift.contact && <ContactHint contact={ownShift.contact} />}
             <div className="flex justify-end gap-2">
               <Button variant="secondary" onClick={() => setOwnShift(null)}>
                 Schließen

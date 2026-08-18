@@ -7,6 +7,7 @@ import {
   type CoverageSpan,
   type CoverageStatus,
 } from './coverage'
+import type { ActivityContact } from './ContactHint'
 
 export interface CalendarBooking {
   id: number
@@ -34,7 +35,7 @@ export interface CalendarActivity {
   name: string
   summary?: string
   description?: string | null
-  contact?: { user: { fullName: string } } | null
+  contact?: { user: ActivityContact } | null
   periods: CalendarPeriod[]
 }
 
@@ -44,7 +45,7 @@ export interface OwnShift {
   startTime: string
   endTime: string
   activityName: string
-  contactName?: string | null
+  contact?: ActivityContact | null
 }
 
 interface VolunteerCalendarProps {

@@ -1,6 +1,7 @@
 import Modal from '@components/Modal'
 import Button from '@components/Button'
 import ServerHtmlContent from '@components/ServerHtmlContent'
+import ContactHint from './ContactHint'
 import type { CalendarActivity } from './VolunteerCalendar'
 
 interface ActivityDetailsProps {
@@ -20,11 +21,7 @@ const ActivityDetails = ({ activity, onClose }: ActivityDetailsProps) => (
 
       {activity.description && <ServerHtmlContent html={activity.description} />}
 
-      {activity.contact && (
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          Fragen? {activity.contact.user.fullName} weiß Bescheid.
-        </p>
-      )}
+      {activity.contact && <ContactHint contact={activity.contact.user} />}
 
       <div className="flex justify-end">
         <Button variant="secondary" onClick={onClose}>
