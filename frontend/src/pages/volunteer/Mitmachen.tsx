@@ -11,7 +11,13 @@ import VolunteerCalendar, {
   type CalendarPeriod,
 } from '@components/volunteer/VolunteerCalendar'
 import SignUpDialog from '@components/volunteer/SignUpDialog'
-import { clock, coverageChip, coverageLabel, weekday } from '@components/volunteer/coverage'
+import {
+  clock,
+  coverageChip,
+  joinAdjacent,
+  wantsPeople,
+  weekday,
+} from '@components/volunteer/coverage'
 
 const GET_PLAN = graphql(`
   query GetVolunteerPlan {
@@ -56,6 +62,9 @@ const GET_PLAN = graphql(`
     }
   }
 `)
+
+/* The stretches of a period that still want somebody. */
+const gapsOf = (period: CalendarPeriod) => joinAdjacent(period.coverage.filter(wantsPeople))
 
 const Mitmachen = () => {
   const { loading, error, data, refetch } = useQuery(GET_PLAN, { fetchPolicy: 'cache-and-network' })
@@ -120,14 +129,15 @@ const Mitmachen = () => {
                     : 'beliebig viele willkommen'}
                   {period.note ? ` — ${period.note}` : ''}
                 </span>
-                <span className="flex flex-wrap gap-1">
-                  {period.coverage.map((span, index) => (
-                    <span
-                      key={index}
-                      className={`text-xs rounded px-2 py-1 ${coverageChip[span.status]}`}>
-                      {clock(span.startTime)}–{clock(span.endTime)}: {coverageLabel[span.status]}
-                    </span>
-                  ))}
+                {/* The calendar above shows the shape of it; here it is enough
+                    to say when somebody is still missing. */}
+                <span
+                  className={`text-xs rounded px-2 py-1 ${coverageChip[gapsOf(period).length ? 'under' : 'met']}`}>
+                  {gapsOf(period).length
+                    ? `noch frei: ${gapsOf(period)
+                        .map((span) => `${clock(span.startTime)}–${clock(span.endTime)}`)
+                        .join(', ')}`
+                    : 'besetzt'}
                 </span>
                 <button
                   type="button"

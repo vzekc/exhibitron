@@ -70,6 +70,14 @@ describe('coverage', () => {
     expect(summarize(spans)).toEqual(['10-11 1/0 met', '11-13 0/0 none', '13-14 1/0 met'])
   })
 
+  test('a needed count of null is no count at all', () => {
+    /* Which is how it arrives from the database. */
+    const spans = computeCoverage({ startTime: at(10), durationMinutes: 120, neededCount: null }, [
+      booking(10, 12),
+    ])
+    expect(summarize(spans)).toEqual(['10-12 1/0 unlimited'])
+  })
+
   test('without a needed count, anybody helping is enough', () => {
     const spans = computeCoverage(period(10, 14), [booking(11, 13)])
     expect(summarize(spans)).toEqual(['10-11 0/0 none', '11-13 1/0 unlimited', '13-14 0/0 none'])

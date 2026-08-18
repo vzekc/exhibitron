@@ -1,6 +1,4 @@
-import { useMemo, useState } from 'react'
-import { useIsMobile } from '@hooks/useIsMobile'
-import DaySelector from '@components/DaySelector'
+import { useMemo } from 'react'
 import { toLocalDateString } from '@utils/date'
 import {
   clock,
@@ -46,26 +44,30 @@ interface VolunteerCalendarProps {
   onPick?: (activity: CalendarActivity, period: CalendarPeriod, startTime: Date) => void
 }
 
-/* Dense enough that four days fit on a screen, wide enough to hit with a finger. */
-const HOUR_HEIGHT = 44
-
 const hourOf = (value: string) => {
   const date = new Date(value)
   return date.getHours() + date.getMinutes() / 60
 }
 
+/* A stretch this long has room for its numbers written into it. */
+const LABELLED_HOURS = 1.5
+
+/* With a dozen hours in a day, every hour written out crowds a narrow screen.
+   Below that width only every second one is shown. */
+const isQuietHour = (hour: number) => hour % 2 === 1
+
 /*
- * The plan of all days at once. Each day carries a lane per activity that
- * wants help that day, painted from the coverage the server counted: where
- * nobody is, where too few are, where it is done, and where more than enough
- * have come.
+ * The plan of all days at once: a day per row, the clock from left to right,
+ * and under each day one bar per activity that wants help that day. The bars
+ * are painted from the coverage the server counted — where nobody is, where
+ * too few are, where it is done, and where more than enough have come.
  *
- * The days come from the periods themselves, so the build-up before the doors
- * open and the last evening are simply there.
+ * Days downwards rather than sideways is what keeps it dense: another activity
+ * costs one thin bar, not another column, so a day with six of them still fits
+ * on a phone. The days come from the periods themselves, so the build-up
+ * before the doors open and the last evening are simply there.
  */
 const VolunteerCalendar = ({ activities, onPick }: VolunteerCalendarProps) => {
-  const isMobile = useIsMobile()
-
   const days = useMemo(() => {
     const dates = activities.flatMap((activity) =>
       activity.periods.map((period) => toLocalDateString(new Date(period.startTime))),
@@ -73,12 +75,9 @@ const VolunteerCalendar = ({ activities, onPick }: VolunteerCalendarProps) => {
     return [...new Set(dates)].sort()
   }, [activities])
 
-  const [selectedDay, setSelectedDay] = useState('')
-  const shownDays = isMobile ? [selectedDay || days[0]].filter(Boolean) : days
-
   const { startHour, endHour } = useMemo(() => {
     const periods = activities.flatMap((activity) => activity.periods)
-    if (!periods.length) return { startHour: 9, endHour: 18 }
+    if (!periods.length) return { startHour: 9, endHour: 22 }
     return {
       startHour: Math.floor(Math.min(...periods.map((period) => hourOf(period.startTime)))),
       endHour: Math.ceil(Math.max(...periods.map((period) => hourOf(period.endTime)))),
@@ -93,93 +92,97 @@ const VolunteerCalendar = ({ activities, onPick }: VolunteerCalendarProps) => {
     )
   }
 
-  const height = (endHour - startHour) * HOUR_HEIGHT
-  const offsetOf = (value: string) => (hourOf(value) - startHour) * HOUR_HEIGHT
-  const heightOf = (from: string, to: string) => (hourOf(to) - hourOf(from)) * HOUR_HEIGHT
+  /* Everything is placed in percent of the day, so the bars follow the window. */
+  const span = endHour - startHour
+  const percentOf = (hour: number) => ((hour - startHour) / span) * 100
+  const hours = Array.from({ length: span + 1 }, (_, index) => startHour + index)
 
   const onDay = (activity: CalendarActivity, day: string) =>
     activity.periods.filter((period) => toLocalDateString(new Date(period.startTime)) === day)
 
   return (
     <div className="space-y-3">
-      {isMobile && (
-        <DaySelector
-          availableDates={days}
-          selectedDate={selectedDay || days[0]}
-          onChange={setSelectedDay}
-        />
-      )}
+      {/* The clock, once, above everything it applies to */}
+      <div className="flex items-end gap-2">
+        <div className="w-24 shrink-0 sm:w-36" />
+        <div className="relative h-4 grow">
+          {hours.map((hour) => (
+            <span
+              key={hour}
+              className={`text-xs absolute -translate-x-1/2 text-gray-500 dark:text-gray-400 ${
+                isQuietHour(hour) ? 'hidden sm:inline' : ''
+              }`}
+              style={{ left: `${percentOf(hour)}%` }}>
+              {hour}
+            </span>
+          ))}
+        </div>
+      </div>
 
-      <div className="overflow-x-auto">
-        <div className="flex gap-4">
-          {/* The clock down the left-hand side. It carries the same two header
-              rows as a day column, so that every hour stands beside its own
-              stretch of the lanes rather than half an hour above it. */}
-          <div className="w-12 shrink-0">
-            <div className="invisible mb-1 text-sm font-medium">.</div>
-            <div className="text-xs invisible">.</div>
-            <div style={{ height }}>
-              {Array.from({ length: endHour - startHour }, (_, index) => (
-                <div
-                  key={index}
-                  className="text-xs text-gray-500 dark:text-gray-400"
-                  style={{ height: HOUR_HEIGHT }}>
-                  {String(startHour + index).padStart(2, '0')}:00
+      {days.map((day) => {
+        const withPeriods = activities.filter((activity) => onDay(activity, day).length)
+        return (
+          <div key={day}>
+            <div className="border-b border-gray-200 pb-0.5 text-sm font-semibold dark:border-gray-700">
+              {new Date(day).toLocaleDateString('de-DE', {
+                weekday: 'long',
+                day: '2-digit',
+                month: '2-digit',
+              })}
+            </div>
+
+            <div className="mt-1 space-y-0.5">
+              {withPeriods.map((activity) => (
+                <div key={activity.id} className="flex items-center gap-2">
+                  <div
+                    className="text-xs w-24 shrink-0 truncate text-gray-600 sm:w-36 dark:text-gray-400"
+                    title={activity.name}>
+                    {activity.name}
+                  </div>
+
+                  <div className="relative h-5 grow rounded-sm bg-gray-100 dark:bg-gray-800">
+                    {/* An hour line, so that a bar can be read against the clock */}
+                    {hours.slice(1, -1).map((hour) => (
+                      <div
+                        key={hour}
+                        className="absolute top-0 h-full w-px bg-white dark:bg-gray-900"
+                        style={{ left: `${percentOf(hour)}%` }}
+                      />
+                    ))}
+
+                    {onDay(activity, day).flatMap((period) =>
+                      period.coverage.map((stretch, index) => {
+                        const status = stretch.status as CoverageStatus
+                        const from = hourOf(stretch.startTime)
+                        const to = hourOf(stretch.endTime)
+                        return (
+                          <button
+                            key={`${period.id}-${index}`}
+                            type="button"
+                            onClick={() => onPick?.(activity, period, new Date(stretch.startTime))}
+                            title={`${activity.name}, ${clock(stretch.startTime)}–${clock(
+                              stretch.endTime,
+                            )}: ${coverageLabel[status]}${
+                              stretch.needed ? ` (${stretch.count} von ${stretch.needed})` : ''
+                            }`}
+                            className={`absolute top-0 h-full overflow-hidden rounded-sm text-[10px] leading-5 text-gray-700 dark:text-gray-100 ${coverageFill[status]}`}
+                            style={{
+                              left: `${percentOf(from)}%`,
+                              width: `${((to - from) / span) * 100}%`,
+                            }}>
+                            {to - from >= LABELLED_HOURS &&
+                              `${stretch.count}${stretch.needed ? `/${stretch.needed}` : ''}`}
+                          </button>
+                        )
+                      }),
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
-
-          {shownDays.map((day) => {
-            const withPeriods = activities.filter((activity) => onDay(activity, day).length)
-            return (
-              <div key={day} className="min-w-0 grow">
-                <div className="mb-1 text-sm font-medium">
-                  {new Date(day).toLocaleDateString('de-DE', {
-                    weekday: 'short',
-                    day: '2-digit',
-                    month: '2-digit',
-                  })}
-                </div>
-                <div className="flex gap-1">
-                  {withPeriods.map((activity) => (
-                    <div key={activity.id} className="min-w-16 grow">
-                      <div
-                        className="text-xs truncate text-gray-600 dark:text-gray-400"
-                        title={activity.name}>
-                        {activity.name}
-                      </div>
-                      <div
-                        className="relative rounded bg-gray-100 dark:bg-gray-800"
-                        style={{ height }}>
-                        {onDay(activity, day).flatMap((period) =>
-                          period.coverage.map((span, index) => (
-                            <button
-                              key={`${period.id}-${index}`}
-                              type="button"
-                              onClick={() => onPick?.(activity, period, new Date(span.startTime))}
-                              title={`${activity.name}, ${clock(span.startTime)}–${clock(span.endTime)}: ${
-                                coverageLabel[span.status as CoverageStatus]
-                              }${span.needed ? ` (${span.count} von ${span.needed})` : ''}`}
-                              className={`absolute w-full rounded-sm border border-white/40 dark:border-black/20 ${
-                                coverageFill[span.status as CoverageStatus]
-                              }`}
-                              style={{
-                                top: offsetOf(span.startTime),
-                                height: heightOf(span.startTime, span.endTime),
-                              }}
-                            />
-                          )),
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </div>
+        )
+      })}
 
       <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
         {(['none', 'under', 'met', 'over'] as CoverageStatus[]).map((status) => (

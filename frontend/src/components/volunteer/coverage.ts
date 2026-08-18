@@ -45,6 +45,21 @@ export const coverageChip: Record<CoverageStatus, string> = {
 export const wantsPeople = ({ status }: { status: CoverageStatus }) =>
   status === 'none' || status === 'under'
 
+/*
+ * Stretches that follow one another, written as one range. A period where
+ * nobody is until noon and one person is until two wants somebody from ten to
+ * two, and reads better said that way.
+ */
+export const joinAdjacent = (spans: { startTime: string; endTime: string }[]) =>
+  spans.reduce<{ startTime: string; endTime: string }[]>((joined, span) => {
+    const previous = joined[joined.length - 1]
+    if (previous && previous.endTime === span.startTime) {
+      previous.endTime = span.endTime
+      return joined
+    }
+    return [...joined, { ...span }]
+  }, [])
+
 export const clock = (value: string | Date) =>
   new Date(value).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
 

@@ -17,8 +17,8 @@ export type CoverageStatus = 'none' | 'under' | 'met' | 'over' | 'unlimited'
 export interface CoveragePeriod {
   startTime: Date
   durationMinutes: number
-  /* Unset means as many as register. */
-  neededCount?: number
+  /* Unset means as many as register. The database hands this over as null. */
+  neededCount?: number | null
 }
 
 export interface CoverageBooking {
@@ -34,16 +34,16 @@ export interface CoverageSpan {
   /* People whose address is verified. Only these count towards the need. */
   count: number
   unconfirmed: number
-  needed?: number
+  needed?: number | null
   status: CoverageStatus
 }
 
 const endOf = ({ startTime, durationMinutes }: CoveragePeriod | CoverageBooking) =>
   startTime.getTime() + durationMinutes * 60_000
 
-const statusOf = (count: number, needed?: number): CoverageStatus => {
+const statusOf = (count: number, needed?: number | null): CoverageStatus => {
   if (count === 0) return 'none'
-  if (needed === undefined) return 'unlimited'
+  if (needed === undefined || needed === null) return 'unlimited'
   if (count < needed) return 'under'
   if (count === needed) return 'met'
   return 'over'
