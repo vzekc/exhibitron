@@ -54,6 +54,21 @@ const MAX_QUEUED_FRAMES = 64
 /* How long the agent has to dial back before the exhibitor is told it did not. */
 const DIAL_TIMEOUT_MS = 15_000
 
+/*
+ * How often a joined socket is asked to answer.
+ *
+ * A session carries nothing for minutes at a time — a machine parked at a
+ * Kermit server prompt is one — and an idle TCP flow is dropped by the routers
+ * and firewalls on either side of this without either end being told. A ping
+ * is a control frame and is not copied across, so the relay keeps both of its
+ * own legs in use and finds the one that has stopped being there.
+ *
+ * The browser is the reason this end pings rather than leaving it to the two
+ * clients: a page cannot send a ping, so its half of the path is the relay's
+ * to hold up.
+ */
+const PING_MS = 30_000
+
 /* One person, one machine, and a spare — not the whole agent to themselves. */
 export const SESSIONS_PER_EXHIBITOR = 2
 
@@ -150,6 +165,32 @@ export function requestSession(options: {
   say(agent.socket, { t: 'open', sid, mode, term, cols, rows })
 }
 
+/*
+ * A socket that answers is one that is still there. One that hears the ping
+ * and says nothing is gone, whatever its state says, and is dropped so that
+ * the pair goes with it — a session held open around a socket nobody is
+ * reading is one the exhibitor cannot use and cannot get past.
+ */
+export function heartbeat(socket: Socket, silent: () => void = () => {}) {
+  let alive = true
+
+  socket.on('pong', () => {
+    alive = true
+  })
+
+  const timer = setInterval(() => {
+    if (!alive) {
+      silent()
+      socket.terminate()
+      return
+    }
+    alive = false
+    socket.ping()
+  }, PING_MS)
+
+  socket.once('close', () => clearInterval(timer))
+}
+
 /* The agent has dialled back for a session somebody is waiting on. */
 export function joinSession(sid: string, agentSide: Socket): boolean {
   const entry = waiting.get(sid)
@@ -169,6 +210,11 @@ export function joinSession(sid: string, agentSide: Socket): boolean {
   for (const frame of entry.queued) {
     agentSide.send(frame.data, { binary: frame.isBinary })
   }
+
+  heartbeat(entry.client)
+  heartbeat(agentSide, () =>
+    say(entry.client, { t: 'exit', reason: 'the agent stopped answering' }),
+  )
 
   const finish = () => {
     entry.agent.sessions = Math.max(0, entry.agent.sessions - 1)
