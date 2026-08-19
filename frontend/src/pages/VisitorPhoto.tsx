@@ -150,8 +150,8 @@ const VisitorPhoto = () => {
       {page.converting && (
         <Card className="border-l-4 border-blue-500">
           <p className="text-gray-700 dark:text-gray-300">
-            Dein Foto wird gerade in die Formate der alten Rechner umgewandelt. Das dauert einen
-            Moment; diese Seite holt sie von selbst nach.
+            Dein Foto wird gerade in die Formate der alten Rechner umgewandelt. Das dauert meist
+            weniger als zwei Minuten; diese Seite holt sie von selbst nach.
           </p>
         </Card>
       )}
