@@ -140,8 +140,16 @@ export async function createApp({
     const responseTimeFormatted = `${responseTime.toFixed(1)}ms`
     const userAgent = headers['user-agent'] || '-'
     const referer = headers.referer || '-'
-    const userDisplayName =
-      request.user?.nickname?.replace(/\s+/g, '+') || request.user?.email || '-'
+    /*
+     * The same reasoning as the address above, one field along. A photo page
+     * is named after somebody's photo, so a signed-in exhibitor who looks at
+     * their own would otherwise stand named in the log beside its id, which is
+     * the tie the address was truncated to avoid.
+     */
+    const namesAPhoto = url.startsWith('/foto/') || url.startsWith('/api/visitor-photo/')
+    const userDisplayName = namesAPhoto
+      ? '-'
+      : request.user?.nickname?.replace(/\s+/g, '+') || request.user?.email || '-'
 
     // Log in a format similar to Apache/Nginx access logs with user info and request ID
     app.log.info(
