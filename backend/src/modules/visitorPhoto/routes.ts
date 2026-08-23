@@ -550,6 +550,18 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
     )
   })
 
+  /*
+   * A download's name is the photo id plus the file's own name, so files from
+   * several photos sit side by side on one disk. The PCX files are fetched for
+   * DOS machines, which keep a file under an 8.3 name: they download as the
+   * six-character id plus `_1` or `_8` for the bit depth, which fits in eight.
+   */
+  const downloadName = (id: string, file: string) => {
+    if (file === 'pcx_1tek.pcx') return `${id}_1.pcx`
+    if (file === 'pcx-color.pcx') return `${id}_8.pcx`
+    return `${id}-${file}`
+  }
+
   app.get<{ Params: { id: string; file: string } }>('/foto/:id/:file', async (request, reply) => {
     noIndex(reply)
     const id = normalizePhotoId(request.params.id)
@@ -562,7 +574,7 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
     const files = await listPhotoFiles(id)
     if (!files.includes(file)) return reply.code(404).send({ error: 'unknown' })
 
-    reply.header('Content-Disposition', `attachment; filename="${id}-${file}"`)
+    reply.header('Content-Disposition', `attachment; filename="${downloadName(id, file)}"`)
     reply.type(file.endsWith('.jpg') ? 'image/jpeg' : 'application/octet-stream')
     return readPhotoFile(id, file)
   })
