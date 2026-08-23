@@ -70,13 +70,15 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         navigateFallback: 'index.html',
         /*
-         * The photo pages and the camera page are rendered by the backend and
-         * have no route in this application. Without them here the service
-         * worker answers a visit to one with index.html out of its cache, and
-         * an exhibitor who has used the site is shown "file not found" for a
-         * page that exists.
+         * The photo pages, the camera page and every page ending in .html are
+         * rendered by the backend and have no route in this application.
+         * Without them here the service worker answers a visit to one with
+         * index.html out of its cache, and an exhibitor who has used the site
+         * is shown "file not found" for a page that exists. The .html pages
+         * are also read through an iframe on the club site, which the service
+         * worker of this origin controls just as it does a visit of its own.
          */
-        navigateFallbackDenylist: [/^\/graphql/, /^\/api\//, /^\/auth\//, /^\/foto\//],
+        navigateFallbackDenylist: [/^\/graphql/, /^\/api\//, /^\/auth\//, /^\/foto\//, /\.html$/],
         runtimeCaching: [
           {
             urlPattern: /\/api\/.*\/image\//,
