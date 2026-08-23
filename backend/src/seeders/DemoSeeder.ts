@@ -15,13 +15,13 @@ import {
 
 export class DemoSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {
-    const tables = []
+    const tables: Table[] = []
 
     /* The exhibitions come from the migrations. cc2026 is the one that answers
      * on localhost, so the demo data hangs off it. */
     const exhibition = await em.getRepository(Exhibition).findOneOrFail({ key: 'cc2026' })
 
-    for (let number = 1; number <= 10; number++) {
+    for (let number = 1; number <= 24; number++) {
       tables.push(em.create(Table, { exhibition, number }))
     }
 
@@ -60,7 +60,91 @@ export class DemoSeeder extends Seeder {
       })(),
     ]
 
+    /*
+     * People who exhibit without an account of their own, so that the list of
+     * exhibitors and the table under /exhibitor-table.html read like the real
+     * one rather than like three demo logins.
+     */
+    const guests = [
+      {
+        fullName: 'Nils Bergmann',
+        nickname: '-Nils-',
+        topic: 'Flugsimulatoren + SpaceSims (1980er bis 2020er) | Compaq 1982-2000er',
+        tables: [11, 12],
+      },
+      {
+        fullName: 'Renate Timm',
+        nickname: '@rndt',
+        topic: 'Commodore VC20, C64, AMIGA und andere',
+        tables: [13],
+      },
+      {
+        fullName: 'Bernd Sieger',
+        nickname: 'bernd-7',
+        topic: 'Speicherprogrammierbare Steuerungen',
+        tables: [14],
+      },
+      {
+        fullName: 'Doreen Kluge',
+        nickname: 'dkt',
+        topic: 'Workstations (Die konfigurierbare Datenstation robotron K8915)',
+        tables: [15],
+      },
+      {
+        fullName: 'Jörg Wittmann',
+        nickname: 'easywitt',
+        topic:
+          'Commodore C16 (evtl. C116 und Plus/4); VIC20; MC-CPM-Computer (evtl. nur statisch, kommt darauf an ob er vollständig läuft); C128D oder C128DCR',
+        tables: [16],
+      },
+      {
+        fullName: 'Sören Falk',
+        nickname: 'Sören',
+        topic: 'Halbleitermikroskopie',
+        tables: [17, 18],
+      },
+      {
+        fullName: 'Computermuseum Visselhövede',
+        nickname: undefined,
+        topic: 'Heimcomputer der 1980er Jahre',
+        tables: [19],
+      },
+      {
+        fullName: 'Tanja Ulrich',
+        nickname: 'tuti',
+        topic: 'Weiß ich noch gar nicht wirklich… 🙂',
+        tables: [20],
+      },
+      {
+        fullName: 'Peter Aland',
+        nickname: 'boulderdash',
+        topic: 'PDP1-Simulatoren auf Raspberry Pi und ESP32',
+        tables: [21, 22],
+      },
+    ]
+
+    for (const guest of guests) {
+      users.push(
+        em.create(User, {
+          fullName: guest.fullName,
+          email: `${guest.nickname ?? guest.fullName}@example.com`.toLowerCase().replace(/ /g, '.'),
+          nickname: guest.nickname,
+          contacts: {},
+        }),
+      )
+    }
+
     const exhibitors = users.map((user) => em.create(Exhibitor, { user, exhibition }))
+
+    exhibitors[0].topic = 'Bildschirmtext und X.25'
+    exhibitors[1].topic = 'DEC PDP-8 und Zubehör'
+    exhibitors[2].topic = 'Apple 8-Bit und Macintosh'
+
+    guests.forEach((guest, index) => {
+      const exhibitor = exhibitors[users.length - guests.length + index]
+      exhibitor.topic = guest.topic
+      guest.tables.forEach((number) => (tables[number - 1].exhibitor = exhibitor))
+    })
 
     // Create a Documents repository to process HTML content
     const documentRepository = em.getRepository(Document)
