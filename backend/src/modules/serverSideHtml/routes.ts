@@ -11,6 +11,7 @@ import { exhibitHtml } from './pages/exhibit.js'
 import { exhibitorHtml } from './pages/exhibitor.js'
 import { lanHtml } from './pages/lan.js'
 import { exhibitorListHtml } from './pages/exhibitorList.js'
+import { exhibitorTableHtml } from './pages/exhibitorTable.js'
 import { GeneratePageHtmlContext } from './utils.js'
 import { readFile } from 'fs/promises'
 import { join } from 'path'
@@ -92,6 +93,7 @@ export const registerServerSideHtmlRoutes = async (app: FastifyInstance): Promis
     }),
     createRoute({ path: '/lan.html', handler: lanHtml }),
     createRoute({ path: '/exhibitor-list.html', handler: exhibitorListHtml, noHeader: true }),
+    createRoute({ path: '/exhibitor-table.html', handler: exhibitorTableHtml, noHeader: true }),
   ] as const
 
   for (const route of routes) {
