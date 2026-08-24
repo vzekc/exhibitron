@@ -1,6 +1,6 @@
 import { EntityRepository } from '@mikro-orm/postgresql'
 import { NotFoundError } from '@mikro-orm/core'
-import { User } from './entity.js'
+import { ProfileImage, User } from './entity.js'
 import { Exhibitor } from '../exhibitor/entity.js'
 import { Registration } from '../registration/entity.js'
 import { VolunteerBooking } from '../volunteer/entity.js'
@@ -118,6 +118,19 @@ export class UserRepository extends EntityRepository<User> {
         await em.populate(nicknameUser, ['adminExhibitions'])
         for (const exhibition of tokenUser.adminExhibitions) {
           nicknameUser.adminExhibitions.add(exhibition)
+        }
+
+        /* A picture is held by a key that keeps the row it hangs from alive,
+           and one account carries at most one. It moves across where there is
+           room for it and goes with the account otherwise. */
+        const images = em.getRepository(ProfileImage)
+        const duplicateImage = await images.findOne({ user: tokenUser })
+        if (duplicateImage) {
+          if (await images.findOne({ user: nicknameUser })) {
+            em.remove(duplicateImage)
+          } else {
+            duplicateImage.user = nicknameUser
+          }
         }
 
         /* What the surviving row takes over: the address the person registered

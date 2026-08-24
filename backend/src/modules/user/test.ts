@@ -3,10 +3,26 @@ import { graphql } from 'gql.tada'
 import { graphqlTest, login } from '../../test/server.js'
 import { sendEmail } from '../common/sendEmail.js'
 import { initORM } from '../../db.js'
-import { User } from './entity.js'
+import { ProfileImage, User } from './entity.js'
+import { ImageStorage } from '../image/entity.js'
+import type { Services } from '../../db.js'
 import { VolunteerActivity, VolunteerBooking, VolunteerPeriod } from '../volunteer/entity.js'
 
 let mockedSendEmail: MockedFunction<typeof sendEmail>
+
+/* A one-pixel PNG, enough to hang a profile picture from. */
+const makeImage = (db: Services, slug: string) =>
+  db.em.create(ImageStorage, {
+    data: Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVQI12P4//8/AAX+Av7czFnnAAAAAElFTkSuQmCC',
+      'base64',
+    ),
+    mimeType: 'image/png',
+    filename: `${slug}.png`,
+    slug: `profile-${slug}`,
+    width: 1,
+    height: 1,
+  })
 
 beforeAll(async () => {
   mockedSendEmail = vi.spyOn(await import('../common/sendEmail.js'), 'sendEmail') as MockedFunction<
@@ -380,4 +396,96 @@ graphqlTest('forum link without a name conflict associates and spends the token'
   expect((result as User).id).toBe(user.id)
   expect((result as User).nickname).toBe('tauber')
   expect(await db.user.findOne({ passwordResetToken: token })).toBeNull()
+})
+
+/*
+ * A picture is held by a key that keeps its account alive, so a merge that
+ * leaves one behind cannot delete the row. Where the surviving account has no
+ * picture of its own, the one from the account being folded in moves across.
+ */
+graphqlTest('the merge carries the picture over when the surviving account has none', async () => {
+  const db = await initORM()
+
+  const canonical = db.user.create({
+    email: 'ulrich-alt@example.com',
+    fullName: 'Udo Ulrich',
+    nickname: 'ulrich',
+    isAdministrator: false,
+  })
+  const duplicate = db.user.create({
+    email: 'ulrich-neu@example.com',
+    fullName: 'Udo Ulrich',
+    isAdministrator: false,
+  })
+  db.em.persist([canonical, duplicate])
+  await db.em.flush()
+
+  const image = db.em.create(ProfileImage, {
+    user: duplicate,
+    image: makeImage(db, 'ulrich'),
+  })
+  db.em.persist(image)
+  db.user.createPasswordResetToken(duplicate, Date.now() + 3600000)
+  await db.em.flush()
+  await db.em.populate(duplicate, ['passwordResetToken'])
+  const token = duplicate.passwordResetToken!
+  const imageId = image.id
+
+  await db.user.associateForumUser({
+    nickname: 'ulrich',
+    registrationToken: token,
+    isAdministrator: false,
+  })
+
+  const moved = await db.em.findOne(ProfileImage, { id: imageId }, { populate: ['user'] })
+  expect(moved).not.toBeNull()
+  expect(moved!.user.id).toBe(canonical.id)
+})
+
+/*
+ * An account carries at most one picture, so where the surviving account
+ * already has one the other goes with the row it belonged to.
+ */
+graphqlTest('the merge drops the picture when the surviving account has one', async () => {
+  const db = await initORM()
+
+  const canonical = db.user.create({
+    email: 'winter-alt@example.com',
+    fullName: 'Wilma Winter',
+    nickname: 'winter',
+    isAdministrator: false,
+  })
+  const duplicate = db.user.create({
+    email: 'winter-neu@example.com',
+    fullName: 'Wilma Winter',
+    isAdministrator: false,
+  })
+  db.em.persist([canonical, duplicate])
+  await db.em.flush()
+
+  const keptImage = db.em.create(ProfileImage, {
+    user: canonical,
+    image: makeImage(db, 'winter-alt'),
+  })
+  const droppedImage = db.em.create(ProfileImage, {
+    user: duplicate,
+    image: makeImage(db, 'winter-neu'),
+  })
+  db.em.persist([keptImage, droppedImage])
+  db.user.createPasswordResetToken(duplicate, Date.now() + 3600000)
+  await db.em.flush()
+  await db.em.populate(duplicate, ['passwordResetToken'])
+  const token = duplicate.passwordResetToken!
+  const keptId = keptImage.id
+  const droppedId = droppedImage.id
+
+  await db.user.associateForumUser({
+    nickname: 'winter',
+    registrationToken: token,
+    isAdministrator: false,
+  })
+
+  expect(await db.em.findOne(ProfileImage, { id: droppedId })).toBeNull()
+  const kept = await db.em.findOne(ProfileImage, { id: keptId }, { populate: ['user'] })
+  expect(kept!.user.id).toBe(canonical.id)
 })
