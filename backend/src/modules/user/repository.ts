@@ -3,6 +3,7 @@ import { NotFoundError } from '@mikro-orm/core'
 import { User } from './entity.js'
 import { Exhibitor } from '../exhibitor/entity.js'
 import { Registration } from '../registration/entity.js'
+import { VolunteerBooking } from '../volunteer/entity.js'
 import { PermissionDeniedError } from '../common/errors.js'
 import { match, P } from 'ts-pattern'
 import { logger } from '../../app/logger.js'
@@ -73,6 +74,16 @@ export class UserRepository extends EntityRepository<User> {
     return user
   }
 
+  /*
+   * The forum is the authority on how a name is spelled and may hand it back
+   * in a different case than the one stored here, so the name is matched
+   * without regard to case. `%` and `_` are literal characters in a forum
+   * name and are escaped to stay that way.
+   */
+  async findByNickname(nickname: string) {
+    return await this.findOne({ nickname: { $ilike: nickname.replace(/[\\%_]/g, '\\$&') } })
+  }
+
   async associateForumUser(options: AssociateForumUserOptions): Promise<AssociateForumUserResult> {
     const { nickname, isAdministrator, registrationToken, email, createIfMissing } = options
     const em = this.getEntityManager()
@@ -81,7 +92,7 @@ export class UserRepository extends EntityRepository<User> {
       const tokenUser = await this.findOne({ passwordResetToken: registrationToken })
       if (!tokenUser) return null
 
-      const nicknameUser = await this.findOne({ nickname })
+      const nicknameUser = await this.findByNickname(nickname)
 
       if (nicknameUser && nicknameUser.id !== tokenUser.id) {
         // The forum nickname already belongs to a different user — merge accounts.
@@ -96,15 +107,42 @@ export class UserRepository extends EntityRepository<User> {
           exhibitor.user = nicknameUser
         }
 
-        nicknameUser.email = tokenUser.email
-        if (!nicknameUser.fullName && tokenUser.fullName) {
-          nicknameUser.fullName = tokenUser.fullName
+        /* The shifts belong to the person, and the row they hang from is about
+           to go; its delete rule would take them along. */
+        const bookings = await em.getRepository(VolunteerBooking).find({ user: tokenUser })
+        for (const booking of bookings) {
+          booking.user = nicknameUser
+        }
+
+        await em.populate(tokenUser, ['adminExhibitions'])
+        await em.populate(nicknameUser, ['adminExhibitions'])
+        for (const exhibition of tokenUser.adminExhibitions) {
+          nicknameUser.adminExhibitions.add(exhibition)
+        }
+
+        /* What the surviving row takes over: the address the person registered
+           with, and the date that address was shown to be theirs. */
+        const {
+          email: adoptedEmail,
+          fullName: adoptedFullName,
+          emailVerifiedAt: adoptedVerifiedAt,
+        } = tokenUser
+
+        /* The duplicate is written away in a flush of its own, so that the
+           address is free when the surviving row takes it. A single flush
+           orders the update ahead of the delete and both rows would hold the
+           address at once, which the unique index refuses. */
+        em.remove(tokenUser)
+        await em.flush()
+
+        nicknameUser.email = adoptedEmail
+        nicknameUser.emailVerifiedAt = adoptedVerifiedAt
+        if (!nicknameUser.fullName && adoptedFullName) {
+          nicknameUser.fullName = adoptedFullName
         }
         if (isAdministrator) {
           nicknameUser.isAdministrator = true
         }
-
-        em.remove(tokenUser)
         await em.flush()
         return nicknameUser
       }
@@ -125,7 +163,7 @@ export class UserRepository extends EntityRepository<User> {
     }
 
     // No registration token — returning forum login
-    const user = await this.findOne({ nickname })
+    const user = await this.findByNickname(nickname)
     if (user) {
       logger.debug(`Forum login for existing user: ${user.nickname} (${user.email})`)
       if (isAdministrator) {

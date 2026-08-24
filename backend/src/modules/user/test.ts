@@ -2,6 +2,9 @@ import { expect, MockedFunction, vi, beforeAll } from 'vitest'
 import { graphql } from 'gql.tada'
 import { graphqlTest, login } from '../../test/server.js'
 import { sendEmail } from '../common/sendEmail.js'
+import { initORM } from '../../db.js'
+import { User } from './entity.js'
+import { VolunteerActivity, VolunteerBooking, VolunteerPeriod } from '../volunteer/entity.js'
 
 let mockedSendEmail: MockedFunction<typeof sendEmail>
 
@@ -238,4 +241,143 @@ graphqlTest('password reset', async (graphqlRequest) => {
     expect(result.errors).toBeUndefined()
     expect(result.data?.getCurrentUser?.id).toBe(donald.userId)
   }
+})
+
+/*
+ * A returning exhibitor who registers again under a new address ends up with a
+ * second account, and linking the forum name folds it into the one that
+ * already carries the name. The address moves across, and so does everything
+ * the second account collected on the way.
+ */
+graphqlTest(
+  'forum link merges a re-registered exhibitor into the account holding the name',
+  async () => {
+    const db = await initORM()
+    const exhibition = await db.exhibition.findOneOrFail({ key: 'cc2025' })
+
+    const canonical = db.user.create({
+      email: 'ruecker-alt@example.com',
+      fullName: 'Rita Rücker',
+      nickname: 'ruecker',
+      isAdministrator: false,
+    })
+    const duplicate = db.user.create({
+      email: 'ruecker-neu@example.com',
+      fullName: 'Rita Rücker',
+      isAdministrator: false,
+    })
+    duplicate.emailVerifiedAt = new Date()
+    db.em.persist([canonical, duplicate])
+    await db.em.flush()
+
+    const exhibitor = db.exhibitor.create({ exhibition, user: duplicate })
+    db.em.persist(exhibitor)
+    db.user.createPasswordResetToken(duplicate, Date.now() + 3600000)
+    await db.em.flush()
+    await db.em.populate(duplicate, ['passwordResetToken'])
+    const token = duplicate.passwordResetToken!
+    const duplicateId = duplicate.id
+
+    /* The forum spells the name differently than the account does. */
+    const merged = await db.user.associateForumUser({
+      nickname: 'Ruecker',
+      registrationToken: token,
+      isAdministrator: false,
+    })
+
+    expect(merged).not.toBe('needsSetup')
+    expect((merged as User).id).toBe(canonical.id)
+    expect((merged as User).email).toBe('ruecker-neu@example.com')
+    expect((merged as User).emailVerifiedAt).toBeDefined()
+    expect(await db.user.findOne({ id: duplicateId })).toBeNull()
+
+    await db.em.refresh(exhibitor)
+    expect(exhibitor.user.id).toBe(canonical.id)
+  },
+)
+
+/*
+ * The shifts a volunteer booked under the second account are theirs, and the
+ * merge carries them over rather than letting them go with the row.
+ */
+graphqlTest('the merge keeps the volunteer shifts of the account it folds in', async () => {
+  const db = await initORM()
+  const exhibition = await db.exhibition.findOneOrFail({ key: 'cc2025' })
+
+  const canonical = db.user.create({
+    email: 'sommer-alt@example.com',
+    fullName: 'Sven Sommer',
+    nickname: 'sommer',
+    isAdministrator: false,
+  })
+  const duplicate = db.user.create({
+    email: 'sommer-neu@example.com',
+    fullName: 'Sven Sommer',
+    isAdministrator: false,
+  })
+  db.em.persist([canonical, duplicate])
+  await db.em.flush()
+
+  const activity = db.em.create(VolunteerActivity, {
+    exhibition,
+    key: 'merge-test',
+    name: 'Aufbau',
+    summary: 'Tische tragen',
+  })
+  const period = db.em.create(VolunteerPeriod, {
+    activity,
+    startTime: new Date('2026-09-01T09:00:00Z'),
+    durationMinutes: 180,
+  })
+  const booking = db.em.create(VolunteerBooking, {
+    period,
+    user: duplicate,
+    startTime: new Date('2026-09-01T09:00:00Z'),
+    durationMinutes: 60,
+  })
+  db.em.persist([activity, period, booking])
+  db.user.createPasswordResetToken(duplicate, Date.now() + 3600000)
+  await db.em.flush()
+  await db.em.populate(duplicate, ['passwordResetToken'])
+  const token = duplicate.passwordResetToken!
+  const bookingId = booking.id
+
+  await db.user.associateForumUser({
+    nickname: 'sommer',
+    registrationToken: token,
+    isAdministrator: false,
+  })
+
+  const kept = await db.em.findOne(VolunteerBooking, { id: bookingId }, { populate: ['user'] })
+  expect(kept).not.toBeNull()
+  expect(kept!.user.id).toBe(canonical.id)
+})
+
+/*
+ * With no second account in the way the name simply goes onto the account the
+ * token belongs to, and the token is spent.
+ */
+graphqlTest('forum link without a name conflict associates and spends the token', async () => {
+  const db = await initORM()
+
+  const user = db.user.create({
+    email: 'tauber@example.com',
+    fullName: 'Tina Tauber',
+    isAdministrator: false,
+  })
+  db.em.persist(user)
+  db.user.createPasswordResetToken(user, Date.now() + 3600000)
+  await db.em.flush()
+  await db.em.populate(user, ['passwordResetToken'])
+  const token = user.passwordResetToken!
+
+  const result = await db.user.associateForumUser({
+    nickname: 'tauber',
+    registrationToken: token,
+    isAdministrator: false,
+  })
+
+  expect((result as User).id).toBe(user.id)
+  expect((result as User).nickname).toBe('tauber')
+  expect(await db.user.findOne({ passwordResetToken: token })).toBeNull()
 })
