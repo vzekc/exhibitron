@@ -265,6 +265,15 @@
           "nullable": true,
           "length": 255,
           "mappedType": "string"
+        },
+        "seatplan_svg": {
+          "name": "seatplan_svg",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
         }
       },
       "name": "exhibition",
@@ -1404,6 +1413,16 @@
           "length": 6,
           "mappedType": "datetime"
         },
+        "email_verified_at": {
+          "name": "email_verified_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
         "bio": {
           "name": "bio",
           "type": "text",
@@ -1844,6 +1863,185 @@
           "nullable": false,
           "mappedType": "integer"
         },
+        "table_number": {
+          "name": "table_number",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "previous_exhibitor_id": {
+          "name": "previous_exhibitor_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
+        "new_exhibitor_id": {
+          "name": "new_exhibitor_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
+        "actor_id": {
+          "name": "actor_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
+        "notified_at": {
+          "name": "notified_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        }
+      },
+      "name": "table_assignment_change",
+      "schema": "public",
+      "indexes": [
+        {
+          "columnNames": [
+            "notified_at"
+          ],
+          "composite": false,
+          "keyName": "table_assignment_change_notified_at_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "table_assignment_change_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "table_assignment_change_exhibition_id_foreign": {
+          "constraintName": "table_assignment_change_exhibition_id_foreign",
+          "columnNames": [
+            "exhibition_id"
+          ],
+          "localTableName": "public.table_assignment_change",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.exhibition",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        },
+        "table_assignment_change_previous_exhibitor_id_foreign": {
+          "constraintName": "table_assignment_change_previous_exhibitor_id_foreign",
+          "columnNames": [
+            "previous_exhibitor_id"
+          ],
+          "localTableName": "public.table_assignment_change",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.exhibitor",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        },
+        "table_assignment_change_new_exhibitor_id_foreign": {
+          "constraintName": "table_assignment_change_new_exhibitor_id_foreign",
+          "columnNames": [
+            "new_exhibitor_id"
+          ],
+          "localTableName": "public.table_assignment_change",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.exhibitor",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        },
+        "table_assignment_change_actor_id_foreign": {
+          "constraintName": "table_assignment_change_actor_id_foreign",
+          "columnNames": [
+            "actor_id"
+          ],
+          "localTableName": "public.table_assignment_change",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.user",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {
+        "registration_status": {
+          "name": "registration_status",
+          "schema": "public",
+          "items": [
+            "approved",
+            "inProgress",
+            "new",
+            "rejected"
+          ]
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "exhibition_id": {
+          "name": "exhibition_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
         "number": {
           "name": "number",
           "type": "int",
@@ -1861,6 +2059,16 @@
           "primary": false,
           "nullable": true,
           "mappedType": "integer"
+        },
+        "shows_visitor_photos": {
+          "name": "shows_visitor_photos",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
         }
       },
       "name": "table",
@@ -1913,6 +2121,149 @@
           ],
           "referencedTableName": "public.exhibitor",
           "deleteRule": "set null",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {
+        "registration_status": {
+          "name": "registration_status",
+          "schema": "public",
+          "items": [
+            "approved",
+            "inProgress",
+            "new",
+            "rejected"
+          ]
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "exhibitor_id": {
+          "name": "exhibitor_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "token_hash": {
+          "name": "token_hash",
+          "type": "varchar(64)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 64,
+          "mappedType": "string"
+        },
+        "prefix": {
+          "name": "prefix",
+          "type": "varchar(16)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 16,
+          "mappedType": "string"
+        },
+        "label": {
+          "name": "label",
+          "type": "varchar(100)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 100,
+          "mappedType": "string"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "last_used_at": {
+          "name": "last_used_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "revoked_at": {
+          "name": "revoked_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        }
+      },
+      "name": "serial_token",
+      "schema": "public",
+      "indexes": [
+        {
+          "columnNames": [
+            "token_hash"
+          ],
+          "composite": false,
+          "keyName": "serial_token_token_hash_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "serial_token_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "serial_token_exhibitor_id_foreign": {
+          "constraintName": "serial_token_exhibitor_id_foreign",
+          "columnNames": [
+            "exhibitor_id"
+          ],
+          "localTableName": "public.serial_token",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.exhibitor",
           "updateRule": "cascade"
         }
       },
@@ -2551,6 +2902,676 @@
             "id"
           ],
           "referencedTableName": "public.exhibitor",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {
+        "registration_status": {
+          "name": "registration_status",
+          "schema": "public",
+          "items": [
+            "approved",
+            "inProgress",
+            "new",
+            "rejected"
+          ]
+        }
+      }
+    },
+    {
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "exhibition_id": {
+          "name": "exhibition_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        }
+      },
+      "name": "user_admin_exhibitions",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "user_admin_exhibitions_pkey",
+          "columnNames": [
+            "user_id",
+            "exhibition_id"
+          ],
+          "composite": true,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "user_admin_exhibitions_user_id_foreign": {
+          "constraintName": "user_admin_exhibitions_user_id_foreign",
+          "columnNames": [
+            "user_id"
+          ],
+          "localTableName": "public.user_admin_exhibitions",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.user",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        },
+        "user_admin_exhibitions_exhibition_id_foreign": {
+          "constraintName": "user_admin_exhibitions_exhibition_id_foreign",
+          "columnNames": [
+            "exhibition_id"
+          ],
+          "localTableName": "public.user_admin_exhibitions",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.exhibition",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {
+        "registration_status": {
+          "name": "registration_status",
+          "schema": "public",
+          "items": [
+            "approved",
+            "inProgress",
+            "new",
+            "rejected"
+          ]
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "exhibition_id": {
+          "name": "exhibition_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "code_hash": {
+          "name": "code_hash",
+          "type": "varchar(64)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 64,
+          "mappedType": "string"
+        },
+        "tables": {
+          "name": "tables",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "json"
+        },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "'booth'",
+          "enumItems": [
+            "booth",
+            "web"
+          ],
+          "mappedType": "enum"
+        },
+        "converted_at": {
+          "name": "converted_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        }
+      },
+      "name": "visitor_photo",
+      "schema": "public",
+      "indexes": [
+        {
+          "columnNames": [
+            "source"
+          ],
+          "composite": false,
+          "keyName": "visitor_photo_source_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
+            "deleted_at"
+          ],
+          "composite": false,
+          "keyName": "visitor_photo_deleted_at_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "visitor_photo_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "visitor_photo_exhibition_id_foreign": {
+          "constraintName": "visitor_photo_exhibition_id_foreign",
+          "columnNames": [
+            "exhibition_id"
+          ],
+          "localTableName": "public.visitor_photo",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.exhibition",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {
+        "registration_status": {
+          "name": "registration_status",
+          "schema": "public",
+          "items": [
+            "approved",
+            "inProgress",
+            "new",
+            "rejected"
+          ]
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "exhibition_id": {
+          "name": "exhibition_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "key": {
+          "name": "key",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "summary": {
+          "name": "summary",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "description_id": {
+          "name": "description_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
+        "contact_id": {
+          "name": "contact_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
+        "ordering": {
+          "name": "ordering",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "0",
+          "mappedType": "integer"
+        }
+      },
+      "name": "volunteer_activity",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "volunteer_activity_exhibition_id_key_unique",
+          "columnNames": [
+            "exhibition_id",
+            "key"
+          ],
+          "composite": true,
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "volunteer_activity_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "volunteer_activity_exhibition_id_foreign": {
+          "constraintName": "volunteer_activity_exhibition_id_foreign",
+          "columnNames": [
+            "exhibition_id"
+          ],
+          "localTableName": "public.volunteer_activity",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.exhibition",
+          "updateRule": "cascade"
+        },
+        "volunteer_activity_description_id_foreign": {
+          "constraintName": "volunteer_activity_description_id_foreign",
+          "columnNames": [
+            "description_id"
+          ],
+          "localTableName": "public.volunteer_activity",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.document",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        },
+        "volunteer_activity_contact_id_foreign": {
+          "constraintName": "volunteer_activity_contact_id_foreign",
+          "columnNames": [
+            "contact_id"
+          ],
+          "localTableName": "public.volunteer_activity",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.exhibitor",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {
+        "registration_status": {
+          "name": "registration_status",
+          "schema": "public",
+          "items": [
+            "approved",
+            "inProgress",
+            "new",
+            "rejected"
+          ]
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "activity_id": {
+          "name": "activity_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "start_time": {
+          "name": "start_time",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "duration_minutes": {
+          "name": "duration_minutes",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "needed_count": {
+          "name": "needed_count",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        }
+      },
+      "name": "volunteer_period",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "volunteer_period_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "volunteer_period_activity_id_foreign": {
+          "constraintName": "volunteer_period_activity_id_foreign",
+          "columnNames": [
+            "activity_id"
+          ],
+          "localTableName": "public.volunteer_period",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.volunteer_activity",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {
+        "registration_status": {
+          "name": "registration_status",
+          "schema": "public",
+          "items": [
+            "approved",
+            "inProgress",
+            "new",
+            "rejected"
+          ]
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "period_id": {
+          "name": "period_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "start_time": {
+          "name": "start_time",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "duration_minutes": {
+          "name": "duration_minutes",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "reminder_sent_at": {
+          "name": "reminder_sent_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "digest_sent_at": {
+          "name": "digest_sent_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        }
+      },
+      "name": "volunteer_booking",
+      "schema": "public",
+      "indexes": [
+        {
+          "columnNames": [
+            "start_time"
+          ],
+          "composite": false,
+          "keyName": "volunteer_booking_start_time_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "volunteer_booking_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "volunteer_booking_period_id_foreign": {
+          "constraintName": "volunteer_booking_period_id_foreign",
+          "columnNames": [
+            "period_id"
+          ],
+          "localTableName": "public.volunteer_booking",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.volunteer_period",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        },
+        "volunteer_booking_user_id_foreign": {
+          "constraintName": "volunteer_booking_user_id_foreign",
+          "columnNames": [
+            "user_id"
+          ],
+          "localTableName": "public.volunteer_booking",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.user",
           "deleteRule": "cascade",
           "updateRule": "cascade"
         }

@@ -2,6 +2,7 @@ import {
   Collection,
   Entity,
   EntityRepositoryType,
+  Index,
   ManyToOne,
   OneToMany,
   Property,
@@ -12,6 +13,7 @@ import { TableRepository } from './repository.js'
 import { Exhibitor } from '../exhibitor/entity.js'
 import { Exhibition } from '../exhibition/entity.js'
 import { Exhibit } from '../exhibit/entity.js'
+import { User } from '../user/entity.js'
 
 @Entity({ repository: () => TableRepository })
 @Unique({ properties: ['exhibition', 'number'] })
@@ -38,4 +40,37 @@ export class Table extends BaseEntity<'exhibitor' | 'showsVisitorPhotos'> {
    */
   @Property({ default: false })
   showsVisitorPhotos: boolean = false
+}
+
+/*
+ * One table changing hands, and who did it. The exhibitors and the actor are
+ * let go rather than kept alive by this row, so an account that leaves takes
+ * its name out of the record but not the record itself. The table is held as
+ * its number rather than as a reference, which is what the mail says anyway
+ * and what survives a plan being redrawn.
+ *
+ * `notifiedAt` is what keeps the digest idempotent across restarts: a change
+ * that has been reported leaves its date behind, and the next run passes it
+ * by. A change nobody needed to hear about is stamped as well.
+ */
+@Entity()
+export class TableAssignmentChange extends BaseEntity {
+  @ManyToOne(() => Exhibition, { deleteRule: 'cascade' })
+  exhibition!: Exhibition
+
+  @Property()
+  tableNumber!: number
+
+  @ManyToOne(() => Exhibitor, { nullable: true, deleteRule: 'set null' })
+  previousExhibitor?: Exhibitor
+
+  @ManyToOne(() => Exhibitor, { nullable: true, deleteRule: 'set null' })
+  newExhibitor?: Exhibitor
+
+  @ManyToOne(() => User, { nullable: true, deleteRule: 'set null' })
+  actor?: User
+
+  @Index()
+  @Property({ nullable: true })
+  notifiedAt?: Date
 }

@@ -57,6 +57,20 @@ graphqlTest('should unassign exhibits when table is released', async (executeOpe
   expect(createResponse.errors).toBeUndefined()
   const exhibitId = createResponse.data!.createExhibit!.id
 
+  // Take the table, so that releasing it is the holder's own doing
+  const claimResponse = await executeOperation(
+    graphql(`
+      mutation ClaimTable($number: Int!) {
+        claimTable(number: $number) {
+          id
+        }
+      }
+    `),
+    { number: 1 },
+    user,
+  )
+  expect(claimResponse.errors).toBeUndefined()
+
   // Now release the table
   await executeOperation(
     graphql(`
@@ -71,6 +85,7 @@ graphqlTest('should unassign exhibits when table is released', async (executeOpe
       }
     `),
     { number: 1 },
+    user,
   )
 
   // Check if our specific exhibit is now unassigned

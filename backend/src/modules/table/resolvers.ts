@@ -14,9 +14,9 @@ export const tableQueries: QueryResolvers<Context> = {
 
 export const tableMutations: MutationResolvers<Context> = {
   // @ts-expect-error ts2345
-  claimTable: async (_, { number }, { db, exhibition, exhibitor }) => {
+  claimTable: async (_, { number }, { db, exhibition, exhibitor, user }) => {
     requireNotFrozen(exhibition)
-    if (!exhibitor) {
+    if (!exhibitor || !user) {
       throw new AuthError('You must be logged in to claim a table')
     }
     await db.em.populate(exhibitor, ['tables'])
@@ -29,11 +29,14 @@ export const tableMutations: MutationResolvers<Context> = {
     ) {
       throw new PermissionDeniedError('You can claim at most two tables')
     }
-    return await db.table.claim(exhibition, number, exhibitor)
+    return await db.table.claim(exhibition, number, exhibitor, user)
   },
   // @ts-expect-error ts2345
   releaseTable: async (_, { number }, { db, exhibition, exhibitor, user }) => {
     requireNotFrozen(exhibition)
+    if (!user) {
+      throw new AuthError('You must be logged in to release a table')
+    }
     // Find all exhibits associated with this table
     const table = await db.table.findOneOrFail({ exhibition, number })
     const exhibits = await db.exhibit.find({ table })
@@ -45,7 +48,12 @@ export const tableMutations: MutationResolvers<Context> = {
     await db.em.flush()
 
     // Now release the table
-    return await db.table.release(exhibition, number, isAdmin(user, exhibition) ? null : exhibitor)
+    return await db.table.release(
+      exhibition,
+      number,
+      isAdmin(user, exhibition) ? null : exhibitor,
+      user,
+    )
   },
   /*
    * Whoever holds the table says whether a machine on it can show a visitor's
@@ -66,12 +74,13 @@ export const tableMutations: MutationResolvers<Context> = {
     return table
   },
   // @ts-expect-error ts2345
-  assignTable: async (_, { number, exhibitorId }, { db, exhibition }) => {
+  assignTable: async (_, { number, exhibitorId }, { db, exhibition, user }) => {
     requireNotFrozen(exhibition)
+    if (!user) {
+      throw new AuthError('You must be logged in to assign a table')
+    }
     const exhibitor = await db.exhibitor.findOneOrFail({ id: exhibitorId })
-    const table = await db.table.findOneOrFail({ exhibition, number })
-    table.exhibitor = exhibitor
-    return table
+    return await db.table.assignTo(exhibition, number, exhibitor, user)
   },
 }
 
