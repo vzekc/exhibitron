@@ -8,7 +8,7 @@ import { ConferenceSession } from '../conferenceSession/entity.js'
 import { Host } from '../host/entity.js'
 
 @Entity()
-export class Exhibitor extends BaseEntity {
+export class Exhibitor extends BaseEntity<'nameTagShowNickname'> {
   @ManyToOne()
   exhibition!: Exhibition
 
@@ -17,6 +17,13 @@ export class Exhibitor extends BaseEntity {
 
   @Property({ nullable: true })
   topic?: string
+
+  // Name to print on the name tag.  Falls back to the user's fullName when unset.
+  @Property({ nullable: true })
+  nameTagName?: string
+
+  @Property()
+  nameTagShowNickname: boolean = true
 
   @OneToMany({ mappedBy: 'exhibitor' })
   exhibits = new Collection<Exhibit>(this)

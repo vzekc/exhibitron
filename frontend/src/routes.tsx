@@ -47,6 +47,7 @@ import VolunteerActivityEditor from '@pages/admin/VolunteerActivityEditor.tsx'
 import SerialPort from './pages/user/SerialPort.tsx'
 import VisitorPhoto from './pages/VisitorPhoto.tsx'
 import Praesentation from './pages/fotofix/Praesentation.tsx'
+import NameTags from '@pages/admin/NameTags.tsx'
 
 const routes: RouteObject[] = [
   { path: '/register', element: <Register /> },
@@ -111,6 +112,7 @@ const routes: RouteObject[] = [
           { path: 'page', element: <PageList /> },
           { path: 'page/:key', element: <PageEditor /> },
           { path: 'tableLabels', element: <TableLabels /> },
+          { path: 'nameTags', element: <NameTags /> },
           { path: 'emailExhibitors', element: <EmailExhibitors /> },
           { path: 'welcomePdf', element: <WelcomePdf /> },
           { path: 'seatplan', element: <SeatplanImport /> },

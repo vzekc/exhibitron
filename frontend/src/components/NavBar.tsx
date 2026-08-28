@@ -233,6 +233,7 @@ const NavBar = () => {
     { to: '/admin/emailExhibitors', label: 'E-Mail an Mitwirkende' },
     { to: '/admin/page', label: 'Seiten' },
     { to: '/admin/tableLabels', label: 'Tisch-Labels' },
+    { to: '/admin/nameTags', label: 'Namensschilder' },
     { to: '/admin/welcomePdf', label: 'Willkommens-PDF' },
     { to: '/admin/seatplan', label: 'Tischplan' },
     { to: '/admin/mitmachen', label: 'Mitmachen' },

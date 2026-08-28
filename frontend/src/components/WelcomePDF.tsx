@@ -1,5 +1,6 @@
 import { Document, Page, Text, View, StyleSheet, Image, Font, pdf } from '@react-pdf/renderer'
 import QRCode from 'qrcode'
+import { getImageDataViaCanvas } from '@utils/imageData.ts'
 
 // Register fonts
 Font.register({
@@ -127,33 +128,6 @@ const generateQRCode = async (url: string): Promise<string> =>
     margin: 1,
     width: 140,
   })
-
-/**
- * Load an image and convert it to base64
- * @param imageUrl The URL of the image to load
- * @returns A promise that resolves to the base64 data URL
- */
-const getImageDataViaCanvas = async (imageUrl: string): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const img = document.createElement('img')
-    img.crossOrigin = 'anonymous'
-    img.onload = () => {
-      const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d')
-      if (!ctx) {
-        reject(new Error('Could not get canvas context'))
-        return
-      }
-      canvas.width = img.width
-      canvas.height = img.height
-      ctx.drawImage(img, 0, 0)
-      const dataURL = canvas.toDataURL('image/png')
-      resolve(dataURL)
-    }
-    img.onerror = () => reject(new Error(`Failed to load image: ${imageUrl}`))
-    img.src = imageUrl
-  })
-}
 
 /**
  * Generate and download the Welcome PDF

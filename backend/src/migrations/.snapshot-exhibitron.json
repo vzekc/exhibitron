@@ -266,6 +266,16 @@
           "length": 255,
           "mappedType": "string"
         },
+        "venue": {
+          "name": "venue",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
         "seatplan_svg": {
           "name": "seatplan_svg",
           "type": "text",
@@ -1767,6 +1777,26 @@
           "nullable": true,
           "length": 255,
           "mappedType": "string"
+        },
+        "name_tag_name": {
+          "name": "name_tag_name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "name_tag_show_nickname": {
+          "name": "name_tag_show_nickname",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "true",
+          "mappedType": "boolean"
         }
       },
       "name": "exhibitor",

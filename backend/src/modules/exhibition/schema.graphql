@@ -9,6 +9,7 @@ type Exhibition {
   dnsZone: String
   frozen: Boolean!
   location: String
+  venue: String
   tables: [Table!]
   exhibitors: [Exhibitor!]
   exhibits: [Exhibit!]

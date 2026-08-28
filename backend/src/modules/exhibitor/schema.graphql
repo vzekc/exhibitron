@@ -2,13 +2,20 @@ type Exhibitor {
   id: Int!
   user: User!
   topic: String
+  nameTagName: String
+  nameTagShowNickname: Boolean!
   exhibits: [Exhibit!]
   tables: [Table!]
   canSwitchExhibitor: Boolean!
 }
 
 extend type Mutation {
-  updateExhibitor(id: Int!, topic: String): Exhibitor
+  updateExhibitor(
+    id: Int!
+    topic: String
+    nameTagName: String
+    nameTagShowNickname: Boolean
+  ): Exhibitor
   switchExhibitor(exhibitorId: Int!): Exhibitor
 }
 

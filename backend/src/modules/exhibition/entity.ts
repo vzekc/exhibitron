@@ -36,8 +36,13 @@ export class Exhibition extends BaseEntity {
   @Property({ default: false })
   frozen: boolean = false
 
+  // Sentence fragment for prose, e.g. "in der CD Kaserne in Celle".
   @Property({ nullable: true })
   location?: string
+
+  // Bare venue name for labels and headings, e.g. "CD Kaserne Celle".
+  @Property({ nullable: true })
+  venue?: string
 
   @Property({ type: 'text', nullable: true })
   seatplanSvg?: string

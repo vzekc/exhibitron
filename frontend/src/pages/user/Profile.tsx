@@ -17,6 +17,9 @@ import {
   TextArea,
 } from '@components/Form.tsx'
 import ImageUploader from '@components/ImageUploader.tsx'
+import NameTagPreview from '@components/NameTagPreview.tsx'
+import { NAME_TAG } from '@components/nameTag.ts'
+import { generateAndDownloadNameTag } from '@components/NameTagPDF.tsx'
 import { showMessage } from '@components/MessageModalUtil.tsx'
 
 type Inputs = {
@@ -30,6 +33,8 @@ type Inputs = {
   website: string
   youtube: string
   allowEmailContact: boolean
+  nameTagName: string
+  nameTagShowNickname: boolean
 }
 
 type YouTubeChannel = {
@@ -48,10 +53,13 @@ const GET_USER_PROFILE = graphql(`
   query GetUserProfile {
     getCurrentExhibition {
       title
+      venue
     }
     getCurrentExhibitor {
       id
       topic
+      nameTagName
+      nameTagShowNickname
       user {
         id
         fullName
@@ -72,7 +80,13 @@ const GET_USER_PROFILE = graphql(`
 `)
 
 const UPDATE_USER_PROFILE = graphql(`
-  mutation UpdateUserProfile($input: UpdateUserProfileInput!, $exhibitorId: Int!, $topic: String) {
+  mutation UpdateUserProfile(
+    $input: UpdateUserProfileInput!
+    $exhibitorId: Int!
+    $topic: String
+    $nameTagName: String
+    $nameTagShowNickname: Boolean
+  ) {
     updateUserProfile(input: $input) {
       id
       fullName
@@ -87,8 +101,15 @@ const UPDATE_USER_PROFILE = graphql(`
         youtube
       }
     }
-    updateExhibitor(id: $exhibitorId, topic: $topic) {
+    updateExhibitor(
+      id: $exhibitorId
+      topic: $topic
+      nameTagName: $nameTagName
+      nameTagShowNickname: $nameTagShowNickname
+    ) {
       id
+      nameTagName
+      nameTagShowNickname
     }
   }
 `)
@@ -143,6 +164,19 @@ const Profile = () => {
   const websiteValue = watch('website')
   const websiteFocusedRef = useRef(false)
 
+  // The name tag preview follows the form rather than the saved record, so that edits
+  // are visible before saving.
+  const nameTagExhibitor = {
+    id: data?.getCurrentExhibitor?.id ?? 0,
+    nameTagName: watch('nameTagName'),
+    nameTagShowNickname: watch('nameTagShowNickname'),
+    user: { fullName: watch('fullName') ?? '', nickname: watch('nickname') ?? '' },
+  }
+  const nameTagExhibition = {
+    title: data?.getCurrentExhibition?.title ?? '',
+    venue: data?.getCurrentExhibition?.venue,
+  }
+
   useEffect(() => {
     navigate(window.location.pathname, { replace: true })
   }, [navigate])
@@ -181,12 +215,23 @@ const Profile = () => {
   }
 
   const updateProfile: SubmitHandler<Inputs> = async (inputs) => {
-    const { fullName, nickname, bio, topic, allowEmailContact, ...contacts } = inputs
+    const {
+      fullName,
+      nickname,
+      bio,
+      topic,
+      allowEmailContact,
+      nameTagName,
+      nameTagShowNickname,
+      ...contacts
+    } = inputs
     const result = await updateUserProfile({
       variables: {
         input: { fullName, nickname, bio, contacts, allowEmailContact },
         exhibitorId: exhibitor!.id,
         topic,
+        nameTagName: nameTagName.trim() || null,
+        nameTagShowNickname,
       },
     })
     if (result.errors?.length) {
@@ -214,6 +259,8 @@ const Profile = () => {
         website: newUser?.contacts?.website || '',
         youtube: newUser?.contacts?.youtube || '',
         allowEmailContact: newUser?.allowEmailContact || false,
+        nameTagName: data.getCurrentExhibitor?.nameTagName || '',
+        nameTagShowNickname: data.getCurrentExhibitor?.nameTagShowNickname ?? true,
       })
       setProfileImage(newUser?.profileImage as number | null)
     }
@@ -303,6 +350,66 @@ const Profile = () => {
                     <FormLabel>Über mich</FormLabel>
                     <TextArea rows={4} {...register('bio')} error={errors.bio?.message} />
                   </FormFieldGroup>
+                </FormSection>
+
+                <FormSection>
+                  <SectionLabel>Namensschild</SectionLabel>
+                  <p className="mb-4 text-sm text-gray-500">
+                    Dein Namensschild trägst Du während der Ausstellung. Der QR-Code darauf führt
+                    Besucher direkt auf Deine Ausstellerseite.
+                  </p>
+                  <FormFieldGroup>
+                    <FormLabel>Name auf dem Namensschild</FormLabel>
+                    <Input
+                      type="text"
+                      placeholder={nameTagExhibitor.user.fullName}
+                      {...register('nameTagName', { required: false })}
+                      error={errors.nameTagName?.message}
+                    />
+                    <p className="text-sm text-gray-500">
+                      Leer lassen, um den Namen aus Deinem Profil zu übernehmen.
+                    </p>
+
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="nameTagShowNickname"
+                        {...register('nameTagShowNickname')}
+                        className="text-primary-600 focus:ring-primary-500 h-4 w-4 rounded border-gray-300"
+                      />
+                      <FormLabel htmlFor="nameTagShowNickname">
+                        Nickname auf dem Namensschild anzeigen
+                      </FormLabel>
+                    </div>
+                  </FormFieldGroup>
+
+                  <div className="mt-6 space-y-3">
+                    <span className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Vorschau ({NAME_TAG.width} × {NAME_TAG.height} mm)
+                    </span>
+                    <NameTagPreview exhibitor={nameTagExhibitor} exhibition={nameTagExhibition} />
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={async () => {
+                        try {
+                          await generateAndDownloadNameTag({
+                            exhibitor: nameTagExhibitor,
+                            exhibition: nameTagExhibition,
+                          })
+                        } catch (error) {
+                          await showMessage(
+                            'Fehler',
+                            error instanceof Error
+                              ? error.message
+                              : 'Das Namensschild konnte nicht erzeugt werden',
+                            'OK',
+                          )
+                        }
+                      }}>
+                      Namensschild als PDF
+                    </Button>
+                  </div>
                 </FormSection>
 
                 <FormSection>

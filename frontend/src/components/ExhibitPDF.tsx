@@ -3,6 +3,7 @@ import { graphql, ResultOf } from 'gql.tada'
 import { ApolloClient } from '@apollo/client'
 import QRCode from 'qrcode'
 import { getDisplayName } from '@utils/displayName'
+import { getImageDataViaCanvas } from '@utils/imageData.ts'
 
 // Register fonts (assuming you have Lato fonts in your public directory)
 Font.register({
@@ -149,39 +150,6 @@ const GET_EXHIBIT = graphql(`
 `)
 
 type Exhibit = NonNullable<ResultOf<typeof GET_EXHIBIT>['getExhibit']>
-
-const getImageDataViaCanvas = async (url: string): Promise<string> => {
-  return new Promise<string>((resolve, reject) => {
-    const img = document.createElement('img')
-    img.crossOrigin = 'Anonymous'
-
-    img.onload = () => {
-      // Create canvas element
-      const canvas = document.createElement('canvas')
-      canvas.width = img.width
-      canvas.height = img.height
-
-      // Draw image to canvas
-      const ctx = canvas.getContext('2d')
-      if (!ctx) {
-        reject(new Error('Could not get canvas context'))
-        return
-      }
-
-      ctx.drawImage(img, 0, 0)
-
-      // Get data URL
-      const dataURL = canvas.toDataURL('image/png')
-      resolve(dataURL)
-    }
-
-    img.onerror = () => {
-      reject(new Error('Failed to load image'))
-    }
-
-    img.src = url
-  })
-}
 
 // Function to strip HTML tags from text for PDF
 const stripHtml = (html: string) => {
