@@ -6,7 +6,7 @@ import Button from '@components/Button'
 import { Checkbox } from '@components/Form.tsx'
 import MultipleExhibitorSelector from '@components/MultipleExhibitorSelector'
 import NameTagPreview from '@components/NameTagPreview.tsx'
-import { generateAndDownloadNameTagSheet, nameTagsPerPage } from '@components/NameTagPDF.tsx'
+import { generateAndDownloadNameTagSheet } from '@components/NameTagPDF.tsx'
 import { NAME_TAG, getNameTagName } from '@components/nameTag.ts'
 import { getDisplayName } from '@utils/displayName'
 import { showMessage } from '@components/MessageModalUtil.tsx'
@@ -76,17 +76,6 @@ const NameTags = () => {
         <Card className="mb-6">
           <div className="space-y-4">
             <div>
-              <h2 className="mb-2 text-lg font-semibold">Layout</h2>
-              <p className="text-sm text-gray-600">
-                Die Namensschilder sind {NAME_TAG.width} × {NAME_TAG.height} mm groß und werden
-                lückenlos auf A4 gedruckt, {nameTagsPerPage} Stück pro Seite. Auf den Schnittkanten
-                selbst ist nichts gedruckt — die Schnittmarken liegen am Blattrand außerhalb der
-                Schilder. Zum Schneiden das Lineal an zwei gegenüberliegenden Marken anlegen; ein
-                Schnitt trennt jeweils zwei benachbarte Schilder.
-              </p>
-            </div>
-
-            <div>
               <h2 className="mb-2 text-lg font-semibold">Mitwirkende auswählen</h2>
               <Checkbox
                 label="Alle Mitwirkenden"
@@ -123,9 +112,16 @@ const NameTags = () => {
           <h2 className="mb-4 text-lg font-semibold">Vorschau</h2>
           <div className="flex flex-wrap gap-4">
             {selected.map((exhibitor) => (
-              <div key={exhibitor.id} className="space-y-1">
+              // Pin the cell to the card's width: without it the caption, which can be
+              // much wider than the card, stretches the flex item and skews the grid.
+              <div
+                key={exhibitor.id}
+                className="space-y-1"
+                style={{ width: `${NAME_TAG.width}mm` }}>
                 <NameTagPreview exhibitor={exhibitor} exhibition={exhibition} />
-                <p className="text-xs text-gray-500">{getDisplayName(exhibitor.user)}</p>
+                <p className="text-xs break-words text-gray-500">
+                  {getDisplayName(exhibitor.user)}
+                </p>
               </div>
             ))}
           </div>
