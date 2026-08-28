@@ -93,6 +93,12 @@ const styles = StyleSheet.create({
     marginLeft: `${NAME_TAG.padding}mm`,
     marginRight: `${NAME_TAG.padding}mm`,
   },
+  // Spans the width the logo leaves, so both lines right-align on the header's right
+  // margin -- the same margin the QR code sits on.  Without a definite width the block
+  // shrink-wraps the longer line and the shorter one has nothing to align against.
+  headerText: {
+    flex: 1,
+  },
   exhibitionTitle: {
     fontSize: NAME_TAG.titleFontSize,
     fontWeight: 'bold',
@@ -151,7 +157,7 @@ const NameTag = ({ tag, exhibition, logo, position }: NameTagProps) => (
   <View style={[styles.tag, ...(position ? [styles.positioned, position] : [])]}>
     <View style={styles.header}>
       <Image src={logo.dataUrl} style={{ height: `${NAME_TAG.logoHeight}mm`, width: logo.width }} />
-      <View>
+      <View style={styles.headerText}>
         <Text style={styles.exhibitionTitle}>{exhibition.title}</Text>
         {exhibition.venue && <Text style={styles.venue}>{exhibition.venue}</Text>}
       </View>

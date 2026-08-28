@@ -45,7 +45,7 @@ const NameTagPreview = ({ exhibitor, exhibition, className = '' }: NameTagPrevie
         className="flex items-start justify-between"
         style={{ margin: `${NAME_TAG.padding}mm ${NAME_TAG.padding}mm 0` }}>
         <img src="/vzekc-logo.svg" alt="VzEkC" style={{ height: `${NAME_TAG.logoHeight}mm` }} />
-        <div className="text-right" style={{ color: '#4a4a4a' }}>
+        <div className="flex-1 text-right" style={{ color: '#4a4a4a' }}>
           <div className="font-bold" style={{ fontSize: `${NAME_TAG.titleFontSize}pt` }}>
             {exhibition.title}
           </div>
