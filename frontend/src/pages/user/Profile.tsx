@@ -18,8 +18,6 @@ import {
 } from '@components/Form.tsx'
 import ImageUploader from '@components/ImageUploader.tsx'
 import NameTagPreview from '@components/NameTagPreview.tsx'
-import { NAME_TAG } from '@components/nameTag.ts'
-import { generateAndDownloadNameTag } from '@components/NameTagPDF.tsx'
 import { showMessage } from '@components/MessageModalUtil.tsx'
 
 type Inputs = {
@@ -355,7 +353,7 @@ const Profile = () => {
                 <FormSection>
                   <SectionLabel>Namensschild</SectionLabel>
                   <p className="mb-4 text-sm text-gray-500">
-                    Dein Namensschild trägst Du während der Ausstellung. Der QR-Code darauf führt
+                    Dein Namensschild kannst Du am Infotresen abholen. Der QR-Code darauf führt
                     Besucher direkt auf Deine Ausstellerseite.
                   </p>
                   <FormFieldGroup>
@@ -366,10 +364,6 @@ const Profile = () => {
                       {...register('nameTagName', { required: false })}
                       error={errors.nameTagName?.message}
                     />
-                    <p className="text-sm text-gray-500">
-                      Leer lassen, um den Namen aus Deinem Profil zu übernehmen.
-                    </p>
-
                     <div className="flex items-center gap-2">
                       <input
                         type="checkbox"
@@ -385,30 +379,9 @@ const Profile = () => {
 
                   <div className="mt-6 space-y-3">
                     <span className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Vorschau ({NAME_TAG.width} × {NAME_TAG.height} mm)
+                      Vorschau
                     </span>
                     <NameTagPreview exhibitor={nameTagExhibitor} exhibition={nameTagExhibition} />
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      onClick={async () => {
-                        try {
-                          await generateAndDownloadNameTag({
-                            exhibitor: nameTagExhibitor,
-                            exhibition: nameTagExhibition,
-                          })
-                        } catch (error) {
-                          await showMessage(
-                            'Fehler',
-                            error instanceof Error
-                              ? error.message
-                              : 'Das Namensschild konnte nicht erzeugt werden',
-                            'OK',
-                          )
-                        }
-                      }}>
-                      Namensschild als PDF
-                    </Button>
                   </div>
                 </FormSection>
 

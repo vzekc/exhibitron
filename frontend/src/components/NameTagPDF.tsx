@@ -21,7 +21,6 @@ import {
   getNameTagName,
   getNameTagNickname,
   getNameTagUrl,
-  mmToPt,
 } from './nameTag.ts'
 
 Font.register({
@@ -194,28 +193,6 @@ const loadLogo = async (): Promise<Logo> => {
 const openPdf = async (document: React.ReactElement<DocumentProps>) => {
   const blob = await pdf(document).toBlob()
   window.open(URL.createObjectURL(blob), '_blank')
-}
-
-interface SingleNameTagParams {
-  exhibitor: NameTagExhibitor
-  exhibition: NameTagExhibition
-}
-
-// A single tag on a page cut to the tag itself, for exhibitors printing their own.
-export const generateAndDownloadNameTag = async ({
-  exhibitor,
-  exhibition,
-}: SingleNameTagParams): Promise<void> => {
-  const [tag] = await renderTags([exhibitor])
-  const logo = await loadLogo()
-
-  await openPdf(
-    <Document>
-      <Page size={{ width: mmToPt(NAME_TAG.width), height: mmToPt(NAME_TAG.height) }}>
-        <NameTag tag={tag} exhibition={exhibition} logo={logo} />
-      </Page>
-    </Document>,
-  )
 }
 
 interface NameTagSheetParams {
