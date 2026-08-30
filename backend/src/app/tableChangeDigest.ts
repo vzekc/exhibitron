@@ -3,10 +3,11 @@ import { RequestContext } from '@mikro-orm/core'
 import { initORM, Services } from '../db.js'
 import { logger } from './logger.js'
 import { sendEmail } from '../modules/common/sendEmail.js'
-import { makeTableChangeDigestEmail } from '../modules/table/emails.js'
-import { TableAssignmentChange } from '../modules/table/entity.js'
+import { makeTableChangeDigestEmail, TableChangeDigest } from '../modules/table/emails.js'
+import { Table, TableAssignmentChange } from '../modules/table/entity.js'
 import { Exhibition } from '../modules/exhibition/entity.js'
 import { Exhibitor } from '../modules/exhibitor/entity.js'
+import { User } from '../modules/user/entity.js'
 
 const digestLogger = logger.child({ module: 'tableChangeDigest' })
 
@@ -20,15 +21,62 @@ const changePopulate = [
   'actor',
 ] as const
 
+/* Whoever made a change, under the name the site shows them by. */
+const actorName = (actor: User | undefined) =>
+  actor?.fullName || actor?.nickname || 'die Organisation'
+
 /*
- * Who hears about one change. A table moving between two exhibitors concerns
- * both of them, the one it went to and the one it came from. Whoever made the
- * change already knows.
+ * What one table's day means to one exhibitor. The desk shuffles tables in
+ * several steps, and what an exhibitor needs to hear is the difference between
+ * the last state they knew of and where the table ended up. A move they made
+ * themselves is a state they know; the moves after it that took the table from
+ * them or gave it to them were made by others, and those are the names told.
  */
-const recipientsOf = (change: TableAssignmentChange) =>
-  [change.previousExhibitor, change.newExhibitor]
-    .filter((exhibitor) => exhibitor != null)
-    .filter((exhibitor) => exhibitor.user.id !== change.actor?.id)
+type Telling = {
+  exhibitor: Exhibitor
+  tableNumber: number
+  gained: boolean
+  actors: (User | undefined)[]
+}
+
+const tellingsOf = (steps: TableAssignmentChange[]): Telling[] => {
+  const concerned = new Map<number, Exhibitor>()
+  for (const step of steps) {
+    for (const exhibitor of [step.previousExhibitor, step.newExhibitor]) {
+      if (exhibitor) concerned.set(exhibitor.id, exhibitor)
+    }
+  }
+
+  const tellings: Telling[] = []
+  for (const exhibitor of concerned.values()) {
+    let known = steps[0].previousExhibitor?.id === exhibitor.id
+    let actors: (User | undefined)[] = []
+    for (const step of steps) {
+      const touched = [step.previousExhibitor?.id, step.newExhibitor?.id].includes(exhibitor.id)
+      if (step.actor?.id === exhibitor.user.id) {
+        known = step.newExhibitor?.id === exhibitor.id
+        actors = []
+      } else if (touched) {
+        actors.push(step.actor)
+      }
+    }
+    const holds = steps[steps.length - 1].newExhibitor?.id === exhibitor.id
+    if (holds !== known) {
+      tellings.push({ exhibitor, tableNumber: steps[0].tableNumber, gained: holds, actors })
+    }
+  }
+  return tellings
+}
+
+/* Each table's steps in the order they happened. */
+const stepsByTable = (changes: TableAssignmentChange[]) => {
+  const byTable = new Map<string, TableAssignmentChange[]>()
+  for (const change of changes) {
+    const key = `${change.exhibition.id}:${change.tableNumber}`
+    byTable.set(key, [...(byTable.get(key) ?? []), change])
+  }
+  return [...byTable.values()]
+}
 
 /*
  * The day's table movement, told to the exhibitors it happened to. `now` is
@@ -41,17 +89,15 @@ const recipientsOf = (change: TableAssignmentChange) =>
 export const sendTableChangeDigest = async (db: Services, now: Date) => {
   const counts = { mails: 0, changes: 0, skipped: 0 }
 
+  /* Ordered by id within a table, so the fold walks each table's day in the
+     order it happened. */
   const pending = await db.em.find(
     TableAssignmentChange,
     { notifiedAt: null },
-    { populate: changePopulate, orderBy: { tableNumber: 'asc' } },
+    { populate: changePopulate, orderBy: { tableNumber: 'asc', id: 'asc' } },
   )
 
-  /* One exhibitor, one mail, however many of their tables moved. */
-  const byExhibitor = new Map<
-    number,
-    { user: Exhibitor['user']; changes: TableAssignmentChange[] }
-  >()
+  const reportable: TableAssignmentChange[] = []
   for (const change of pending) {
     change.notifiedAt = now
     if (change.exhibition.startDate <= now) {
@@ -59,22 +105,52 @@ export const sendTableChangeDigest = async (db: Services, now: Date) => {
       continue
     }
     counts.changes++
-    for (const exhibitor of recipientsOf(change)) {
-      const entry = byExhibitor.get(exhibitor.id) ?? { user: exhibitor.user, changes: [] }
-      entry.changes.push(change)
+    reportable.push(change)
+  }
+
+  /* One exhibitor, one mail, however many of their tables moved. */
+  type Entry = {
+    exhibitor: Exhibitor
+    actors: (User | undefined)[]
+    released: number[]
+    assigned: number[]
+  }
+  const byExhibitor = new Map<number, Entry>()
+  for (const steps of stepsByTable(reportable)) {
+    for (const { exhibitor, tableNumber, gained, actors } of tellingsOf(steps)) {
+      const entry = byExhibitor.get(exhibitor.id) ?? {
+        exhibitor,
+        actors: [],
+        released: [],
+        assigned: [],
+      }
+      entry.actors.push(...actors)
+      ;(gained ? entry.assigned : entry.released).push(tableNumber)
       byExhibitor.set(exhibitor.id, entry)
     }
   }
 
-  for (const [exhibitorId, { user, changes }] of byExhibitor) {
-    const { exhibition } = changes[0]
+  for (const { exhibitor, actors, released, assigned } of byExhibitor.values()) {
+    const { exhibition, user } = exhibitor
     const siteUrl = siteUrlFor(exhibition)
+    const holding = await db.em.find(
+      Table,
+      { exhibition, exhibitor },
+      { orderBy: { number: 'asc' } },
+    )
+    /* Each name once, in a fixed order. */
+    const names = [...new Set(actors.map(actorName))].sort((a, b) => a.localeCompare(b, 'de'))
+    const digest: TableChangeDigest = {
+      actors: names,
+      released,
+      assigned,
+      holding: holding.map((table) => table.number),
+    }
     await sendEmail(
       makeTableChangeDigestEmail(
         user.fullName || user.nickname || '',
         user.email,
-        changes,
-        exhibitorId,
+        digest,
         siteUrl && `${siteUrl}/tables`,
         exhibition.title,
       ),

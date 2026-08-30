@@ -105,9 +105,13 @@ graphqlTest('a reassignment reaches both the old and the new holder', async () =
 
   expect(counts.mails).toBe(2)
   expect(recipients()).toEqual(['anna-tisch@example.com', 'bernd-tisch@example.com'])
-  expect(bodyFor('bernd-tisch@example.com')).toContain('Tisch 9 wurde Dir von Hilde Helfer')
-  expect(bodyFor('bernd-tisch@example.com')).toContain('vorher stand er bei Anna Adler')
-  expect(bodyFor('anna-tisch@example.com')).toContain('an Bernd Bauer vergeben')
+  expect(bodyFor('bernd-tisch@example.com')).toContain(
+    'Hilde Helfer hat die Tischbelegung geändert',
+  )
+  expect(bodyFor('bernd-tisch@example.com')).toContain('Tisch 9 wurde Dir zugewiesen.')
+  expect(bodyFor('bernd-tisch@example.com')).toContain('Du hast jetzt den Tisch 9.')
+  expect(bodyFor('anna-tisch@example.com')).toContain('Tisch 9 wurde freigegeben.')
+  expect(bodyFor('anna-tisch@example.com')).toContain('Du hast jetzt keinen Tisch mehr.')
 })
 
 /*
@@ -175,8 +179,8 @@ graphqlTest('one exhibitor hears about all their tables in a single mail', async
 
   expect(counts.mails).toBe(1)
   const body = bodyFor('anna-tisch@example.com')
-  expect(body).toContain('Tisch 9')
-  expect(body).toContain('Tisch 10')
+  expect(body).toContain('Tische 9 und 10 wurden Dir zugewiesen.')
+  expect(body).toContain('Du hast jetzt die Tische 9 und 10.')
 })
 
 /* Releasing a table the desk took back says so to the exhibitor who held it. */
@@ -193,7 +197,7 @@ graphqlTest('a release by the desk reaches the exhibitor who held the table', as
 
   expect(counts.mails).toBe(1)
   expect(recipients()).toEqual(['anna-tisch@example.com'])
-  expect(bodyFor('anna-tisch@example.com')).toContain('Tisch 9 wurde von Hilde Helfer freigegeben')
+  expect(bodyFor('anna-tisch@example.com')).toContain('Tisch 9 wurde freigegeben.')
 })
 
 /* Setting a table to the exhibitor it already has is not a change. */
@@ -207,4 +211,63 @@ graphqlTest('reassigning a table to its current holder records nothing', async (
   await db.em.flush()
 
   expect(await db.em.count(TableAssignmentChange, { tableNumber: table.number })).toBe(1)
+})
+
+/*
+ * The desk moves an exhibitor in steps: from 9 to 10, and on to 9 again the
+ * same evening. The mail says where the day ended and nothing of the way there.
+ */
+graphqlTest('a table moved twice in one day is reported once, as its net move', async () => {
+  const db = await initORM()
+  const { exhibition, anna, admin, table, other } = await seed(db)
+
+  await db.table.assignTo(exhibition, table.number, anna, admin)
+  await db.em.flush()
+  await db.table.release(exhibition, table.number, null, admin)
+  await db.table.assignTo(exhibition, other.number, anna, admin)
+  await db.em.flush()
+
+  const counts = await sendTableChangeDigest(db, NOW)
+
+  expect(counts.mails).toBe(1)
+  const body = bodyFor('anna-tisch@example.com')
+  expect(body).toContain('Tisch 10 wurde Dir zugewiesen.')
+  expect(body).not.toContain('Tisch 9')
+  expect(body).toContain('Du hast jetzt den Tisch 10.')
+})
+
+/* A table that leaves and comes back the same day is no change for its holder. */
+graphqlTest('a table released and given back before the digest is not mentioned', async () => {
+  const db = await initORM()
+  const { exhibition, anna, admin, table } = await seed(db)
+
+  await db.table.claim(exhibition, table.number, anna, anna.user)
+  await db.em.flush()
+  await db.table.release(exhibition, table.number, null, admin)
+  await db.em.flush()
+  await db.table.assignTo(exhibition, table.number, anna, admin)
+  await db.em.flush()
+
+  const counts = await sendTableChangeDigest(db, NOW)
+
+  expect(counts.mails).toBe(0)
+  expect(mockedSendEmail).not.toHaveBeenCalled()
+  expect(await db.em.count(TableAssignmentChange, { notifiedAt: null })).toBe(0)
+})
+
+/* Everybody who had a hand in the recipient's tables is named, each once. */
+graphqlTest('the mail names every person who moved the tables', async () => {
+  const db = await initORM()
+  const { exhibition, anna, bernd, admin, table, other } = await seed(db)
+
+  await db.table.assignTo(exhibition, table.number, bernd, admin)
+  await db.table.assignTo(exhibition, other.number, bernd, anna.user)
+  await db.em.flush()
+
+  const counts = await sendTableChangeDigest(db, NOW)
+
+  expect(counts.mails).toBe(1)
+  const body = bodyFor('bernd-tisch@example.com')
+  expect(body).toContain('Anna Adler und Hilde Helfer haben die Tischbelegung geändert')
+  expect(body).toContain('Tische 9 und 10 wurden Dir zugewiesen.')
 })

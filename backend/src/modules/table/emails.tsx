@@ -1,60 +1,69 @@
 import React from 'react'
 import { makeEmailBody } from '../common/emailUtils.js'
-import { TableAssignmentChange } from './entity.js'
-
-/* Whoever made the change, under the name the site shows them by. */
-export const actorName = (change: TableAssignmentChange) =>
-  change.actor?.fullName || change.actor?.nickname || 'der Organisation'
-
-const exhibitorName = (change: TableAssignmentChange, which: 'previous' | 'new') => {
-  const exhibitor = which === 'previous' ? change.previousExhibitor : change.newExhibitor
-  return exhibitor?.user.fullName || exhibitor?.user.nickname || 'jemand anderem'
-}
 
 /*
- * What one change says to one recipient. The same change reads differently on
- * either side of it: the table arrives for the one and goes for the other.
+ * What one exhibitor is told about a day of table movement: who moved tables,
+ * which of theirs went and which came, and what they hold now that it is over.
+ * The numbers are the net result of the day — a table that came and went again
+ * appears in neither list.
  */
-export const changeLine = (change: TableAssignmentChange, recipientExhibitorId: number) => {
-  const by = actorName(change)
-  const gained = change.newExhibitor?.id === recipientExhibitorId
+export type TableChangeDigest = {
+  actors: string[]
+  released: number[]
+  assigned: number[]
+  holding: number[]
+}
 
-  if (gained) {
-    return change.previousExhibitor
-      ? `Tisch ${change.tableNumber} wurde Dir von ${by} zugewiesen; vorher stand er bei ${exhibitorName(change, 'previous')}.`
-      : `Tisch ${change.tableNumber} wurde Dir von ${by} zugewiesen.`
-  }
-  return change.newExhibitor
-    ? `Tisch ${change.tableNumber} wurde von ${by} an ${exhibitorName(change, 'new')} vergeben.`
-    : `Tisch ${change.tableNumber} wurde von ${by} freigegeben.`
+/* "9", "9 und 10", "9, 10 und 11". */
+export const listOf = (items: (string | number)[]) =>
+  items.length <= 1
+    ? items.join('')
+    : `${items.slice(0, -1).join(', ')} und ${items[items.length - 1]}`
+
+const capitalised = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
+
+export const actorsLine = (actors: string[]) =>
+  capitalised(
+    `${listOf(actors)} ${actors.length === 1 ? 'hat' : 'haben'} die Tischbelegung geändert:`,
+  )
+
+export const releasedLine = (tables: number[]) =>
+  tables.length === 1
+    ? `Tisch ${tables[0]} wurde freigegeben.`
+    : `Tische ${listOf(tables)} wurden freigegeben.`
+
+export const assignedLine = (tables: number[]) =>
+  tables.length === 1
+    ? `Tisch ${tables[0]} wurde Dir zugewiesen.`
+    : `Tische ${listOf(tables)} wurden Dir zugewiesen.`
+
+export const holdingLine = (tables: number[]) => {
+  if (tables.length === 0) return 'Du hast jetzt keinen Tisch mehr.'
+  if (tables.length === 1) return `Du hast jetzt den Tisch ${tables[0]}.`
+  return `Du hast jetzt die Tische ${listOf(tables)}.`
 }
 
 export const makeTableChangeDigestEmail = (
   name: string,
   email: string,
-  changes: TableAssignmentChange[],
-  recipientExhibitorId: number,
+  digest: TableChangeDigest,
   tablesUrl: string,
   exhibitionTitle: string,
 ) => ({
   to: [email],
   subject:
-    changes.length === 1
+    digest.released.length + digest.assigned.length === 1
       ? `Dein Tisch auf der ${exhibitionTitle} hat sich geändert`
       : `Deine Tische auf der ${exhibitionTitle} haben sich geändert`,
   body: makeEmailBody(
     <article>
       <h1>Hallo {name}!</h1>
-      <p>
-        {changes.length === 1
-          ? 'An Deiner Tischbelegung hat sich etwas geändert:'
-          : 'An Deiner Tischbelegung hat sich seit gestern etwas geändert:'}
-      </p>
+      <p>{actorsLine(digest.actors)}</p>
       <ul>
-        {changes.map((change) => (
-          <li key={change.id}>{changeLine(change, recipientExhibitorId)}</li>
-        ))}
+        {digest.released.length > 0 && <li>{releasedLine(digest.released)}</li>}
+        {digest.assigned.length > 0 && <li>{assignedLine(digest.assigned)}</li>}
       </ul>
+      <p>{holdingLine(digest.holding)}</p>
       {tablesUrl && (
         <p>
           <a href={tablesUrl}>Zum Sitzplan</a>
