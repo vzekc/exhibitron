@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Confirm from '@components/Confirm'
 import MessageInputModal from '@components/MessageInputModal'
+import { showMessage } from '@components/MessageModalUtil.tsx'
 import { useBreadcrumb } from '@contexts/BreadcrumbContext.ts'
 import { graphql } from 'gql.tada'
 import { useQuery, useMutation, useApolloClient } from '@apollo/client'
@@ -37,6 +38,7 @@ const GET_REGISTRATION = graphql(`
       data
       talkTitle
       talkSummary
+      exhibitorId
     }
   }
 `)
@@ -56,6 +58,12 @@ const REJECT_REGISTRATION = graphql(`
 const DELETE_REGISTRATION = graphql(`
   mutation DeleteRegistration($id: Int!) {
     deleteRegistration(id: $id)
+  }
+`)
+
+const DELETE_EXHIBITOR = graphql(`
+  mutation DeleteExhibitor($id: Int!) {
+    deleteExhibitor(id: $id)
   }
 `)
 
@@ -82,6 +90,7 @@ const RegistrationDetails = () => {
   const [approveRegistration] = useMutation(APPROVE_REGISTRATION)
   const [rejectRegistration] = useMutation(REJECT_REGISTRATION)
   const [deleteRegistration] = useMutation(DELETE_REGISTRATION)
+  const [deleteExhibitor] = useMutation(DELETE_EXHIBITOR)
   const [setRegistrationInProgress] = useMutation(SET_REGISTRATION_IN_PROGRESS)
   const [updateNotes] = useMutation(UPDATE_REGISTRATION_NOTES)
   const [notes, setNotes] = useState('')
@@ -291,6 +300,36 @@ const RegistrationDetails = () => {
               })
             }>
             Löschen
+          </Button>
+        )}
+        {registration.status === 'approved' && !!registration.exhibitorId && (
+          <Button
+            variant="danger"
+            onClick={() =>
+              setConfirmAction({
+                title: 'Aussteller entfernen',
+                message:
+                  'Aussteller entfernen? Exponate, Tische, Vorträge und die Anmeldung werden ' +
+                  'entfernt. Diese Aktion kann nicht rückgängig gemacht werden.',
+                actionName: 'Entfernen',
+                action: async () => {
+                  const result = await deleteExhibitor({
+                    variables: { id: registration.exhibitorId! },
+                  })
+                  if (result.errors?.length) {
+                    await showMessage(
+                      'Fehler',
+                      result.errors[0]?.message || 'Der Aussteller konnte nicht entfernt werden.',
+                      'OK',
+                    )
+                    return
+                  }
+                  await apolloClient.clearStore()
+                  navigate('/admin/registration')
+                },
+              })
+            }>
+            Aussteller entfernen
           </Button>
         )}
         {notes !== (registration.notes || '') && (

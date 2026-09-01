@@ -2,7 +2,7 @@ import { Context } from '../../app/context.js'
 import { ExhibitorResolvers, MutationResolvers, QueryResolvers } from '../../generated/graphql.js'
 import { QueryOrder, wrap } from '@mikro-orm/core'
 import { GraphQLError } from 'graphql'
-import { requireNotFrozen, isAdmin } from '../../db.js'
+import { requireNotFrozen, isAdmin, requireAdmin } from '../../db.js'
 
 export const exhibitorQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2345
@@ -38,6 +38,13 @@ export const exhibitorMutations: MutationResolvers<Context> = {
     session.userId = newExhibitor.user.id
     // The session.canSwitchExhibitor is not set here, so that we can still switch back users
     return newExhibitor
+  },
+  deleteExhibitor: async (_, { id }, { db, user, exhibition }) => {
+    requireNotFrozen(exhibition)
+    requireAdmin(user, exhibition)
+    const exhibitor = await db.exhibitor.findOneOrFail({ id, exhibition })
+    await db.exhibitor.cancelParticipation(exhibitor, user!)
+    return true
   },
 }
 

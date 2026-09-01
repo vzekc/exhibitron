@@ -15,6 +15,7 @@ import { User } from './modules/user/entity.js'
 import { Registration } from './modules/registration/entity.js'
 import { RegistrationRepository } from './modules/registration/repository.js'
 import { Exhibitor } from './modules/exhibitor/entity.js'
+import { ExhibitorRepository } from './modules/exhibitor/repository.js'
 import { ExhibitionRepository } from './modules/exhibition/repository.js'
 import { Exhibition } from './modules/exhibition/entity.js'
 import { Page } from './modules/page/entity.js'
@@ -41,7 +42,7 @@ export interface Services {
   image: ImageRepository
   user: UserRepository
   exhibit: ExhibitRepository
-  exhibitor: EntityRepository<Exhibitor>
+  exhibitor: ExhibitorRepository
   exhibition: ExhibitionRepository
   table: TableRepository
   registration: RegistrationRepository

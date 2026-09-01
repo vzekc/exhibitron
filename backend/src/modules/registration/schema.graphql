@@ -20,6 +20,7 @@ type Registration {
   hasNotes: Boolean!
   talkTitle: String
   talkSummary: String
+  exhibitorId: Int
 }
 
 input RegisterInput {

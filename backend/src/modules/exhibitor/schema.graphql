@@ -17,6 +17,7 @@ extend type Mutation {
     nameTagShowNickname: Boolean
   ): Exhibitor
   switchExhibitor(exhibitorId: Int!): Exhibitor
+  deleteExhibitor(id: Int!): Boolean
 }
 
 extend type Query {

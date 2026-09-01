@@ -130,6 +130,14 @@ export const registrationTypeResolvers: RegistrationResolvers = {
   talkSummary: (registration) => {
     return ((registration.data as Record<string, unknown>)?.talkSummary as string) || null
   },
+  exhibitorId: async (registration, _, { db, exhibition }) => {
+    const user = await db.user.findOne({ email: registration.email })
+    if (!user) {
+      return null
+    }
+    const exhibitor = await db.exhibitor.findOne({ user, exhibition })
+    return exhibitor?.id ?? null
+  },
 }
 
 export const registrationResolvers = {

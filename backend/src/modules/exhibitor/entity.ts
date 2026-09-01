@@ -1,4 +1,12 @@
-import { Collection, Entity, ManyToOne, OneToMany, ManyToMany, Property } from '@mikro-orm/core'
+import {
+  Collection,
+  Entity,
+  EntityRepositoryType,
+  ManyToOne,
+  OneToMany,
+  ManyToMany,
+  Property,
+} from '@mikro-orm/core'
 import { User } from '../user/entity.js'
 import { Exhibition } from '../exhibition/entity.js'
 import { BaseEntity } from '../common/base.entity.js'
@@ -6,9 +14,12 @@ import { Exhibit } from '../exhibit/entity.js'
 import { Table } from '../table/entity.js'
 import { ConferenceSession } from '../conferenceSession/entity.js'
 import { Host } from '../host/entity.js'
+import { ExhibitorRepository } from './repository.js'
 
-@Entity()
+@Entity({ repository: () => ExhibitorRepository })
 export class Exhibitor extends BaseEntity<'nameTagShowNickname'> {
+  [EntityRepositoryType]?: ExhibitorRepository
+
   @ManyToOne()
   exhibition!: Exhibition
 
