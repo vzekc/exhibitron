@@ -47,6 +47,22 @@ export function hashCode(code: string) {
 }
 
 /*
+ * The code's second form: HTTP Digest's HA1, MD5(id:realm:code), for partner
+ * sites whose visitors prove their code through the browser's own Digest login
+ * (RFC 2617) — the one authentication a vintage browser can do over plain HTTP
+ * without sending the code itself. The realm is baked into the hash, so it is
+ * fixed here and part of the contract: a partner's Digest challenge must carry
+ * exactly this realm, with the foto-id as the username. Like the SHA-256 hash,
+ * this is computed in the moment the code exists in the open and stored in its
+ * place.
+ */
+export const DIGEST_REALM = 'FotoFix Geheimcode'
+
+export function digestHa1(id: string, code: string) {
+  return createHash('md5').update(`${id}:${DIGEST_REALM}:${code}`).digest('hex')
+}
+
+/*
  * Ids and codes as the booth mints them, for a photo that did not come from the
  * booth. Both are drawn from the crypto source: an id is not a secret, but a
  * guessable one would let somebody walk the ids and find other people's photos,

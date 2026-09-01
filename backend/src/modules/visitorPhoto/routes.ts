@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
-import { randomBytes, timingSafeEqual } from 'crypto'
+import { createHash, randomBytes, timingSafeEqual } from 'crypto'
 import { spawn } from 'child_process'
 import * as path from 'path'
 import { readFile } from 'fs/promises'
@@ -31,6 +31,7 @@ import { buildReceiptSvg, ditherAtkinson, rasteriseSvg, rgbaToGray } from './rec
 import { receiptPdf } from './pdf.js'
 import {
   codeMatches,
+  digestHa1,
   generateDeleteCode,
   generatePhotoId,
   describePhotoFiles,
@@ -181,6 +182,16 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
       return reply.code(400).send({ error: 'missing or malformed code hash' })
     }
 
+    /*
+     * The code's Digest form, MD5(id:realm:code), travels beside its hash —
+     * both describe the same code, so a push carrying only the hash leaves no
+     * Digest form behind rather than one that contradicts the new code.
+     */
+    const pushedHa1 = String(request.headers['x-digest-ha1'] ?? '')
+    if (pushedHa1 !== '' && !/^[0-9a-f]{32}$/.test(pushedHa1)) {
+      return reply.code(400).send({ error: 'malformed digest ha1' })
+    }
+
     const body = request.body as Buffer
     if (!Buffer.isBuffer(body) || body.length === 0) {
       return reply.code(400).send({ error: 'no picture' })
@@ -202,6 +213,7 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
     const photo =
       existing ?? photos.create({ id, exhibition, codeHash, tables, createdAt: new Date() })
     photo.codeHash = codeHash
+    photo.digestHa1 = pushedHa1 || undefined
     photo.tables = tables
     await db.em.persistAndFlush(photo)
 
@@ -447,6 +459,7 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
       id,
       exhibition,
       codeHash: hashCode(code),
+      digestHa1: digestHa1(id, code),
       tables: showing.map((t) => t.number),
       source: 'web',
       createdAt: new Date(),
@@ -658,6 +671,97 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
       return json(200, { valid })
     },
   )
+
+  /*
+   * Digest validation: did the owner of this photo just type their Geheimcode
+   * into a browser's Digest login (RFC 2617)? A partner site that lets a
+   * photo's owner edit their page challenges the browser with
+   * realm="FotoFix Geheimcode" and the foto-id as the username — Digest is the
+   * one login a vintage browser can do over plain HTTP without sending the
+   * code itself. The browser answers with an MD5 chain over the code, the
+   * partner hands that answer here, and the reply is {"valid":true|false}:
+   * whether the login was genuine, and nothing the partner could reuse.
+   *
+   * The nonce is the partner's own — it issued it, and freshness and replay
+   * are its to judge. What is checked here is that the response proves
+   * knowledge of the code, from the stored HA1 = MD5(id:realm:code):
+   *
+   *     HA2      = md5(method ":" uri)
+   *     expected = md5(HA1 ":" nonce ":" nc ":" cnonce ":auth:" HA2)  with qop
+   *     expected = md5(HA1 ":" nonce ":" HA2)                         without
+   *
+   * A photo pushed before the HA1 travelled with it has none stored, and its
+   * owner's login cannot be confirmed until the photo is pushed again.
+   */
+  app.get<{
+    Querystring: {
+      id?: string
+      method?: string
+      uri?: string
+      nonce?: string
+      qop?: string
+      nc?: string
+      cnonce?: string
+      response?: string
+    }
+  }>('/api/digest-pruefen', async (request, reply) => {
+    noIndex(reply)
+    const json = (status: number, body: unknown) =>
+      reply
+        .code(status)
+        .type('application/json')
+        .send(JSON.stringify(body) + '\n')
+
+    const id = normalizePhotoId(String(request.query.id ?? '').trim())
+    if (!isWellFormedId(id)) return json(400, { error: 'malformed id' })
+
+    const printable = (s: string, max: number) =>
+      s.length > 0 && s.length <= max && /^[\x21-\x7e]+$/.test(s)
+
+    const method = String(request.query.method ?? '')
+    const uri = String(request.query.uri ?? '')
+    if (!/^[A-Za-z]+$/.test(method) || !printable(uri, 512)) {
+      return json(400, { error: 'method oder uri fehlt' })
+    }
+
+    const nonce = String(request.query.nonce ?? '')
+    if (!printable(nonce, 256)) return json(400, { error: 'nonce fehlt' })
+
+    const response = String(request.query.response ?? '').toLowerCase()
+    if (!/^[0-9a-f]{32}$/.test(response)) return json(400, { error: 'response ist kein md5' })
+
+    /* qop=auth is what a browser sends; auth-int would need the request body,
+       which never travels here. */
+    const qop = request.query.qop
+    const nc = String(request.query.nc ?? '')
+    const cnonce = String(request.query.cnonce ?? '')
+    if (qop !== undefined && qop !== 'auth') return json(400, { error: 'qop muss auth sein' })
+    if (qop === 'auth' && (!/^[0-9a-f]{8}$/.test(nc) || !printable(cnonce, 256))) {
+      return json(400, { error: 'qop=auth braucht nc und cnonce' })
+    }
+
+    if (tooManyValidateFailures(id)) return json(429, { error: 'zu viele Versuche' })
+
+    /* A deleted photo's code stops confirming logins with it, and an unknown
+       or Digest-less id answers no without saying which it was. */
+    const photo = await photos.findOne({ id })
+    const ha1 = photo && !photo.deletedAt ? (photo.digestHa1 ?? null) : null
+    if (ha1 === null) {
+      recordValidateFailure(id)
+      return json(200, { valid: false })
+    }
+
+    const md5hex = (s: string) => createHash('md5').update(s).digest('hex')
+    const ha2 = md5hex(`${method}:${uri}`)
+    const expected =
+      qop === 'auth'
+        ? md5hex(`${ha1}:${nonce}:${nc}:${cnonce}:auth:${ha2}`)
+        : md5hex(`${ha1}:${nonce}:${ha2}`)
+
+    const valid = hexEqual(response, expected)
+    if (!valid) recordValidateFailure(id)
+    return json(200, { valid })
+  })
 
   /* Linked from the footer of every page here, and from nowhere else. */
   app.get('/foto/datenschutz', async (_request, reply) => {

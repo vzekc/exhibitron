@@ -27,7 +27,7 @@ import { Exhibition } from '../exhibition/entity.js'
  */
 @Entity()
 export class VisitorPhoto {
-  [OptionalProps]?: 'tables' | 'createdAt' | 'deletedAt' | 'source' | 'convertedAt'
+  [OptionalProps]?: 'tables' | 'createdAt' | 'deletedAt' | 'source' | 'convertedAt' | 'digestHa1'
 
   /* Six characters from A-Z 2-9, printed on the visitor's slip. */
   @PrimaryKey()
@@ -43,6 +43,16 @@ export class VisitorPhoto {
    */
   @Property({ length: 64 })
   codeHash!: string
+
+  /*
+   * The same code as HTTP Digest's HA1 — MD5(id:realm:code) with the fixed
+   * realm from storage.ts — so a partner site can let the owner prove their
+   * code through the browser's Digest login and this end can check the answer.
+   * Minted beside the SHA-256 hash; a photo pushed before this existed has
+   * none, and its owner cannot log in by Digest until it is pushed again.
+   */
+  @Property({ length: 32, nullable: true })
+  digestHa1?: string
 
   /* The tables printed on the slip, so the page can show the same trail. */
   @Property({ type: 'json' })
