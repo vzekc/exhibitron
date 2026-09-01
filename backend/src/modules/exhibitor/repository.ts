@@ -18,8 +18,16 @@ export class ExhibitorRepository extends EntityRepository<Exhibitor> {
    * deleted so the address can register again. The user account is deleted
    * too, unless something else still hangs on it — a participation in another
    * exhibition, volunteer shifts, or administrator rights.
+   *
+   * `keepRegistration` is for rejecting an already approved registration: the
+   * participation goes, the registration stays on file as the record of the
+   * rejection.
    */
-  async cancelParticipation(exhibitor: Exhibitor, actor: User) {
+  async cancelParticipation(
+    exhibitor: Exhibitor,
+    actor: User,
+    { keepRegistration = false }: { keepRegistration?: boolean } = {},
+  ) {
     const em = this.em
     await em.populate(exhibitor, ['user', 'exhibition'])
     const { user, exhibition } = exhibitor
@@ -54,10 +62,12 @@ export class ExhibitorRepository extends EntityRepository<Exhibitor> {
 
     await em.nativeDelete(SerialToken, { exhibitor })
 
-    await em.nativeDelete(Registration, {
-      exhibition,
-      $or: [{ email: user.email }, ...(user.nickname ? [{ nickname: user.nickname }] : [])],
-    })
+    if (!keepRegistration) {
+      await em.nativeDelete(Registration, {
+        exhibition,
+        $or: [{ email: user.email }, ...(user.nickname ? [{ nickname: user.nickname }] : [])],
+      })
+    }
 
     em.remove(exhibitor)
 

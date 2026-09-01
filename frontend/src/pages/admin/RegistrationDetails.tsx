@@ -38,7 +38,6 @@ const GET_REGISTRATION = graphql(`
       data
       talkTitle
       talkSummary
-      exhibitorId
     }
   }
 `)
@@ -58,12 +57,6 @@ const REJECT_REGISTRATION = graphql(`
 const DELETE_REGISTRATION = graphql(`
   mutation DeleteRegistration($id: Int!) {
     deleteRegistration(id: $id)
-  }
-`)
-
-const DELETE_EXHIBITOR = graphql(`
-  mutation DeleteExhibitor($id: Int!) {
-    deleteExhibitor(id: $id)
   }
 `)
 
@@ -90,7 +83,6 @@ const RegistrationDetails = () => {
   const [approveRegistration] = useMutation(APPROVE_REGISTRATION)
   const [rejectRegistration] = useMutation(REJECT_REGISTRATION)
   const [deleteRegistration] = useMutation(DELETE_REGISTRATION)
-  const [deleteExhibitor] = useMutation(DELETE_EXHIBITOR)
   const [setRegistrationInProgress] = useMutation(SET_REGISTRATION_IN_PROGRESS)
   const [updateNotes] = useMutation(UPDATE_REGISTRATION_NOTES)
   const [notes, setNotes] = useState('')
@@ -279,7 +271,7 @@ const RegistrationDetails = () => {
             <Button onClick={() => handleStatusChange('approved')}>Annehmen</Button>
           </>
         )}
-        {registration.status !== 'rejected' && (
+        {registration.status !== 'rejected' && registration.status !== 'approved' && (
           <Button onClick={() => handleStatusChange('rejected')}>Ablehnen</Button>
         )}
         {registration.status !== 'approved' && (
@@ -302,34 +294,34 @@ const RegistrationDetails = () => {
             Löschen
           </Button>
         )}
-        {registration.status === 'approved' && !!registration.exhibitorId && (
+        {registration.status === 'approved' && (
           <Button
             variant="danger"
             onClick={() =>
               setConfirmAction({
-                title: 'Aussteller entfernen',
+                title: 'Aussteller hat abgesagt',
                 message:
-                  'Aussteller entfernen? Exponate, Tische, Vorträge und die Anmeldung werden ' +
+                  'Absage verbuchen? Exponate, Tische und Vorträge des Ausstellers werden ' +
                   'entfernt. Diese Aktion kann nicht rückgängig gemacht werden.',
-                actionName: 'Entfernen',
+                actionName: 'Hat abgesagt',
                 action: async () => {
-                  const result = await deleteExhibitor({
-                    variables: { id: registration.exhibitorId! },
+                  const result = await rejectRegistration({
+                    variables: { id: parseInt(id) },
                   })
                   if (result.errors?.length) {
                     await showMessage(
                       'Fehler',
-                      result.errors[0]?.message || 'Der Aussteller konnte nicht entfernt werden.',
+                      result.errors[0]?.message || 'Die Absage konnte nicht verbucht werden.',
                       'OK',
                     )
                     return
                   }
                   await apolloClient.clearStore()
-                  navigate('/admin/registration')
+                  await refetch()
                 },
               })
             }>
-            Aussteller entfernen
+            Hat abgesagt
           </Button>
         )}
         {notes !== (registration.notes || '') && (

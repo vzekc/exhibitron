@@ -277,4 +277,141 @@ describe('exhibitor', () => {
       expect(result.data!.getUsers!.find((u) => u!.email === 'exadmin@example.com')).toBeDefined()
     }
   })
+
+  graphqlTest(
+    'rejecting an approved registration removes the participation',
+    async (graphqlRequest) => {
+      const admin = await login('admin@example.com')
+      const donald = await login('donald@example.com')
+
+      const registerResult = await graphqlRequest(
+        graphql(`
+          mutation Register($input: RegisterInput!) {
+            register(input: $input) {
+              id
+            }
+          }
+        `),
+        {
+          input: {
+            name: 'Donald Duck',
+            email: 'donald@example.com',
+            nickname: 'donald',
+            topic: 'Ducks',
+            data: {},
+          },
+        },
+      )
+      expect(registerResult.errors).toBeUndefined()
+      const registrationId = registerResult.data!.register!.id
+
+      {
+        const result = await graphqlRequest(
+          graphql(`
+            mutation ApproveRegistration($id: Int!, $siteUrl: String!) {
+              approveRegistration(id: $id, siteUrl: $siteUrl)
+            }
+          `),
+          { id: registrationId, siteUrl: 'https://example.com/' },
+          admin,
+        )
+        expect(result.errors).toBeUndefined()
+      }
+
+      {
+        const result = await graphqlRequest(
+          graphql(`
+            mutation ClaimTable($number: Int!) {
+              claimTable(number: $number) {
+                id
+              }
+            }
+          `),
+          { number: 2 },
+          donald,
+        )
+        expect(result.errors).toBeUndefined()
+      }
+
+      {
+        const result = await graphqlRequest(
+          graphql(`
+            mutation RejectRegistration($id: Int!) {
+              rejectRegistration(id: $id)
+            }
+          `),
+          { id: registrationId },
+          admin,
+        )
+        expect(result.errors).toBeUndefined()
+      }
+
+      // The registration stays on file as the record of the rejection
+      {
+        const result = await graphqlRequest(
+          graphql(`
+            query GetRegistration($id: Int!) {
+              getRegistration(id: $id) {
+                status
+              }
+            }
+          `),
+          { id: registrationId },
+          admin,
+        )
+        expect(result.errors).toBeUndefined()
+        expect(result.data!.getRegistration!.status).toBe('rejected')
+      }
+
+      // The participation is gone: exhibits deleted, table free, account removed
+      {
+        const result = await graphqlRequest(
+          graphql(`
+            query GetExhibit($id: Int!) {
+              getExhibit(id: $id) {
+                id
+              }
+            }
+          `),
+          { id: 1003 },
+        )
+        expect(result.errors).toBeDefined()
+      }
+
+      {
+        const result = await graphqlRequest(
+          graphql(`
+            query GetTable($number: Int!) {
+              getTable(number: $number) {
+                exhibitor {
+                  id
+                }
+              }
+            }
+          `),
+          { number: 2 },
+        )
+        expect(result.errors).toBeUndefined()
+        expect(result.data!.getTable!.exhibitor).toBeNull()
+      }
+
+      {
+        const result = await graphqlRequest(
+          graphql(`
+            query GetUsers {
+              getUsers {
+                email
+              }
+            }
+          `),
+          {},
+          admin,
+        )
+        expect(result.errors).toBeUndefined()
+        expect(
+          result.data!.getUsers!.find((u) => u!.email === 'donald@example.com'),
+        ).toBeUndefined()
+      }
+    },
+  )
 })

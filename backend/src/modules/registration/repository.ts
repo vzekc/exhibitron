@@ -135,7 +135,32 @@ export class RegistrationRepository extends EntityRepository<Registration> {
     )
   }
 
-  async reject(registration: Registration) {
+  /*
+   * Rejecting a registration that was already approved takes the
+   * participation with it — exhibits, tables, talks — the same way an
+   * explicit removal does. The registration itself stays on file as the
+   * record of the rejection.
+   */
+  async reject(registration: Registration, actor: User) {
+    if (registration.status === RegistrationStatus.Approved) {
+      const userRepository = this.em.getRepository(User)
+      let user = await userRepository.lookup(registration.email)
+      if (!user && registration.nickname) {
+        user = await userRepository.findOne({ nickname: registration.nickname })
+      }
+      if (user) {
+        const exhibitorRepository = this.em.getRepository(Exhibitor)
+        const exhibitor = await exhibitorRepository.findOne({
+          user,
+          exhibition: registration.exhibition,
+        })
+        if (exhibitor) {
+          await exhibitorRepository.cancelParticipation(exhibitor, actor, {
+            keepRegistration: true,
+          })
+        }
+      }
+    }
     registration.status = RegistrationStatus.Rejected
     await this.em.flush()
   }

@@ -64,7 +64,7 @@ export const registrationMutations: MutationResolvers<Context> = {
   rejectRegistration: async (_, { id }, { db, user, exhibition }) => {
     requireAdmin(user, exhibition)
     const registration = await db.registration.findOneOrFail({ id })
-    await db.registration.reject(registration)
+    await db.registration.reject(registration, user!)
     return true
   },
   deleteRegistration: async (_, { id }, { db, user, exhibition }) => {
