@@ -612,7 +612,7 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
 
       if (request.query.code !== undefined) {
         if (request.protocol !== 'https') {
-          return json(403, { error: 'code nur ueber https — hier nonce und proof verwenden' })
+          return json(403, { error: 'code nur ueber https - hier nonce und proof verwenden' })
         }
         if (tooManyValidateFailures(id)) return json(429, { error: 'zu viele Versuche' })
         const code = String(request.query.code).toUpperCase().replace(/\s+/g, '')
