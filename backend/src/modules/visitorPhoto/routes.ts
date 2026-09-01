@@ -1,4 +1,5 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
+import { randomBytes, timingSafeEqual } from 'crypto'
 import { spawn } from 'child_process'
 import * as path from 'path'
 import { readFile } from 'fs/promises'
@@ -71,6 +72,49 @@ function tooManyAttempts(id: string) {
   }
   seen.count += 1
   return seen.count > MAX_ATTEMPTS
+}
+
+/*
+ * The validation API's nonce ledger and its own guess counter. A nonce answers
+ * once, expires after two minutes, and is bound to the id it was issued for.
+ * Failures are counted apart from the deletion form's counter: an exhibitor
+ * checking pairs does not use up a visitor's tries at their own deletion form.
+ */
+const NONCE_TTL_MS = 2 * 60 * 1000
+const VALIDATE_LIMIT = 10
+const VALIDATE_WINDOW_MS = 60 * 1000
+const nonces = new Map<string, { id: string; expires: number }>()
+const validateFailures = new Map<string, { count: number; since: number }>()
+
+setInterval(() => {
+  const now = Date.now()
+  for (const [nonce, issued] of nonces) if (issued.expires < now) nonces.delete(nonce)
+  for (const [id, seen] of validateFailures)
+    if (now - seen.since > VALIDATE_WINDOW_MS) validateFailures.delete(id)
+}, 60 * 1000).unref()
+
+function tooManyValidateFailures(id: string) {
+  const seen = validateFailures.get(id)
+  return (
+    seen !== undefined &&
+    Date.now() - seen.since <= VALIDATE_WINDOW_MS &&
+    seen.count >= VALIDATE_LIMIT
+  )
+}
+
+function recordValidateFailure(id: string) {
+  const seen = validateFailures.get(id)
+  if (seen === undefined || Date.now() - seen.since > VALIDATE_WINDOW_MS) {
+    validateFailures.set(id, { count: 1, since: Date.now() })
+  } else {
+    seen.count += 1
+  }
+}
+
+function hexEqual(a: string, b: string) {
+  const left = Buffer.from(a, 'hex')
+  const right = Buffer.from(b, 'hex')
+  return left.length === right.length && timingSafeEqual(left, right)
 }
 
 function boothAuthorised(request: FastifyRequest) {
@@ -501,6 +545,13 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
       if (!photo) return reply.code(404).send({ error: 'unknown' })
       if (photo.deletedAt) return reply.send({ deleted: true })
 
+      /* MUSTER's deletion code is published for exhibitors to test the
+         validation API against, so the demo photo refuses the deletion the
+         code would otherwise buy. */
+      if (id === 'MUSTER') {
+        return reply.code(403).send({ error: 'Das Musterfoto lässt sich nicht löschen.' })
+      }
+
       if (tooManyAttempts(id)) {
         return reply.code(429).send({ error: 'Zu viele Versuche. Bitte später noch einmal.' })
       }
@@ -516,6 +567,95 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
       request.log.info({ id }, 'visitor asked for their photo to be deleted')
 
       return reply.send({ deleted: true })
+    },
+  )
+
+  /* ── the exhibitor's client ────────────────────────────────────────────── */
+
+  /*
+   * Validation: do this foto-id and this deletion code belong together? The
+   * answer is {"valid":true|false} and nothing else — for the exhibitor whose
+   * machine shows a visitor's photo and is handed the slip. Over TLS the code
+   * may stand in the request itself; over plain HTTP the client proves it
+   * through a nonce instead, so the code never crosses the wire unencrypted:
+   *
+   *     GET /api/pruefen?id=K7NP4M                    -> {"nonce":"<32 hex>"}
+   *     GET /api/pruefen?id=K7NP4M&nonce=…&proof=sha256hex(nonce + sha256hex(code))
+   *                                                   -> {"valid":true}
+   *
+   * The Pi in the hall answers the same exchange at the same path from its own
+   * hashes, and the fotofix.classic-computing.de vhost proxies both of its
+   * ports here. The flows are documented for exhibitors on the fotofix landing
+   * pages (api.html in the fotofix repository); the answers match the intake's
+   * byte for byte, trailing newline included, so a client built against one
+   * end works against the other.
+   */
+  app.get<{ Querystring: { id?: string; code?: string; nonce?: string; proof?: string } }>(
+    '/api/pruefen',
+    async (request, reply) => {
+      noIndex(reply)
+      const json = (status: number, body: unknown) =>
+        reply
+          .code(status)
+          .type('application/json')
+          .send(JSON.stringify(body) + '\n')
+
+      const id = normalizePhotoId(String(request.query.id ?? '').trim())
+      if (!isWellFormedId(id)) return json(400, { error: 'malformed id' })
+
+      /* A deleted photo's code stops validating with it: the hash to check
+         against is only ever a living photo's. */
+      const storedHash = async () => {
+        const photo = await photos.findOne({ id })
+        return photo && !photo.deletedAt ? photo.codeHash : null
+      }
+
+      if (request.query.code !== undefined) {
+        if (request.protocol !== 'https') {
+          return json(403, { error: 'code nur ueber https — hier nonce und proof verwenden' })
+        }
+        if (tooManyValidateFailures(id)) return json(429, { error: 'zu viele Versuche' })
+        const code = String(request.query.code).toUpperCase().replace(/\s+/g, '')
+        const codeHash = await storedHash()
+        const valid = codeHash !== null && isWellFormedCode(code) && codeMatches(code, codeHash)
+        if (!valid) recordValidateFailure(id)
+        return json(200, { valid })
+      }
+
+      const nonceParam = request.query.nonce
+      const proofParam = request.query.proof?.trim().toLowerCase()
+
+      if (nonceParam === undefined && proofParam === undefined) {
+        /* Issued for any well-formed id, so the challenge says nothing about
+           whether a photo exists. */
+        const nonce = randomBytes(16).toString('hex')
+        nonces.set(nonce, { id, expires: Date.now() + NONCE_TTL_MS })
+        return json(200, { nonce })
+      }
+
+      if (
+        nonceParam === undefined ||
+        proofParam === undefined ||
+        !/^[0-9a-f]{64}$/.test(proofParam)
+      ) {
+        return json(400, { error: 'nonce und proof gehoeren zusammen' })
+      }
+
+      /* One answer per nonce, whichever answer it is. */
+      const issued = nonces.get(nonceParam)
+      nonces.delete(nonceParam)
+
+      if (tooManyValidateFailures(id)) return json(429, { error: 'zu viele Versuche' })
+
+      if (issued === undefined || issued.expires < Date.now() || issued.id !== id) {
+        recordValidateFailure(id)
+        return json(200, { valid: false })
+      }
+
+      const codeHash = await storedHash()
+      const valid = codeHash !== null && hexEqual(proofParam, hashCode(nonceParam + codeHash))
+      if (!valid) recordValidateFailure(id)
+      return json(200, { valid })
     },
   )
 
@@ -617,6 +757,21 @@ export async function registerVisitorPhotoRoutes(app: FastifyInstance) {
       const photo = await photos.findOne({ id })
       if (!photo) return reply.code(404).type('text/html').send(renderNotFound())
       if (photo.deletedAt) return reply.type('text/html').send(renderDeletedPage())
+
+      /* MUSTER's deletion code is published for exhibitors to test the
+         validation API against, so the demo photo refuses the deletion the
+         code would otherwise buy. */
+      if (id === 'MUSTER') {
+        return reply
+          .code(403)
+          .type('text/html')
+          .send(
+            renderPhotoPage(id, await describePhotoFiles(id), photo.tables, {
+              converting: converting(photo),
+              problem: 'Das Musterfoto lässt sich nicht löschen.',
+            }),
+          )
+      }
 
       if (tooManyAttempts(id)) {
         return reply
