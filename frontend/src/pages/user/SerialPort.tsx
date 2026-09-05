@@ -471,8 +471,8 @@ const SerialTokens = () => {
         fotofix-serial --port /dev/ttyUSB0 --speed {DEFAULTS.baudRate} --format 8N1 --flow xonxoff
       </pre>
       <p className="text-sm">
-        Das Programm heruntergeladen, das Token in eine Datei gelegt, fertig. Heruntergeladene
-        Programme sind gesperrt; die Sperre nimmt man so weg:
+        Beim ersten Start fragt das Programm nach dem Token — unten erzeugt — und merkt es sich.
+        Heruntergeladene Programme sind gesperrt; die Sperre nimmt man so weg:
       </p>
       {/* Ein Template-Literal, weil JSX Zeilenumbrüche in Text zu Leerzeichen macht. */}
       <pre className="my-2 overflow-x-auto rounded bg-gray-100 p-2 text-sm dark:bg-gray-800">
