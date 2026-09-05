@@ -1,4 +1,12 @@
-pnpm prettier
-git diff --name-only -- frontend/src backend/src | while IFS= read -r file; do git add "$file"; done
+# Format only the staged frontend/backend sources and re-stage exactly those.
+# Running prettier over the whole tree on every commit is slow, and re-adding
+# every changed file sweeps unrelated working-tree edits into the commit; both
+# are avoided by acting on the staged set alone.
+files=$(git diff --cached --name-only --diff-filter=ACMR -- frontend/src backend/src \
+  | grep -E '\.(ts|tsx|js|jsx|json|css|scss|md|html|yml|yaml)$' || true)
+if [ -n "$files" ]; then
+  printf '%s\n' "$files" | xargs pnpm exec prettier --write
+  printf '%s\n' "$files" | while IFS= read -r f; do git add "$f"; done
+fi
 pnpm lint
 pnpm test
