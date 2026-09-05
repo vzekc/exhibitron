@@ -101,6 +101,15 @@ export class SerialBridge {
   private paused = false
   private waiters: Array<() => void> = []
 
+  /*
+   * Outbound data waits here for one writer loop. A single loop, paced to the
+   * wire, is what keeps the driver's own transmit buffer shallow; letting each
+   * websocket message write on its own would both race the writer and hand the
+   * driver the whole burst at once, past any XOFF.
+   */
+  private queue: Uint8Array[] = []
+  private draining = false
+
   private counters: Counters = {
     toWire: 0,
     fromWire: 0,
@@ -276,16 +285,39 @@ export class SerialBridge {
     /* The exhibition's own output, which is most of what there is to see. */
     this.events.onData(data, 'exhibition')
     if (!this.port.writable) return
-    if (!this.writer) this.writer = this.port.writable.getWriter()
-
-    const size = chunkSize(this.line)
-    for (let at = 0; at < data.length; at += size) {
-      await this.gate()
-      if (this.stopping) return
-      await this.writer.write(data.subarray(at, Math.min(at + size, data.length)))
-      this.counters.toWire += Math.min(size, data.length - at)
+    this.queue.push(data)
+    if (this.draining) return
+    this.draining = true
+    try {
+      if (!this.writer) this.writer = this.port.writable.getWriter()
+      const size = chunkSize(this.line)
+      /*
+       * The wire time of one chunk. A write() resolves when the OS accepts the
+       * bytes, not when they leave, and Web Serial offers no drain, so without
+       * pacing the whole burst lands in the driver's buffer at once -- seconds
+       * of committed data at 9600 that no XOFF can recall. Holding the write
+       * rate to the wire keeps that buffer about one chunk deep, so a machine
+       * that says stop is pushed one chunk further and no more.
+       */
+      const perChunkMs = (size * 1000) / bytesPerSecond(this.line)
+      while (this.queue.length && !this.stopping) {
+        const buf = this.queue.shift() as Uint8Array
+        for (let at = 0; at < buf.length; at += size) {
+          await this.gate()
+          if (this.stopping || !this.writer) return
+          const end = Math.min(at + size, buf.length)
+          const started = typeof performance !== 'undefined' ? performance.now() : Date.now()
+          await this.writer.write(buf.subarray(at, end))
+          this.counters.toWire += end - at
+          const now = typeof performance !== 'undefined' ? performance.now() : Date.now()
+          const wait = perChunkMs - (now - started)
+          if (wait > 0) await new Promise((r) => setTimeout(r, wait))
+        }
+      }
+    } finally {
+      this.draining = false
+      this.bump()
     }
-    this.bump()
   }
 
   /* What the exhibitor types in the terminal, when the machine is not there. */
@@ -327,6 +359,7 @@ export class SerialBridge {
 
   private async releaseSerial() {
     this.stopping = true
+    this.queue = []
 
     /* Let go of anyone parked on an XOFF that will now never be lifted. */
     const waiting = this.waiters
