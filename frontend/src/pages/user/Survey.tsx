@@ -11,6 +11,8 @@ import QuestionField from '@components/survey/QuestionField'
 import {
   Answers,
   AnswerValue,
+  Audience,
+  audienceLabel,
   collectAnswers,
   isVisible,
   missingAnswers,
@@ -37,6 +39,8 @@ const GET_QUESTIONS = graphql(`
       }
       required
       isClosed
+      audience
+      appliesToMe
       showIfQuestion {
         id
       }
@@ -103,6 +107,9 @@ const Survey = () => {
 
   const frozen = data?.getCurrentExhibition?.frozen ?? false
   const visible = questions.filter((question) => isVisible(question, answers))
+  /* The general questions first, then each audience's questions under its name. */
+  const general = visible.filter((question) => !question.audience)
+  const audiences = [...new Set(visible.map((q) => q.audience).filter(Boolean))] as Audience[]
   const canSave = !frozen && visible.some((question) => !question.isClosed)
 
   const setAnswer = (question: Question, value: AnswerValue | undefined) => {
@@ -114,6 +121,16 @@ const Survey = () => {
       return next
     })
   }
+
+  const field = (question: Question) => (
+    <QuestionField
+      key={question.id}
+      question={frozen ? { ...question, isClosed: true } : question}
+      value={answers[question.id]}
+      onChange={(value) => setAnswer(question, value)}
+      error={errors[question.id]}
+    />
+  )
 
   const save = async () => {
     const missing = missingAnswers(questions, answers).filter((question) => !question.isClosed)
@@ -162,15 +179,19 @@ const Survey = () => {
           </p>
         </Card>
       ) : (
-        <div className="space-y-2">
-          {visible.map((question) => (
-            <QuestionField
-              key={question.id}
-              question={frozen ? { ...question, isClosed: true } : question}
-              value={answers[question.id]}
-              onChange={(value) => setAnswer(question, value)}
-              error={errors[question.id]}
-            />
+        <div className="space-y-4">
+          <div className="space-y-2">{general.map(field)}</div>
+          {audiences.map((audience) => (
+            <section
+              key={audience}
+              className="rounded-lg border border-gray-300 bg-gray-50 p-3 dark:border-gray-600 dark:bg-gray-900">
+              <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
+                {audienceLabel[audience]}
+              </h2>
+              <div className="space-y-2">
+                {visible.filter((question) => question.audience === audience).map(field)}
+              </div>
+            </section>
           ))}
         </div>
       )}

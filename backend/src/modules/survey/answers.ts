@@ -1,4 +1,4 @@
-import { SurveyQuestionType } from '../../generated/graphql.js'
+import { SurveyAudience, SurveyQuestionType } from '../../generated/graphql.js'
 import { BadRequestError } from '../common/errors.js'
 import { SurveyAnswerValue, SurveyQuestion } from './entity.js'
 
@@ -17,6 +17,17 @@ export const parentValuesOf = (parent: SurveyQuestion) =>
   parent.type === SurveyQuestionType.Checkbox
     ? ['true', 'false']
     : parent.options.map((option) => option.key)
+
+/* The audiences one exhibitor belongs to. */
+export type Audiences = Set<SurveyAudience>
+
+/* Whether a question is put to somebody in these audiences. */
+export const appliesTo = (question: SurveyQuestion, audiences: Audiences) =>
+  !question.audience || audiences.has(question.audience)
+
+/* The questions put to somebody in these audiences. */
+export const applicable = (questions: SurveyQuestion[], audiences: Audiences) =>
+  questions.filter((question) => appliesTo(question, audiences))
 
 /*
  * A question with a parent is shown while the parent's answer is one of the

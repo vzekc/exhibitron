@@ -9,6 +9,15 @@ enum SurveyQuestionType {
   number
 }
 
+"""
+Who a question is put to. Without an audience it goes to every exhibitor of
+the exhibition; `fotofix` reaches those who hold a table that shows visitor
+photos.
+"""
+enum SurveyAudience {
+  fotofix
+}
+
 type SurveyOption {
   """
   Stays the same when the label is reworded, so that answers already given keep
@@ -46,6 +55,24 @@ type SurveyQuestion {
   """
   onRegistrationForm: Boolean!
   """
+  Null means every exhibitor.
+  """
+  audience: SurveyAudience
+  """
+  Whether the question is put to whoever is asking. True for everybody when the
+  question has no audience.
+  """
+  appliesToMe: Boolean!
+  """
+  How many exhibitors the question is put to.
+  """
+  audienceSize: Int!
+  """
+  The exhibitors the question is put to who have not answered, for somebody
+  logged in. Empty for everybody else.
+  """
+  nonRespondents: [Exhibitor!]!
+  """
   Shown only while the answer to this question is one of `showIfValues`: the
   option keys of a choice question, or "true" / "false" for a checkbox.
   """
@@ -76,6 +103,16 @@ type SurveyAnswer {
   updatedAt: Date
 }
 
+"""
+What somebody wants to hear about in the daily digest. A question, an audience,
+or everything of the exhibition when both are null.
+"""
+type SurveySubscription {
+  id: Int!
+  question: SurveyQuestion
+  audience: SurveyAudience
+}
+
 input SurveyOptionInput {
   """
   The key of an option that already exists. Left out for a new option, whose
@@ -94,6 +131,7 @@ input SurveyQuestionInput {
   required: Boolean
   closesAt: Date
   onRegistrationForm: Boolean
+  audience: SurveyAudience
   showIfQuestionId: Int
   showIfValues: [String!]
   ordering: Int
@@ -113,6 +151,11 @@ extend type Query {
   """
   getSurveyQuestions: [SurveyQuestion!]!
   getSurveyQuestion(id: Int!): SurveyQuestion
+  """
+  The exhibitors a question with this audience is put to. For admins.
+  """
+  getSurveyAudienceMembers(audience: SurveyAudience!): [Exhibitor!]!
+  getMySurveySubscriptions: [SurveySubscription!]!
 }
 
 extend type Mutation {
@@ -137,6 +180,12 @@ extend type Mutation {
   for somebody else.
   """
   saveSurveyAnswers(answers: [SurveyAnswerInput!]!, exhibitorId: Int): [SurveyAnswer!]!
+  """
+  Asks to be told about changed answers: to one question, to an audience, or
+  to everything when neither is given. Asking twice is one subscription.
+  """
+  subscribeToSurvey(questionId: Int, audience: SurveyAudience): SurveySubscription!
+  unsubscribeFromSurvey(id: Int!): Boolean!
 }
 
 extend type Exhibitor {

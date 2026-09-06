@@ -192,11 +192,18 @@ code follows:
   registration form and the exhibitor's form.
 - Option keys are fixed when an option is made and survive relabelling. A dependent question waits
   for one parent, one level deep; a hidden question loses its answer when the form is saved.
+- A question may have an audience (`SurveyAudience`, so far only `fotofix`: exhibitors holding a
+  table with `showsVisitorPhotos`). Membership is derived in `survey/audience.ts` from the tables at
+  the time of asking, never stored. A question with an audience cannot be on the registration form,
+  since a registrant has no table yet.
 - A question past `closesAt` keeps the answer it has. The registration form's answers live in
   `Registration.surveyAnswers`, keyed by question id, until approval copies them to the exhibitor.
 - `notifiedAt` on an answer is cleared whenever the value changes; the daily digest
-  (`app/surveyDigest.ts`, 06:00) mails the exhibition's admins about every cleared answer and stamps
-  it. `npm run survey-digest` sends it by hand.
+  (`app/surveyDigest.ts`, 06:00) sends every cleared answer to the exhibition's admins and, per
+  `SurveySubscription`, to anybody following that question, its audience, or everything, one mail
+  per address, then stamps it. `npm run survey-digest` sends it by hand. Exhibitors may subscribe
+  because they may read all answers anyway.
+- The admin mail page offers the survey's audiences as recipient groups.
 - Frontend: exhibitors answer under `/user/umfrage` and read everybody's answers under
   `/user/umfrage/ergebnisse`; admins shape the questions under `/admin/umfrage`. The registration
   form renders the questions marked `onRegistrationForm` in its Teilnahme section.

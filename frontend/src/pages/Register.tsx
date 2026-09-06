@@ -74,6 +74,7 @@ const FORM_QUESTIONS = graphql(`
       required
       isClosed
       onRegistrationForm
+      audience
       showIfQuestion {
         id
       }
@@ -106,7 +107,7 @@ const Register = () => {
   const [answers, setAnswers] = useState<Answers>({})
   const [answerErrors, setAnswerErrors] = useState<Record<number, string>>({})
   const questions = (questionData?.getSurveyQuestions ?? []).filter(
-    (question) => question.onRegistrationForm,
+    (question) => question.onRegistrationForm && !question.audience,
   ) as Question[]
   const visibleQuestions = questions.filter((question) => isVisible(question, answers))
   const { exhibition } = useExhibition()

@@ -1,4 +1,5 @@
 import { Context } from '../../app/context.js'
+import { requireAdmin } from '../../db.js'
 import { ExhibitionResolvers, MutationResolvers, QueryResolvers } from '../../generated/graphql.js'
 import { QueryOrder } from '@mikro-orm/core'
 import { Exhibit } from '../exhibit/entity.js'
@@ -18,6 +19,7 @@ export const exhibitionQueries: QueryResolvers<Context> = {
 
 export const exhibitionMutations: MutationResolvers<Context> = {
   emailExhibitors: async (_, { exhibitorIds, subject, html }, { db, exhibition, user }) => {
+    requireAdmin(user, exhibition)
     const loadedExhibition = await db.exhibition.findOneOrFail(
       { id: exhibition.id },
       { populate: ['exhibitors.user'] }, // populate exhibitors and their user

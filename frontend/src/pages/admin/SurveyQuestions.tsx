@@ -10,7 +10,7 @@ import FormSelect from '@components/FormSelect'
 import LoadInProgress from '@components/LoadInProgress'
 import { TableRow, TableCell } from '@components/Table'
 import PlainTable from '@components/volunteer/PlainTable'
-import { formatClosesAt, typeLabel } from '@components/survey/answers'
+import { audienceLabel, formatClosesAt, typeLabel } from '@components/survey/answers'
 import { showMessage } from '@components/MessageModalUtil'
 import { showConfirm } from '@components/ConfirmUtil'
 
@@ -34,6 +34,7 @@ const GET_QUESTIONS = graphql(`
       isClosed
       closesAt
       onRegistrationForm
+      audience
       showIfQuestion {
         id
         label
@@ -166,7 +167,17 @@ const SurveyQuestions = () => {
 
       <Card>
         <PlainTable
-          headers={['', 'Frage', 'Kürzel', 'Typ', 'Pflicht', 'Anmeldung', 'Schließt', 'Antworten']}>
+          headers={[
+            '',
+            'Frage',
+            'Kürzel',
+            'Typ',
+            'Für',
+            'Pflicht',
+            'Anmeldung',
+            'Schließt',
+            'Antworten',
+          ]}>
           {questions.map((question, index) => (
             <TableRow key={question.id} onClick={() => navigate(`/admin/umfrage/${question.id}`)}>
               <TableCell>
@@ -201,6 +212,7 @@ const SurveyQuestions = () => {
               </TableCell>
               <TableCell>{question.key}</TableCell>
               <TableCell>{typeLabel[question.type]}</TableCell>
+              <TableCell>{question.audience ? audienceLabel[question.audience] : 'Alle'}</TableCell>
               <TableCell>{question.required ? 'Ja' : '—'}</TableCell>
               <TableCell>{question.onRegistrationForm ? 'Ja' : '—'}</TableCell>
               <TableCell>

@@ -17,7 +17,7 @@ const formQuestionsOf = async ({ db, exhibition }: Context) =>
   inAnswerOrder(
     await db.em.find(
       SurveyQuestion,
-      { exhibition, onRegistrationForm: true },
+      { exhibition, onRegistrationForm: true, audience: null },
       { populate: ['showIfQuestion'], orderBy: { ordering: 'asc', id: 'asc' } },
     ),
   )

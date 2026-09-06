@@ -15,6 +15,8 @@ import { showMessage } from '@components/MessageModalUtil'
 import { showConfirm } from '@components/ConfirmUtil'
 import { useBreadcrumb } from '@contexts/BreadcrumbContext.ts'
 import {
+  Audience,
+  audienceLabel,
   canBeParent,
   isChoice,
   Option,
@@ -39,6 +41,7 @@ const GET_QUESTIONS = graphql(`
       isClosed
       closesAt
       onRegistrationForm
+      audience
       showIfQuestion {
         id
       }
@@ -131,6 +134,7 @@ const SurveyQuestionEditor = () => {
   const [options, setOptions] = useState<EditableOption[]>([{ label: '' }, { label: '' }])
   const [required, setRequired] = useState(false)
   const [onRegistrationForm, setOnRegistrationForm] = useState(false)
+  const [audience, setAudience] = useState<Audience | ''>('')
   const [closesAt, setClosesAt] = useState('')
   const [parentId, setParentId] = useState('')
   const [parentValues, setParentValues] = useState<string[]>([])
@@ -149,6 +153,7 @@ const SurveyQuestionEditor = () => {
     setOptions(question.options.length ? question.options : [{ label: '' }, { label: '' }])
     setRequired(question.required)
     setOnRegistrationForm(question.onRegistrationForm)
+    setAudience(question.audience ?? '')
     setClosesAt(question.closesAt ? toLocalInput(question.closesAt as string) : '')
     setParentId(question.showIfQuestion ? String(question.showIfQuestion.id) : '')
     setParentValues(question.showIfValues)
@@ -191,7 +196,8 @@ const SurveyQuestionEditor = () => {
             .map((option) => ({ key: option.key ?? null, label: option.label.trim() }))
         : null,
       required,
-      onRegistrationForm,
+      onRegistrationForm: audience ? false : onRegistrationForm,
+      audience: audience || null,
       closesAt: closesAt ? new Date(closesAt).toISOString() : null,
       showIfQuestionId: parent ? parent.id : null,
       showIfValues: parent ? parentValues : null,
@@ -341,14 +347,31 @@ const SurveyQuestionEditor = () => {
               />
               <span>Pflichtfrage — Aussteller werden erinnert, bis sie geantwortet haben</span>
             </label>
-            <label className="flex cursor-pointer items-center">
+            <label className="block">
+              <Label>Zielgruppe</Label>
+              <FormSelect
+                value={audience}
+                onChange={(e) => setAudience(e.target.value as Audience | '')}>
+                <option value="">Alle Aussteller</option>
+                {(Object.keys(audienceLabel) as Audience[]).map((each) => (
+                  <option key={each} value={each}>
+                    {audienceLabel[each]}
+                  </option>
+                ))}
+              </FormSelect>
+            </label>
+            <label className={`flex items-center ${audience ? 'opacity-50' : 'cursor-pointer'}`}>
               <FormInput
                 type="checkbox"
                 className="mr-2"
-                checked={onRegistrationForm}
+                checked={!audience && onRegistrationForm}
+                disabled={!!audience}
                 onChange={(e) => setOnRegistrationForm(e.target.checked)}
               />
-              <span>Schon auf dem Anmeldeformular fragen</span>
+              <span>
+                Schon auf dem Anmeldeformular fragen
+                {audience && ' — nicht für eine Zielgruppe, wer anmeldet, hat noch keinen Tisch'}
+              </span>
             </label>
             <label className="block">
               <Label>Antworten möglich bis (leer: bis die Ausstellung eingefroren wird)</Label>

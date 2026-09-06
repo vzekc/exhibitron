@@ -2,7 +2,8 @@ import { Entity, Enum, Index, ManyToOne, Property, Unique } from '@mikro-orm/cor
 import { BaseEntity } from '../common/base.entity.js'
 import { Exhibition } from '../exhibition/entity.js'
 import { Exhibitor } from '../exhibitor/entity.js'
-import { SurveyQuestionType } from '../../generated/graphql.js'
+import { User } from '../user/entity.js'
+import { SurveyAudience, SurveyQuestionType } from '../../generated/graphql.js'
 
 export type SurveyOptionRow = { key: string; label: string }
 
@@ -55,6 +56,10 @@ export class SurveyQuestion extends BaseEntity<
   @Property()
   onRegistrationForm: boolean = false
 
+  /* Who the question is put to. Unset means every exhibitor. */
+  @Enum({ items: () => SurveyAudience, nullable: true, nativeEnumName: 'survey_audience' })
+  audience?: SurveyAudience
+
   @ManyToOne(() => SurveyQuestion, { nullable: true, deleteRule: 'set null' })
   showIfQuestion?: SurveyQuestion
 
@@ -82,4 +87,25 @@ export class SurveyAnswer extends BaseEntity {
   @Index()
   @Property({ nullable: true })
   notifiedAt?: Date
+}
+
+/*
+ * Somebody who wants to hear about answers as they change: to one question,
+ * to every question of an audience, or to every question of the exhibition
+ * when neither is set. The exhibition's admins hear about everything without
+ * subscribing.
+ */
+@Entity()
+export class SurveySubscription extends BaseEntity {
+  @ManyToOne(() => User, { deleteRule: 'cascade' })
+  user!: User
+
+  @ManyToOne(() => Exhibition, { deleteRule: 'cascade' })
+  exhibition!: Exhibition
+
+  @ManyToOne(() => SurveyQuestion, { nullable: true, deleteRule: 'cascade' })
+  question?: SurveyQuestion
+
+  @Enum({ items: () => SurveyAudience, nullable: true, nativeEnumName: 'survey_audience' })
+  audience?: SurveyAudience
 }

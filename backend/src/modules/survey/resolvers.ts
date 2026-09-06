@@ -5,6 +5,7 @@ import {
   MutationResolvers,
   QueryResolvers,
   SurveyAnswerResolvers,
+  SurveySubscriptionResolvers,
   SurveyOptionInput,
   SurveyQuestionInput,
   SurveyQuestionResolvers,
@@ -14,9 +15,12 @@ import { isAdmin, requireAdmin, requireNotFrozen } from '../../db.js'
 import { AuthError, BadRequestError, UniqueConstraintError } from '../common/errors.js'
 import { Exhibition } from '../exhibition/entity.js'
 import { Exhibitor } from '../exhibitor/entity.js'
-import { SurveyAnswer, SurveyOptionRow, SurveyQuestion } from './entity.js'
+import { SurveyAnswer, SurveyOptionRow, SurveyQuestion, SurveySubscription } from './entity.js'
+import { audiencesOf, membersOf } from './audience.js'
 import {
   AnswerMap,
+  applicable,
+  appliesTo,
   canBeParent,
   checkAnswers,
   inAnswerOrder,
@@ -153,6 +157,11 @@ const fieldsFrom = async (
   checkKey(input.key)
   const label = input.label.trim()
   if (!label) throw new BadRequestError('Eine Frage braucht einen Text')
+  if (input.audience && input.onRegistrationForm) {
+    throw new BadRequestError(
+      'Eine Frage an eine Zielgruppe kann nicht auf dem Anmeldeformular stehen; wer anmeldet, hat noch keinen Tisch',
+    )
+  }
   return {
     key: input.key,
     label,
@@ -162,6 +171,7 @@ const fieldsFrom = async (
     required: input.required ?? false,
     closesAt: input.closesAt ?? undefined,
     onRegistrationForm: input.onRegistrationForm ?? false,
+    audience: input.audience ?? undefined,
     ...(await parentFrom(context, input, self)),
   }
 }
@@ -178,7 +188,8 @@ export const storeAnswers = async (
   now = new Date(),
 ) => {
   const { db, exhibition } = context
-  const questions = inAnswerOrder(await questionsOf(context, exhibition))
+  const questions = await questionsOf(context, exhibition)
+  const audiences = await audiencesOf(db, exhibitor)
   const existing = await answersOf(context, exhibitor)
   const byQuestion = new Map(existing.map((answer) => [answer.question.id, answer]))
 
@@ -202,7 +213,8 @@ export const storeAnswers = async (
     effective.set(question.id, stored)
   }
 
-  const wanted = checkAnswers(questions, effective)
+  /* A question not put to this exhibitor keeps no answer of theirs. */
+  const wanted = checkAnswers(applicable(questions, audiences), effective)
   for (const question of questions) {
     const value = wanted.get(question.id)
     const answer = byQuestion.get(question.id)
@@ -226,6 +238,32 @@ export const surveyQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2345
   getSurveyQuestion: async (_, { id }, { db, exhibition }) =>
     db.em.findOne(SurveyQuestion, { id, exhibition }, { populate: ['showIfQuestion'] }),
+
+  // @ts-expect-error ts2345
+  getSurveyAudienceMembers: async (_, { audience }, { db, user, exhibition }) => {
+    requireAdmin(user, exhibition)
+    return membersOf(db, exhibition, audience)
+  },
+
+  // @ts-expect-error ts2345
+  getMySurveySubscriptions: async (_, _args, { db, user, exhibition }) => {
+    if (!user) return []
+    return db.em.find(
+      SurveySubscription,
+      { user, exhibition },
+      { populate: ['question'], orderBy: { id: 'asc' } },
+    )
+  },
+}
+
+export const surveySubscriptionTypeResolvers: SurveySubscriptionResolvers<Context> = {
+  // @ts-expect-error ts2345
+  question: async (subscription, _, { db }) => {
+    const { question } = subscription as unknown as SurveySubscription
+    return question
+      ? db.em.findOneOrFail(SurveyQuestion, { id: question.id }, { populate: ['showIfQuestion'] })
+      : null
+  },
 }
 
 export const surveyQuestionTypeResolvers: SurveyQuestionResolvers<Context> = {
@@ -235,6 +273,32 @@ export const surveyQuestionTypeResolvers: SurveyQuestionResolvers<Context> = {
 
   isClosed: (question, _, { exhibition }) =>
     exhibition.frozen || isClosed(question as unknown as SurveyQuestion),
+
+  appliesToMe: async (question, _, { db, exhibitor }) => {
+    const entity = question as unknown as SurveyQuestion
+    if (!entity.audience) return true
+    return !!exhibitor && appliesTo(entity, await audiencesOf(db, exhibitor))
+  },
+
+  audienceSize: async (question, _, { db, exhibition }) =>
+    (await membersOf(db, exhibition, (question as unknown as SurveyQuestion).audience)).length,
+
+  /* Who still owes an answer is for the people exhibiting, like the answers. */
+  // @ts-expect-error ts2345
+  nonRespondents: async (question, _, { db, exhibition, user }) => {
+    if (!user) return []
+    const entity = question as unknown as SurveyQuestion
+    const answered = new Set(
+      (await db.em.find(SurveyAnswer, { question: { id: entity.id } })).map(
+        (answer) => answer.exhibitor.id,
+      ),
+    )
+    const members = await membersOf(db, exhibition, entity.audience)
+    await db.em.populate(members, ['user'])
+    return members
+      .filter((exhibitor) => !answered.has(exhibitor.id))
+      .sort((a, b) => (a.user.fullName ?? '').localeCompare(b.user.fullName ?? '', 'de'))
+  },
 
   // @ts-expect-error ts2345
   showIfQuestion: async (question, _, { db }) => {
@@ -280,9 +344,11 @@ export const surveyExhibitorTypeResolvers: ExhibitorResolvers<Context> = {
     answersOf(context, exhibitor as unknown as Exhibitor),
 
   unansweredRequiredSurveyQuestions: async (exhibitor, _, context) => {
+    const entity = exhibitor as unknown as Exhibitor
     const questions = await questionsOf(context, context.exhibition)
-    const answers = await answersOf(context, exhibitor as unknown as Exhibitor)
-    return unansweredRequired(questions, toMap(answers)).length
+    const audiences = await audiencesOf(context.db, entity)
+    const answers = await answersOf(context, entity)
+    return unansweredRequired(applicable(questions, audiences), toMap(answers)).length
   },
 }
 
@@ -400,6 +466,7 @@ const adminSurveyMutations: MutationResolvers<Context> = {
         options: original.options.map((option) => ({ ...option })),
         required: original.required,
         onRegistrationForm: original.onRegistrationForm,
+        audience: original.audience,
         showIfQuestion: parent ?? undefined,
         showIfValues: parent ? [...original.showIfValues] : [],
       })
@@ -440,9 +507,58 @@ const exhibitorSurveyMutations: MutationResolvers<Context> = {
   },
 }
 
+/* Answers are readable by the people exhibiting, so they may follow them too. */
+const requireFollower = ({ user, exhibitor, exhibition }: Context) => {
+  if (!user) throw new AuthError('Bitte melde dich an')
+  if (!exhibitor && !isAdmin(user, exhibition)) {
+    throw new AuthError('Du bist bei dieser Ausstellung nicht als Aussteller eingetragen')
+  }
+  return user
+}
+
+const subscriptionMutations: MutationResolvers<Context> = {
+  // @ts-expect-error ts2345
+  subscribeToSurvey: async (_, { questionId, audience }, context) => {
+    const { db, exhibition } = context
+    const user = requireFollower(context)
+    if (questionId !== undefined && questionId !== null && audience) {
+      throw new BadRequestError('Entweder eine Frage oder eine Zielgruppe, nicht beides')
+    }
+    const question =
+      questionId !== undefined && questionId !== null
+        ? await questionOf(context, questionId)
+        : undefined
+    const where = {
+      user,
+      exhibition,
+      question: question ?? null,
+      audience: audience ?? null,
+    }
+    const existing = await db.em.findOne(SurveySubscription, where)
+    if (existing) return existing
+    const subscription = db.em.create(SurveySubscription, {
+      user,
+      exhibition,
+      question,
+      audience: audience ?? undefined,
+    })
+    await db.em.persist(subscription).flush()
+    return subscription
+  },
+
+  unsubscribeFromSurvey: async (_, { id }, context) => {
+    const { db, exhibition } = context
+    const user = requireFollower(context)
+    const subscription = await db.em.findOneOrFail(SurveySubscription, { id, user, exhibition })
+    await db.em.remove(subscription).flush()
+    return true
+  },
+}
+
 export const surveyMutations: MutationResolvers<Context> = {
   ...adminSurveyMutations,
   ...exhibitorSurveyMutations,
+  ...subscriptionMutations,
 }
 
 export const surveyResolvers = {
@@ -450,5 +566,6 @@ export const surveyResolvers = {
   Mutation: surveyMutations,
   SurveyQuestion: surveyQuestionTypeResolvers,
   SurveyAnswer: surveyAnswerTypeResolvers,
+  SurveySubscription: surveySubscriptionTypeResolvers,
   Exhibitor: surveyExhibitorTypeResolvers,
 }

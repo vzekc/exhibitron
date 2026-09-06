@@ -10,6 +10,18 @@ export type AnswerValue = boolean | string | number | string[]
 
 export type Option = { key: string; label: string }
 
+export type Audience = 'fotofix'
+
+/* The name of the audience, as a heading or a choice. */
+export const audienceLabel: Record<Audience, string> = {
+  fotofix: 'Fotofix',
+}
+
+/* Its members, for 'x von y … haben geantwortet'. */
+export const audienceMembersLabel: Record<Audience, string> = {
+  fotofix: 'Fotofix-Ausstellern',
+}
+
 export type Question = {
   id: number
   key: string
@@ -19,6 +31,9 @@ export type Question = {
   options: Option[]
   required: boolean
   isClosed: boolean
+  audience?: Audience | null
+  /* Whether the question is put to the viewer. Absent means yes. */
+  appliesToMe?: boolean
   showIfQuestion?: { id: number } | null
   showIfValues: string[]
 }
@@ -54,6 +69,7 @@ export const parentValuesOf = (parent: Question): Option[] =>
  * values it waits for. A parent without an answer shows none of its children.
  */
 export const isVisible = (question: Question, answers: Answers) => {
+  if (question.appliesToMe === false) return false
   const parent = question.showIfQuestion
   if (!parent) return true
   const value = answers[parent.id]

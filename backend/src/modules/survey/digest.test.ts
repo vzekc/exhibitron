@@ -4,9 +4,9 @@ import { initORM, Services } from '../../db.js'
 import { Exhibition } from '../exhibition/entity.js'
 import { Exhibitor } from '../exhibitor/entity.js'
 import { User } from '../user/entity.js'
-import { SurveyAnswer, SurveyQuestion } from './entity.js'
+import { SurveyAnswer, SurveyQuestion, SurveySubscription } from './entity.js'
 import { sendSurveyDigest } from './digest.js'
-import { SurveyQuestionType } from '../../generated/graphql.js'
+import { SurveyAudience, SurveyQuestionType } from '../../generated/graphql.js'
 
 const inContext = async (fn: (db: Services) => Promise<void>) => {
   const db = await initORM()
@@ -18,6 +18,7 @@ const inContext = async (fn: (db: Services) => Promise<void>) => {
  * yet. The admin account is made the exhibition's admin.
  */
 const seed = async (db: Services) => {
+  await db.em.nativeDelete(SurveySubscription, {})
   await db.em.nativeDelete(SurveyAnswer, {})
   await db.em.nativeDelete(SurveyQuestion, {})
   db.em.clear()
@@ -30,7 +31,9 @@ const seed = async (db: Services) => {
     },
   )
   const admin = await db.em.findOneOrFail(User, { nickname: 'admin' })
-  if (!exhibition.admins.contains(admin)) exhibition.admins.add(admin)
+  /* Exactly one admin, so the mail count is what the test says. */
+  exhibition.admins.removeAll()
+  exhibition.admins.add(admin)
 
   const question = db.em.create(SurveyQuestion, {
     exhibition,
@@ -77,6 +80,31 @@ describe('survey digest', () => {
       answers.daffy.notifiedAt = undefined
       await db.em.flush()
       expect(await sendSurveyDigest(db, new Date())).toEqual({ mails: 1, answers: 1 })
+    })
+  })
+
+  test('subscribers hear about what they follow, admins about everything', async () => {
+    await inContext(async (db) => {
+      const { exhibition, answers } = await seed(db)
+      const daffy = await db.em.findOneOrFail(User, { nickname: 'daffy' })
+      const donald = await db.em.findOneOrFail(User, { nickname: 'donald' })
+
+      /* Daffy follows the buffet question, Donald follows fotofix questions,
+         of which there are none. */
+      db.em.create(SurveySubscription, {
+        user: daffy,
+        exhibition,
+        question: answers.daffy.question,
+      })
+      db.em.create(SurveySubscription, {
+        user: donald,
+        exhibition,
+        audience: SurveyAudience.Fotofix,
+      })
+      await db.em.flush()
+
+      /* One mail to the admin, one to Daffy. */
+      expect(await sendSurveyDigest(db, new Date())).toEqual({ mails: 2, answers: 2 })
     })
   })
 

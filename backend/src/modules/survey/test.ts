@@ -7,6 +7,7 @@ import { Exhibition } from '../exhibition/entity.js'
 import { Exhibitor } from '../exhibitor/entity.js'
 import { User } from '../user/entity.js'
 import { SurveyAnswer, SurveyQuestion } from './entity.js'
+import { Table } from '../table/entity.js'
 import { SurveyQuestionType } from '../../generated/graphql.js'
 
 const QUESTIONS = graphql(`
@@ -828,6 +829,182 @@ describe('survey', () => {
 
     const db = await initORM()
     expect(await db.em.count(SurveyAnswer, { question: { id: ids['buffet-freitag'] } })).toBe(0)
+  })
+
+  graphqlTest('a question for the fotofix tables reaches only their holders', async (request) => {
+    const ids = await seedQuestions()
+    const admin = await login('admin@example.com')
+    const daffy = await login('daffy@example.com')
+
+    const onForm = await request(
+      CREATE,
+      {
+        input: {
+          key: 'fotofix-format',
+          label: 'Welches Bildformat liest deine Maschine?',
+          type: SurveyQuestionType.Text,
+          required: true,
+          audience: 'fotofix',
+          onRegistrationForm: true,
+        },
+      },
+      admin,
+    )
+    expect(onForm.errors?.[0]?.message).toMatch(/Zielgruppe/)
+
+    const created = await request(
+      CREATE,
+      {
+        input: {
+          key: 'fotofix-format',
+          label: 'Welches Bildformat liest deine Maschine?',
+          type: SurveyQuestionType.Text,
+          required: true,
+          audience: 'fotofix',
+        },
+      },
+      admin,
+    )
+    expect(created.errors).toBeUndefined()
+    const formatId = created.data!.createSurveyQuestion.id
+
+    const AUDIENCE = graphql(`
+      query GetSurveyAudience {
+        getSurveyQuestions {
+          key
+          audience
+          appliesToMe
+          audienceSize
+          nonRespondents {
+            user {
+              nickname
+            }
+          }
+        }
+      }
+    `)
+    const formatOf = (result: { data?: unknown }) =>
+      (
+        result.data as {
+          getSurveyQuestions: {
+            key: string
+            appliesToMe: boolean
+            audienceSize: number
+            nonRespondents: { user: { nickname: string | null } }[]
+          }[]
+        }
+      ).getSurveyQuestions.find((question) => question.key === 'fotofix-format')!
+
+    /* Daffy has no photo table, so the question is not his. */
+    const before = await request(MY_STATE, {}, daffy)
+    const owed = before.data!.getCurrentExhibitor!.unansweredRequiredSurveyQuestions
+    const notMine = await request(AUDIENCE, {}, daffy)
+    expect(formatOf(notMine)).toMatchObject({ appliesToMe: false, audienceSize: 0 })
+
+    const ignored = await request(
+      SAVE,
+      {
+        answers: [
+          { questionId: ids.ethernet, value: true },
+          { questionId: formatId, value: 'PCX' },
+        ],
+      },
+      daffy,
+    )
+    expect(ignored.errors).toBeUndefined()
+    expect(byKey(ignored.data!.saveSurveyAnswers)['fotofix-format']).toBeUndefined()
+
+    /* Now his table shows visitor photos. */
+    const db = await initORM()
+    const table = await db.em.findOneOrFail(Table, { number: 1 })
+    table.exhibitor = await db.em.findOneOrFail(Exhibitor, { user: { nickname: 'daffy' } })
+    table.showsVisitorPhotos = true
+    await db.em.flush()
+
+    const mine = await request(AUDIENCE, {}, daffy)
+    expect(formatOf(mine)).toMatchObject({ appliesToMe: true, audienceSize: 1 })
+    expect(formatOf(mine).nonRespondents.map((each) => each.user.nickname)).toEqual(['daffy'])
+    const after = await request(MY_STATE, {}, daffy)
+    expect(after.data!.getCurrentExhibitor!.unansweredRequiredSurveyQuestions).toBe(owed + 1)
+
+    const answered = await request(
+      SAVE,
+      {
+        answers: [
+          { questionId: ids.ethernet, value: true },
+          { questionId: formatId, value: 'PCX' },
+        ],
+      },
+      daffy,
+    )
+    expect(byKey(answered.data!.saveSurveyAnswers)['fotofix-format']).toBe('PCX')
+    const done = await request(AUDIENCE, {}, daffy)
+    expect(formatOf(done).nonRespondents).toEqual([])
+
+    /* Anonymous readers see the question, but not who owes an answer. */
+    const anonymous = await request(AUDIENCE)
+    expect(formatOf(anonymous)).toMatchObject({ appliesToMe: false, nonRespondents: [] })
+  })
+
+  graphqlTest('an exhibitor follows a question, an audience, or everything', async (request) => {
+    const ids = await seedQuestions()
+    const daffy = await login('daffy@example.com')
+
+    const SUBSCRIBE = graphql(`
+      mutation SubscribeToSurvey($questionId: Int, $audience: SurveyAudience) {
+        subscribeToSurvey(questionId: $questionId, audience: $audience) {
+          id
+          question {
+            key
+          }
+          audience
+        }
+      }
+    `)
+    const MINE = graphql(`
+      query GetMySurveySubscriptions {
+        getMySurveySubscriptions {
+          id
+          question {
+            key
+          }
+          audience
+        }
+      }
+    `)
+
+    const refused = await request(SUBSCRIBE, { questionId: ids.ethernet })
+    expect(refused.errors?.[0]?.message).toBe('Bitte melde dich an')
+
+    const one = await request(SUBSCRIBE, { questionId: ids.ethernet }, daffy)
+    expect(one.errors).toBeUndefined()
+    const again = await request(SUBSCRIBE, { questionId: ids.ethernet }, daffy)
+    expect(again.data!.subscribeToSurvey.id).toBe(one.data!.subscribeToSurvey.id)
+    const all = await request(SUBSCRIBE, {}, daffy)
+    expect(all.errors).toBeUndefined()
+    const both = await request(SUBSCRIBE, { questionId: ids.ethernet, audience: 'fotofix' }, daffy)
+    expect(both.errors?.[0]?.message).toMatch(/nicht beides/)
+
+    const mine = await request(MINE, {}, daffy)
+    expect(mine.data!.getMySurveySubscriptions).toEqual([
+      { id: one.data!.subscribeToSurvey.id, question: { key: 'ethernet' }, audience: null },
+      { id: all.data!.subscribeToSurvey.id, question: null, audience: null },
+    ])
+
+    const gone = await request(
+      graphql(`
+        mutation UnsubscribeFromSurvey($id: Int!) {
+          unsubscribeFromSurvey(id: $id)
+        }
+      `),
+      { id: all.data!.subscribeToSurvey.id },
+      daffy,
+    )
+    expect(gone.errors).toBeUndefined()
+    const left = await request(MINE, {}, daffy)
+    expect(left.data!.getMySurveySubscriptions.map((each) => each.question?.key)).toEqual([
+      'ethernet',
+    ])
   })
 
   graphqlTest('a frozen exhibition takes no more answers', async (request) => {
