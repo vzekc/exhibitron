@@ -21,6 +21,16 @@ type Registration {
   talkTitle: String
   talkSummary: String
   exhibitorId: Int
+  """
+  What the survey questions on the form were answered with, in the order the
+  questions are asked.
+  """
+  surveyAnswers: [RegistrationSurveyAnswer!]!
+}
+
+type RegistrationSurveyAnswer {
+  question: SurveyQuestion!
+  value: JSON!
 }
 
 input RegisterInput {
@@ -30,6 +40,7 @@ input RegisterInput {
   nickname: String!
   topic: String!
   data: JSON!
+  surveyAnswers: [SurveyAnswerInput!]
 }
 
 extend type Mutation {

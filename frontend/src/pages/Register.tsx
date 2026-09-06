@@ -1,6 +1,6 @@
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { useState } from 'react'
-import { useLazyQuery, useMutation } from '@apollo/client'
+import { useLazyQuery, useMutation, useQuery } from '@apollo/client'
 import { graphql } from 'gql.tada'
 
 import { Link, useSearchParams } from 'react-router-dom'
@@ -15,6 +15,15 @@ import DurationSelector from '@components/DurationSelector'
 import Footer from '@components/Footer'
 import { useExhibition } from '@contexts/ExhibitionContext.ts'
 import { showMessage } from '@components/MessageModalUtil.tsx'
+import QuestionField from '@components/survey/QuestionField'
+import {
+  Answers,
+  AnswerValue,
+  collectAnswers,
+  isVisible,
+  missingAnswers,
+  Question,
+} from '@components/survey/answers'
 
 type Inputs = {
   name: string
@@ -24,20 +33,12 @@ type Inputs = {
   forum: string
   topic: string
   topicExtras: string
-  friday: boolean
-  saturday: boolean
-  sunday: boolean
-  setupHelper: boolean
-  gameCornerSupporter: boolean
-  dailyLunch: boolean
-  helpOnSunday: boolean
   talk: boolean
   talkTitle: string
   talkSummary: string
   talkDuration: number
   tables: number
   tableNextTo: string
-  ethernet: boolean
   message: string
 }
 
@@ -56,6 +57,31 @@ const IS_REGISTERED_QUERY = graphql(`
   }
 `)
 
+/* The questions the organisation asks on the form, beyond what the form
+   itself needs to know. */
+const FORM_QUESTIONS = graphql(`
+  query GetSurveyQuestionsForRegistration {
+    getSurveyQuestions {
+      id
+      key
+      label
+      description
+      type
+      options {
+        key
+        label
+      }
+      required
+      isClosed
+      onRegistrationForm
+      showIfQuestion {
+        id
+      }
+      showIfValues
+    }
+  }
+`)
+
 const Register = () => {
   const {
     register,
@@ -66,9 +92,6 @@ const Register = () => {
   } = useForm<Inputs>({
     mode: 'onBlur',
     defaultValues: {
-      friday: true,
-      saturday: true,
-      sunday: true,
       talk: false,
       talkDuration: 30,
       tables: 1,
@@ -79,6 +102,13 @@ const Register = () => {
   const [state, setState] = useState<'entering' | 'sending' | 'done'>('entering')
   const [registerMutation] = useMutation(REGISTER_MUTATION)
   const [checkIsRegistered] = useLazyQuery(IS_REGISTERED_QUERY)
+  const { data: questionData } = useQuery(FORM_QUESTIONS)
+  const [answers, setAnswers] = useState<Answers>({})
+  const [answerErrors, setAnswerErrors] = useState<Record<number, string>>({})
+  const questions = (questionData?.getSurveyQuestions ?? []).filter(
+    (question) => question.onRegistrationForm,
+  ) as Question[]
+  const visibleQuestions = questions.filter((question) => isVisible(question, answers))
   const { exhibition } = useExhibition()
   const [notYetRegisteredPopup, setNotYetRegisteredPopup] = useState(
     searchParams.has('forumMemberNotYetRegistered'),
@@ -89,13 +119,6 @@ const Register = () => {
   const exhibitionTitle = exhibition?.title ?? 'Classic Computing'
   const exhibitionKey = exhibition?.key ?? 'cc'
 
-  // Format dates for display
-  const formatDateShort = (dateValue: unknown) => {
-    if (!dateValue) return ''
-    const date = new Date(String(dateValue))
-    return date.toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })
-  }
-
   const getDateRange = () => {
     if (!exhibition?.startDate || !exhibition?.endDate) return ''
     const start = new Date(String(exhibition.startDate))
@@ -105,11 +128,6 @@ const Register = () => {
     const month = start.toLocaleDateString('de-DE', { month: 'long' })
     const year = start.getFullYear()
     return `${startDay}. bis zum ${endDay}. ${month} ${year}`
-  }
-
-  const getFridayDate = () => {
-    if (!exhibition?.startDate) return 'Freitag'
-    return formatDateShort(exhibition.startDate)
   }
 
   const topic = watch('topic')
@@ -125,7 +143,27 @@ const Register = () => {
     return true
   }
 
+  const setAnswer = (question: Question, value: AnswerValue | undefined) => {
+    setAnswers((current) => ({ ...current, [question.id]: value }))
+    setAnswerErrors((current) => {
+      if (!current[question.id]) return current
+      const next = { ...current }
+      delete next[question.id]
+      return next
+    })
+  }
+
   const onSubmit: SubmitHandler<Inputs> = async (inputs) => {
+    const missing = missingAnswers(questions, answers)
+    if (missing.length) {
+      setAnswerErrors(
+        Object.fromEntries(
+          missing.map((question) => [question.id, 'Bitte beantworte diese Frage']),
+        ),
+      )
+      document.getElementById(`question-${missing[0].id}`)?.scrollIntoView({ block: 'center' })
+      return
+    }
     const { name, email, nickname, message, topic, topicExtras, ...data } = inputs
     // Set tables to 0 if "Keine Ausstellung" is selected
     if (topic === 'Keine Ausstellung') {
@@ -141,6 +179,7 @@ const Register = () => {
           topic: topicExtras ? topic.replace('*', topicExtras) : topic,
           message,
           data,
+          surveyAnswers: collectAnswers(questions, answers),
         },
       },
     })
@@ -352,19 +391,6 @@ const Register = () => {
                         <option value={2}>2 (wenn verfügbar)</option>
                       </FormSelect>
                     </FormField>
-                    <FormField>
-                      <div className="flex items-center">
-                        <FormInput
-                          type="checkbox"
-                          id="ethernet"
-                          {...register('ethernet')}
-                          className="mr-2"
-                        />
-                        <label htmlFor="ethernet" className="cursor-pointer">
-                          Für meine Ausstellung benötige ich einen Internet-Zugang über Ethernet
-                        </label>
-                      </div>
-                    </FormField>
                     <FormField label="Ich wünsche mir einen Tisch neben:">
                       <FormInput type="text" {...register('tableNextTo')} />
                     </FormField>
@@ -414,52 +440,22 @@ const Register = () => {
                 )}
               </FormFieldset>
 
-              <FormFieldset legend="Teilnahme">
-                <FormField>
+              {visibleQuestions.length > 0 && (
+                <FormFieldset legend="Teilnahme">
                   <div className="space-y-2">
-                    <label className="flex cursor-pointer items-center">
-                      <FormInput type="checkbox" {...register('friday')} className="mr-2" />
-                      <span>Freitag ({getFridayDate()}, nur Aussteller und persönliche Gäste)</span>
-                    </label>
-                    <label className="flex cursor-pointer items-center">
-                      <FormInput type="checkbox" {...register('saturday')} className="mr-2" />
-                      <span>Samstag (Publikumstag)</span>
-                    </label>
-                    <label className="flex cursor-pointer items-center">
-                      <FormInput type="checkbox" {...register('sunday')} className="mr-2" />
-                      <span>Sonntag (Publikumstag)</span>
-                    </label>
+                    {visibleQuestions.map((question) => (
+                      <div key={question.id} id={`question-${question.id}`}>
+                        <QuestionField
+                          question={question}
+                          value={answers[question.id]}
+                          onChange={(value) => setAnswer(question, value)}
+                          error={answerErrors[question.id]}
+                        />
+                      </div>
+                    ))}
                   </div>
-                </FormField>
-              </FormFieldset>
-
-              <FormFieldset legend="Unterstützung">
-                <div className="space-y-2">
-                  <label className="flex cursor-pointer items-center">
-                    <FormInput type="checkbox" {...register('setupHelper')} className="mr-2" />
-                    <span>Ich unterstütze beim Aufbau am Donnerstag</span>
-                  </label>
-                  <label className="flex cursor-pointer items-center">
-                    <FormInput
-                      type="checkbox"
-                      {...register('gameCornerSupporter')}
-                      className="mr-2"
-                    />
-                    <span>Ich unterstütze die Spiele-Ecke im Foyer mit eigener Hardware</span>
-                  </label>
-                  <label className="flex cursor-pointer items-center">
-                    <FormInput type="checkbox" {...register('dailyLunch')} className="mr-2" />
-                    <span>
-                      Ich interessiere mich für Essensangebote in der Halle zwischen Freitag und
-                      Sonntag
-                    </span>
-                  </label>
-                  <label className="flex cursor-pointer items-center">
-                    <FormInput type="checkbox" {...register('helpOnSunday')} className="mr-2" />
-                    <span>Ich unterstütze beim Abbau am Sonntag</span>
-                  </label>
-                </div>
-              </FormFieldset>
+                </FormFieldset>
+              )}
 
               <FormFieldset legend="Mitteilungen">
                 <FormField label="Mitteilung ans Orga-Team:">

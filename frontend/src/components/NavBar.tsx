@@ -208,6 +208,7 @@ const NavBar = () => {
     { to: '/user/profile', label: 'Profil' },
     { to: '/user/exhibit', label: 'Deine Exponate' },
     { to: '/user/exhibitorInfo', label: 'Infos für Mitwirkende' },
+    { to: '/user/umfrage', label: 'Fragen der Orga' },
     { type: 'divider' },
     { to: `https://www.classic-computing.de/${exhibitionKey}faq`, label: 'FAQ' },
     { to: '/user/help', label: 'Hilfe' },
@@ -237,6 +238,7 @@ const NavBar = () => {
     { to: '/admin/welcomePdf', label: 'Willkommens-PDF' },
     { to: '/admin/seatplan', label: 'Tischplan' },
     { to: '/admin/mitmachen', label: 'Mitmachen' },
+    { to: '/admin/umfrage', label: 'Fragen an Aussteller' },
   ]
 
   const renderMenuEntry = (item: MenuEntry, key: React.Key, onClose?: () => void) => {

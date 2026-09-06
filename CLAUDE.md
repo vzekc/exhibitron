@@ -179,6 +179,31 @@ colours rather than a design of its own. Its pictures are `frontend/public/fotof
 stands on which slide is listed in `talk-material/fotoliste.md` in the fotofix repository, where the
 photographs are made.
 
+## The survey: questions an exhibition puts to its exhibitors
+
+`modules/survey` holds the questions of an exhibition ("Ich brauche Ethernet", "Buffet am Freitag:
+nein / normal / vegetarisch / vegan") and one answer row per exhibitor and question. The rules the
+code follows:
+
+- The questions are public; who answered what is readable by anybody logged in, and only admins
+  shape the questions.
+- An answer's JSON shape follows the question type: boolean, option key, list of option keys,
+  string, integer. `answers.ts` is the one place that checks and formats them; use it from both the
+  registration form and the exhibitor's form.
+- Option keys are fixed when an option is made and survive relabelling. A dependent question waits
+  for one parent, one level deep; a hidden question loses its answer when the form is saved.
+- A question past `closesAt` keeps the answer it has. The registration form's answers live in
+  `Registration.surveyAnswers`, keyed by question id, until approval copies them to the exhibitor.
+- `notifiedAt` on an answer is cleared whenever the value changes; the daily digest
+  (`app/surveyDigest.ts`, 06:00) mails the exhibition's admins about every cleared answer and stamps
+  it. `npm run survey-digest` sends it by hand.
+- Frontend: exhibitors answer under `/user/umfrage` and read everybody's answers under
+  `/user/umfrage/ergebnisse`; admins shape the questions under `/admin/umfrage`. The registration
+  form renders the questions marked `onRegistrationForm` in its Teilnahme section.
+  `components/survey/answers.ts` mirrors the backend's answer rules for the client; `QuestionField`
+  draws one question and is shared by the form and the registration page. `SurveyReminder` in
+  `MainLayout` nags while required questions are open.
+
 ## Environment Variables (backend/.env)
 
 Required:

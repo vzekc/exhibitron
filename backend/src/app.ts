@@ -21,6 +21,7 @@ import { registerSerialRoutes } from './modules/serial/routes.js'
 import { startCleanupScheduler } from './app/cleanup.js'
 import { startVolunteerReminderScheduler } from './app/volunteerReminders.js'
 import { startTableChangeDigestScheduler } from './app/tableChangeDigest.js'
+import { startSurveyDigestScheduler } from './app/surveyDigest.js'
 
 const registerErrorHandler = (app: FastifyInstance) => {
   // register global error handler to process 404 errors from `findOneOrFail` calls
@@ -215,6 +216,7 @@ export async function bootstrap({
     startCleanupScheduler()
     startVolunteerReminderScheduler()
     startTableChangeDigestScheduler()
+    startSurveyDigestScheduler()
   }
 
   return { app, url }

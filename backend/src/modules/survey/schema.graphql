@@ -1,0 +1,148 @@
+scalar JSON
+scalar Date
+
+enum SurveyQuestionType {
+  checkbox
+  singleChoice
+  multipleChoice
+  text
+  number
+}
+
+type SurveyOption {
+  """
+  Stays the same when the label is reworded, so that answers already given keep
+  pointing at the option.
+  """
+  key: String!
+  label: String!
+}
+
+"""
+Something the organisation wants to know from every exhibitor of an exhibition:
+whether they need Ethernet, whether they eat at the buffet on Friday and what.
+"""
+type SurveyQuestion {
+  id: Int!
+  key: String!
+  ordering: Int!
+  label: String!
+  description: String
+  type: SurveyQuestionType!
+  """
+  What can be picked, for a single or multiple choice question. Empty otherwise.
+  """
+  options: [SurveyOption!]!
+  required: Boolean!
+  """
+  After this moment the answer can no longer be changed. Null means until the
+  exhibition is frozen.
+  """
+  closesAt: Date
+  isClosed: Boolean!
+  """
+  Asked on the registration form as well. The answers given there become the
+  exhibitor's answers when the registration is approved.
+  """
+  onRegistrationForm: Boolean!
+  """
+  Shown only while the answer to this question is one of `showIfValues`: the
+  option keys of a choice question, or "true" / "false" for a checkbox.
+  """
+  showIfQuestion: SurveyQuestion
+  showIfValues: [String!]!
+  """
+  The answer of whoever is asking. Null when nobody is logged in or nothing has
+  been answered.
+  """
+  myAnswer: JSON
+  """
+  Every answer given so far, for somebody logged in. Empty for everybody else.
+  """
+  answers: [SurveyAnswer!]!
+}
+
+"""
+One exhibitor's answer to one question. The value has the shape of the
+question's type: a boolean for a checkbox, an option key for a single choice,
+a list of option keys for a multiple choice, a string for text, a number for a
+number.
+"""
+type SurveyAnswer {
+  id: Int!
+  exhibitor: Exhibitor!
+  question: SurveyQuestion!
+  value: JSON!
+  updatedAt: Date
+}
+
+input SurveyOptionInput {
+  """
+  The key of an option that already exists. Left out for a new option, whose
+  key is made from its label.
+  """
+  key: String
+  label: String!
+}
+
+input SurveyQuestionInput {
+  key: String!
+  label: String!
+  description: String
+  type: SurveyQuestionType!
+  options: [SurveyOptionInput!]
+  required: Boolean
+  closesAt: Date
+  onRegistrationForm: Boolean
+  showIfQuestionId: Int
+  showIfValues: [String!]
+  ordering: Int
+}
+
+input SurveyAnswerInput {
+  questionId: Int!
+  """
+  Null or left out means no answer.
+  """
+  value: JSON
+}
+
+extend type Query {
+  """
+  The questions of this exhibition, in the order they are asked.
+  """
+  getSurveyQuestions: [SurveyQuestion!]!
+  getSurveyQuestion(id: Int!): SurveyQuestion
+}
+
+extend type Mutation {
+  createSurveyQuestion(input: SurveyQuestionInput!): SurveyQuestion!
+  updateSurveyQuestion(id: Int!, input: SurveyQuestionInput!): SurveyQuestion!
+  """
+  Removes the question with every answer it has.
+  """
+  deleteSurveyQuestion(id: Int!): Boolean!
+  """
+  Puts the questions in the order of the ids given.
+  """
+  reorderSurveyQuestions(ids: [Int!]!): [SurveyQuestion!]!
+  """
+  Takes over the questions of another exhibition, without their answers and
+  without their deadlines. A key that already exists here is left alone.
+  """
+  copySurveyQuestions(fromExhibitionId: Int!): [SurveyQuestion!]!
+  """
+  Saves the whole form. A question left out or answered null loses its answer;
+  a question its parent hides loses it too. `exhibitorId` lets an admin answer
+  for somebody else.
+  """
+  saveSurveyAnswers(answers: [SurveyAnswerInput!]!, exhibitorId: Int): [SurveyAnswer!]!
+}
+
+extend type Exhibitor {
+  surveyAnswers: [SurveyAnswer!]!
+  """
+  How many required questions this exhibitor still has to answer.
+  """
+  unansweredRequiredSurveyQuestions: Int!
+}

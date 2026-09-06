@@ -74,6 +74,7 @@ describe('registration', () => {
       'nickname',
       'notes',
       'status',
+      'surveyAnswers',
       'topic',
       'updatedAt',
     ])

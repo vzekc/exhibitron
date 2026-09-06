@@ -48,6 +48,10 @@ import SerialPort from './pages/user/SerialPort.tsx'
 import VisitorPhoto from './pages/VisitorPhoto.tsx'
 import Praesentation from './pages/fotofix/Praesentation.tsx'
 import NameTags from '@pages/admin/NameTags.tsx'
+import Survey from './pages/user/Survey.tsx'
+import SurveyResults from './pages/user/SurveyResults.tsx'
+import SurveyQuestions from '@pages/admin/SurveyQuestions.tsx'
+import SurveyQuestionEditor from '@pages/admin/SurveyQuestionEditor.tsx'
 
 const routes: RouteObject[] = [
   { path: '/register', element: <Register /> },
@@ -94,6 +98,8 @@ const routes: RouteObject[] = [
           { path: 'exhibit/:id', element: <ExhibitEditor /> },
           { path: 'import-exhibits', element: <ImportExhibits /> },
           { path: 'serial', element: <SerialPort /> },
+          { path: 'umfrage', element: <Survey /> },
+          { path: 'umfrage/ergebnisse', element: <SurveyResults /> },
           { path: 'help', element: <Documentation name="aussteller-dokumentation" /> },
         ],
       },
@@ -119,6 +125,9 @@ const routes: RouteObject[] = [
           { path: 'mitmachen', element: <VolunteerActivities /> },
           { path: 'mitmachen/neu', element: <VolunteerActivityEditor /> },
           { path: 'mitmachen/:key', element: <VolunteerActivityEditor /> },
+          { path: 'umfrage', element: <SurveyQuestions /> },
+          { path: 'umfrage/neu', element: <SurveyQuestionEditor /> },
+          { path: 'umfrage/:id', element: <SurveyQuestionEditor /> },
           { path: 'session/new', element: <SessionEditorPage /> },
           { path: 'session/:id', element: <SessionEditorPage /> },
         ],

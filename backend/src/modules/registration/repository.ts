@@ -12,6 +12,7 @@ import { User } from '../user/entity.js'
 import { Exhibitor } from '../exhibitor/entity.js'
 import { ConferenceSession } from '../conferenceSession/entity.js'
 import { Document } from '../document/entity.js'
+import { SurveyAnswer, SurveyQuestion } from '../survey/entity.js'
 
 export type RegistrationData = Omit<Registration, keyof BaseEntity | 'notes'>
 
@@ -123,6 +124,8 @@ export class RegistrationRepository extends EntityRepository<Registration> {
       }
     }
 
+    await this.adoptFormAnswers(registration, exhibitor)
+
     await this.em.flush()
     await sendEmail(
       makeWelcomeEmail(
@@ -133,6 +136,27 @@ export class RegistrationRepository extends EntityRepository<Registration> {
         message,
       ),
     )
+  }
+
+  /*
+   * The answers given on the form become the exhibitor's. A question removed
+   * since the form was filled in has nothing to take them.
+   */
+  private async adoptFormAnswers(registration: Registration, exhibitor: Exhibitor) {
+    for (const [id, value] of Object.entries(registration.surveyAnswers ?? {})) {
+      const question = await this.em.findOne(SurveyQuestion, {
+        id: Number(id),
+        exhibition: registration.exhibition,
+      })
+      if (!question) continue
+      const answer = await this.em.findOne(SurveyAnswer, { exhibitor, question })
+      if (answer) {
+        answer.value = value
+        answer.notifiedAt = undefined
+      } else {
+        this.em.persist(this.em.create(SurveyAnswer, { exhibitor, question, value }))
+      }
+    }
   }
 
   /*

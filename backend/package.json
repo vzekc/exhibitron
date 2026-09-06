@@ -22,7 +22,8 @@
     "import-seatplan": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/scripts/import-seatplan-svg.ts",
     "watch-schema": "node --no-warnings=ExperimentalWarning --loader ts-node/esm scripts/watch-schema.ts",
     "expire-visitor-photos": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/scripts/expire-visitor-photos.ts",
-    "volunteer-reminders": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/scripts/send-volunteer-reminders.ts"
+    "volunteer-reminders": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/scripts/send-volunteer-reminders.ts",
+    "survey-digest": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/scripts/send-survey-digest.ts"
   },
   "dependencies": {
     "@apollo/server": "^4.11.3",

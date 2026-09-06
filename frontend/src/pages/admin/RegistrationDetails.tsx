@@ -14,6 +14,7 @@ import Button from '@components/Button'
 import RegistrationStatusChip from '@components/RegistrationStatusChip.tsx'
 import { KeyValueTable, TableRow, TableCell } from '@components/Table'
 import LoadInProgress from '@components/LoadInProgress'
+import { AnswerValue, formatAnswer, Question } from '@components/survey/answers'
 
 type ConfirmAction = {
   title: string
@@ -38,6 +39,18 @@ const GET_REGISTRATION = graphql(`
       data
       talkTitle
       talkSummary
+      surveyAnswers {
+        question {
+          id
+          label
+          type
+          options {
+            key
+            label
+          }
+        }
+        value
+      }
     }
   }
 `)
@@ -245,6 +258,24 @@ const RegistrationDetails = () => {
             </div>
           </div>
         </section>
+
+        {registration.surveyAnswers.length > 0 && (
+          <section className="rounded-lg bg-white p-6 shadow">
+            <h2 className="mb-4 text-lg font-medium text-gray-900">Antworten auf die Fragen</h2>
+            <KeyValueTable headers={['Frage', 'Antwort']}>
+              {registration.surveyAnswers.map(({ question, value }) => (
+                <TableRow key={question.id}>
+                  <TableCell className="whitespace-normal font-medium text-gray-500">
+                    {question.label}
+                  </TableCell>
+                  <TableCell className="whitespace-normal">
+                    {formatAnswer(question as unknown as Question, value as AnswerValue)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </KeyValueTable>
+          </section>
+        )}
 
         {/* Section 3: Additional Data */}
         <section className="rounded-lg bg-white p-6 shadow">

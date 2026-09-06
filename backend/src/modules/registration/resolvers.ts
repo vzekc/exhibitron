@@ -7,6 +7,31 @@ import {
 } from '../../generated/graphql.js'
 import { requireAdmin, requireNotFrozen } from '../../db.js'
 import { wrap } from '@mikro-orm/core'
+import { SurveyQuestion } from '../survey/entity.js'
+import { Registration } from './entity.js'
+import { checkAnswers, inAnswerOrder } from '../survey/answers.js'
+import { SurveyAnswerInput } from '../../generated/graphql.js'
+
+/* The questions the registration form asks, parents first. */
+const formQuestionsOf = async ({ db, exhibition }: Context) =>
+  inAnswerOrder(
+    await db.em.find(
+      SurveyQuestion,
+      { exhibition, onRegistrationForm: true },
+      { populate: ['showIfQuestion'], orderBy: { ordering: 'asc', id: 'asc' } },
+    ),
+  )
+
+/*
+ * The form's answers in the shape the registration keeps them: checked against
+ * the questions, keyed by question id.
+ */
+const formAnswersFrom = async (context: Context, given?: SurveyAnswerInput[] | null) => {
+  const questions = await formQuestionsOf(context)
+  const byId = new Map((given ?? []).map(({ questionId, value }) => [questionId, value]))
+  const kept = checkAnswers(questions, byId)
+  return Object.fromEntries([...kept].map(([id, value]) => [String(id), value]))
+}
 
 export const registrationQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2322
@@ -27,9 +52,10 @@ export const registrationQueries: QueryResolvers<Context> = {
 
 export const registrationMutations: MutationResolvers<Context> = {
   // @ts-expect-error ts2322
-  register: async (_, { input }, { exhibition, db, siteUrl }) => {
+  register: async (_, { input }, context) => {
+    const { exhibition, db, siteUrl } = context
     requireNotFrozen(exhibition)
-    const { email, message, ...rest } = input
+    const { email, message, surveyAnswers, ...rest } = input
     const existing = await db.registration.findOne({
       email: email,
       exhibition,
@@ -43,6 +69,7 @@ export const registrationMutations: MutationResolvers<Context> = {
         status: RegistrationStatus.New,
         message: message || undefined,
         email,
+        surveyAnswers: await formAnswersFrom(context, surveyAnswers),
         ...rest,
       },
       siteUrl,
@@ -129,6 +156,16 @@ export const registrationTypeResolvers: RegistrationResolvers = {
   },
   talkSummary: (registration) => {
     return ((registration.data as Record<string, unknown>)?.talkSummary as string) || null
+  },
+  // @ts-expect-error ts2322
+  surveyAnswers: async (registration, _, { db, exhibition }) => {
+    const answers = (registration as unknown as Registration).surveyAnswers ?? {}
+    const questions: SurveyQuestion[] = await db.em.find(
+      SurveyQuestion,
+      { exhibition, id: { $in: Object.keys(answers).map(Number) } },
+      { populate: ['showIfQuestion'], orderBy: { ordering: 'asc', id: 'asc' } },
+    )
+    return questions.map((question) => ({ question, value: answers[String(question.id)] }))
   },
   exhibitorId: async (registration, _, { db, exhibition }) => {
     const user = await db.user.findOne({ email: registration.email })

@@ -10,6 +10,7 @@ export const fetchCurrentExhibitor = async () => {
           id
           topic
           canSwitchExhibitor
+          unansweredRequiredSurveyQuestions
           user {
             id
             email

@@ -13,6 +13,7 @@ import { conferenceSessionResolvers } from './modules/conferenceSession/resolver
 import { hostResolvers } from './modules/host/resolvers.js'
 import { docResolvers } from './modules/doc/resolvers.js'
 import { volunteerResolvers } from './modules/volunteer/resolvers.js'
+import { surveyResolvers } from './modules/survey/resolvers.js'
 import { mergeResolvers } from '@graphql-tools/merge'
 import { Resolvers } from './generated/graphql.js'
 
@@ -32,6 +33,7 @@ const resolvers: Resolvers = mergeResolvers([
   hostResolvers,
   docResolvers,
   volunteerResolvers,
+  surveyResolvers,
 ])
 
 export default resolvers

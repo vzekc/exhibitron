@@ -12,6 +12,8 @@ import {
   VolunteerBooking,
   VolunteerPeriod,
 } from '../modules/volunteer/entity.js'
+import { SurveyAnswer, SurveyQuestion } from '../modules/survey/entity.js'
+import { SurveyQuestionType } from '../generated/graphql.js'
 
 export class DemoSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {
@@ -347,6 +349,82 @@ export class DemoSeeder extends Seeder {
 
     /* Everybody in the demo data counts, so the colours are not all pale. */
     users.forEach((user) => (user.emailVerifiedAt = new Date()))
+
+    /* What the organisation asks everybody, with the first answers in. */
+    const ethernet = em.create(SurveyQuestion, {
+      exhibition,
+      key: 'ethernet',
+      ordering: 0,
+      label: 'Ich brauche Ethernet am Tisch',
+      description: 'WLAN gibt es in der ganzen Halle; ein Kabel nur, wenn du es hier ankreuzt.',
+      type: SurveyQuestionType.Checkbox,
+      required: true,
+      onRegistrationForm: true,
+    })
+    const buffet = em.create(SurveyQuestion, {
+      exhibition,
+      key: 'buffet-freitag',
+      ordering: 1,
+      label: 'Buffet am Freitagabend',
+      type: SurveyQuestionType.SingleChoice,
+      options: [
+        { key: 'nein', label: 'Nein, ich bin nicht dabei' },
+        { key: 'normal', label: 'Ja' },
+        { key: 'vegetarisch', label: 'Ja, vegetarisch' },
+        { key: 'vegan', label: 'Ja, vegan' },
+      ],
+      required: true,
+      closesAt: day(-3, 18),
+    })
+    const wish = em.create(SurveyQuestion, {
+      exhibition,
+      key: 'buffet-wuensche',
+      ordering: 2,
+      label: 'Gibt es etwas, das wir beim Essen beachten sollen?',
+      type: SurveyQuestionType.Text,
+      showIfQuestion: buffet,
+      showIfValues: ['vegetarisch', 'vegan'],
+    })
+    const anreise = em.create(SurveyQuestion, {
+      exhibition,
+      key: 'anreise',
+      ordering: 3,
+      label: 'Wann kommst du zum Aufbau?',
+      type: SurveyQuestionType.MultipleChoice,
+      options: [
+        { key: 'donnerstag', label: 'Donnerstag' },
+        { key: 'freitag-frueh', label: 'Freitag früh' },
+      ],
+    })
+    const personen = em.create(SurveyQuestion, {
+      exhibition,
+      key: 'personen',
+      ordering: 4,
+      label: 'Mit wie vielen Personen kommst du insgesamt?',
+      type: SurveyQuestionType.Number,
+    })
+    const answersOf = (
+      exhibitor: Exhibitor,
+      given: [SurveyQuestion, boolean | string | number | string[]][],
+    ) =>
+      given.forEach(([question, value]) => em.create(SurveyAnswer, { exhibitor, question, value }))
+    answersOf(exhibitors[0], [
+      [ethernet, true],
+      [buffet, 'vegetarisch'],
+      [wish, 'Bitte ohne Sellerie'],
+      [anreise, ['donnerstag']],
+      [personen, 2],
+    ])
+    answersOf(exhibitors[1], [
+      [ethernet, false],
+      [buffet, 'normal'],
+      [anreise, ['freitag-frueh']],
+      [personen, 1],
+    ])
+    answersOf(exhibitors[2], [
+      [ethernet, true],
+      [buffet, 'nein'],
+    ])
 
     await em.persistAndFlush([...tables, ...users, ...exhibits, homePage])
   }
