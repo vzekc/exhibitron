@@ -15,11 +15,12 @@ import type { Origin } from './kermit'
 export type Flow = 'none' | 'hardware' | 'xonxoff'
 
 /*
- * What the port answers with. At the show this belongs to the port and is
- * settled at the terminal server; here it is a choice, because there is no
- * terminal server to settle it.
+ * What the port answers with: a login, a Kermit server, or the photo screen
+ * for a Tono Theta-7000 or a Minitel 1B. At the show this belongs to the port
+ * and is settled at the terminal server; here it is a choice, because there is
+ * no terminal server to settle it.
  */
-export type Mode = 'login' | 'kermit'
+export type Mode = 'login' | 'kermit' | 'tono' | 'minitel'
 
 export type LineSettings = {
   baudRate: number

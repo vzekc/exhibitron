@@ -17,6 +17,7 @@ import {
 } from '@utils/serialBridge'
 import { KermitMonitor, type KermitEvent } from '@utils/kermit'
 import { kermitLine, kermitOpening } from '@utils/kermitTranscript'
+import { VideotexScreen } from '@utils/videotex'
 
 /*
  * Die Seite, auf der ein Aussteller seine Maschine an die Ausstellung hängt.
@@ -43,6 +44,17 @@ const DEFAULTS: LineSettings = {
   term: 'vt100',
   cols: 80,
   rows: 24,
+}
+
+/*
+ * Die Leitung, die ein Fotoschirm erwartet: das Tono Theta-7000 spricht 300
+ * Baud 8N1, das Minitel 1B an seiner Péri-informatique-Buchse 4800 Baud 7E1.
+ * Beide ohne Flusskontrolle — das Minitel schickt seine Funktionstasten als
+ * DC3 und einen Code, und DC3 ist XOFF.
+ */
+const MODE_LINES: Partial<Record<Mode, Partial<LineSettings>>> = {
+  tono: { baudRate: 300, dataBits: 8, parity: 'none', stopBits: 1, flow: 'none' },
+  minitel: { baudRate: 4800, dataBits: 7, parity: 'even', stopBits: 1, flow: 'none' },
 }
 
 function applyFormat(line: LineSettings, format: string): LineSettings {
@@ -92,6 +104,9 @@ const SerialPortPage = () => {
   const termHost = useRef<HTMLDivElement | null>(null)
   /* Set for a session in Kermit mode, and the thing that reads its stream. */
   const kermitRef = useRef<KermitMonitor | null>(null)
+  /* Set for a session in Minitel mode: the page the terminal is showing. */
+  const videotexRef = useRef<VideotexScreen | null>(null)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const idleRef = useRef<number>(0)
 
   const supported = webSerialAvailable()
@@ -117,6 +132,13 @@ const SerialPortPage = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  /* Die leere Seite, sobald der Schirm da ist. */
+  useEffect(() => {
+    if (mode === 'minitel' && canvasRef.current) {
+      ;(videotexRef.current ?? new VideotexScreen()).paint(canvasRef.current)
+    }
+  }, [mode])
 
   useEffect(() => {
     void fetch('/api/serial/agents', { credentials: 'include' })
@@ -144,6 +166,13 @@ const SerialPortPage = () => {
     kermitRef.current = monitor
     if (monitor) for (const opening of kermitOpening()) termRef.current?.writeln(opening)
 
+    /*
+     * Ein Minitel zeichnet Videotex, und diese Seite malt dieselbe Seite: 40
+     * mal 25 Zellen, Mosaik und Text in den acht Graustufen der Röhre.
+     */
+    const videotex = mode === 'minitel' ? new VideotexScreen() : null
+    videotexRef.current = videotex
+
     const write = (event: KermitEvent) => termRef.current?.writeln(kermitLine(event))
 
     /*
@@ -158,6 +187,12 @@ const SerialPortPage = () => {
 
     const bridge = new SerialBridge(portRef.current, line, {
       onData: (chunk, origin) => {
+        if (videotex) {
+          if (origin !== 'exhibition') return
+          videotex.feed(chunk)
+          if (canvasRef.current) videotex.paint(canvasRef.current)
+          return
+        }
         const term = termRef.current
         if (!term) return
         if (!monitor) {
@@ -183,6 +218,7 @@ const SerialPortPage = () => {
          */
         if (next === 'stopped') {
           kermitRef.current = null
+          videotexRef.current = null
           window.clearInterval(idleRef.current)
           termRef.current?.reset()
         }
@@ -216,6 +252,28 @@ const SerialPortPage = () => {
   )
 
   const running = state === 'running' || state === 'connecting'
+
+  /* Die Betriebsart bringt die Leitung mit, die ihr Gerät erwartet. */
+  const chooseMode = (next: Mode) => {
+    setMode(next)
+    const preset = MODE_LINES[next]
+    if (preset) setLine({ ...line, ...preset })
+  }
+
+  /*
+   * Tasten auf dem Minitel-Schirm gehen an die Gegenstelle, wenn das Gerät
+   * gerade nicht angeschlossen ist: Eingabe wie ENVOI, Rücktaste wie
+   * CORRECTION, und die Zeichen der Foto-ID.
+   */
+  const minitelKey = (event: React.KeyboardEvent<HTMLCanvasElement>) => {
+    const bridge = bridgeRef.current
+    if (!bridge || state !== 'running') return
+    if (event.key === 'Enter') bridge.typed('\r')
+    else if (event.key === 'Backspace') bridge.typed('\b')
+    else if (event.key.length === 1 && !event.ctrlKey && !event.metaKey) bridge.typed(event.key)
+    else return
+    event.preventDefault()
+  }
 
   if (!supported) {
     return (
@@ -296,9 +354,11 @@ const SerialPortPage = () => {
             <select
               value={mode}
               disabled={running}
-              onChange={(event) => setMode(event.target.value as Mode)}>
+              onChange={(event) => chooseMode(event.target.value as Mode)}>
               <option value="login">Anmeldung</option>
               <option value="kermit">Kermit-Server</option>
+              <option value="tono">Fotoschirm Tono Theta-7000</option>
+              <option value="minitel">Fotoschirm Minitel 1B</option>
             </select>
           </label>
 
@@ -337,6 +397,23 @@ const SerialPortPage = () => {
             holt Dateien mit <code>get K7NP4M/photo.jpg</code> und beendet den Server mit{' '}
             <code>finish</code>. Im Saal legt der Terminalserver fest, welcher Anschluss so
             betrieben wird.
+          </p>
+        )}
+
+        {mode === 'tono' && (
+          <p className="mt-3 text-sm">
+            Der Anschluss antwortet mit dem Fotoschirm für das Tono Theta-7000: das Terminal fragt
+            nach der Foto-ID vom Laufzettel und zeigt das Foto als 32×16 Zeichen in Großbuchstaben.
+            Jede Taste danach fragt nach dem nächsten Foto. Die Leitung: 300 Baud, 8N1.
+          </p>
+        )}
+
+        {mode === 'minitel' && (
+          <p className="mt-3 text-sm">
+            Der Anschluss antwortet mit dem Fotoschirm für das Minitel 1B: das Terminal fragt nach
+            der Foto-ID, ENVOI schickt sie ab, CORRECTION nimmt ein Zeichen zurück, und das Foto
+            kommt als Videotex-Seite in Graustufen oder Schwarzweiß. Die Leitung an der
+            Péri-informatique-Buchse: 4800 Baud, 7E1.
           </p>
         )}
 
@@ -396,6 +473,12 @@ const SerialPortPage = () => {
             Inhalt. Zeichen, die zu keinem Paket gehören, stehen als Bytes da — an ihnen ist zu
             erkennen, ob Geschwindigkeit, Format oder Kabel nicht stimmen.
           </p>
+        ) : mode === 'minitel' ? (
+          <p className="mb-2 text-sm">
+            Die Seite, die das Minitel gerade zeigt, so wie seine Röhre sie zeichnet. Ein Klick
+            darauf, und die Tastatur geht an die Gegenstelle, wenn das Minitel gerade nicht
+            angeschlossen ist: Eingabe für ENVOI, Rücktaste für CORRECTION.
+          </p>
         ) : (
           <p className="mb-2 text-sm">
             Was über die Leitung geht, steht auch hier — und hier kann getippt werden, wenn dein
@@ -403,7 +486,18 @@ const SerialPortPage = () => {
             der Gegenstelle liegt oder am Kabel.
           </p>
         )}
-        <div ref={termHost} className="overflow-x-auto" />
+        {mode === 'minitel' && (
+          <canvas
+            ref={canvasRef}
+            width={640}
+            height={500}
+            tabIndex={0}
+            onKeyDown={minitelKey}
+            className="block max-w-full bg-black outline-none focus:ring-2 focus:ring-teal-600"
+            style={{ width: 640, aspectRatio: '4 / 3' }}
+          />
+        )}
+        <div ref={termHost} className="overflow-x-auto" hidden={mode === 'minitel'} />
       </Card>
 
       <SerialTokens />

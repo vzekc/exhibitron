@@ -49,12 +49,14 @@ type SessionQuery = {
 }
 
 /*
- * What the port is: somewhere to log in, or the Kermit protocol on its own for
- * a machine whose terminal program is all it has. At the show this belongs to
- * the port and is settled at the terminal server; here the client names it,
- * because there is no terminal server to name it for them.
+ * What the port is: somewhere to log in, the Kermit protocol on its own for a
+ * machine whose terminal program is all it has, or a photo screen for a
+ * terminal that asks for a photo id and shows the picture — a Tono Theta-7000
+ * or a Minitel 1B. At the show this belongs to the port and is settled at the
+ * terminal server; here the client names it, because there is no terminal
+ * server to name it for them.
  */
-const MODES = ['login', 'kermit']
+const MODES = ['login', 'kermit', 'tono', 'minitel']
 const DEFAULT_MODE = 'login'
 
 /*

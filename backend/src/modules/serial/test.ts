@@ -210,12 +210,14 @@ describe('the relay', () => {
   })
 
   /*
-   * Which of the two things a port is, on its way to the agent. Anything the
+   * Which of the things a port can be, on its way to the agent. Anything the
    * relay does not recognise is a login, because that is the safe end to be
    * wrong at: a prompt asks who you are, a Kermit server does not.
    */
   test.each([
     ['kermit', 'kermit'],
+    ['tono', 'tono'],
+    ['minitel', 'minitel'],
     ['login', 'login'],
     [undefined, 'login'],
     ['something-else', 'login'],
