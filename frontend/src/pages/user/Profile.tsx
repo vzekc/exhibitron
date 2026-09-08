@@ -307,6 +307,9 @@ const Profile = () => {
                   alt="Profilbild"
                   enableCropping={true}
                 />
+                <p className="mt-2 text-sm text-gray-500">
+                  Änderungen am Profilbild werden sofort übernommen.
+                </p>
               </FormSection>
 
               <div className="flex-1 space-y-6 md:w-2/3">

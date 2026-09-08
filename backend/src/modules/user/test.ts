@@ -489,3 +489,37 @@ graphqlTest('the merge drops the picture when the surviving account has one', as
   const kept = await db.em.findOne(ProfileImage, { id: keptId }, { populate: ['user'] })
   expect(kept!.user.id).toBe(canonical.id)
 })
+
+graphqlTest('profile image is revalidated by the browser', async (_, app) => {
+  const db = await initORM()
+  const user = db.user.create({
+    email: 'bildmann@example.com',
+    fullName: 'Bernd Bildmann',
+    isAdministrator: false,
+  })
+  db.em.persist(user)
+  await db.em.flush()
+  const image = db.em.create(ProfileImage, { user, image: makeImage(db, 'bildmann') })
+  db.em.persist(image)
+  await db.em.flush()
+
+  const url = `/api/user/${user.id}/image/profile`
+  const first = await app.inject({ method: 'GET', url })
+  expect(first.statusCode).toBe(200)
+  expect(first.headers['content-type']).toBe('image/png')
+  expect(first.headers['cache-control']).toBe('no-cache')
+  const lastModified = first.headers['last-modified'] as string
+  expect(lastModified).toBeTruthy()
+
+  const unchanged = await app.inject({
+    method: 'GET',
+    url,
+    headers: { 'if-modified-since': lastModified },
+  })
+  expect(unchanged.statusCode).toBe(304)
+
+  const stale = new Date(new Date(lastModified).getTime() - 60000).toUTCString()
+  const changed = await app.inject({ method: 'GET', url, headers: { 'if-modified-since': stale } })
+  expect(changed.statusCode).toBe(200)
+  expect(changed.rawPayload.length).toBeGreaterThan(0)
+})

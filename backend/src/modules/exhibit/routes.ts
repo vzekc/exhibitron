@@ -3,7 +3,7 @@ import { initORM, isAdmin } from '../../db.js'
 import { Exhibit, ExhibitImage } from './entity.js'
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { randomUUID } from 'crypto'
-import { generateThumbnail } from '../image/utils.js'
+import { generateThumbnail, sendMutableImage } from '../image/utils.js'
 
 export async function registerExhibitImageRoutes(app: FastifyInstance) {
   const db = await initORM()
@@ -50,9 +50,7 @@ export async function registerExhibitImageRoutes(app: FastifyInstance) {
       return reply.code(404).send({ error: 'No main image found for this exhibit' })
     }
 
-    reply.header('Content-Type', exhibit.mainImage.image.mimeType)
-    reply.header('Content-Disposition', `inline; filename="${exhibit.mainImage.image.filename}"`)
-    return exhibit.mainImage.image.data
+    return sendMutableImage(request, reply, exhibit.mainImage.image)
   })
 
   // Get exhibit thumbnail
@@ -73,8 +71,7 @@ export async function registerExhibitImageRoutes(app: FastifyInstance) {
 
       // If thumbnail exists and regeneration is not requested, serve it
       if (mainImage.thumbnail && !regenerate) {
-        reply.header('Content-Type', mainImage.thumbnail.mimeType)
-        return mainImage.thumbnail.data
+        return sendMutableImage(request, reply, mainImage.thumbnail)
       }
 
       const { image } = mainImage
@@ -93,12 +90,10 @@ export async function registerExhibitImageRoutes(app: FastifyInstance) {
         )
         await db.em.flush()
 
-        reply.header('Content-Type', image.mimeType)
-        return thumbnail
+        return sendMutableImage(request, reply, mainImage.thumbnail)
       } catch (error) {
         console.warn('Failed to generate thumbnail, serving original image', error)
-        reply.header('Content-Type', image.mimeType)
-        return image.data
+        return sendMutableImage(request, reply, image)
       }
     },
   )

@@ -1,3 +1,4 @@
+import { FastifyReply, FastifyRequest } from 'fastify'
 import sharp from 'sharp'
 
 export const THUMBNAIL_SIZE = 200
@@ -100,4 +101,30 @@ export async function getImageDimensions(
     width: isRotated ? height : width,
     height: isRotated ? width : height,
   }
+}
+
+/**
+ * Sends an image stored under a URL whose content changes when the image is replaced.
+ *
+ * The browser caches the picture but has to revalidate it on every use, and gets a 304
+ * while the picture is unchanged, so a replaced picture shows on the next load.
+ */
+export const sendMutableImage = (
+  request: FastifyRequest,
+  reply: FastifyReply,
+  image: { data: Buffer; mimeType: string; filename?: string; createdAt: Date; updatedAt?: Date },
+) => {
+  const lastModified = new Date(image.updatedAt ?? image.createdAt)
+  lastModified.setMilliseconds(0)
+  reply.header('Cache-Control', 'no-cache')
+  reply.header('Last-Modified', lastModified.toUTCString())
+  const ifModifiedSince = request.headers['if-modified-since']
+  if (ifModifiedSince && lastModified.getTime() <= new Date(ifModifiedSince).getTime()) {
+    return reply.code(304).send()
+  }
+  reply.header('Content-Type', image.mimeType)
+  if (image.filename) {
+    reply.header('Content-Disposition', `inline; filename="${image.filename}"`)
+  }
+  return reply.send(image.data)
 }

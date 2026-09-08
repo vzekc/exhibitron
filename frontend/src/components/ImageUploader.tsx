@@ -3,6 +3,7 @@ import axios from 'axios'
 import Confirm from './Confirm'
 import { showMessage } from './MessageModalUtil'
 import ImageCropper from './ImageCropper'
+import { bumpImageVersion, useImageVersion, versionedImageUrl } from '@utils/imageVersion.ts'
 
 interface ImageUploaderProps {
   imageId: number | null
@@ -35,6 +36,7 @@ const ImageUploader = ({
   const [tempImageUrl, setTempImageUrl] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const dropZoneRef = useRef<HTMLDivElement>(null)
+  const imageVersion = useImageVersion()
 
   const handleImageUpload = useCallback(
     async (file: File) => {
@@ -51,13 +53,8 @@ const ImageUploader = ({
           },
         })
 
-        // If the response includes an image ID, use it
-        if (response.data?.id) {
-          onImageChange?.(response.data.id)
-        } else if (!imageId && onImageChange) {
-          // If we didn't have an image before, assume we have one now
-          onImageChange(1) // Placeholder ID
-        }
+        bumpImageVersion()
+        onImageChange?.(response.data.imageId)
       } catch (error) {
         console.error('Error uploading image:', JSON.stringify(error))
         await showMessage('Fehler', 'Fehler beim Hochladen des Bildes')
@@ -68,7 +65,7 @@ const ImageUploader = ({
         }
       }
     },
-    [imageId, imageUrl, onImageChange],
+    [imageUrl, onImageChange],
   )
 
   const handleFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -158,7 +155,7 @@ const ImageUploader = ({
   )
 
   return (
-    <div className="mb-6">
+    <div>
       {title && <h3 className="mb-2 text-lg font-medium text-gray-700">{title}</h3>}
       <div
         ref={dropZoneRef}
@@ -192,7 +189,11 @@ const ImageUploader = ({
         ) : imageId ? (
           <>
             <div className="relative h-full w-full">
-              <img src={imageUrl} alt={alt} className="h-full w-full object-contain p-2" />
+              <img
+                src={versionedImageUrl(imageUrl, imageVersion)}
+                alt={alt}
+                className="h-full w-full object-contain p-2"
+              />
               <div
                 className={`absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 transition-opacity duration-200 ${isDragging ? 'bg-opacity-40' : 'opacity-0 hover:bg-opacity-40 hover:opacity-100'} `}>
                 {isDragging ? (
