@@ -302,6 +302,8 @@ const Profile = () => {
                     apolloClient.refetchQueries({
                       include: [GET_USER_PROFILE],
                     })
+                    // The navbar avatar follows the exhibitor context, which holds its own copy
+                    void reloadExhibitor()
                   }}
                   title=""
                   alt="Profilbild"

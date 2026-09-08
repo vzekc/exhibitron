@@ -100,6 +100,7 @@ const ImageUploader = ({
     setIsImageLoading(true)
     try {
       await axios.delete(imageUrl)
+      bumpImageVersion()
       onImageChange?.(null)
     } catch (error) {
       console.error('Error deleting image:', error)
