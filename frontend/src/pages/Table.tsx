@@ -1,6 +1,7 @@
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import React, { useEffect, useState } from 'react'
 import { useExhibitor } from '@contexts/ExhibitorContext.ts'
+import { useExhibition } from '@contexts/ExhibitionContext.ts'
 import { FragmentOf, graphql } from 'gql.tada'
 import { useApolloClient, useMutation, useQuery } from '@apollo/client'
 import ExhibitorCard from '@components/ExhibitorCard.tsx'
@@ -72,6 +73,7 @@ const Table = () => {
   const [updateTable] = useMutation(UPDATE_TABLE)
   const navigate = useNavigate()
   const { exhibitor: currentUser } = useExhibitor()
+  const { exhibition } = useExhibition()
   const { setDetailName } = useBreadcrumb()
   const [showReleaseConfirm, setShowReleaseConfirm] = useState(false)
 
@@ -205,6 +207,28 @@ const Table = () => {
     )
   }
 
+  const isHolder = !!currentUser && !!exhibitor && currentUser.id === exhibitor.id
+
+  /*
+   * The holder of a table with nothing on it yet is told where the exhibits
+   * come from, since the table itself only carries them.
+   */
+  const NoExhibitsYet = () => {
+    if (!isHolder || exhibition?.frozen) return <></>
+    return (
+      <section className="mb-4 rounded-lg border border-gray-200 bg-white p-4 text-gray-700">
+        <p className="m-0">
+          Auf diesem Tisch steht noch kein Exponat. Bild und Beschreibung gehören zu den Exponaten:
+          lege eines mit „Exponat auf Tisch {tableNumber} anlegen“ an oder wähle unter{' '}
+          <Link className="underline" to="/user/exhibit">
+            Deine Exponate
+          </Link>{' '}
+          bei einem vorhandenen Exponat diesen Tisch aus.
+        </p>
+      </section>
+    )
+  }
+
   /*
    * Giving the table up lives here rather than on the floor-plan panel, so that
    * it stands apart from the photo-booth checkbox and the confirmation can say
@@ -229,6 +253,11 @@ const Table = () => {
       return (
         <>
           <ActionBar>
+            {isHolder && !exhibition?.frozen && (
+              <Button onClick={() => navigate(`/user/exhibit/new?table=${tableNumber}`)}>
+                Exponat auf Tisch {tableNumber} anlegen
+              </Button>
+            )}
             <Button variant="danger" onClick={() => setShowReleaseConfirm(true)}>
               Tisch {tableNumber} freigeben
             </Button>
@@ -267,6 +296,7 @@ const Table = () => {
     return (
       <article>
         <VisitorPhotos />
+        <NoExhibitsYet />
         <ExhibitorCard exhibitor={exhibitor} />
         <OtherExhibits
           exhibits={otherExhibitorExhibits}

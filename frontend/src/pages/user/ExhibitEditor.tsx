@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import React, { useEffect, useState, useRef } from 'react'
 import TextEditor, { TextEditorHandle } from '@components/TextEditor.tsx'
 import { useBreadcrumb } from '@contexts/BreadcrumbContext.ts'
@@ -213,6 +213,12 @@ const UPDATE_HOST_SERVICES = graphql(`
 const ExhibitEditor = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  /*
+   * A table's page links here with ?table=<number>, so that an exhibit made
+   * from the table starts out standing on it.
+   */
+  const [searchParams] = useSearchParams()
+  const requestedTable = Number(searchParams.get('table')) || undefined
   const { setDetailName } = useBreadcrumb()
   const apolloClient = useApolloClient()
   const isNew = id === 'new'
@@ -305,7 +311,7 @@ const ExhibitEditor = () => {
       reset({
         title: '',
         touchMe: false,
-        table: undefined,
+        table: requestedTable,
         description: '',
         descriptionExtension: '',
         attributes: [],
@@ -325,6 +331,7 @@ const ExhibitEditor = () => {
     exhibitData?.getExhibit?.mainImage,
     setDetailName,
     isNew,
+    requestedTable,
     reset,
   ])
 
@@ -475,7 +482,7 @@ const ExhibitEditor = () => {
               <FormLabel>Bespielbar</FormLabel>
               <Checkbox label="Besucher dürfen das Exponat bespielen" {...register('touchMe')} />
 
-              {!isNew && tables.length > 0 && (
+              {tables.length > 0 && (
                 <>
                   <FormLabel>Tisch</FormLabel>
                   <select
