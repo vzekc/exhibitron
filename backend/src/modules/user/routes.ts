@@ -156,40 +156,20 @@ export async function registerUserRoutes(app: FastifyInstance) {
     // Generate thumbnail and get dimensions
     const thumbnailData = await generateThumbnail(buffer, mimeType)
 
-    const { profileImage } = user
-    // Create new image or update existing one
-    if (profileImage) {
-      await db.em.populate(profileImage, ['image', 'thumbnail'])
-      const { image } = profileImage
-      // Update existing image
-      image.data = buffer
-      image.mimeType = mimeType
-      image.filename = filename
-      const oldThumbnail = profileImage.thumbnail
-      profileImage.thumbnail = await db.image.createImage(
-        thumbnailData,
-        mimeType,
-        filename,
-        randomUUID(),
-      )
-      // The row points at the new thumbnail before the old one goes, since the old one's
-      // deletion cascades to whatever still references it.
+    // Every upload is a new picture with an id of its own, so that a URL carrying the id
+    // changes with the picture and no cache, in the browser or the service worker, can
+    // hold on to the one before. The old picture goes first: one account holds one.
+    if (user.profileImage) {
+      await db.image.removePicture(user.profileImage)
+      user.profileImage = undefined
       await db.em.flush()
-      await db.image.removeImages(oldThumbnail)
-    } else {
-      // Create new image
-      const image = await db.image.createImage(buffer, mimeType, filename, randomUUID())
-      const thumbnail = await db.image.createImage(thumbnailData, mimeType, filename, randomUUID())
-      user.profileImage = db.em.create(ProfileImage, {
-        user,
-        image,
-        thumbnail,
-      })
-      db.em.persist(user.profileImage)
     }
-
+    const image = await db.image.createImage(buffer, mimeType, filename, randomUUID())
+    const thumbnail = await db.image.createImage(thumbnailData, mimeType, filename, randomUUID())
+    user.profileImage = db.em.create(ProfileImage, { user, image, thumbnail })
+    db.em.persist(user.profileImage)
     await db.em.flush()
-    return { success: true, imageId: user.profileImage!.id }
+    return { success: true, imageId: user.profileImage.id }
   })
 
   // Delete user profile image

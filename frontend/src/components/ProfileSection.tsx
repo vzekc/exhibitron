@@ -1,3 +1,4 @@
+import { pictureUrl } from '@utils/pictureUrl.ts'
 import Icon from './Icon'
 import { getDisplayName } from '@utils/displayName'
 
@@ -5,7 +6,7 @@ type ProfileSectionProps = {
   userId: string
   fullName: string
   nickname: string | null
-  profileImage: boolean
+  profileImage: number | null | undefined
   topic?: string | null
 }
 
@@ -25,7 +26,7 @@ const ProfileSection = ({
           <div className="flex h-[150px] w-[150px] items-center justify-center rounded-md bg-gray-100 dark:bg-gray-700">
             {profileImage ? (
               <img
-                src={`/api/user/${userId}/image/profile`}
+                src={pictureUrl(`/api/user/${userId}/image/profile`, profileImage)}
                 alt={`Profile of ${displayName}`}
                 className="h-full w-full rounded-md object-cover"
               />

@@ -1,3 +1,4 @@
+import { pictureUrl } from '@utils/pictureUrl.ts'
 import { FragmentOf, graphql } from 'gql.tada'
 import Icon from './Icon'
 import Card from '@components/Card.tsx'
@@ -32,7 +33,7 @@ const ExhibitorChip = ({ exhibitor }: ExhibitorChipProps) => {
           <div className="flex h-[100px] w-[100px] items-center justify-center rounded-md bg-gray-100 dark:bg-gray-700">
             {profileImage ? (
               <img
-                src={`/api/user/${userId}/image/profile`}
+                src={pictureUrl(`/api/user/${userId}/image/profile`, profileImage)}
                 alt={displayName}
                 className="h-full w-full rounded-md object-cover"
               />

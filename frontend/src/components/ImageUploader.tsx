@@ -3,7 +3,7 @@ import axios from 'axios'
 import Confirm from './Confirm'
 import { showMessage } from './MessageModalUtil'
 import ImageCropper from './ImageCropper'
-import { bumpImageVersion, useImageVersion, versionedImageUrl } from '@utils/imageVersion.ts'
+import { pictureUrl } from '@utils/pictureUrl.ts'
 
 interface ImageUploaderProps {
   imageId: number | null
@@ -36,7 +36,6 @@ const ImageUploader = ({
   const [tempImageUrl, setTempImageUrl] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const dropZoneRef = useRef<HTMLDivElement>(null)
-  const imageVersion = useImageVersion()
 
   const handleImageUpload = useCallback(
     async (file: File) => {
@@ -53,7 +52,6 @@ const ImageUploader = ({
           },
         })
 
-        bumpImageVersion()
         onImageChange?.(response.data.imageId)
       } catch (error) {
         console.error('Error uploading image:', JSON.stringify(error))
@@ -100,7 +98,6 @@ const ImageUploader = ({
     setIsImageLoading(true)
     try {
       await axios.delete(imageUrl)
-      bumpImageVersion()
       onImageChange?.(null)
     } catch (error) {
       console.error('Error deleting image:', error)
@@ -191,7 +188,7 @@ const ImageUploader = ({
           <>
             <div className="relative h-full w-full">
               <img
-                src={versionedImageUrl(imageUrl, imageVersion)}
+                src={pictureUrl(imageUrl, imageId)}
                 alt={alt}
                 className="h-full w-full object-contain p-2"
               />

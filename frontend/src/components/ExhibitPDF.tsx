@@ -1,3 +1,4 @@
+import { pictureUrl } from '@utils/pictureUrl.ts'
 import { Document, Page, Text, View, StyleSheet, Image, Font, pdf } from '@react-pdf/renderer'
 import { graphql, ResultOf } from 'gql.tada'
 import { ApolloClient } from '@apollo/client'
@@ -293,7 +294,9 @@ export const generateAndDownloadPDF = async (params: GeneratePDFParams): Promise
 
   // Load images
   const mainImageBase64 = exhibit.mainImage
-    ? await getImageDataViaCanvas(`${window.location.origin}/api/exhibit/${id}/image/main`)
+    ? await getImageDataViaCanvas(
+        pictureUrl(`${window.location.origin}/api/exhibit/${id}/image/main`, exhibit.mainImage),
+      )
     : ''
   const headerLogoBase64 = await getImageDataViaCanvas(`${window.location.origin}/cc-logo.svg`)
   const footerLogoBase64 = await getImageDataViaCanvas(`${window.location.origin}/vzekc-logo.svg`)

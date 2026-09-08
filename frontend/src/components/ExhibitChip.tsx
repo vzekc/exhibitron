@@ -1,3 +1,4 @@
+import { pictureUrl } from '@utils/pictureUrl.ts'
 import Card from '@components/Card.tsx'
 import { FragmentOf, graphql } from 'gql.tada'
 import RandomComputer from '@components/RandomComputer.tsx'
@@ -39,7 +40,7 @@ const ExhibitChip = ({ exhibit, noTable, noExhibitor, url = '/exhibit' }: Exhibi
         <div className="flex-shrink-0">
           {exhibit.mainImage ? (
             <img
-              src={`/api/exhibit/${exhibit.id}/image/thumbnail`}
+              src={pictureUrl(`/api/exhibit/${exhibit.id}/image/thumbnail`, exhibit.mainImage)}
               alt={exhibit.title}
               className="h-[100px] w-[100px] rounded-md object-cover"
               loading="lazy"

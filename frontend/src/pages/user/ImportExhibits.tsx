@@ -1,3 +1,4 @@
+import { pictureUrl } from '@utils/pictureUrl.ts'
 import { graphql } from 'gql.tada'
 import { useMutation, useQuery } from '@apollo/client'
 import { useState } from 'react'
@@ -152,7 +153,10 @@ const ImportExhibits = () => {
                     <div className="flex flex-1 gap-3">
                       {exhibit.mainImage ? (
                         <img
-                          src={`/api/exhibit/${exhibit.id}/image/thumbnail`}
+                          src={pictureUrl(
+                            `/api/exhibit/${exhibit.id}/image/thumbnail`,
+                            exhibit.mainImage,
+                          )}
                           alt={exhibit.title}
                           className="h-16 w-16 rounded object-cover"
                           loading="lazy"

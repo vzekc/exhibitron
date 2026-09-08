@@ -116,35 +116,20 @@ export async function registerExhibitImageRoutes(app: FastifyInstance) {
     // Generate thumbnail and get dimensions
     const thumbnailData = await generateThumbnail(buffer, mimeType)
 
-    const { mainImage } = exhibit
-    // Create new image or update existing one
-    if (mainImage) {
-      await db.em.populate(mainImage, ['image', 'thumbnail'])
-      const { image } = mainImage
-      // Update existing image
-      image.data = buffer
-      image.mimeType = mimeType
-      image.filename = filename
-      mainImage.thumbnail = await db.image.createImage(
-        thumbnailData,
-        mimeType,
-        filename,
-        randomUUID(),
-      )
-    } else {
-      // Create new image
-      const image = await db.image.createImage(buffer, mimeType, filename, randomUUID())
-      const thumbnail = await db.image.createImage(thumbnailData, mimeType, filename, randomUUID())
-      exhibit.mainImage = db.em.create(ExhibitImage, {
-        exhibit,
-        image,
-        thumbnail,
-      })
-      db.em.persist(exhibit.mainImage)
+    // Every upload is a new picture with an id of its own, so that a URL carrying the id
+    // changes with the picture and no cache, in the browser or the service worker, can
+    // hold on to the one before. The old picture goes first: one exhibit holds one.
+    if (exhibit.mainImage) {
+      await db.image.removePicture(exhibit.mainImage)
+      exhibit.mainImage = undefined
+      await db.em.flush()
     }
-
+    const image = await db.image.createImage(buffer, mimeType, filename, randomUUID())
+    const thumbnail = await db.image.createImage(thumbnailData, mimeType, filename, randomUUID())
+    exhibit.mainImage = db.em.create(ExhibitImage, { exhibit, image, thumbnail })
+    db.em.persist(exhibit.mainImage)
     await db.em.flush()
-    return { success: true, imageId: exhibit.mainImage!.id }
+    return { success: true, imageId: exhibit.mainImage.id }
   })
 
   // Delete exhibit main image

@@ -564,7 +564,7 @@ graphqlTest('deleting the profile picture leaves nothing in storage', async (_, 
   expect(await db.em.count(ImageVariant, { id: variant.id })).toBe(0)
 })
 
-graphqlTest('replacing the profile picture drops the thumbnail it had', async (_, app) => {
+graphqlTest('replacing the profile picture makes a new one and drops the old', async (_, app) => {
   const db = await initORM()
   const session = await login('meistereder@example.com', 'password123')
   const user = await db.user.findOneOrFail({ id: session.userId })
@@ -575,7 +575,7 @@ graphqlTest('replacing the profile picture drops the thumbnail it had', async (_
   })
   db.em.persist(picture)
   await db.em.flush()
-  const oldThumbnailId = picture.thumbnail!.id
+  const oldIds = [picture.id, picture.image.id, picture.thumbnail!.id]
 
   const boundary = 'grenze'
   const payload = Buffer.concat([
@@ -595,15 +595,17 @@ graphqlTest('replacing the profile picture drops the thumbnail it had', async (_
     payload,
   })
   expect(response.statusCode).toBe(200)
-  expect(response.json().imageId).toBe(picture.id)
+  const newId = response.json().imageId
+  expect(newId).not.toBe(oldIds[0])
 
   db.em.clear()
   const replaced = await db.em.findOneOrFail(
     ProfileImage,
-    { id: picture.id },
+    { user },
     { populate: ['image', 'thumbnail'] },
   )
+  expect(replaced.id).toBe(newId)
   expect(replaced.image.filename).toBe('neu.png')
-  expect(replaced.thumbnail!.id).not.toBe(oldThumbnailId)
-  expect(await db.em.count(ImageStorage, { id: oldThumbnailId })).toBe(0)
+  expect(await db.em.count(ProfileImage, { id: oldIds[0] })).toBe(0)
+  expect(await db.em.count(ImageStorage, { id: { $in: oldIds.slice(1) } })).toBe(0)
 })

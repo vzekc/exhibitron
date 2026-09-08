@@ -12,7 +12,7 @@ import Breadcrumbs from './Breadcrumbs.tsx'
 import { gql, useMutation } from '@apollo/client'
 import Icon from './Icon'
 import Button from '@components/Button.tsx'
-import { useImageVersion, versionedImageUrl } from '@utils/imageVersion.ts'
+import { pictureUrl } from '@utils/pictureUrl.ts'
 
 interface MenuItemProps {
   to?: string
@@ -124,7 +124,6 @@ const GET_CURRENT_USER = graphql(`
 
 const NavBar = () => {
   const { exhibitor } = useExhibitor()
-  const imageVersion = useImageVersion()
   /* A volunteer who registered to help has an account but no exhibitor record,
      and would otherwise be shown a Login button while being logged in. */
   const { data: currentUser } = useQuery(GET_CURRENT_USER)
@@ -321,9 +320,9 @@ const NavBar = () => {
             <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600">
               {exhibitor?.user?.profileImage ? (
                 <img
-                  src={versionedImageUrl(
+                  src={pictureUrl(
                     `/api/user/${exhibitor.user.id}/image/profile`,
-                    imageVersion,
+                    exhibitor.user.profileImage,
                   )}
                   alt="User Menu"
                   className="h-full w-full object-cover"

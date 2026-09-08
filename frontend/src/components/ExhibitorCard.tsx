@@ -91,7 +91,7 @@ const ExhibitorCard = ({ exhibitor }: { exhibitor: FragmentOf<typeof EXHIBITOR_F
             userId={String(userId)}
             fullName={fullName}
             nickname={nickname}
-            profileImage={Boolean(profileImage)}
+            profileImage={profileImage}
             topic={topic}
           />
           {tables && tables.length > 0 && (

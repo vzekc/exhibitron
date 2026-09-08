@@ -1,3 +1,4 @@
+import { pictureUrl } from '@utils/pictureUrl.ts'
 import { graphql } from 'gql.tada'
 import { useQuery } from '@apollo/client'
 import ExhibitorChip from './ExhibitorChip.tsx'
@@ -84,7 +85,7 @@ const ExhibitCard = ({ id }: { id: number }) => {
                   hasAttributes ? 'min-w-[300px] basis-1/3' : 'w-full'
                 }`}>
                 <img
-                  src={`/api/exhibit/${exhibit.id}/image/main`}
+                  src={pictureUrl(`/api/exhibit/${exhibit.id}/image/main`, exhibit.mainImage)}
                   alt={`Main image for ${exhibit.title}`}
                   className="block h-auto max-w-full"
                 />
