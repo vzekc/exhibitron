@@ -119,6 +119,7 @@ export async function registerExhibitImageRoutes(app: FastifyInstance) {
     const { mainImage } = exhibit
     // Create new image or update existing one
     if (mainImage) {
+      await db.em.populate(mainImage, ['image', 'thumbnail'])
       const { image } = mainImage
       // Update existing image
       image.data = buffer
@@ -154,7 +155,7 @@ export async function registerExhibitImageRoutes(app: FastifyInstance) {
     if (exhibit.mainImage) {
       const imageToRemove = exhibit.mainImage
       exhibit.mainImage = undefined
-      db.em.remove(imageToRemove)
+      await db.image.removePicture(imageToRemove)
       await db.em.flush()
     }
 

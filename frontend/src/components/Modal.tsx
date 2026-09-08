@@ -36,6 +36,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title }) => {
         <header className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
           <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">{title}</h3>
           <button
+            type="button"
             aria-label="Close"
             onClick={(e) => {
               e.stopPropagation()

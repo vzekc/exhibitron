@@ -181,9 +181,12 @@ export const exhibitMutations: MutationResolvers<Context> = {
   },
   deleteExhibit: async (_, { id }, { db, exhibitor, user, exhibition }) => {
     requireNotFrozen(exhibition)
-    const exhibit = await db.exhibit.findOneOrFail({ id })
+    const exhibit = await db.exhibit.findOneOrFail({ id }, { populate: ['mainImage'] })
     if (exhibitor !== exhibit.exhibitor && !isAdmin(user, exhibition)) {
       throw new Error('You do not have permission to delete this exhibit')
+    }
+    if (exhibit.mainImage) {
+      await db.image.removePicture(exhibit.mainImage)
     }
     db.em.remove(exhibit)
     return true

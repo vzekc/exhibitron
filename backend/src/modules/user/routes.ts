@@ -159,17 +159,23 @@ export async function registerUserRoutes(app: FastifyInstance) {
     const { profileImage } = user
     // Create new image or update existing one
     if (profileImage) {
+      await db.em.populate(profileImage, ['image', 'thumbnail'])
       const { image } = profileImage
       // Update existing image
       image.data = buffer
       image.mimeType = mimeType
       image.filename = filename
+      const oldThumbnail = profileImage.thumbnail
       profileImage.thumbnail = await db.image.createImage(
         thumbnailData,
         mimeType,
         filename,
         randomUUID(),
       )
+      // The row points at the new thumbnail before the old one goes, since the old one's
+      // deletion cascades to whatever still references it.
+      await db.em.flush()
+      await db.image.removeImages(oldThumbnail)
     } else {
       // Create new image
       const image = await db.image.createImage(buffer, mimeType, filename, randomUUID())
@@ -194,7 +200,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
     if (user.profileImage) {
       const imageToRemove = user.profileImage
       user.profileImage = undefined
-      db.em.remove(imageToRemove)
+      await db.image.removePicture(imageToRemove)
       await db.em.flush()
     }
 

@@ -92,8 +92,10 @@ const ImageCropper = ({ imageUrl, onCropDone, onCancel }: ImageCropperProps) => 
           </ReactCrop>
         </div>
         <div className="flex justify-end gap-2">
-          <Button onClick={onCancel}>Abbrechen</Button>
-          <Button onClick={handleCrop} disabled={!completedCrop}>
+          <Button type="button" onClick={onCancel}>
+            Abbrechen
+          </Button>
+          <Button type="button" onClick={handleCrop} disabled={!completedCrop}>
             Zuschneiden
           </Button>
         </div>

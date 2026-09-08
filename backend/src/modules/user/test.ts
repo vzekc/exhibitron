@@ -4,7 +4,7 @@ import { graphqlTest, login } from '../../test/server.js'
 import { sendEmail } from '../common/sendEmail.js'
 import { initORM } from '../../db.js'
 import { ProfileImage, User } from './entity.js'
-import { ImageStorage } from '../image/entity.js'
+import { ImageStorage, ImageVariant } from '../image/entity.js'
 import type { Services } from '../../db.js'
 import { VolunteerActivity, VolunteerBooking, VolunteerPeriod } from '../volunteer/entity.js'
 
@@ -522,4 +522,88 @@ graphqlTest('profile image is revalidated by the browser', async (_, app) => {
   const changed = await app.inject({ method: 'GET', url, headers: { 'if-modified-since': stale } })
   expect(changed.statusCode).toBe(200)
   expect(changed.rawPayload.length).toBeGreaterThan(0)
+})
+
+graphqlTest('deleting the profile picture leaves nothing in storage', async (_, app) => {
+  const db = await initORM()
+  const session = await login('meistereder@example.com', 'password123')
+  const user = await db.user.findOneOrFail({ id: session.userId })
+  const existing = await db.em.findOne(ProfileImage, { user })
+  if (existing) {
+    await db.image.removePicture(existing)
+    await db.em.flush()
+  }
+  const picture = db.em.create(ProfileImage, {
+    user,
+    image: makeImage(db, 'meistereder'),
+    thumbnail: makeImage(db, 'meistereder-klein'),
+  })
+  db.em.persist(picture)
+  await db.em.flush()
+  const variant = db.em.create(ImageVariant, {
+    data: picture.image.data,
+    width: 1,
+    height: 1,
+    variantName: 'htmlSmall',
+    mimeType: 'image/jpeg',
+    originalImage: picture.image,
+  })
+  db.em.persist(variant)
+  await db.em.flush()
+  const ids = [picture.image.id, picture.thumbnail!.id]
+
+  const response = await app.inject({
+    method: 'DELETE',
+    url: `/api/user/${user.id}/image/profile`,
+    headers: { cookie: session.cookie },
+  })
+  expect(response.statusCode).toBe(204)
+
+  expect(await db.em.count(ProfileImage, { user })).toBe(0)
+  expect(await db.em.count(ImageStorage, { id: { $in: ids } })).toBe(0)
+  expect(await db.em.count(ImageVariant, { id: variant.id })).toBe(0)
+})
+
+graphqlTest('replacing the profile picture drops the thumbnail it had', async (_, app) => {
+  const db = await initORM()
+  const session = await login('meistereder@example.com', 'password123')
+  const user = await db.user.findOneOrFail({ id: session.userId })
+  const picture = db.em.create(ProfileImage, {
+    user,
+    image: makeImage(db, 'meistereder-alt'),
+    thumbnail: makeImage(db, 'meistereder-alt-klein'),
+  })
+  db.em.persist(picture)
+  await db.em.flush()
+  const oldThumbnailId = picture.thumbnail!.id
+
+  const boundary = 'grenze'
+  const payload = Buffer.concat([
+    Buffer.from(
+      `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="neu.png"\r\nContent-Type: image/png\r\n\r\n`,
+    ),
+    picture.image.data,
+    Buffer.from(`\r\n--${boundary}--\r\n`),
+  ])
+  const response = await app.inject({
+    method: 'PUT',
+    url: `/api/user/${user.id}/image/profile`,
+    headers: {
+      cookie: session.cookie,
+      'content-type': `multipart/form-data; boundary=${boundary}`,
+    },
+    payload,
+  })
+  expect(response.statusCode).toBe(200)
+  expect(response.json().imageId).toBe(picture.id)
+
+  db.em.clear()
+  const replaced = await db.em.findOneOrFail(
+    ProfileImage,
+    { id: picture.id },
+    { populate: ['image', 'thumbnail'] },
+  )
+  expect(replaced.image.filename).toBe('neu.png')
+  expect(replaced.thumbnail!.id).not.toBe(oldThumbnailId)
+  expect(await db.em.count(ImageStorage, { id: oldThumbnailId })).toBe(0)
 })

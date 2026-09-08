@@ -9,6 +9,7 @@ import { ConferenceSession } from '../conferenceSession/entity.js'
 import { Registration } from '../registration/entity.js'
 import { VolunteerBooking } from '../volunteer/entity.js'
 import { ProfileImage, User } from '../user/entity.js'
+import { ImageStorage } from '../image/entity.js'
 
 export class ExhibitorRepository extends EntityRepository<Exhibitor> {
   /*
@@ -80,7 +81,7 @@ export class ExhibitorRepository extends EntityRepository<Exhibitor> {
     if (!accountStillNeeded) {
       const profileImage = await em.findOne(ProfileImage, { user })
       if (profileImage) {
-        em.remove(profileImage)
+        await em.getRepository(ImageStorage).removePicture(profileImage)
       }
       em.remove(user)
     }

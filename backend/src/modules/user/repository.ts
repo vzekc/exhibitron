@@ -1,6 +1,7 @@
 import { EntityRepository } from '@mikro-orm/postgresql'
 import { NotFoundError } from '@mikro-orm/core'
 import { ProfileImage, User } from './entity.js'
+import { ImageStorage } from '../image/entity.js'
 import { Exhibitor } from '../exhibitor/entity.js'
 import { Registration } from '../registration/entity.js'
 import { VolunteerBooking } from '../volunteer/entity.js'
@@ -127,7 +128,7 @@ export class UserRepository extends EntityRepository<User> {
         const duplicateImage = await images.findOne({ user: tokenUser })
         if (duplicateImage) {
           if (await images.findOne({ user: nicknameUser })) {
-            em.remove(duplicateImage)
+            await em.getRepository(ImageStorage).removePicture(duplicateImage)
           } else {
             duplicateImage.user = nicknameUser
           }
