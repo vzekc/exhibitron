@@ -240,6 +240,7 @@ const NavBar = () => {
     { to: '/admin/seatplan', label: 'Tischplan' },
     { to: '/admin/mitmachen', label: 'Mitmachen' },
     { to: '/admin/umfrage', label: 'Fragen an Aussteller' },
+    { to: '/admin/attribute', label: 'Attribute' },
   ]
 
   const renderMenuEntry = (item: MenuEntry, key: React.Key, onClose?: () => void) => {

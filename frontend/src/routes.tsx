@@ -51,6 +51,7 @@ import NameTags from '@pages/admin/NameTags.tsx'
 import Survey from './pages/user/Survey.tsx'
 import SurveyResults from './pages/user/SurveyResults.tsx'
 import SurveyQuestions from '@pages/admin/SurveyQuestions.tsx'
+import ExhibitAttributes from '@pages/admin/ExhibitAttributes.tsx'
 import SurveyQuestionEditor from '@pages/admin/SurveyQuestionEditor.tsx'
 
 const routes: RouteObject[] = [
@@ -126,6 +127,7 @@ const routes: RouteObject[] = [
           { path: 'mitmachen/neu', element: <VolunteerActivityEditor /> },
           { path: 'mitmachen/:key', element: <VolunteerActivityEditor /> },
           { path: 'umfrage', element: <SurveyQuestions /> },
+          { path: 'attribute', element: <ExhibitAttributes /> },
           { path: 'umfrage/neu', element: <SurveyQuestionEditor /> },
           { path: 'umfrage/:id', element: <SurveyQuestionEditor /> },
           { path: 'session/new', element: <SessionEditorPage /> },

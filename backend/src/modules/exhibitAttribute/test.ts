@@ -344,4 +344,180 @@ describe('exhibit attribute', () => {
     )
     expect(foundAttribute).toBeDefined()
   })
+
+  const RENAME = graphql(`
+    mutation RenameExhibitAttribute($id: Int!, $name: String!) {
+      renameExhibitAttribute(id: $id, name: $name) {
+        id
+        name
+        exhibitCount
+      }
+    }
+  `)
+
+  const GET_EXHIBIT = graphql(`
+    query GetExhibitAttributesOf($id: Int!) {
+      getExhibit(id: $id) {
+        id
+        attributes {
+          name
+          value
+        }
+      }
+    }
+  `)
+
+  graphqlTest('rename an attribute on every data sheet that carries it', async (graphqlRequest) => {
+    const admin = await login('admin@example.com')
+    const user = await login('daffy@example.com')
+    const oldName = `Model Nrummer ${Date.now()}`
+    const newName = `Modell Nummer ${Date.now()}`
+
+    const exhibit = await createExhibitWithAttributes(
+      graphqlRequest,
+      {
+        title: 'Renamed attribute',
+        attributes: [
+          { name: 'Hersteller', value: 'Siemens' },
+          { name: oldName, value: '3504-160' },
+          { name: oldName, value: 'FS1511' },
+        ],
+      },
+      user,
+    )
+    const untouched = await createExhibitWithAttributes(
+      graphqlRequest,
+      { title: 'Other exhibit', attributes: [{ name: 'Hersteller', value: 'Nixdorf' }] },
+      user,
+    )
+
+    const list = await graphqlRequest(
+      graphql(`
+        query GetExhibitAttributesWithCount {
+          getExhibitAttributes {
+            id
+            name
+            exhibitCount
+          }
+        }
+      `),
+    )
+    const attribute = list.data!.getExhibitAttributes.find((a) => a.name === oldName)!
+    expect(attribute.exhibitCount).toBe(1)
+
+    const renamed = await graphqlRequest(RENAME, { id: attribute.id, name: newName }, admin)
+    expect(renamed.errors).toBeUndefined()
+    expect(renamed.data!.renameExhibitAttribute).toMatchObject({
+      id: attribute.id,
+      name: newName,
+      exhibitCount: 1,
+    })
+
+    const after = await graphqlRequest(GET_EXHIBIT, { id: exhibit.id }, user)
+    expect(after.data!.getExhibit!.attributes).toEqual([
+      { name: 'Hersteller', value: 'Siemens' },
+      { name: newName, value: '3504-160' },
+      { name: newName, value: 'FS1511' },
+    ])
+    const other = await graphqlRequest(GET_EXHIBIT, { id: untouched.id }, user)
+    expect(other.data!.getExhibit!.attributes).toEqual([{ name: 'Hersteller', value: 'Nixdorf' }])
+  })
+
+  graphqlTest('renaming to an existing name merges the two', async (graphqlRequest) => {
+    const admin = await login('admin@example.com')
+    const user = await login('daffy@example.com')
+    const stamp = Date.now()
+    const duplicate = `Baujahr (Exponat) ${stamp}`
+    const canonical = `Baujahr ${stamp}`
+
+    const exhibit = await createExhibitWithAttributes(
+      graphqlRequest,
+      { title: 'Merged attribute', attributes: [{ name: duplicate, value: '1987' }] },
+      user,
+    )
+    const keep = await createExhibitAttribute(graphqlRequest, canonical, admin)
+    const list = await graphqlRequest(
+      graphql(`
+        query GetExhibitAttributesForMerge {
+          getExhibitAttributes {
+            id
+            name
+          }
+        }
+      `),
+    )
+    const gone = list.data!.getExhibitAttributes.find((a) => a.name === duplicate)!
+
+    const merged = await graphqlRequest(RENAME, { id: gone.id, name: canonical }, admin)
+    expect(merged.errors).toBeUndefined()
+    expect(merged.data!.renameExhibitAttribute).toMatchObject({
+      id: keep.id,
+      name: canonical,
+      exhibitCount: 1,
+    })
+
+    const after = await graphqlRequest(GET_EXHIBIT, { id: exhibit.id }, user)
+    expect(after.data!.getExhibit!.attributes).toEqual([{ name: canonical, value: '1987' }])
+
+    const names = (
+      await graphqlRequest(
+        graphql(`
+          query GetExhibitAttributesAfterMerge {
+            getExhibitAttributes {
+              name
+            }
+          }
+        `),
+      )
+    ).data!.getExhibitAttributes.map((a) => a.name)
+    expect(names).toContain(canonical)
+    expect(names).not.toContain(duplicate)
+  })
+
+  graphqlTest('rename needs an admin and a name', async (graphqlRequest) => {
+    const admin = await login('admin@example.com')
+    const user = await login('daffy@example.com')
+    const attribute = await createExhibitAttribute(graphqlRequest, `rename-${Date.now()}`, user)
+
+    const asUser = await graphqlRequest(RENAME, { id: attribute.id, name: 'Neu' }, user)
+    expect(asUser.errors![0].message).toBe('You must be an administrator to perform this operation')
+
+    const empty = await graphqlRequest(RENAME, { id: attribute.id, name: '  ' }, admin)
+    expect(empty.errors![0].message).toBe('Der Name darf nicht leer sein')
+  })
+
+  graphqlTest('an attribute on a data sheet cannot be deleted', async (graphqlRequest) => {
+    const admin = await login('admin@example.com')
+    const user = await login('daffy@example.com')
+    const name = `used-${Date.now()}`
+    await createExhibitWithAttributes(
+      graphqlRequest,
+      { title: 'Uses attribute', attributes: [{ name, value: 'x' }] },
+      user,
+    )
+    const list = await graphqlRequest(
+      graphql(`
+        query GetExhibitAttributesForDelete {
+          getExhibitAttributes {
+            id
+            name
+          }
+        }
+      `),
+    )
+    const attribute = list.data!.getExhibitAttributes.find((a) => a.name === name)!
+
+    const result = await graphqlRequest(
+      graphql(`
+        mutation DeleteUsedExhibitAttribute($id: Int!) {
+          deleteExhibitAttribute(id: $id)
+        }
+      `),
+      { id: attribute.id },
+      admin,
+    )
+    expect(result.errors![0].message).toBe(
+      `„${name}“ steht noch auf dem Datenblatt von 1 Exponat und kann nicht gelöscht werden`,
+    )
+  })
 })

@@ -1,6 +1,8 @@
 type ExhibitAttribute {
   id: Int!
   name: String!
+  "How many exhibits, across all exhibitions, carry this attribute on their data sheet."
+  exhibitCount: Int!
   createdAt: String!
   updatedAt: String
 }
@@ -12,5 +14,12 @@ extend type Query {
 
 extend type Mutation {
   createExhibitAttribute(name: String!): ExhibitAttribute!
+  """
+  Renames the attribute on every data sheet that carries it. Renaming to a name
+  that already exists merges the two: the exhibits move over and this one goes.
+  Returns the attribute the exhibits now carry.
+  """
+  renameExhibitAttribute(id: Int!, name: String!): ExhibitAttribute!
+  "Removes an attribute nobody uses. An attribute on a data sheet is refused."
   deleteExhibitAttribute(id: Int!): Boolean
 }
