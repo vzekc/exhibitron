@@ -18,9 +18,11 @@ const ExhibitorSelector = ({ options, onSelect }: ExhibitorSelectorProps) => {
   const inputRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  const filteredOptions = options.filter((option) =>
-    getDisplayName(option.user).toLowerCase().includes(inputValue.toLowerCase()),
-  )
+  const filteredOptions = options
+    .filter((option) =>
+      getDisplayName(option.user).toLowerCase().includes(inputValue.toLowerCase()),
+    )
+    .sort((a, b) => getDisplayName(a.user).localeCompare(getDisplayName(b.user), 'de'))
 
   useEffect(() => {
     if (showDropdown && inputRef.current && dropdownRef.current) {

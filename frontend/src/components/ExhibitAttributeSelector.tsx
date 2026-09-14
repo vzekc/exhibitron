@@ -12,9 +12,9 @@ export const ExhibitAttributeSelector = ({ options, onSelect, onCreateNew }: Com
   const [showConfirmation, setShowConfirmation] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const filteredOptions = options.filter((option) =>
-    option.name.toLowerCase().includes(inputValue.toLowerCase()),
-  )
+  const filteredOptions = options
+    .filter((option) => option.name.toLowerCase().includes(inputValue.toLowerCase()))
+    .sort((a, b) => a.name.localeCompare(b.name, 'de'))
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value)
