@@ -77,7 +77,11 @@ export const userMutations: MutationResolvers<Context> = {
     if (!user) {
       throw new Error('You must be logged in to update your profile')
     }
-    wrap(user).assign(input)
+    // A nickname is a forum name; blank means none, and a blank string would take
+    // the one slot the unique constraint leaves for it.
+    wrap(user).assign(
+      input.nickname == null ? input : { ...input, nickname: input.nickname.trim() || null },
+    )
     try {
       await db.em.flush()
     } catch (error) {

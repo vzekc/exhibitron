@@ -55,7 +55,7 @@ export const registrationMutations: MutationResolvers<Context> = {
   register: async (_, { input }, context) => {
     const { exhibition, db, siteUrl } = context
     requireNotFrozen(exhibition)
-    const { email, message, surveyAnswers, ...rest } = input
+    const { email, message, nickname, surveyAnswers, ...rest } = input
     const existing = await db.registration.findOne({
       email: email,
       exhibition,
@@ -68,6 +68,7 @@ export const registrationMutations: MutationResolvers<Context> = {
         exhibition,
         status: RegistrationStatus.New,
         message: message || undefined,
+        nickname: nickname.trim() || undefined,
         email,
         surveyAnswers: await formAnswersFrom(context, surveyAnswers),
         ...rest,

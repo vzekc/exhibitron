@@ -243,6 +243,41 @@ describe('registration', () => {
     expect(oldDaffy).toBeUndefined()
   })
 
+  graphqlTest('an empty nickname is stored as null and never collides', async (graphqlRequest) => {
+    const admin = await login('admin@example.com')
+    const approve = async (id: number) =>
+      graphqlRequest(
+        graphql(`
+          mutation ApproveRegistration($id: Int!, $siteUrl: String!) {
+            approveRegistration(id: $id, siteUrl: $siteUrl)
+          }
+        `),
+        { id, siteUrl: 'https://example.com/' },
+        admin,
+      )
+    const first = await createRegistration(graphqlRequest, {
+      email: 'first@example.com',
+      nickname: '',
+    })
+    const second = await createRegistration(graphqlRequest, {
+      email: 'second@example.com',
+      nickname: '',
+    })
+    const third = await createRegistration(graphqlRequest, {
+      email: 'third@example.com',
+      nickname: '   ',
+    })
+    expect((await approve(first)).errors).toBeUndefined()
+    expect((await approve(second)).errors).toBeUndefined()
+    expect((await approve(third)).errors).toBeUndefined()
+
+    const { user: userRepo, registration: registrationRepo } = await initORM()
+    for (const email of ['first@example.com', 'second@example.com', 'third@example.com']) {
+      expect((await registrationRepo.findOneOrFail({ email })).nickname).toBeNull()
+      expect((await userRepo.findOneOrFail({ email })).nickname).toBeNull()
+    }
+  })
+
   graphqlTest('approve, reject and delete registration', async (graphqlRequest) => {
     const admin = await login('admin@example.com')
     const registrationId = await createRegistration(graphqlRequest)
