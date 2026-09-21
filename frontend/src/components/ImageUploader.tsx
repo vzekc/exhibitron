@@ -9,6 +9,12 @@ interface ImageUploaderProps {
   imageId: number | null
   imageUrl: string
   onImageChange?: (imageId: number | null) => void
+  /*
+   * Given, the picture is kept in the browser and handed over here in place of
+   * being uploaded, for a form whose subject has no URL yet. Null means the
+   * picture was taken away again.
+   */
+  onFileChange?: (file: File | null) => void
   title?: string
   uploadButtonText?: string
   deleteButtonText?: string
@@ -22,6 +28,7 @@ const ImageUploader = ({
   imageId,
   imageUrl,
   onImageChange,
+  onFileChange,
   title = 'Bild',
   uploadButtonText = 'Bild hochladen',
   deleteButtonText = 'Bild löschen',
@@ -34,12 +41,25 @@ const ImageUploader = ({
   const [showDeleteImageConfirm, setShowDeleteImageConfirm] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [tempImageUrl, setTempImageUrl] = useState<string | null>(null)
+  const [heldImageUrl, setHeldImageUrl] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const dropZoneRef = useRef<HTMLDivElement>(null)
 
   const handleImageUpload = useCallback(
     async (file: File) => {
       if (!file) return
+
+      if (onFileChange) {
+        setHeldImageUrl((previous) => {
+          if (previous) URL.revokeObjectURL(previous)
+          return URL.createObjectURL(file)
+        })
+        onFileChange(file)
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ''
+        }
+        return
+      }
 
       setIsImageLoading(true)
       try {
@@ -63,7 +83,7 @@ const ImageUploader = ({
         }
       }
     },
-    [imageUrl, onImageChange],
+    [imageUrl, onImageChange, onFileChange],
   )
 
   const handleFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,6 +113,13 @@ const ImageUploader = ({
   }
 
   const handleConfirmDeleteImage = async () => {
+    if (heldImageUrl) {
+      URL.revokeObjectURL(heldImageUrl)
+      setHeldImageUrl(null)
+      onFileChange?.(null)
+      setShowDeleteImageConfirm(false)
+      return
+    }
     if (!imageId) return
 
     setIsImageLoading(true)
@@ -152,6 +179,8 @@ const ImageUploader = ({
     [enableCropping, handleImageUpload],
   )
 
+  const shownImageUrl = heldImageUrl ?? (imageId ? pictureUrl(imageUrl, imageId) : null)
+
   return (
     <div>
       {title && <h3 className="mb-2 text-lg font-medium text-gray-700">{title}</h3>}
@@ -161,8 +190,8 @@ const ImageUploader = ({
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        className={`relative flex aspect-square w-full max-w-md flex-col items-center justify-center overflow-hidden rounded-lg border-2 transition-all duration-200 ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} ${isImageLoading ? 'opacity-70' : ''} ${imageId ? '' : 'cursor-pointer'} `}
-        onClick={() => !imageId && fileInputRef.current?.click()}>
+        className={`relative flex aspect-square w-full max-w-md flex-col items-center justify-center overflow-hidden rounded-lg border-2 transition-all duration-200 ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} ${isImageLoading ? 'opacity-70' : ''} ${shownImageUrl ? '' : 'cursor-pointer'} `}
+        onClick={() => !shownImageUrl && fileInputRef.current?.click()}>
         {isImageLoading ? (
           <div className="flex flex-col items-center justify-center p-4">
             <svg
@@ -184,14 +213,10 @@ const ImageUploader = ({
             </svg>
             <p className="text-sm text-gray-600">Bild wird verarbeitet...</p>
           </div>
-        ) : imageId ? (
+        ) : shownImageUrl ? (
           <>
             <div className="relative h-full w-full">
-              <img
-                src={pictureUrl(imageUrl, imageId)}
-                alt={alt}
-                className="h-full w-full object-contain p-2"
-              />
+              <img src={shownImageUrl} alt={alt} className="h-full w-full object-contain p-2" />
               <div
                 className={`absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 transition-opacity duration-200 ${isDragging ? 'bg-opacity-40' : 'opacity-0 hover:bg-opacity-40 hover:opacity-100'} `}>
                 {isDragging ? (

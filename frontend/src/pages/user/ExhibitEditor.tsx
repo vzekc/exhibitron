@@ -23,6 +23,7 @@ import {
 import { useForm, SubmitHandler } from 'react-hook-form'
 import LoadInProgress from '@components/LoadInProgress'
 import Icon from '@components/Icon'
+import axios from 'axios'
 
 const WELL_KNOWN_SERVICES = ['ftp', 'http', 'https', 'ssh', 'telnet'] as const
 type WellKnownService = (typeof WELL_KNOWN_SERVICES)[number]
@@ -342,6 +343,9 @@ const ExhibitEditor = () => {
     setValue('attributes', newAttributes, { shouldDirty: true })
   }
 
+  // The picture of a new exhibit, uploaded once the exhibit exists.
+  const [newMainImage, setNewMainImage] = useState<File | null>(null)
+
   const handleMainImageChange = (newImageId: number | null) => {
     setValue('mainImage', newImageId, { shouldDirty: true })
     apolloClient.refetchQueries({
@@ -378,7 +382,23 @@ const ExhibitEditor = () => {
         await showMessage('Fehler', 'Fehler beim Erstellen des Exponats')
         return
       }
-      navigate(`/exhibit/${result.data?.createExhibit!.id}`)
+      const newId = result.data?.createExhibit!.id
+      if (newMainImage) {
+        const formData = new FormData()
+        formData.append('file', newMainImage)
+        const upload = await axios
+          .put(`/api/exhibit/${newId}/image/main`, formData)
+          .then(() => true)
+          .catch(() => false)
+        if (!upload) {
+          await showMessage(
+            'Bild nicht hochgeladen',
+            'Das Exponat wurde angelegt, aber das Hauptbild konnte nicht hochgeladen werden. Du kannst es beim Bearbeiten noch einmal versuchen.',
+            'OK',
+          )
+        }
+      }
+      navigate(`/exhibit/${newId}`)
     } else {
       const result = await updateExhibit({ variables: { id: Number(id), ...variables } })
       if (result.errors) {
@@ -502,18 +522,17 @@ const ExhibitEditor = () => {
           </FormSection>
 
           <div className="flex flex-col gap-6 md:flex-row">
-            {!isNew && (
-              <FormSection className="md:w-[40%]">
-                <SectionLabel>Hauptbild</SectionLabel>
-                <ImageUploader
-                  imageId={watch('mainImage')}
-                  imageUrl={`/api/exhibit/${id}/image/main`}
-                  onImageChange={handleMainImageChange}
-                  title=""
-                  alt="Hauptbild"
-                />
-              </FormSection>
-            )}
+            <FormSection className="md:w-[40%]">
+              <SectionLabel>Hauptbild</SectionLabel>
+              <ImageUploader
+                imageId={watch('mainImage')}
+                imageUrl={`/api/exhibit/${id}/image/main`}
+                onImageChange={handleMainImageChange}
+                onFileChange={isNew ? setNewMainImage : undefined}
+                title=""
+                alt="Hauptbild"
+              />
+            </FormSection>
 
             <FormSection className="md:w-[60%]">
               <SectionLabel>Datenblatt</SectionLabel>
