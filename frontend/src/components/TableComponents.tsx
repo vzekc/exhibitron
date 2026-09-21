@@ -6,6 +6,7 @@ interface TableRowProps {
   className?: string
   index?: number
   mobile?: boolean
+  ref?: React.Ref<HTMLTableRowElement>
 }
 
 export const TableRow: React.FC<TableRowProps> = ({
@@ -14,6 +15,7 @@ export const TableRow: React.FC<TableRowProps> = ({
   className = '',
   index,
   mobile = false,
+  ref,
 }) => {
   if (mobile) {
     return (
@@ -31,6 +33,7 @@ export const TableRow: React.FC<TableRowProps> = ({
 
   return (
     <tr
+      ref={ref}
       onClick={onClick}
       className={`${className} ${onClick ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700' : ''} ${
         index !== undefined && index % 2 === 0

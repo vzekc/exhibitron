@@ -9,6 +9,20 @@ import { Exhibit } from '../exhibit/entity.js'
  * sheets, and counting its uses looks into them.
  */
 export class ExhibitAttributeRepository extends EntityRepository<ExhibitAttribute> {
+  /* The standard attributes in their order, then the rest by name. */
+  async listInOrder(): Promise<ExhibitAttribute[]> {
+    const attributes = await this.findAll()
+    const collator = new Intl.Collator('de')
+    return attributes.sort((a, b) => {
+      if (a.standardOrder != null && b.standardOrder != null) {
+        return a.standardOrder - b.standardOrder
+      }
+      if (a.standardOrder != null) return -1
+      if (b.standardOrder != null) return 1
+      return collator.compare(a.name, b.name)
+    })
+  }
+
   /* The raw queries run inside the request's transaction, so they see sheets
      rewritten and flushed a moment ago. */
   private async exhibitIdsUsing(name: string): Promise<number[]> {

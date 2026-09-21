@@ -11,6 +11,7 @@ const GET_EXHIBIT_ATTRIBUTES = graphql(`
     getExhibitAttributes {
       id
       name
+      standardOrder
     }
   }
 `)
@@ -187,6 +188,44 @@ const DraggableAttributeItem = ({
   )
 }
 
+/* A standard attribute stands on every sheet, so its row is neither moved nor removed. */
+const StandardAttributeItem = ({
+  attr,
+  onValueChange,
+}: {
+  attr: Attribute
+  onValueChange: (value: string) => void
+}) => (
+  <div className="mb-2 flex items-center space-x-4 rounded border border-gray-200 bg-white p-2 dark:border-gray-600 dark:bg-gray-800">
+    <div className="w-6 flex-shrink-0" />
+    <div className="min-w-[180px] flex-shrink-0 font-medium text-gray-900 dark:text-gray-100">
+      {attr.name}
+    </div>
+    <div className="flex-grow">
+      <input
+        type="text"
+        value={attr.value}
+        onChange={(e) => onValueChange(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.currentTarget.blur()
+          }
+        }}
+        placeholder="Wert"
+        className="w-full rounded border border-gray-300 bg-white p-2 text-gray-900 placeholder-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
+      />
+    </div>
+    <div className="w-9 flex-shrink-0" />
+  </div>
+)
+
+/*
+ * The sheet shows the standard attributes first, in their order, each with the
+ * exhibit's value or an empty one, and after them whatever else the exhibitor has
+ * added, which can be reordered and removed. `attributes` is the exhibit's list as
+ * saved; every change hands back the standard rows followed by the extras, and the
+ * editor drops the rows without a value when it saves.
+ */
 const ExhibitAttributeEditor = ({ attributes, onChange }: ExhibitAttributeEditorProps) => {
   const [showAddAttributeInput, setShowAddAttributeInput] = useState(false)
 
@@ -207,32 +246,45 @@ const ExhibitAttributeEditor = ({ attributes, onChange }: ExhibitAttributeEditor
     }
   }, [showAddAttributeInput])
 
-  const handleAddAttribute = () => {
-    setShowAddAttributeInput(true)
+  const availableAttributes = attributesData?.getExhibitAttributes || []
+  const standardNames = availableAttributes
+    .filter((attribute) => attribute.standardOrder != null)
+    .map((attribute) => attribute.name)
+
+  // Each standard name takes the first row of the sheet that carries it; the rest are extras.
+  const taken = new Set<number>()
+  const standardRows: Attribute[] = standardNames.map((name) => {
+    const index = attributes.findIndex((attr, i) => attr.name === name && !taken.has(i))
+    if (index >= 0) taken.add(index)
+    return { name, value: index >= 0 ? attributes[index].value : '' }
+  })
+  const extras = attributes.filter((_, i) => !taken.has(i))
+
+  const emit = (standard: Attribute[], rest: Attribute[]) => onChange([...standard, ...rest])
+
+  const handleStandardValueChange = (index: number, value: string) => {
+    const newStandard = [...standardRows]
+    newStandard[index] = { ...newStandard[index], value }
+    emit(newStandard, extras)
   }
 
   const handleAttributeValueChange = (index: number, value: string) => {
-    const newAttributes = [...attributes]
-    newAttributes[index] = { ...newAttributes[index], value }
-    onChange(newAttributes)
+    const newExtras = [...extras]
+    newExtras[index] = { ...newExtras[index], value }
+    emit(standardRows, newExtras)
   }
 
   const handleRemoveAttribute = (index: number) => {
-    const newAttributes = [...attributes]
-    newAttributes.splice(index, 1)
-    onChange(newAttributes)
+    const newExtras = [...extras]
+    newExtras.splice(index, 1)
+    emit(standardRows, newExtras)
   }
 
   const moveAttribute = (dragIndex: number, hoverIndex: number) => {
-    const newAttributes = [...attributes]
-    const draggedAttribute = newAttributes[dragIndex]
-
-    // Remove the dragged item
-    newAttributes.splice(dragIndex, 1)
-    // Insert it at the new position
-    newAttributes.splice(hoverIndex, 0, draggedAttribute)
-
-    onChange(newAttributes)
+    const newExtras = [...extras]
+    const [dragged] = newExtras.splice(dragIndex, 1)
+    newExtras.splice(hoverIndex, 0, dragged)
+    emit(standardRows, newExtras)
   }
 
   const handleCreateNewAttribute = async (name: string) => {
@@ -258,7 +310,7 @@ const ExhibitAttributeEditor = ({ attributes, onChange }: ExhibitAttributeEditor
   }
 
   const handleSelectAttribute = (name: string) => {
-    onChange([...attributes, { name, value: '' }])
+    emit(standardRows, [...extras, { name, value: '' }])
     setShowAddAttributeInput(false)
   }
 
@@ -270,16 +322,24 @@ const ExhibitAttributeEditor = ({ attributes, onChange }: ExhibitAttributeEditor
     }
   }
 
-  const availableAttributes = attributesData?.getExhibitAttributes || []
+  const onSheet = new Set([...standardNames, ...extras.map((attr) => attr.name)])
+  const selectable = availableAttributes.filter((attribute) => !onSheet.has(attribute.name))
 
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="rounded-lg bg-white p-2 dark:bg-gray-800">
-        {attributes.length === 0 ? (
+        {standardRows.length === 0 && extras.length === 0 ? (
           <p className="mb-4 italic text-gray-500 dark:text-gray-400">Keine Attribute vorhanden</p>
         ) : (
           <div className="mb-4">
-            {attributes.map((attr, index) => (
+            {standardRows.map((attr, index) => (
+              <StandardAttributeItem
+                key={attr.name}
+                attr={attr}
+                onValueChange={(value) => handleStandardValueChange(index, value)}
+              />
+            ))}
+            {extras.map((attr, index) => (
               <DraggableAttributeItem
                 key={index}
                 index={index}
@@ -295,7 +355,7 @@ const ExhibitAttributeEditor = ({ attributes, onChange }: ExhibitAttributeEditor
         {showAddAttributeInput ? (
           <div className="mb-4 rounded border border-gray-200 bg-white p-3 dark:border-gray-600 dark:bg-gray-800">
             <ExhibitAttributeSelector
-              options={availableAttributes}
+              options={selectable}
               onSelect={handleSelectAttribute}
               onCreateNew={handleCreateAttributeFromComboBox}
             />
@@ -312,7 +372,7 @@ const ExhibitAttributeEditor = ({ attributes, onChange }: ExhibitAttributeEditor
           <div className="mt-4 flex space-x-2">
             <button
               type="button"
-              onClick={handleAddAttribute}
+              onClick={() => setShowAddAttributeInput(true)}
               className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
               Attribut hinzufügen
             </button>

@@ -9,4 +9,12 @@ export class ExhibitAttribute extends BaseEntity {
   @Property()
   @Unique()
   name!: string
+
+  /*
+   * A standard attribute stands on every data sheet, in this position among the
+   * standard ones, whether or not the exhibit has a value for it. Null makes an
+   * attribute one that an exhibitor adds by hand.
+   */
+  @Property({ nullable: true })
+  standardOrder?: number | null
 }

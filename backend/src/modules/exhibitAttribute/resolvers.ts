@@ -6,13 +6,11 @@ import {
 } from '../../generated/graphql.js'
 import { ExhibitAttribute } from './entity.js'
 import { requireGlobalAdmin } from '../../db.js'
-import { QueryOrder } from '@mikro-orm/core'
 import { BadRequestError } from '../common/errors.js'
 
 export const exhibitAttributeQueries: QueryResolvers<Context> = {
   // @ts-expect-error ts2345
-  getExhibitAttributes: async (_, _args, { db }) =>
-    db.exhibitAttribute.findAll({ orderBy: { createdAt: QueryOrder.ASC } }),
+  getExhibitAttributes: async (_, _args, { db }) => db.exhibitAttribute.listInOrder(),
   // @ts-expect-error ts2345
   getExhibitAttribute: async (_, { id }, { db }) => db.exhibitAttribute.findOne({ id }),
 }
@@ -37,6 +35,20 @@ export const exhibitAttributeMutations: MutationResolvers<Context> = {
     const attribute = await db.exhibitAttribute.findOneOrFail({ id })
     if (attribute.name === trimmed) return attribute
     return db.exhibitAttribute.rename(attribute, trimmed)
+  },
+  // @ts-expect-error ts2345
+  setStandardExhibitAttributes: async (_, { ids }, { db, user }) => {
+    requireGlobalAdmin(user)
+    const attributes = await db.exhibitAttribute.find({ id: { $in: ids } })
+    if (attributes.length !== new Set(ids).size) {
+      throw new BadRequestError('Ein Attribut in der Liste gibt es nicht')
+    }
+    for (const attribute of await db.exhibitAttribute.findAll()) {
+      const position = ids.indexOf(attribute.id)
+      attribute.standardOrder = position === -1 ? null : position
+    }
+    await db.em.flush()
+    return db.exhibitAttribute.listInOrder()
   },
   deleteExhibitAttribute: async (_, { id }, { db, user }) => {
     requireGlobalAdmin(user)

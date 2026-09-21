@@ -521,3 +521,84 @@ describe('exhibit attribute', () => {
     )
   })
 })
+
+describe('standard exhibit attributes', () => {
+  const SET_STANDARD = graphql(`
+    mutation SetStandardExhibitAttributes($ids: [Int!]!) {
+      setStandardExhibitAttributes(ids: $ids) {
+        id
+        name
+        standardOrder
+      }
+    }
+  `)
+
+  const LIST = graphql(`
+    query GetExhibitAttributesInOrder {
+      getExhibitAttributes {
+        id
+        name
+        standardOrder
+      }
+    }
+  `)
+
+  graphqlTest('an admin picks the standard attributes and their order', async (graphqlRequest) => {
+    const admin = await login('admin@example.com')
+    const exhibitor = await login('daffy@example.com')
+    const stamp = Date.now()
+    const ram = await createExhibitAttribute(graphqlRequest, `RAM ${stamp}`, exhibitor)
+    const cpu = await createExhibitAttribute(graphqlRequest, `CPU ${stamp}`, exhibitor)
+    const extra = await createExhibitAttribute(graphqlRequest, `Anzeige ${stamp}`, exhibitor)
+
+    const set = await graphqlRequest(SET_STANDARD, { ids: [ram.id, cpu.id] }, admin)
+    expect(set.errors).toBeUndefined()
+    const names = set.data!.setStandardExhibitAttributes.map((a) => a.name)
+    expect(names.slice(0, 2)).toEqual([ram.name, cpu.name])
+    expect(names.indexOf(extra.name)).toBeGreaterThan(1)
+
+    const reordered = await graphqlRequest(SET_STANDARD, { ids: [cpu.id, ram.id] }, admin)
+    expect(reordered.errors).toBeUndefined()
+    const list = await graphqlRequest(LIST)
+    const byId = new Map(list.data!.getExhibitAttributes.map((a) => [a.id, a]))
+    expect(byId.get(cpu.id)!.standardOrder).toBe(0)
+    expect(byId.get(ram.id)!.standardOrder).toBe(1)
+    expect(byId.get(extra.id)!.standardOrder).toBeNull()
+    expect(list.data!.getExhibitAttributes.slice(0, 2).map((a) => a.name)).toEqual([
+      cpu.name,
+      ram.name,
+    ])
+
+    const cleared = await graphqlRequest(SET_STANDARD, { ids: [] }, admin)
+    expect(cleared.errors).toBeUndefined()
+    expect(cleared.data!.setStandardExhibitAttributes.every((a) => a.standardOrder === null)).toBe(
+      true,
+    )
+  })
+
+  graphqlTest('the rest of the list is ordered by name', async (graphqlRequest) => {
+    const exhibitor = await login('daffy@example.com')
+    const stamp = Date.now()
+    await createExhibitAttribute(graphqlRequest, `Zubehör ${stamp}`, exhibitor)
+    await createExhibitAttribute(graphqlRequest, `Ärger ${stamp}`, exhibitor)
+    await createExhibitAttribute(graphqlRequest, `Anzeige ${stamp}`, exhibitor)
+    const list = await graphqlRequest(LIST)
+    const names = list
+      .data!.getExhibitAttributes.filter((a) => a.standardOrder === null)
+      .map((a) => a.name)
+    const collator = new Intl.Collator('de')
+    expect(names).toEqual([...names].sort(collator.compare))
+  })
+
+  graphqlTest('only an admin sets the standard attributes', async (graphqlRequest) => {
+    const exhibitor = await login('daffy@example.com')
+    const result = await graphqlRequest(SET_STANDARD, { ids: [] }, exhibitor)
+    expect(result.errors![0].message).toBe('You must be an administrator to perform this operation')
+  })
+
+  graphqlTest('an unknown id is refused', async (graphqlRequest) => {
+    const admin = await login('admin@example.com')
+    const result = await graphqlRequest(SET_STANDARD, { ids: [999999] }, admin)
+    expect(result.errors![0].message).toBe('Ein Attribut in der Liste gibt es nicht')
+  })
+})
