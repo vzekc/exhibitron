@@ -4,7 +4,7 @@ import { graphql, ResultOf } from 'gql.tada'
 import { ApolloClient } from '@apollo/client'
 import QRCode from 'qrcode'
 import { getDisplayName } from '@utils/displayName'
-import { getImageDataViaCanvas } from '@utils/imageData.ts'
+import { fetchImageDataUrl, getImageDataViaCanvas } from '@utils/imageData.ts'
 
 // Register fonts (assuming you have Lato fonts in your public directory)
 Font.register({
@@ -269,16 +269,13 @@ interface GeneratePDFParams {
   /** The exhibit ID */
   id: number
   client: ApolloClient<object>
-  /** Optional URL to include as a QR code in the PDF */
-  url?: string
 }
 
 /**
- * Generate and download a PDF for an exhibit
- * @param params Configuration parameters
- * @returns A promise that resolves when the PDF is generated and downloaded
+ * Renders the PDF of an exhibit and returns a blob URL to show it under. The caller opens
+ * the tab, because a tab has to be opened while the click that asked for it is fresh.
  */
-export const generateAndDownloadPDF = async (params: GeneratePDFParams): Promise<void> => {
+export const generateExhibitPdf = async (params: GeneratePDFParams): Promise<string> => {
   const { id, client } = params
 
   const result = await client.query({
@@ -294,7 +291,7 @@ export const generateAndDownloadPDF = async (params: GeneratePDFParams): Promise
 
   // Load images
   const mainImageBase64 = exhibit.mainImage
-    ? await getImageDataViaCanvas(
+    ? await fetchImageDataUrl(
         pictureUrl(`${window.location.origin}/api/exhibit/${id}/image/main`, exhibit.mainImage),
       )
     : ''
@@ -313,10 +310,6 @@ export const generateAndDownloadPDF = async (params: GeneratePDFParams): Promise
     />
   )
 
-  // Generate the PDF blob
   const blob = await pdf(pdfDocument).toBlob()
-
-  // Create URL for the blob
-  const blobUrl = URL.createObjectURL(blob)
-  window.open(blobUrl, '_blank')
+  return URL.createObjectURL(blob)
 }

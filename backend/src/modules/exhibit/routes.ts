@@ -3,10 +3,12 @@ import { initORM, isAdmin } from '../../db.js'
 import { Exhibit, ExhibitImage } from './entity.js'
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { randomUUID } from 'crypto'
-import { generateThumbnail, sendMutableImage } from '../image/utils.js'
+import { generateThumbnail, sendMutableImage, sendMutableImageVariant } from '../image/utils.js'
+import { ImageService } from '../image/service.js'
 
 export async function registerExhibitImageRoutes(app: FastifyInstance) {
   const db = await initORM()
+  const imageService = new ImageService(db.em)
 
   /**
    * Check if the user is authorized to modify the exhibit
@@ -38,19 +40,19 @@ export async function registerExhibitImageRoutes(app: FastifyInstance) {
     return exhibit
   }
 
-  // Get exhibit main image
+  // Get exhibit main image, in the size the exhibit page and the exhibit PDF show it
   app.get<{ Params: { id: string } }>('/api/exhibit/:id/image/main', async (request, reply) => {
     const { id } = request.params
     const exhibit = await db.exhibit.findOneOrFail(
       { id: parseInt(id, 10) },
-      { populate: ['mainImage', 'mainImage.image.data', 'mainImage.thumbnail.data'] },
+      { populate: ['mainImage.image'] },
     )
 
     if (!exhibit.mainImage) {
       return reply.code(404).send({ error: 'No main image found for this exhibit' })
     }
 
-    return sendMutableImage(request, reply, exhibit.mainImage.image)
+    return sendMutableImageVariant(request, reply, imageService, exhibit.mainImage.image, 'display')
   })
 
   // Get exhibit thumbnail

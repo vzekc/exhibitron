@@ -34,3 +34,24 @@ export const loadImageData = (imageUrl: string): Promise<LoadedImage> =>
 
 export const getImageDataViaCanvas = async (imageUrl: string): Promise<string> =>
   (await loadImageData(imageUrl)).dataUrl
+
+/*
+ * A JPEG or PNG goes into a PDF as it is, so a photo keeps its compression and the PDF
+ * stays small. react-pdf reads only those two formats; any other is rasterised.
+ */
+export const fetchImageDataUrl = async (imageUrl: string): Promise<string> => {
+  const response = await fetch(imageUrl)
+  if (!response.ok) {
+    throw new Error(`Failed to load image ${imageUrl}`)
+  }
+  const blob = await response.blob()
+  if (blob.type !== 'image/jpeg' && blob.type !== 'image/png') {
+    return getImageDataViaCanvas(imageUrl)
+  }
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = () => reject(new Error(`Failed to read image ${imageUrl}`))
+    reader.readAsDataURL(blob)
+  })
+}

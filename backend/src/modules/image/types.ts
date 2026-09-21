@@ -5,14 +5,27 @@ export type ImageVariant = {
   format?: 'gif'
 }
 
+/*
+ * A picture is stored as it was uploaded and served in the size its use calls for. The
+ * `display` variant is the exhibit picture as the exhibit page and the exhibit PDF show it:
+ * a photo from a phone is 4000 pixels wide and a few megabytes, while the page draws it at
+ * most 1600 pixels wide and the PDF at a third of a page. The `profile` variant is the
+ * portrait as the chips and the profile page draw it. Both keep the format of the upload,
+ * so a screenshot stays lossless.
+ */
 export const IMAGE_VARIANTS: Record<string, ImageVariant> = {
   thumbnail: {
     maxWidth: 150,
     maxHeight: 150,
   },
   profile: {
-    maxWidth: 300,
-    maxHeight: 300,
+    maxWidth: 400,
+    maxHeight: 400,
+  },
+  display: {
+    maxWidth: 1600,
+    maxHeight: 1600,
+    quality: 85,
   },
   htmlThumbnail: {
     maxWidth: 75,

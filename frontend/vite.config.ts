@@ -81,10 +81,17 @@ export default defineConfig({
         navigateFallbackDenylist: [/^\/graphql/, /^\/api\//, /^\/auth\//, /^\/foto\//, /\.html$/],
         runtimeCaching: [
           {
+            /*
+             * A picture URL carries the id of its upload, so the cache holds a
+             * picture until it is replaced. When the size or the format the server
+             * sends under those URLs changes, give the cache a new name and add the
+             * old one to RETIRED_CACHES in public/sw-reload.js: the new worker then
+             * starts with an empty cache and drops the old one.
+             */
             urlPattern: /\/api\/.*\/image\//,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'api-images',
+              cacheName: 'api-pictures',
               expiration: {
                 maxEntries: 200,
                 maxAgeSeconds: 7 * 24 * 60 * 60,

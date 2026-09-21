@@ -12,8 +12,9 @@ export class ImageService {
     const sharpInstance = sharp(image.data)
     const metadata = await sharpInstance.metadata()
 
-    // Basic resize operation
-    let processedImage = sharpInstance.resize(variant.maxWidth, variant.maxHeight, {
+    // The EXIF orientation of a phone photo is baked into the pixels, because the
+    // metadata does not survive the resize.
+    let processedImage = sharpInstance.rotate().resize(variant.maxWidth, variant.maxHeight, {
       withoutEnlargement: true,
       fit: 'inside',
     })

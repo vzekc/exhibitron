@@ -1,5 +1,8 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import sharp from 'sharp'
+import { ImageStorage } from './entity.js'
+import { ImageService } from './service.js'
+import { ImageVariantName } from './types.js'
 
 export const THUMBNAIL_SIZE = 200
 
@@ -127,4 +130,25 @@ export const sendMutableImage = (
     reply.header('Content-Disposition', `inline; filename="${image.filename}"`)
   }
   return reply.send(image.data)
+}
+
+/**
+ * Sends a picture in one of its sizes, made on first use and kept with the picture. The
+ * picture's own dates govern the revalidation, so the size is as fresh as the upload.
+ */
+export const sendMutableImageVariant = async (
+  request: FastifyRequest,
+  reply: FastifyReply,
+  imageService: ImageService,
+  image: ImageStorage,
+  variantName: ImageVariantName,
+) => {
+  const variant = await imageService.ensureVariant(image, variantName)
+  return sendMutableImage(request, reply, {
+    data: variant.data,
+    mimeType: variant.mimeType,
+    filename: image.filename,
+    createdAt: image.createdAt,
+    updatedAt: image.updatedAt,
+  })
 }

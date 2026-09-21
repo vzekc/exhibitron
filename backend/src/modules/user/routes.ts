@@ -4,10 +4,12 @@ import { AuthError, errorSchema } from '../common/errors.js'
 import { User, ProfileImage } from './entity.js'
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { randomUUID } from 'crypto'
-import { generateThumbnail, sendMutableImage } from '../image/utils.js'
+import { generateThumbnail, sendMutableImage, sendMutableImageVariant } from '../image/utils.js'
+import { ImageService } from '../image/service.js'
 
 export async function registerUserRoutes(app: FastifyInstance) {
   const db = await initORM()
+  const imageService = new ImageService(db.em)
 
   /**
    * Check if the user is authorized to modify the profile
@@ -83,14 +85,14 @@ export async function registerUserRoutes(app: FastifyInstance) {
     const { id } = request.params
     const user = await db.user.findOneOrFail(
       { id: parseInt(id, 10) },
-      { populate: ['profileImage', 'profileImage.image.data', 'profileImage.thumbnail.data'] },
+      { populate: ['profileImage.image'] },
     )
 
     if (!user.profileImage) {
       return reply.code(404).send({ error: 'No profile image found for this user' })
     }
 
-    return sendMutableImage(request, reply, user.profileImage.image)
+    return sendMutableImageVariant(request, reply, imageService, user.profileImage.image, 'profile')
   })
 
   // Get user profile thumbnail

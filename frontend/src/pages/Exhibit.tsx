@@ -11,7 +11,7 @@ import Confirm from '@components/Confirm'
 import Button from '@components/Button'
 import ActionBar from '@components/ActionBar'
 import LoadInProgress from '@components/LoadInProgress'
-import { generateAndDownloadPDF } from '@components/ExhibitPDF.tsx'
+import { generateExhibitPdf } from '@components/ExhibitPDF.tsx'
 import { showMessage } from '@components/MessageModalUtil.tsx'
 
 const GET_DATA = graphql(`
@@ -115,17 +115,30 @@ const Exhibit = () => {
   const handlePdfClick = async () => {
     if (isPdfGenerating) return
 
+    // The tab is opened while the click is fresh. A tab opened once the PDF is ready is a
+    // popup to the browser, which blocks it without a word after a few seconds.
+    const target = window.open('', '_blank')
+    if (target) {
+      target.document.title = 'PDF wird erstellt …'
+      target.document.body.textContent = 'PDF wird erstellt …'
+      target.document.body.style.font = '16px sans-serif'
+      target.document.body.style.padding = '2em'
+    }
+    setIsPdfGenerating(true)
     try {
-      setIsPdfGenerating(true)
-
-      const exhibitId = parseInt(id!)
-
-      await generateAndDownloadPDF({
-        id: exhibitId,
-        client: apolloClient,
-      })
+      const url = await generateExhibitPdf({ id: parseInt(id!), client: apolloClient })
+      if (target) {
+        target.location.replace(url)
+      } else {
+        window.open(url, '_blank')
+      }
     } catch (error) {
-      console.error('Error generating PDF:', error)
+      target?.close()
+      await showMessage(
+        'Fehler',
+        `Das PDF konnte nicht erstellt werden: ${error instanceof Error ? error.message : String(error)}`,
+        'OK',
+      )
     } finally {
       setIsPdfGenerating(false)
     }

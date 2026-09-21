@@ -1,6 +1,7 @@
 import { expect, describe } from 'vitest'
 import { graphql } from 'gql.tada'
 import { ExecuteOperationFunction, graphqlTest, login, Session } from '../../test/server.js'
+import sharp from 'sharp'
 
 const createExhibit = async (
   graphqlRequest: ExecuteOperationFunction,
@@ -359,4 +360,43 @@ describe('exhibit', () => {
       expect(getResult.data!.getExhibit!.descriptionExtension).toBe(descriptionExtension)
     },
   )
+})
+
+graphqlTest('the exhibit picture is served in display size', async (graphqlRequest, app) => {
+  const session = await login('daffy@example.com')
+  const id = await createExhibit(graphqlRequest, { title: 'Großes Bild' }, session)
+  const photo = await sharp({
+    create: { width: 4000, height: 3000, channels: 3, background: '#ffcc00' },
+  })
+    .jpeg()
+    .toBuffer()
+  const boundary = 'grenze'
+  const payload = Buffer.concat([
+    Buffer.from(
+      `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="foto.jpg"\r\nContent-Type: image/jpeg\r\n\r\n`,
+    ),
+    photo,
+    Buffer.from(`\r\n--${boundary}--\r\n`),
+  ])
+  const upload = await app.inject({
+    method: 'PUT',
+    url: `/api/exhibit/${id}/image/main`,
+    headers: {
+      cookie: session.cookie,
+      'content-type': `multipart/form-data; boundary=${boundary}`,
+    },
+    payload,
+  })
+  expect(upload.statusCode).toBe(200)
+
+  const response = await app.inject({ method: 'GET', url: `/api/exhibit/${id}/image/main` })
+  expect(response.statusCode).toBe(200)
+  expect(response.headers['content-type']).toBe('image/jpeg')
+  const { width, height } = await sharp(response.rawPayload).metadata()
+  expect(width).toBe(1600)
+  expect(height).toBe(1200)
+
+  // The size is kept, so the second request is served without resizing again.
+  const again = await app.inject({ method: 'GET', url: `/api/exhibit/${id}/image/main` })
+  expect(again.rawPayload.equals(response.rawPayload)).toBe(true)
 })

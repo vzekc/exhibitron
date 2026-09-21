@@ -8,6 +8,11 @@ import { ApolloProvider } from '@apollo/client'
 import client from './apolloClient.ts'
 import { ExhibitionProvider } from './contexts/ExhibitionProvider.tsx'
 import { watchForUpdates } from './serviceWorkerUpdates.ts'
+import { Buffer } from 'buffer'
+
+// @react-pdf/layout reads the global Buffer to tell a fetched picture from a URL.
+const globalScope = globalThis as { Buffer?: typeof Buffer }
+if (!globalScope.Buffer) globalScope.Buffer = Buffer
 
 watchForUpdates()
 

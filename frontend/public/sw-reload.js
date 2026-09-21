@@ -17,6 +17,15 @@
 const UPDATE_MARKER_CACHE = 'sw-update-marker'
 const UPDATE_MARKER_URL = '/__replaces-earlier-version'
 
+/*
+ * Runtime caches that earlier versions of the worker filled under a name the
+ * configuration in vite.config.ts no longer uses. Workbox only cleans up the
+ * precache, so they are dropped here, on activation, in every browser the new
+ * worker reaches. 'api-images' held exhibit and profile pictures as uploaded,
+ * before the server sent them in display size.
+ */
+const RETIRED_CACHES = ['api-images']
+
 const reloadOpenWindows = async () => {
   const windows = await self.clients.matchAll({ type: 'window' })
   for (const openWindow of windows) {
@@ -50,6 +59,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     (async () => {
+      await Promise.all(RETIRED_CACHES.map((name) => caches.delete(name)))
       const cache = await caches.open(UPDATE_MARKER_CACHE)
       const replacesEarlierVersion = Boolean(await cache.match(UPDATE_MARKER_URL))
       await cache.delete(UPDATE_MARKER_URL)

@@ -23,6 +23,7 @@
     "@types/qrcode": "^1.5.5",
     "@xterm/xterm": "^6.0.0",
     "axios": "^1.7.9",
+    "buffer": "^6.0.3",
     "dompurify": "^3.2.4",
     "fast-deep-equal": "^3.1.3",
     "gql.tada": "^1.8.10",
