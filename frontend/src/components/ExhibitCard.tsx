@@ -82,7 +82,9 @@ const ExhibitCard = ({ id }: { id: number }) => {
             {hasMainImage && (
               <div
                 className={`flex items-center justify-center ${
-                  hasAttributes ? 'min-w-[300px] basis-1/3' : 'w-full'
+                  hasAttributes
+                    ? 'min-w-[300px] basis-1/3'
+                    : 'mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8'
                 }`}>
                 <img
                   src={pictureUrl(`/api/exhibit/${exhibit.id}/image/main`, exhibit.mainImage)}
