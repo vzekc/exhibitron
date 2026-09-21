@@ -66,18 +66,13 @@ const createLoggerConfig = (name: string, customLogFile?: string) => {
   }
 }
 
-// Create different loggers for different purposes
-export const createAppLogger = () => pino(createLoggerConfig('app'))
-export const createMutationLogger = () => pino(createLoggerConfig('mutation', 'mutations.json'))
+/*
+ * A pino logger with transports owns a worker thread and a shared buffer for each
+ * target, which live until the logger is garbage collected. The process holds one
+ * logger per destination for its lifetime, and a request logs through a child of the
+ * app logger, which shares its transports and adds the request id to every line.
+ */
+export const logger = pino(createLoggerConfig('app'))
+export const mutationLogger = pino(createLoggerConfig('mutation', 'mutations.json'))
 
-// Create a request-scoped logger that includes request ID
-export const createRequestLogger = (requestId: string) => {
-  const baseLogger = createAppLogger()
-  return baseLogger.child({ requestId })
-}
-
-// Default logger for general use
-export const logger = createAppLogger()
-
-// Export individual loggers for specific use cases
-export const mutationLogger = createMutationLogger()
+export const createRequestLogger = (requestId: string) => logger.child({ requestId })
