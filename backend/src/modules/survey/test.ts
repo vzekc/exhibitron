@@ -1012,6 +1012,72 @@ describe('survey', () => {
     ])
   })
 
+  graphqlTest('an admin finds who still owes answers to open questions', async (request) => {
+    const ids = await seedQuestions()
+    const admin = await login('admin@example.com')
+    const daffy = await login('daffy@example.com')
+    const donald = await login('donald@example.com')
+
+    /* Earlier tests left more questions; only Ethernet and the headcount stay open. */
+    const db = await initORM()
+    const exhibition = await db.em.findOneOrFail(Exhibition, { key: 'cc2025' })
+    const others = await db.em.find(SurveyQuestion, {
+      exhibition,
+      key: { $nin: ['ethernet', 'personen'] },
+    })
+    const deadlines = new Map(others.map((question) => [question.id, question.closesAt]))
+    others.forEach((question) => (question.closesAt = new Date(Date.now() - 60_000)))
+    await db.em.flush()
+
+    const OWING = graphql(`
+      query GetSurveyNonRespondents($requiredOnly: Boolean!) {
+        getSurveyNonRespondents(requiredOnly: $requiredOnly) {
+          user {
+            nickname
+          }
+        }
+      }
+    `)
+    const owing = async (requiredOnly: boolean) => {
+      const result = await request(OWING, { requiredOnly }, admin)
+      expect(result.errors).toBeUndefined()
+      return result.data!.getSurveyNonRespondents.map((each) => each.user.nickname)
+    }
+
+    const refused = await request(OWING, { requiredOnly: true }, daffy)
+    expect(refused.errors?.[0]?.message).toBeDefined()
+
+    const required = await request(
+      SAVE,
+      { answers: [{ questionId: ids.ethernet, value: false }] },
+      donald,
+    )
+    expect(required.errors).toBeUndefined()
+    expect(await owing(true)).not.toContain('donald')
+    expect(await owing(false)).toContain('donald')
+
+    /* A question past its deadline is owed by nobody. */
+    await setClosesAt('personen', new Date(Date.now() - 60_000))
+    expect(await owing(false)).not.toContain('donald')
+    await setClosesAt('personen', undefined)
+
+    const all = await request(
+      SAVE,
+      {
+        answers: [
+          { questionId: ids.ethernet, value: false },
+          { questionId: ids.personen, value: 1 },
+        ],
+      },
+      donald,
+    )
+    expect(all.errors).toBeUndefined()
+    expect(await owing(false)).not.toContain('donald')
+
+    others.forEach((question) => (question.closesAt = deadlines.get(question.id)))
+    await db.em.flush()
+  })
+
   graphqlTest('a frozen exhibition takes no more answers', async (request) => {
     const ids = await seedQuestions()
     const db = await initORM()

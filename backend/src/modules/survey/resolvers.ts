@@ -9,6 +9,7 @@ import {
   SurveyOptionInput,
   SurveyQuestionInput,
   SurveyQuestionResolvers,
+  SurveyAudience,
   SurveyQuestionType,
 } from '../../generated/graphql.js'
 import { isAdmin, requireAdmin, requireNotFrozen } from '../../db.js'
@@ -19,6 +20,7 @@ import { SurveyAnswer, SurveyOptionRow, SurveyQuestion, SurveySubscription } fro
 import { audiencesOf, membersOf } from './audience.js'
 import {
   AnswerMap,
+  Audiences,
   applicable,
   appliesTo,
   canBeParent,
@@ -30,6 +32,7 @@ import {
   parentValuesOf,
   sameAnswer,
   slugOf,
+  unanswered,
   unansweredRequired,
 } from './answers.js'
 
@@ -262,6 +265,41 @@ export const surveyQueries: QueryResolvers<Context> = {
   getSurveyAudienceMembers: async (_, { audience }, { db, user, exhibition }) => {
     requireAdmin(user, exhibition)
     return membersOf(db, exhibition, audience)
+  },
+
+  // @ts-expect-error ts2345
+  getSurveyNonRespondents: async (_, { requiredOnly }, context) => {
+    const { db, user, exhibition } = context
+    requireAdmin(user, exhibition)
+    if (exhibition.frozen) return []
+
+    const now = new Date()
+    const questions = (await questionsOf(context, exhibition)).filter(
+      (question) => !isClosed(question, now) && (!requiredOnly || question.required),
+    )
+    if (!questions.length) return []
+
+    const exhibitors = await db.exhibitor.find({ exhibition })
+    const members: { audience: SurveyAudience; ids: Set<number> }[] = []
+    for (const audience of Object.values(SurveyAudience)) {
+      const ids = new Set((await membersOf(db, exhibition, audience)).map((each) => each.id))
+      members.push({ audience, ids })
+    }
+    const answers = await db.em.find(SurveyAnswer, { exhibitor: { exhibition } })
+    const byExhibitor = new Map<number, AnswerMap>()
+    for (const answer of answers) {
+      const map = byExhibitor.get(answer.exhibitor.id) ?? new Map()
+      map.set(answer.question.id, answer.value)
+      byExhibitor.set(answer.exhibitor.id, map)
+    }
+
+    return exhibitors.filter((exhibitor) => {
+      const audiences: Audiences = new Set(
+        members.filter(({ ids }) => ids.has(exhibitor.id)).map(({ audience }) => audience),
+      )
+      const given = byExhibitor.get(exhibitor.id) ?? new Map()
+      return unanswered(applicable(questions, audiences), given).length > 0
+    })
   },
 
   // @ts-expect-error ts2345

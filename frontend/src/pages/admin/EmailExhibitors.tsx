@@ -44,13 +44,26 @@ const GET_AUDIENCE_MEMBERS = graphql(`
   }
 `)
 
+/* The exhibitors who still owe answers to open questions of the survey. */
+const GET_NON_RESPONDENTS = graphql(`
+  query GetSurveyNonRespondents($requiredOnly: Boolean!) {
+    getSurveyNonRespondents(requiredOnly: $requiredOnly) {
+      id
+    }
+  }
+`)
+
 const EmailExhibitors = () => {
   const [emailExhibitors] = useMutation(EMAIL_EXHIBITORS)
   const [subject, setSubject] = useState('')
-  /* Who gets the mail: everybody, one audience of the survey, or chosen exhibitors. */
-  type Recipients = 'all' | 'audience' | 'exhibitor'
+  /*
+   * Who gets the mail: everybody, one audience of the survey, those who still
+   * owe the survey answers, or chosen exhibitors.
+   */
+  type Recipients = 'all' | 'audience' | 'survey' | 'exhibitor'
   const [recipients, setRecipients] = useState<Recipients>('all')
   const [audience, setAudience] = useState<Audience>('fotofix')
+  const [requiredOnly, setRequiredOnly] = useState(true)
   const [selectedExhibitorIds, setSelectedExhibitorIds] = useState<string[]>([])
   const [edited, setEdited] = useState(false)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
@@ -59,15 +72,26 @@ const EmailExhibitors = () => {
   const editorRef = useRef<TextEditorHandle>(null)
   const { data } = useQuery(GET_EXHIBITORS)
   const [fetchAudience] = useLazyQuery(GET_AUDIENCE_MEMBERS)
+  const [fetchNonRespondents] = useLazyQuery(GET_NON_RESPONDENTS, { fetchPolicy: 'network-only' })
 
-  /* The ids the backend gets; an empty list means every exhibitor. */
-  const recipientIds = async () => {
+  /*
+   * The ids the backend gets; an empty list means every exhibitor. A string is
+   * the message for a lookup that failed.
+   */
+  const recipientIds = async (): Promise<number[] | string> => {
     switch (recipients) {
       case 'all':
         return []
       case 'audience': {
         const result = await fetchAudience({ variables: { audience } })
         return (result.data?.getSurveyAudienceMembers ?? []).map((each) => each.id)
+      }
+      case 'survey': {
+        const result = await fetchNonRespondents({ variables: { requiredOnly } })
+        if (result.error) {
+          return result.error.message || 'Die Empfänger konnten nicht ermittelt werden.'
+        }
+        return (result.data?.getSurveyNonRespondents ?? []).map((each) => each.id)
       }
       case 'exhibitor':
         return selectedExhibitorIds.map(Number)
@@ -85,12 +109,28 @@ const EmailExhibitors = () => {
     const currentHtml = editorRef.current?.getHTML() || ''
 
     const exhibitorIds = await recipientIds()
+    if (typeof exhibitorIds === 'string') {
+      setIsSending(false)
+      setShowConfirmModal(false)
+      await showMessage('Fehler', exhibitorIds, 'OK')
+      return
+    }
     if (recipients === 'audience' && !exhibitorIds.length) {
       setIsSending(false)
       setShowConfirmModal(false)
       await showMessage(
         'Niemand zu erreichen',
         'Diese Zielgruppe hat zurzeit keine Mitglieder.',
+        'OK',
+      )
+      return
+    }
+    if (recipients === 'survey' && !exhibitorIds.length) {
+      setIsSending(false)
+      setShowConfirmModal(false)
+      await showMessage(
+        'Niemand zu erreichen',
+        'Alle Aussteller haben die offenen Fragen beantwortet.',
         'OK',
       )
       return
@@ -139,6 +179,7 @@ const EmailExhibitors = () => {
             [
               ['all', 'Alle Aussteller'],
               ['audience', 'Eine Zielgruppe'],
+              ['survey', 'Wer die Umfrage noch nicht ausgefüllt hat'],
               ['exhibitor', 'Ein Aussteller'],
             ] as [Recipients, string][]
           ).map(([mode, label]) => (
@@ -162,6 +203,16 @@ const EmailExhibitors = () => {
                   {audienceLabel[each]}
                 </option>
               ))}
+            </FormSelect>
+          </div>
+        )}
+        {recipients === 'survey' && (
+          <div className="ml-6 mt-2">
+            <FormSelect
+              value={requiredOnly ? 'required' : 'any'}
+              onChange={(e) => setRequiredOnly(e.target.value === 'required')}>
+              <option value="required">Offene Pflichtfragen</option>
+              <option value="any">Irgendeine offene Frage</option>
             </FormSelect>
           </div>
         )}

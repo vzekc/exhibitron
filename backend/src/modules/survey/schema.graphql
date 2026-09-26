@@ -184,6 +184,11 @@ extend type Query {
   The exhibitors a question with this audience is put to. For admins.
   """
   getSurveyAudienceMembers(audience: SurveyAudience!): [Exhibitor!]!
+  """
+  The exhibitors who have not answered every question put to them that is
+  still open, or only the required ones with `requiredOnly`. For admins.
+  """
+  getSurveyNonRespondents(requiredOnly: Boolean!): [Exhibitor!]!
   getMySurveySubscriptions: [SurveySubscription!]!
 }
 

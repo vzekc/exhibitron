@@ -140,11 +140,15 @@ export const inAnswerOrder = (questions: SurveyQuestion[]) => {
     .flatMap((question) => [question, ...children(question)])
 }
 
+/* The questions an exhibitor is shown and has not answered, given what they answered. */
+export const unanswered = (questions: SurveyQuestion[], answers: AnswerMap) =>
+  inAnswerOrder(questions).filter(
+    (question) => isVisible(question, answers) && !answers.has(question.id),
+  )
+
 /* The required questions an exhibitor still owes, given what they answered. */
 export const unansweredRequired = (questions: SurveyQuestion[], answers: AnswerMap) =>
-  inAnswerOrder(questions).filter(
-    (question) => question.required && isVisible(question, answers) && !answers.has(question.id),
-  )
+  unanswered(questions, answers).filter((question) => question.required)
 
 export const sameAnswer = (a: SurveyAnswerValue | undefined, b: SurveyAnswerValue | undefined) =>
   JSON.stringify(a) === JSON.stringify(b)
