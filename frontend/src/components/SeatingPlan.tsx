@@ -1,16 +1,26 @@
-import React, { useState, useRef, useCallback, useEffect, memo } from 'react'
+import React, { useState, useRef, useCallback, useEffect, useMemo, memo } from 'react'
 import './SeatingPlan.css'
 import { graphql } from 'gql.tada'
 import { useQuery } from '@apollo/client'
 import ReactSVG from './ReactSVG'
 import { useExhibitor } from '@contexts/ExhibitorContext'
 import { useExhibition } from '@contexts/ExhibitionContext'
-import { FragmentOf } from 'gql.tada'
+import { FragmentOf, ResultOf } from 'gql.tada'
 import TableInfoPanel from './seatingPlan/TableInfo'
 import ExhibitorChip from './ExhibitorChip'
 import ExhibitChip from './ExhibitChip'
 import LoadInProgress from './LoadInProgress'
 import { getDisplayName } from '@utils/displayName'
+import { useSearchParams } from 'react-router-dom'
+import MarkerBadge from './seatingPlan/MarkerBadge'
+import {
+  DEFAULT_MARKERS,
+  FOTOFIX_MARKER,
+  Marker,
+  drawMarkers,
+  markerLayer,
+  markerSizes,
+} from './seatingPlan/markers'
 
 const GET_TABLES = graphql(
   `
@@ -33,6 +43,28 @@ const GET_TABLES = graphql(
   `,
   [ExhibitorChip.fragment, ExhibitChip.fragment],
 )
+
+const GET_MARKER_ANSWERS = graphql(`
+  query GetMarkerAnswers {
+    getSurveyQuestions {
+      id
+      key
+      type
+      mapMarker {
+        letter
+        label
+        color
+      }
+      answers {
+        id
+        value
+        exhibitor {
+          id
+        }
+      }
+    }
+  }
+`)
 
 const GET_EXHIBITORS = graphql(`
   query GetExhibitors {
@@ -115,6 +147,15 @@ const MemoizedSVG = memo(
 export const SeatingPlan: React.FC = () => {
   const { data: tablesData } = useQuery(GET_TABLES)
   const { data: exhibitorsData } = useQuery(GET_EXHIBITORS)
+  const { data: markerAnswersData } = useQuery(GET_MARKER_ANSWERS)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const markersParam = searchParams.get('markers')
+  const enabledMarkers = useMemo(
+    () =>
+      new Set(markersParam === null ? DEFAULT_MARKERS : markersParam.split(',').filter(Boolean)),
+    [markersParam],
+  )
+  const [highlightedMarker, setHighlightedMarker] = useState<string | null>(null)
   const [selectedTable, setSelectedTable] = useState<number | null>(null)
   const [tables, setTables] = useState<Map<number, TableInfo>>(new Map())
   const [svgLoadError, setSvgLoadError] = useState<string | null>(null)
@@ -130,13 +171,22 @@ export const SeatingPlan: React.FC = () => {
     target: Element | null
   } | null>(null)
   const { exhibitor, currentUser } = useExhibitor()
+  const markers = useMemo(
+    () =>
+      markedTables(
+        tablesData?.getCurrentExhibition?.tables ?? [],
+        currentUser ? markerAnswersData : undefined,
+      ),
+    [tablesData, markerAnswersData, currentUser],
+  )
   const { exhibition } = useExhibition()
   const isAdmin = currentUser?.isAdministrator || false
   const exhibitionKey = exhibition?.key ?? 'cc2025'
   const svgRef = useRef<SVGSVGElement | null>(null)
   const stylingAppliedRef = useRef<boolean>(false)
   const tablesRef = useRef<Map<number, TableInfo>>(new Map())
-  const photoTablesRef = useRef<Set<number>>(new Set())
+  const markersRef = useRef<MarkedTables[]>([])
+  const enabledMarkersRef = useRef(enabledMarkers)
   const containerRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
 
@@ -376,58 +426,6 @@ export const SeatingPlan: React.FC = () => {
     element.appendChild(tooltip)
   }
 
-  /*
-   * A red F badge in the corner of a table whose holder has said a machine on it
-   * can show a visitor's photo. Drawn into the table's own parent so it shares
-   * the coordinate system of the table it belongs to, with a white ring so it
-   * carries against whatever colour the table has, and cleared first so that
-   * turning the flag off removes it.
-   */
-  const markPhotoTable = (tableElement: Element, shows: boolean) => {
-    const parent = tableElement.parentNode as SVGElement | null
-    if (!parent) return
-
-    const existing = parent.querySelector(`[data-photo-badge="${tableElement.id}"]`)
-    if (existing) parent.removeChild(existing)
-    if (!shows) return
-
-    const box = (tableElement as SVGGraphicsElement).getBBox()
-    if (!box.width || !box.height) return
-
-    const short = Math.min(box.width, box.height)
-    const radius = short * 0.26
-    const pad = short * 0.07
-    const cx = box.x + box.width - radius - pad
-    const cy = box.y + radius + pad
-
-    const svgNS = 'http://www.w3.org/2000/svg'
-    const badge = document.createElementNS(svgNS, 'g')
-    badge.setAttribute('data-photo-badge', tableElement.id)
-    badge.setAttribute('pointer-events', 'none')
-
-    const disc = document.createElementNS(svgNS, 'circle')
-    disc.setAttribute('cx', String(cx))
-    disc.setAttribute('cy', String(cy))
-    disc.setAttribute('r', String(radius))
-    disc.setAttribute('fill', '#c62828')
-    disc.setAttribute('stroke', '#ffffff')
-    disc.setAttribute('stroke-width', String(radius * 0.14))
-
-    const letter = document.createElementNS(svgNS, 'text')
-    letter.setAttribute('x', String(cx))
-    letter.setAttribute('y', String(cy + radius * 0.42))
-    letter.setAttribute('text-anchor', 'middle')
-    letter.setAttribute('font-size', String(radius * 1.25))
-    letter.setAttribute('font-family', 'Liberation Sans, sans-serif')
-    letter.setAttribute('font-weight', 'bold')
-    letter.setAttribute('fill', '#ffffff')
-    letter.textContent = 'F'
-
-    badge.appendChild(disc)
-    badge.appendChild(letter)
-    parent.appendChild(badge)
-  }
-
   const applyTableStyling = useCallback(() => {
     const renderedSvg = document.querySelector('.seating-plan-svg')
     if (!renderedSvg) {
@@ -436,6 +434,9 @@ export const SeatingPlan: React.FC = () => {
 
     // Find all elements with an id matching table_\d
     const tableElements = renderedSvg.querySelectorAll('[id^="table_"]')
+    const svg = (tableElements[0] as SVGGraphicsElement | undefined)?.ownerSVGElement
+    const layer = svg && markerLayer(svg)
+    const sizes = layer && markerSizes(layer, [...tableElements])
 
     tableElements.forEach((tableElement) => {
       const id = tableElement.id
@@ -449,7 +450,19 @@ export const SeatingPlan: React.FC = () => {
 
       // Clear existing classes first to ensure clean state
       tableElement.classList.remove('occupied')
-      markPhotoTable(tableElement, photoTablesRef.current.has(tableNumber))
+      if (layer && sizes) {
+        drawMarkers(
+          layer,
+          tableElement,
+          markersRef.current
+            .filter(
+              ({ marker, tables }) =>
+                enabledMarkersRef.current.has(marker.kind) && tables.has(tableNumber),
+            )
+            .map(({ marker }) => marker),
+          sizes,
+        )
+      }
 
       // Add clickable style to all tables
       tableElement.setAttribute('style', 'cursor: pointer;')
@@ -484,9 +497,7 @@ export const SeatingPlan: React.FC = () => {
     if (!tablesData) return
 
     const { tables: fetchedTables } = tablesData.getCurrentExhibition!
-    photoTablesRef.current = new Set(
-      fetchedTables?.filter((table) => table.showsVisitorPhotos).map((table) => table.number) ?? [],
-    )
+    markersRef.current = markers
     const occupiedTablesMap = new Map(
       fetchedTables
         ?.filter((table) => table.exhibitor)
@@ -511,7 +522,26 @@ export const SeatingPlan: React.FC = () => {
       // Small delay to ensure DOM is updated
       setTimeout(applyTableStyling, 50)
     }
-  }, [tablesData, applyTableStyling]) // Added applyTableStyling to dependencies
+  }, [tablesData, markers, applyTableStyling]) // Added applyTableStyling to dependencies
+
+  useEffect(() => {
+    enabledMarkersRef.current = enabledMarkers
+    applyTableStyling()
+  }, [enabledMarkers, applyTableStyling])
+
+  // The markers shown live in the URL, so that a view of the plan can be bookmarked and passed on.
+  const toggleMarker = (kind: string) => {
+    const next = new Set(enabledMarkers)
+    if (next.has(kind)) next.delete(kind)
+    else next.add(kind)
+    setSearchParams(
+      (params) => {
+        params.set('markers', [...next].join(','))
+        return params
+      },
+      { replace: true },
+    )
+  }
 
   // Handle SVG load event
   const handleSVGLoad = useCallback(
@@ -543,6 +573,19 @@ export const SeatingPlan: React.FC = () => {
 
   return (
     <div className="relative mx-auto w-full max-w-[1600px] p-5" ref={containerRef}>
+      <MarkerLegend
+        markers={markers}
+        enabled={enabledMarkers}
+        onToggle={toggleMarker}
+        onHighlight={setHighlightedMarker}
+      />
+      {highlightedMarker && (
+        <style>{`.table-marker { opacity: 0.35 }
+.table-marker[data-marker="${CSS.escape(highlightedMarker)}"] {
+  opacity: 1;
+  animation: table-marker-pulse 0.9s ease-in-out infinite;
+}`}</style>
+      )}
       <div className="relative h-auto w-full rounded border border-gray-300 bg-white shadow">
         {svgLoadError ? (
           <div className="flex min-h-[200px] flex-col items-center justify-center rounded border border-red-200 bg-red-50 p-5 text-center">
@@ -588,6 +631,104 @@ export const SeatingPlan: React.FC = () => {
         />
       )}
     </div>
+  )
+}
+
+type MarkedTables = { marker: Marker; tables: Set<number> }
+
+/*
+ * Each marker with the tables it applies to. Fotofix is a property of the
+ * table; a question with a map marker marks every table of an exhibitor who
+ * ticked it. Who ticked what is only readable when logged in, so without the
+ * answers only fotofix is offered.
+ */
+const markedTables = (
+  tables: ReadonlyArray<{
+    number: number
+    showsVisitorPhotos: boolean
+    exhibitor?: { id: number } | null
+  }>,
+  answersData: ResultOf<typeof GET_MARKER_ANSWERS> | undefined,
+): MarkedTables[] => [
+  {
+    marker: FOTOFIX_MARKER,
+    tables: new Set(
+      tables.filter((table) => table.showsVisitorPhotos).map((table) => table.number),
+    ),
+  },
+  ...(answersData?.getSurveyQuestions ?? [])
+    .filter((question) => question.type === 'checkbox' && question.mapMarker)
+    .map((question) => {
+      const exhibitors = new Set(
+        question.answers
+          .filter((answer) => answer.value === true)
+          .map((answer) => answer.exhibitor.id),
+      )
+      return {
+        marker: { kind: question.key, ...question.mapMarker! },
+        tables: new Set(
+          tables
+            .filter((table) => table.exhibitor && exhibitors.has(table.exhibitor.id))
+            .map((table) => table.number),
+        ),
+      }
+    }),
+]
+
+/* The height of an element, followed as it changes, e.g. with the window's width. */
+const useHeight = (element: Element | null) => {
+  const [height, setHeight] = useState(0)
+  useEffect(() => {
+    if (!element) return
+    const observer = new ResizeObserver(() => setHeight(element.getBoundingClientRect().height))
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [element])
+  return height
+}
+
+/*
+ * A bar fixed below the navigation bar, so that it stays in place while the
+ * plan scrolls under it. A placeholder of its height keeps the plan clear of it.
+ */
+const MarkerLegend: React.FC<{
+  markers: MarkedTables[]
+  enabled: Set<string>
+  onToggle: (kind: string) => void
+  onHighlight: (kind: string | null) => void
+}> = ({ markers, enabled, onToggle, onHighlight }) => {
+  const [bar, setBar] = useState<HTMLDivElement | null>(null)
+  const navHeight = useHeight(document.querySelector('nav'))
+  const barHeight = useHeight(bar)
+  return (
+    <>
+      <div style={{ height: barHeight }} />
+      <div
+        ref={setBar}
+        className="fixed left-0 right-0 z-30 bg-white shadow-md dark:bg-gray-800"
+        style={{ top: navHeight }}>
+        <div className="mx-auto flex w-full max-w-[1600px] flex-wrap items-center gap-x-6 gap-y-2 px-5 py-2">
+          {markers.map(({ marker, tables }) => (
+            <label
+              key={marker.kind}
+              className="m-0 flex cursor-pointer items-center gap-2"
+              onMouseEnter={() => onHighlight(marker.kind)}
+              onMouseLeave={() => onHighlight(null)}>
+              <input
+                type="checkbox"
+                className="m-0"
+                checked={enabled.has(marker.kind)}
+                onChange={() => onToggle(marker.kind)}
+              />
+              <MarkerBadge letter={marker.letter} color={marker.color} />
+              <span>
+                {marker.label} ({tables.size})
+              </span>
+            </label>
+          ))}
+        </div>
+      </div>
+    </>
   )
 }
 

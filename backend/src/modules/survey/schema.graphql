@@ -28,6 +28,20 @@ type SurveyOption {
 }
 
 """
+A badge on the seating plan for the tables of every exhibitor who ticked a
+checkbox question: a letter on a disc of a colour, named in the legend by the
+label.
+"""
+type SurveyMapMarker {
+  letter: String!
+  label: String!
+  """
+  A hex colour, #rrggbb.
+  """
+  color: String!
+}
+
+"""
 Something the organisation wants to know from every exhibitor of an exhibition:
 whether they need Ethernet, whether they eat at the buffet on Friday and what.
 """
@@ -58,6 +72,11 @@ type SurveyQuestion {
   Null means every exhibitor.
   """
   audience: SurveyAudience
+  """
+  For a checkbox question, how the tables of those who ticked it are marked on
+  the seating plan. Null means not at all.
+  """
+  mapMarker: SurveyMapMarker
   """
   Whether the question is put to whoever is asking. True for everybody when the
   question has no audience.
@@ -122,6 +141,12 @@ input SurveyOptionInput {
   label: String!
 }
 
+input SurveyMapMarkerInput {
+  letter: String!
+  label: String!
+  color: String!
+}
+
 input SurveyQuestionInput {
   key: String!
   label: String!
@@ -132,6 +157,10 @@ input SurveyQuestionInput {
   closesAt: Date
   onRegistrationForm: Boolean
   audience: SurveyAudience
+  """
+  Only for a checkbox question. Null or left out means no marker.
+  """
+  mapMarker: SurveyMapMarkerInput
   showIfQuestionId: Int
   showIfValues: [String!]
   ordering: Int

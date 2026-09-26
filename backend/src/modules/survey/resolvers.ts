@@ -149,6 +149,24 @@ const flushOrExplainKey = async ({ db }: Context, key: string) => {
   }
 }
 
+const mapMarkerFrom = (input: SurveyQuestionInput) => {
+  const marker = input.mapMarker
+  if (!marker) return undefined
+  if (input.type !== SurveyQuestionType.Checkbox) {
+    throw new BadRequestError('Nur eine Ja/Nein-Frage kann Tische auf dem Plan markieren')
+  }
+  const letter = marker.letter.trim()
+  const label = marker.label.trim()
+  if ([...letter].length !== 1) {
+    throw new BadRequestError('Die Markierung auf dem Plan ist genau ein Buchstabe')
+  }
+  if (!label) throw new BadRequestError('Die Markierung braucht eine Beschriftung für die Legende')
+  if (!/^#[0-9a-f]{6}$/i.test(marker.color)) {
+    throw new BadRequestError('Die Farbe der Markierung ist als #rrggbb anzugeben')
+  }
+  return { letter, label, color: marker.color.toLowerCase() }
+}
+
 const fieldsFrom = async (
   context: Context,
   input: SurveyQuestionInput,
@@ -172,6 +190,7 @@ const fieldsFrom = async (
     closesAt: input.closesAt ?? undefined,
     onRegistrationForm: input.onRegistrationForm ?? false,
     audience: input.audience ?? undefined,
+    mapMarker: mapMarkerFrom(input),
     ...(await parentFrom(context, input, self)),
   }
 }
@@ -467,6 +486,7 @@ const adminSurveyMutations: MutationResolvers<Context> = {
         required: original.required,
         onRegistrationForm: original.onRegistrationForm,
         audience: original.audience,
+        mapMarker: original.mapMarker && { ...original.mapMarker },
         showIfQuestion: parent ?? undefined,
         showIfValues: parent ? [...original.showIfValues] : [],
       })

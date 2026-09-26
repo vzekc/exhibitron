@@ -13,6 +13,7 @@ import FormTextarea from '@components/FormTextarea'
 import LoadInProgress from '@components/LoadInProgress'
 import { showMessage } from '@components/MessageModalUtil'
 import { showConfirm } from '@components/ConfirmUtil'
+import MarkerBadge from '@components/seatingPlan/MarkerBadge'
 import { useBreadcrumb } from '@contexts/BreadcrumbContext.ts'
 import {
   Audience,
@@ -42,6 +43,11 @@ const GET_QUESTIONS = graphql(`
       closesAt
       onRegistrationForm
       audience
+      mapMarker {
+        letter
+        label
+        color
+      }
       showIfQuestion {
         id
       }
@@ -136,6 +142,10 @@ const SurveyQuestionEditor = () => {
   const [onRegistrationForm, setOnRegistrationForm] = useState(false)
   const [audience, setAudience] = useState<Audience | ''>('')
   const [closesAt, setClosesAt] = useState('')
+  const [onMap, setOnMap] = useState(false)
+  const [markerLetter, setMarkerLetter] = useState('')
+  const [markerLabel, setMarkerLabel] = useState('')
+  const [markerColor, setMarkerColor] = useState('#1565c0')
   const [parentId, setParentId] = useState('')
   const [parentValues, setParentValues] = useState<string[]>([])
   const [loaded, setLoaded] = useState(false)
@@ -154,6 +164,12 @@ const SurveyQuestionEditor = () => {
     setRequired(question.required)
     setOnRegistrationForm(question.onRegistrationForm)
     setAudience(question.audience ?? '')
+    setOnMap(!!question.mapMarker)
+    if (question.mapMarker) {
+      setMarkerLetter(question.mapMarker.letter)
+      setMarkerLabel(question.mapMarker.label)
+      setMarkerColor(question.mapMarker.color)
+    }
     setClosesAt(question.closesAt ? toLocalInput(question.closesAt as string) : '')
     setParentId(question.showIfQuestion ? String(question.showIfQuestion.id) : '')
     setParentValues(question.showIfValues)
@@ -198,6 +214,10 @@ const SurveyQuestionEditor = () => {
       required,
       onRegistrationForm: audience ? false : onRegistrationForm,
       audience: audience || null,
+      mapMarker:
+        type === 'checkbox' && onMap
+          ? { letter: markerLetter.trim(), label: markerLabel.trim(), color: markerColor }
+          : null,
       closesAt: closesAt ? new Date(closesAt).toISOString() : null,
       showIfQuestionId: parent ? parent.id : null,
       showIfValues: parent ? parentValues : null,
@@ -373,6 +393,48 @@ const SurveyQuestionEditor = () => {
                 {audience && ' — nicht für eine Zielgruppe, wer anmeldet, hat noch keinen Tisch'}
               </span>
             </label>
+            {type === 'checkbox' && (
+              <>
+                <label className="flex cursor-pointer items-center">
+                  <FormInput
+                    type="checkbox"
+                    className="mr-2"
+                    checked={onMap}
+                    onChange={(e) => setOnMap(e.target.checked)}
+                  />
+                  <span>Tische derer, die ankreuzen, auf dem Sitzplan markieren</span>
+                </label>
+                {onMap && (
+                  <div className="flex flex-wrap items-end gap-4 pl-6">
+                    <label className="block w-24">
+                      <Label>Buchstabe</Label>
+                      <FormInput
+                        value={markerLetter}
+                        maxLength={1}
+                        onChange={(e) => setMarkerLetter(e.target.value.toUpperCase())}
+                      />
+                    </label>
+                    <label className="block min-w-48 flex-1">
+                      <Label>In der Legende</Label>
+                      <FormInput
+                        value={markerLabel}
+                        onChange={(e) => setMarkerLabel(e.target.value)}
+                      />
+                    </label>
+                    <label className="block">
+                      <Label>Farbe</Label>
+                      <input
+                        type="color"
+                        value={markerColor}
+                        onChange={(e) => setMarkerColor(e.target.value)}
+                        className="block h-10 w-16 cursor-pointer rounded-md border border-gray-300 p-1 dark:border-gray-600"
+                      />
+                    </label>
+                    <MarkerBadge letter={markerLetter} color={markerColor} size={32} />
+                  </div>
+                )}
+              </>
+            )}
             <label className="block">
               <Label>Antworten möglich bis (leer: bis die Ausstellung eingefroren wird)</Label>
               <input

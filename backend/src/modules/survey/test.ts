@@ -55,6 +55,11 @@ const CREATE = graphql(`
         key
       }
       showIfValues
+      mapMarker {
+        letter
+        label
+        color
+      }
     }
   }
 `)
@@ -1034,5 +1039,45 @@ describe('survey', () => {
     expect(await db.em.count(SurveyAnswer, { exhibitor })).toBeGreaterThan(0)
     await db.em.nativeDelete(Exhibitor, { id: exhibitor.id })
     expect(await db.em.count(SurveyAnswer, { exhibitor: { id: exhibitor.id } })).toBe(0)
+  })
+
+  graphqlTest('a checkbox question can mark tables on the seating plan', async (request) => {
+    const admin = await login('admin@example.com')
+    const marker = { letter: 'E', label: 'Ethernet', color: '#1565C0' }
+    const created = await request(
+      CREATE,
+      {
+        input: {
+          key: 'ethernet-plan',
+          label: 'Ich brauche Ethernet',
+          type: SurveyQuestionType.Checkbox,
+          mapMarker: marker,
+        },
+      },
+      admin,
+    )
+    expect(created.errors).toBeUndefined()
+    expect(created.data!.createSurveyQuestion.mapMarker).toEqual({ ...marker, color: '#1565c0' })
+
+    const refuse = async (input: object, message: string) => {
+      const result = await request(
+        CREATE,
+        { input: { key: 'x', label: 'X', type: SurveyQuestionType.Checkbox, ...input } },
+        admin,
+      )
+      expect(result.errors?.[0]?.message).toBe(message)
+    }
+    await refuse(
+      { type: SurveyQuestionType.Text, mapMarker: marker },
+      'Nur eine Ja/Nein-Frage kann Tische auf dem Plan markieren',
+    )
+    await refuse(
+      { mapMarker: { ...marker, letter: 'EN' } },
+      'Die Markierung auf dem Plan ist genau ein Buchstabe',
+    )
+    await refuse(
+      { mapMarker: { ...marker, color: 'blue' } },
+      'Die Farbe der Markierung ist als #rrggbb anzugeben',
+    )
   })
 })

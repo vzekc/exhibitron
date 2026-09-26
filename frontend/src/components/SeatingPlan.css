@@ -14,3 +14,20 @@
 .react-svg [id^='table_']:hover path {
   fill: #2196f3;
 }
+
+/* Hovering a legend entry makes its markers pulse to one size on every table, so they stand
+   out on the plan; the page sets which markers pulse. */
+@keyframes table-marker-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(var(--pulse-scale, 1.6));
+  }
+}
+
+.table-marker {
+  transform-box: fill-box;
+  transform-origin: center;
+}

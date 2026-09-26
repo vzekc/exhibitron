@@ -7,6 +7,9 @@ import { SurveyAudience, SurveyQuestionType } from '../../generated/graphql.js'
 
 export type SurveyOptionRow = { key: string; label: string }
 
+/* How the tables of the exhibitors who ticked a checkbox are marked on the seating plan. */
+export type SurveyMapMarkerRow = { letter: string; label: string; color: string }
+
 /*
  * What one answer looks like in the database, by the question's type: a
  * boolean for a checkbox, an option key for a single choice, option keys for a
@@ -65,6 +68,9 @@ export class SurveyQuestion extends BaseEntity<
 
   @Property({ type: 'json' })
   showIfValues: string[] = []
+
+  @Property({ type: 'json', nullable: true })
+  mapMarker?: SurveyMapMarkerRow
 }
 
 /*
