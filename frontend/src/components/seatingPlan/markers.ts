@@ -1,7 +1,7 @@
 /*
  * The badges the seating plan can put on a table. Fotofix comes from the table
  * itself; the others come from the checkbox survey questions that carry a map
- * marker, and mark every table held by an exhibitor who ticked one. A marker
+ * marker, and mark one table of each exhibitor who ticked one. A marker
  * is known by its kind: `fotofix`, or the question's key.
  */
 export type Marker = {

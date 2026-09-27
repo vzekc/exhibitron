@@ -638,9 +638,10 @@ type MarkedTables = { marker: Marker; tables: Set<number> }
 
 /*
  * Each marker with the tables it applies to. Fotofix is a property of the
- * table; a question with a map marker marks every table of an exhibitor who
- * ticked it. Who ticked what is only readable when logged in, so without the
- * answers only fotofix is offered.
+ * table and marks each one. A question with a map marker is answered by a
+ * person, so it marks one table of each exhibitor who ticked it: the one with
+ * the lowest number. Who ticked what is only readable when logged in, so
+ * without the answers only fotofix is offered.
  */
 const markedTables = (
   tables: ReadonlyArray<{
@@ -649,31 +650,39 @@ const markedTables = (
     exhibitor?: { id: number } | null
   }>,
   answersData: ResultOf<typeof GET_MARKER_ANSWERS> | undefined,
-): MarkedTables[] => [
-  {
-    marker: FOTOFIX_MARKER,
-    tables: new Set(
-      tables.filter((table) => table.showsVisitorPhotos).map((table) => table.number),
-    ),
-  },
-  ...(answersData?.getSurveyQuestions ?? [])
-    .filter((question) => question.type === 'checkbox' && question.mapMarker)
-    .map((question) => {
-      const exhibitors = new Set(
-        question.answers
-          .filter((answer) => answer.value === true)
-          .map((answer) => answer.exhibitor.id),
-      )
-      return {
-        marker: { kind: question.key, ...question.mapMarker! },
-        tables: new Set(
-          tables
-            .filter((table) => table.exhibitor && exhibitors.has(table.exhibitor.id))
-            .map((table) => table.number),
-        ),
-      }
-    }),
-]
+): MarkedTables[] => {
+  const firstTableOf = new Map<number, number>()
+  for (const { number, exhibitor } of tables) {
+    if (!exhibitor) continue
+    const first = firstTableOf.get(exhibitor.id)
+    if (first === undefined || number < first) firstTableOf.set(exhibitor.id, number)
+  }
+  return [
+    {
+      marker: FOTOFIX_MARKER,
+      tables: new Set(
+        tables.filter((table) => table.showsVisitorPhotos).map((table) => table.number),
+      ),
+    },
+    ...(answersData?.getSurveyQuestions ?? [])
+      .filter((question) => question.type === 'checkbox' && question.mapMarker)
+      .map((question) => {
+        const exhibitors = new Set(
+          question.answers
+            .filter((answer) => answer.value === true)
+            .map((answer) => answer.exhibitor.id),
+        )
+        return {
+          marker: { kind: question.key, ...question.mapMarker! },
+          tables: new Set(
+            [...exhibitors]
+              .map((id) => firstTableOf.get(id))
+              .filter((number) => number !== undefined),
+          ),
+        }
+      }),
+  ]
+}
 
 /* The height of an element, followed as it changes, e.g. with the window's width. */
 const useHeight = (element: Element | null) => {

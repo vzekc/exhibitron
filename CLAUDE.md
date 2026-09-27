@@ -205,8 +205,10 @@ code follows:
   because they may read all answers anyway.
 - The admin mail page offers the survey's audiences as recipient groups.
 - A checkbox question may carry a `mapMarker` (letter, legend label, colour): the seating plan then
-  offers it beside fotofix as a marker on the tables of those who ticked it. Which markers are shown
-  is kept in the URL (`/tables?markers=fotofix,ethernet`); `seatingPlan/markers.ts` draws them.
+  offers it beside fotofix as a marker on the tables of those who ticked it, one table per exhibitor
+  (the lowest-numbered), since the answer is theirs and fotofix belongs to a table. Which markers
+  are shown is kept in the URL (`/tables?markers=fotofix,ethernet`); `seatingPlan/markers.ts` draws
+  them.
 - Frontend: exhibitors answer under `/user/umfrage` and read everybody's answers under
   `/user/umfrage/ergebnisse`; admins shape the questions under `/admin/umfrage`. The registration
   form renders the questions marked `onRegistrationForm` in its Teilnahme section.
