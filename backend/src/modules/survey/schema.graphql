@@ -88,7 +88,8 @@ type SurveyQuestion {
   audienceSize: Int!
   """
   The exhibitors the question is put to who have not answered, for somebody
-  logged in. Empty for everybody else.
+  logged in. Empty for everybody else, and for an optional checkbox, whose
+  unticked box is an answer.
   """
   nonRespondents: [Exhibitor!]!
   """
@@ -186,7 +187,8 @@ extend type Query {
   getSurveyAudienceMembers(audience: SurveyAudience!): [Exhibitor!]!
   """
   The exhibitors who have not answered every question put to them that is
-  still open, or only the required ones with `requiredOnly`. For admins.
+  still open, or only the required ones with `requiredOnly`. An optional
+  checkbox is never owed. For admins.
   """
   getSurveyNonRespondents(requiredOnly: Boolean!): [Exhibitor!]!
   getMySurveySubscriptions: [SurveySubscription!]!

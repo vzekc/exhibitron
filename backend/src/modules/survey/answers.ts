@@ -140,10 +140,17 @@ export const inAnswerOrder = (questions: SurveyQuestion[]) => {
     .flatMap((question) => [question, ...children(question)])
 }
 
-/* The questions an exhibitor is shown and has not answered, given what they answered. */
+/*
+ * An optional checkbox left unticked reads as "no" on the form, so it is never
+ * owed: whoever has seen it has answered it.
+ */
+export const canBeOwed = (question: SurveyQuestion) =>
+  question.required || question.type !== SurveyQuestionType.Checkbox
+
+/* The questions an exhibitor is shown and still owes, given what they answered. */
 export const unanswered = (questions: SurveyQuestion[], answers: AnswerMap) =>
   inAnswerOrder(questions).filter(
-    (question) => isVisible(question, answers) && !answers.has(question.id),
+    (question) => canBeOwed(question) && isVisible(question, answers) && !answers.has(question.id),
   )
 
 /* The required questions an exhibitor still owes, given what they answered. */

@@ -1074,6 +1074,21 @@ describe('survey', () => {
     expect(all.errors).toBeUndefined()
     expect(await owing(false)).not.toContain('donald')
 
+    /* An unticked optional checkbox is an answer, a required one is owed until saved. */
+    const tick = db.em.create(SurveyQuestion, {
+      exhibition,
+      key: 'kaffee',
+      ordering: 99,
+      label: 'Ich trinke Kaffee',
+      type: SurveyQuestionType.Checkbox,
+    })
+    await db.em.persist(tick).flush()
+    expect(await owing(false)).not.toContain('donald')
+    tick.required = true
+    await db.em.flush()
+    expect(await owing(false)).toContain('donald')
+    await db.em.remove(tick).flush()
+
     others.forEach((question) => (question.closesAt = deadlines.get(question.id)))
     await db.em.flush()
   })

@@ -23,6 +23,7 @@ import {
   Audiences,
   applicable,
   appliesTo,
+  canBeOwed,
   canBeParent,
   checkAnswers,
   inAnswerOrder,
@@ -343,8 +344,8 @@ export const surveyQuestionTypeResolvers: SurveyQuestionResolvers<Context> = {
   /* Who still owes an answer is for the people exhibiting, like the answers. */
   // @ts-expect-error ts2345
   nonRespondents: async (question, _, { db, exhibition, user }) => {
-    if (!user) return []
     const entity = question as unknown as SurveyQuestion
+    if (!user || !canBeOwed(entity)) return []
     const answered = new Set(
       (await db.em.find(SurveyAnswer, { question: { id: entity.id } })).map(
         (answer) => answer.exhibitor.id,
