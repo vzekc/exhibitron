@@ -18,6 +18,7 @@ import { registerVolunteerRoutes } from './modules/volunteer/routes.js'
 import { registerSeatplanRoutes } from './modules/seatplan/routes.js'
 import { registerVisitorPhotoRoutes } from './modules/visitorPhoto/routes.js'
 import { registerSerialRoutes } from './modules/serial/routes.js'
+import { registerInfodisplayRoutes } from './modules/infodisplay/routes.js'
 import { startCleanupScheduler } from './app/cleanup.js'
 import { startVolunteerReminderScheduler } from './app/volunteerReminders.js'
 import { startTableChangeDigestScheduler } from './app/tableChangeDigest.js'
@@ -179,6 +180,7 @@ export async function createApp({
   await registerScheduleRoutes(app)
   await registerVolunteerRoutes(app)
   await registerSeatplanRoutes(app)
+  await registerInfodisplayRoutes(app)
 
   /*
    * The booth and the camera page send a JPEG as the raw body, and the machine
