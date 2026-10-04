@@ -10,7 +10,8 @@ import { Page } from '../page/entity.js'
  * What the information display in the hall shows: a 40-column terminal that
  * polls this once a minute and turns it into pages of its own. Everything here
  * is public already — the schedule and the exhibits are on the site, and the
- * photo counts name nobody.
+ * photo counts name nobody. The counts are the booth's: the photos exhibitors take
+ * with the camera page on their own devices are left out.
  *
  * The hand-written page is the Page with the key below, edited in the site's
  * page editor, so its text can change during the show without a deploy. It is
@@ -46,9 +47,10 @@ export const registerInfodisplayRoutes = async (app: FastifyInstance) => {
     const now = new Date()
     const today = dayAndHour(now).day
 
-    // Every photo taken counts, including those whose owners had them deleted
+    // Every booth photo counts, including those whose owners had them deleted
     const recent = await db.em.find(VisitorPhoto, {
       exhibition,
+      source: 'booth',
       createdAt: { $gte: new Date(now.getTime() - 24 * 60 * 60 * 1000) },
     })
     const takenToday = recent.filter(({ createdAt }) => dayAndHour(createdAt).day === today)
@@ -84,9 +86,7 @@ export const registerInfodisplayRoutes = async (app: FastifyInstance) => {
       exhibition: exhibition.title,
       photos: {
         today: takenToday.length,
-        todayBooth: takenToday.filter(({ source }) => source === 'booth').length,
-        todayWeb: takenToday.filter(({ source }) => source === 'web').length,
-        total: await db.em.count(VisitorPhoto, { exhibition }),
+        total: await db.em.count(VisitorPhoto, { exhibition, source: 'booth' }),
         byHour: [...byHour.entries()]
           .sort(([a], [b]) => a - b)
           .map(([hour, count]) => ({ hour, count })),

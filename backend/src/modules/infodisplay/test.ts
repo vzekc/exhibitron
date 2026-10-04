@@ -14,8 +14,6 @@ import { INFO_PAGE_KEY } from './routes.js'
 type Infodisplay = {
   photos: {
     today: number
-    todayBooth: number
-    todayWeb: number
     total: number
     byHour: { hour: number; count: number }[]
   }
@@ -38,6 +36,7 @@ graphqlTest(
     photo('INFO22', new Date(), 'booth')
     photo('INFO33', new Date(), 'web')
     photo('INFO44', new Date(Date.now() - 72 * HOUR), 'booth')
+    photo('INFO55', new Date(Date.now() - 72 * HOUR), 'web')
     const session = (title: string, startTime: Date) =>
       em.create(ConferenceSession, { title, startTime, durationMinutes: 60, room, exhibition })
     session('Schon vorbei', new Date(Date.now() - 3 * HOUR))
@@ -52,8 +51,8 @@ graphqlTest(
     expect(before.statusCode).toBe(200)
     const withoutInfo = before.json() as Infodisplay
     expect(withoutInfo.info).toBeNull()
-    expect(withoutInfo.photos).toMatchObject({ today: 2, todayBooth: 1, todayWeb: 1, total: 3 })
-    expect(withoutInfo.photos.byHour.reduce((sum, { count }) => sum + count, 0)).toBe(2)
+    expect(withoutInfo.photos).toMatchObject({ today: 1, total: 2 })
+    expect(withoutInfo.photos.byHour.reduce((sum, { count }) => sum + count, 0)).toBe(1)
     expect(withoutInfo.sessions.map(({ title }) => title)).toStrictEqual([
       'Läuft gerade',
       'Kommt noch',
