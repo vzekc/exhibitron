@@ -400,3 +400,39 @@ graphqlTest('the exhibit picture is served in display size', async (graphqlReque
   const again = await app.inject({ method: 'GET', url: `/api/exhibit/${id}/image/main` })
   expect(again.rawPayload.equals(response.rawPayload)).toBe(true)
 })
+
+graphqlTest('a TIFF named .jpg gets a JPEG thumbnail', async (graphqlRequest, app) => {
+  const session = await login('daffy@example.com')
+  const id = await createExhibit(graphqlRequest, { title: 'Scan' }, session)
+  const scan = await sharp({
+    create: { width: 800, height: 600, channels: 3, background: '#3366cc' },
+  })
+    .tiff()
+    .toBuffer()
+  const boundary = 'grenze'
+  const payload = Buffer.concat([
+    Buffer.from(
+      `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="scan.jpg"\r\nContent-Type: image/jpeg\r\n\r\n`,
+    ),
+    scan,
+    Buffer.from(`\r\n--${boundary}--\r\n`),
+  ])
+  const upload = await app.inject({
+    method: 'PUT',
+    url: `/api/exhibit/${id}/image/main`,
+    headers: {
+      cookie: session.cookie,
+      'content-type': `multipart/form-data; boundary=${boundary}`,
+    },
+    payload,
+  })
+  expect(upload.statusCode).toBe(200)
+
+  const thumbnail = await app.inject({
+    method: 'GET',
+    url: `/api/exhibit/${id}/image/thumbnail`,
+  })
+  expect(thumbnail.statusCode).toBe(200)
+  expect(thumbnail.headers['content-type']).toBe('image/jpeg')
+  expect((await sharp(thumbnail.rawPayload).metadata()).format).toBe('jpeg')
+})

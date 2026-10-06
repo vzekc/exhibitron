@@ -33,16 +33,33 @@ const formatOptions: FormatOptions = {
 }
 
 /**
- * Generates a thumbnail from an image buffer
- * @param buffer The original image buffer
- * @param mimeType The MIME type of the image
- * @returns A promise that resolves to the thumbnail buffer
+ * The MIME type of an image, read from its bytes. A browser names an upload's type after
+ * the file's extension, so a TIFF called .jpg arrives as image/jpeg.
+ * @param buffer The image buffer
+ * @returns A promise that resolves to the MIME type
  */
-export async function generateThumbnail(buffer: Buffer, mimeType: string): Promise<Buffer> {
-  if (!mimeType.startsWith('image/')) {
-    throw new Error('Unsupported image type')
+export async function detectMimeType(buffer: Buffer): Promise<string> {
+  const { format } = await sharp(buffer).metadata()
+  switch (format) {
+    case 'jpeg':
+    case 'jpg':
+      return 'image/jpeg'
+    case 'svg':
+      return 'image/svg+xml'
+    default:
+      return `image/${format}`
   }
+}
 
+/**
+ * Generates a thumbnail from an image buffer. JPEG, PNG, WebP and GIF keep their format;
+ * every other format is encoded as JPEG, so that any browser can show the thumbnail.
+ * @param buffer The original image buffer
+ * @returns A promise that resolves to the thumbnail and its MIME type
+ */
+export async function generateThumbnail(
+  buffer: Buffer,
+): Promise<{ data: Buffer; mimeType: string }> {
   const image = sharp(buffer, { animated: true })
   const { width, height, format, orientation } = await image.metadata()
 
@@ -68,19 +85,14 @@ export async function generateThumbnail(buffer: Buffer, mimeType: string): Promi
       kernel: 'lanczos3',
     })
 
-  // Apply format-specific options if available
-  if (format) {
-    const normalizedFormat = format === 'jpg' ? 'jpeg' : format
-    if (
-      normalizedFormat in formatOptions &&
-      (normalizedFormat === 'jpeg' || normalizedFormat === 'png' || normalizedFormat === 'webp')
-    ) {
-      const typedFormat = normalizedFormat as SupportedFormat
-      return processedImage[typedFormat](formatOptions[typedFormat]).toBuffer()
-    }
+  if (format === 'gif') {
+    return { data: await processedImage.toBuffer(), mimeType: 'image/gif' }
   }
-
-  return processedImage.toBuffer()
+  const outputFormat: SupportedFormat = format === 'png' || format === 'webp' ? format : 'jpeg'
+  return {
+    data: await processedImage[outputFormat](formatOptions[outputFormat]).toBuffer(),
+    mimeType: `image/${outputFormat}`,
+  }
 }
 
 /**

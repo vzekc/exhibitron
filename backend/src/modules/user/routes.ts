@@ -4,7 +4,12 @@ import { AuthError, errorSchema } from '../common/errors.js'
 import { User, ProfileImage } from './entity.js'
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { randomUUID } from 'crypto'
-import { generateThumbnail, sendMutableImage, sendMutableImageVariant } from '../image/utils.js'
+import {
+  detectMimeType,
+  generateThumbnail,
+  sendMutableImage,
+  sendMutableImageVariant,
+} from '../image/utils.js'
 import { ImageService } from '../image/service.js'
 
 export async function registerUserRoutes(app: FastifyInstance) {
@@ -123,10 +128,10 @@ export async function registerUserRoutes(app: FastifyInstance) {
         console.log(
           `Generating thumbnail for user ${id}${regenerate ? ' (forced regeneration)' : ''}`,
         )
-        const thumbnail = await generateThumbnail(image.data, image.mimeType)
+        const thumbnail = await generateThumbnail(image.data)
         profileImage.thumbnail = await db.image.createImage(
-          thumbnail,
-          image.mimeType,
+          thumbnail.data,
+          thumbnail.mimeType,
           image.filename,
           randomUUID(),
         )
@@ -153,10 +158,8 @@ export async function registerUserRoutes(app: FastifyInstance) {
 
     const buffer = await data.toBuffer()
     const filename = data.filename
-    const mimeType = data.mimetype
-
-    // Generate thumbnail and get dimensions
-    const thumbnailData = await generateThumbnail(buffer, mimeType)
+    const mimeType = await detectMimeType(buffer)
+    const thumbnailData = await generateThumbnail(buffer)
 
     // Every upload is a new picture with an id of its own, so that a URL carrying the id
     // changes with the picture and no cache, in the browser or the service worker, can
@@ -167,7 +170,12 @@ export async function registerUserRoutes(app: FastifyInstance) {
       await db.em.flush()
     }
     const image = await db.image.createImage(buffer, mimeType, filename, randomUUID())
-    const thumbnail = await db.image.createImage(thumbnailData, mimeType, filename, randomUUID())
+    const thumbnail = await db.image.createImage(
+      thumbnailData.data,
+      thumbnailData.mimeType,
+      filename,
+      randomUUID(),
+    )
     user.profileImage = db.em.create(ProfileImage, { user, image, thumbnail })
     db.em.persist(user.profileImage)
     await db.em.flush()
