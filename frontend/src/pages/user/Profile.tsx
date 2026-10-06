@@ -244,8 +244,8 @@ const Profile = () => {
   }
 
   useEffect(() => {
-    if (data) {
-      const newUser = data.getCurrentExhibitor!.user
+    if (data?.getCurrentExhibitor) {
+      const newUser = data.getCurrentExhibitor.user
       reset({
         fullName: newUser?.fullName || '',
         nickname: newUser?.nickname || '',
@@ -263,6 +263,21 @@ const Profile = () => {
       setProfileImage(newUser?.profileImage as number | null)
     }
   }, [data, reset])
+
+  /* Signed in without being an exhibitor here: somebody whose registration
+     awaits approval, or who only comes to help. */
+  if (data && !data.getCurrentExhibitor) {
+    return (
+      <article>
+        <h2>Noch kein Ausstellerprofil</h2>
+        <p>
+          Für die {data.getCurrentExhibition?.title ?? 'Ausstellung'} bist Du noch nicht als
+          Aussteller eingetragen. Wenn Du Dich angemeldet hast, kannst Du Dein Profil und Dein
+          Namensschild hier bearbeiten, sobald wir Deine Anmeldung bestätigt haben.
+        </p>
+      </article>
+    )
+  }
 
   return (
     data?.getCurrentExhibitor && (
