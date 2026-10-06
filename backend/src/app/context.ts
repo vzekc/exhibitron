@@ -43,6 +43,9 @@ const hostToExhibitionId = memoize((hostMatchers: HostMatchers, host: string) =>
   }
 })
 
+export const exhibitionIdForHost = async (host: string) =>
+  hostToExhibitionId(await getHostMatchers(), host)
+
 export type Context = {
   db: Services
   user: User | null
@@ -73,7 +76,7 @@ export const createContext = async (request: FastifyRequest) => {
   }
 
   const exhibition = await db.exhibition.findOneOrFail({
-    id: hostToExhibitionId(await getHostMatchers(), request.hostname),
+    id: await exhibitionIdForHost(request.hostname),
   })
 
   const isClientInLan = isRequestFromLan(request)

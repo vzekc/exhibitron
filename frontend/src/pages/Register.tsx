@@ -115,6 +115,9 @@ const Register = () => {
     searchParams.has('forumMemberNotYetRegistered'),
   )
   const [needsSetupPopup, setNeedsSetupPopup] = useState(searchParams.has('forumMemberNeedsSetup'))
+  const [registeredEarlierPopup, setRegisteredEarlierPopup] = useState(
+    searchParams.has('forumMemberRegisteredEarlier'),
+  )
 
   const isFrozen = exhibition?.frozen ?? false
   const exhibitionTitle = exhibition?.title ?? 'Classic Computing'
@@ -265,6 +268,26 @@ const Register = () => {
                   Bitte benutze den Link aus der E-Mail, die Du bei der Bestätigung Deiner
                   Registrierung erhalten hast, um Dein Konto einzurichten. Von dort aus kannst Du
                   Dich über das Forum anmelden.
+                </p>
+              </Modal>
+            )}
+            {registeredEarlierPopup && (
+              <Modal
+                isOpen={registeredEarlierPopup}
+                onClose={() => setRegisteredEarlierPopup(false)}>
+                <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">
+                  Noch nicht für {exhibitionTitle} angemeldet
+                </h2>
+                <p className="mb-4 text-gray-700 dark:text-gray-300">
+                  Du warst bei einer früheren Ausstellung als Aussteller angemeldet, hast Dein Konto
+                  damals aber nicht mit dem Forum verknüpft. Für {exhibitionTitle} liegt noch keine
+                  Anmeldung von Dir vor.
+                </p>
+                <p className="text-gray-700 dark:text-gray-300">
+                  Bitte fülle das Formular aus. Sobald wir Deine Anmeldung bestätigt haben, bekommst
+                  Du eine E-Mail mit einem Link, über den Du Dein Konto mit dem Forum verknüpfst.
+                  Gib dieselbe E-Mail-Adresse an wie damals, dann bleibt Dein bisheriges Konto
+                  erhalten.
                 </p>
               </Modal>
             )}

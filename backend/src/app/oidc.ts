@@ -5,6 +5,7 @@ import fastifyCookie from '@fastify/cookie'
 import { FastifyInstance, FastifyRequest } from 'fastify'
 import axios from 'axios'
 import { initORM } from '../db.js'
+import { exhibitionIdForHost } from './context.js'
 
 const woltlabBaseUrl = 'https://forum.classic-computing.de'
 const woltlabAuth: ProviderConfiguration = {
@@ -114,6 +115,7 @@ export const register = async (app: FastifyInstance) => {
 
     const user = await db.user.associateForumUser({
       nickname,
+      exhibitionId: await exhibitionIdForHost(request.hostname),
       registrationToken,
       isAdministrator,
       email,
@@ -124,6 +126,9 @@ export const register = async (app: FastifyInstance) => {
     if (user === 'needsSetup') {
       url.pathname = '/register'
       url.search = 'forumMemberNeedsSetup'
+    } else if (user === 'registeredEarlier') {
+      url.pathname = '/register'
+      url.search = 'forumMemberRegisteredEarlier'
     } else if (user) {
       request.session.userId = user.id
       request.session.canSwitchExhibitor = user.isAdministrator

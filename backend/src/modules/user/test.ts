@@ -7,6 +7,8 @@ import { ProfileImage, User } from './entity.js'
 import { ImageStorage, ImageVariant } from '../image/entity.js'
 import type { Services } from '../../db.js'
 import { VolunteerActivity, VolunteerBooking, VolunteerPeriod } from '../volunteer/entity.js'
+import { Exhibition } from '../exhibition/entity.js'
+import { RegistrationStatus } from '../../generated/graphql.js'
 
 let mockedSendEmail: MockedFunction<typeof sendEmail>
 
@@ -297,6 +299,7 @@ graphqlTest(
     /* The forum spells the name differently than the account does. */
     const merged = await db.user.associateForumUser({
       nickname: 'Ruecker',
+      exhibitionId: exhibition.id,
       registrationToken: token,
       isAdministrator: false,
     })
@@ -360,6 +363,7 @@ graphqlTest('the merge keeps the volunteer shifts of the account it folds in', a
 
   await db.user.associateForumUser({
     nickname: 'sommer',
+    exhibitionId: exhibition.id,
     registrationToken: token,
     isAdministrator: false,
   })
@@ -375,6 +379,7 @@ graphqlTest('the merge keeps the volunteer shifts of the account it folds in', a
  */
 graphqlTest('forum link without a name conflict associates and spends the token', async () => {
   const db = await initORM()
+  const exhibition = await db.exhibition.findOneOrFail({ key: 'cc2025' })
 
   const user = db.user.create({
     email: 'tauber@example.com',
@@ -389,6 +394,7 @@ graphqlTest('forum link without a name conflict associates and spends the token'
 
   const result = await db.user.associateForumUser({
     nickname: 'tauber',
+    exhibitionId: exhibition.id,
     registrationToken: token,
     isAdministrator: false,
   })
@@ -399,12 +405,62 @@ graphqlTest('forum link without a name conflict associates and spends the token'
 })
 
 /*
+ * Somebody approved for an earlier exhibition who never set up the account has
+ * an expired link and no registration for this one, so the login asks them to
+ * register again. Once they are approved here, the login points to the setup
+ * link of this exhibition.
+ */
+graphqlTest('forum login tells an earlier registration from a current one', async () => {
+  const db = await initORM()
+  const exhibition = await db.exhibition.findOneOrFail({ key: 'cc2025' })
+  const earlier = db.exhibition.create({
+    key: 'cc2024',
+    title: 'Classic Computing 2024',
+    hostMatch: '^2024\\.classic-computing\\.example$',
+    startDate: new Date('2024-09-12'),
+    endDate: new Date('2024-09-15'),
+    frozen: false,
+  })
+  const user = db.user.create({
+    email: 'dirks@example.com',
+    fullName: 'Dora Dirks',
+    isAdministrator: false,
+  })
+  const registration = (registeredFor: Exhibition) =>
+    db.registration.create({
+      exhibition: registeredFor,
+      status: RegistrationStatus.Approved,
+      name: 'Dora Dirks',
+      email: 'dirks@example.com',
+      nickname: 'Dirks_d',
+      topic: 'Reparatur',
+      data: {},
+    })
+  db.em.persist([earlier, user, registration(earlier)])
+  await db.em.flush()
+
+  const login = () =>
+    db.user.associateForumUser({
+      nickname: 'Dirks_d',
+      exhibitionId: exhibition.id,
+      isAdministrator: false,
+    })
+
+  expect(await login()).toBe('registeredEarlier')
+
+  db.em.persist(registration(exhibition))
+  await db.em.flush()
+  expect(await login()).toBe('needsSetup')
+})
+
+/*
  * A picture is held by a key that keeps its account alive, so a merge that
  * leaves one behind cannot delete the row. Where the surviving account has no
  * picture of its own, the one from the account being folded in moves across.
  */
 graphqlTest('the merge carries the picture over when the surviving account has none', async () => {
   const db = await initORM()
+  const exhibition = await db.exhibition.findOneOrFail({ key: 'cc2025' })
 
   const canonical = db.user.create({
     email: 'ulrich-alt@example.com',
@@ -433,6 +489,7 @@ graphqlTest('the merge carries the picture over when the surviving account has n
 
   await db.user.associateForumUser({
     nickname: 'ulrich',
+    exhibitionId: exhibition.id,
     registrationToken: token,
     isAdministrator: false,
   })
@@ -448,6 +505,7 @@ graphqlTest('the merge carries the picture over when the surviving account has n
  */
 graphqlTest('the merge drops the picture when the surviving account has one', async () => {
   const db = await initORM()
+  const exhibition = await db.exhibition.findOneOrFail({ key: 'cc2025' })
 
   const canonical = db.user.create({
     email: 'winter-alt@example.com',
@@ -481,6 +539,7 @@ graphqlTest('the merge drops the picture when the surviving account has one', as
 
   await db.user.associateForumUser({
     nickname: 'winter',
+    exhibitionId: exhibition.id,
     registrationToken: token,
     isAdministrator: false,
   })

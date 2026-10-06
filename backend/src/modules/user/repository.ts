@@ -13,10 +13,12 @@ import { makePasswordResetEmail } from '../registration/emails.js'
 import { hash } from 'argon2'
 import { RegistrationStatus } from '../../generated/graphql.js'
 
-type AssociateForumUserResult = User | 'needsSetup' | null
+type AssociateForumUserResult = User | 'needsSetup' | 'registeredEarlier' | null
 
 type AssociateForumUserOptions = {
   nickname: string
+  /* The exhibition whose site the login happens on. */
+  exhibitionId: number
   isAdministrator: boolean
   registrationToken?: string
   /*
@@ -86,7 +88,8 @@ export class UserRepository extends EntityRepository<User> {
   }
 
   async associateForumUser(options: AssociateForumUserOptions): Promise<AssociateForumUserResult> {
-    const { nickname, isAdministrator, registrationToken, email, createIfMissing } = options
+    const { nickname, exhibitionId, isAdministrator, registrationToken, email, createIfMissing } =
+      options
     const em = this.getEntityManager()
 
     if (registrationToken) {
@@ -187,14 +190,16 @@ export class UserRepository extends EntityRepository<User> {
       return user
     }
 
-    // No user found by nickname — check if there's an approved registration with this
-    // nickname whose user hasn't completed setup yet (case-insensitive match).
-    const registration = await em.getRepository(Registration).findOne(
-      {
-        nickname: { $ilike: nickname },
-        status: RegistrationStatus.Approved,
-      },
-      { populate: ['email'] },
+    // No user found by nickname — look for registrations under this nickname
+    // (case-insensitive), for this exhibition and for earlier ones.
+    const registrations = await em
+      .getRepository(Registration)
+      .find({ nickname: { $ilike: nickname } }, { populate: ['email'] })
+    const currentRegistration = registrations.find(
+      (registration) => registration.exhibition.id === exhibitionId,
+    )
+    const earlierRegistration = registrations.find(
+      (registration) => registration.status === RegistrationStatus.Approved,
     )
     if (createIfMissing && email) {
       /* An account may exist under this address without the forum name on it
@@ -231,14 +236,24 @@ export class UserRepository extends EntityRepository<User> {
       return created
     }
 
-    if (registration) {
-      const registeredUser = await this.findOne({ email: registration.email })
+    if (currentRegistration?.status === RegistrationStatus.Approved) {
+      const registeredUser = await this.findOne({ email: currentRegistration.email })
       if (registeredUser) {
         logger.info(
           `Forum user ${nickname} has approved registration but hasn't completed setup (user ${registeredUser.id}, ${registeredUser.email})`,
         )
         return 'needsSetup'
       }
+    }
+
+    /* Approved for an earlier exhibition and never set up, with no registration
+       for this one: the setup link of back then has expired, and the way in is
+       to register again. */
+    if (!currentRegistration && earlierRegistration) {
+      logger.info(
+        `Forum user ${nickname} was registered for exhibition ${earlierRegistration.exhibition.id} only`,
+      )
+      return 'registeredEarlier'
     }
 
     return null

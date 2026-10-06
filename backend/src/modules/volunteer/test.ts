@@ -724,10 +724,12 @@ describe('volunteer', () => {
   })
   graphqlTest('a forum member who comes to help gets an account', async () => {
     const db = await initORM()
+    const exhibition = await db.exhibition.findOneOrFail({ key: 'cc2025' })
     await RequestContext.create(db.em, async () => {
       /* What the callback does once the forum has said who this is. */
       const created = await db.user.associateForumUser({
         nickname: 'neuling',
+        exhibitionId: exhibition.id,
         email: 'neuling@forum.example',
         isAdministrator: false,
         createIfMissing: true,
@@ -746,6 +748,7 @@ describe('volunteer', () => {
 
       const linked = (await db.user.associateForumUser({
         nickname: 'donald',
+        exhibitionId: exhibition.id,
         email: known.email,
         isAdministrator: false,
         createIfMissing: true,
@@ -757,6 +760,7 @@ describe('volunteer', () => {
       expect(
         await db.user.associateForumUser({
           nickname: 'niemand',
+          exhibitionId: exhibition.id,
           email: 'niemand@forum.example',
           isAdministrator: false,
         }),
