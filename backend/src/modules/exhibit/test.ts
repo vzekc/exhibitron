@@ -436,3 +436,62 @@ graphqlTest('a TIFF named .jpg gets a JPEG thumbnail', async (graphqlRequest, ap
   expect(thumbnail.headers['content-type']).toBe('image/jpeg')
   expect((await sharp(thumbnail.rawPayload).metadata()).format).toBe('jpeg')
 })
+
+graphqlTest('a portrait phone photo gets an upright thumbnail', async (graphqlRequest, app) => {
+  const session = await login('daffy@example.com')
+  const id = await createExhibit(graphqlRequest, { title: 'Hochkant' }, session)
+  // Stored landscape, left half red and right half blue, with the EXIF orientation a phone
+  // writes for a picture taken upright: shown turned a quarter clockwise, red on top.
+  const half = (background: string) =>
+    sharp({ create: { width: 200, height: 300, channels: 3, background } })
+      .png()
+      .toBuffer()
+  const photo = await sharp({
+    create: { width: 400, height: 300, channels: 3, background: '#000000' },
+  })
+    .composite([
+      { input: await half('#ff0000'), left: 0, top: 0 },
+      { input: await half('#0000ff'), left: 200, top: 0 },
+    ])
+    .jpeg()
+    .withMetadata({ orientation: 6 })
+    .toBuffer()
+  const boundary = 'grenze'
+  const payload = Buffer.concat([
+    Buffer.from(
+      `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="IMG_0001.jpg"\r\nContent-Type: image/jpeg\r\n\r\n`,
+    ),
+    photo,
+    Buffer.from(`\r\n--${boundary}--\r\n`),
+  ])
+  const upload = await app.inject({
+    method: 'PUT',
+    url: `/api/exhibit/${id}/image/main`,
+    headers: {
+      cookie: session.cookie,
+      'content-type': `multipart/form-data; boundary=${boundary}`,
+    },
+    payload,
+  })
+  expect(upload.statusCode).toBe(200)
+
+  const thumbnail = await app.inject({
+    method: 'GET',
+    url: `/api/exhibit/${id}/image/thumbnail`,
+  })
+  expect(thumbnail.statusCode).toBe(200)
+  const { data, info } = await sharp(thumbnail.rawPayload)
+    .raw()
+    .toBuffer({ resolveWithObject: true })
+  expect([info.width, info.height]).toEqual([200, 200])
+  const pixel = (x: number, y: number) => {
+    const offset = (y * info.width + x) * info.channels
+    return [data[offset], data[offset + 2]]
+  }
+  const [topRed, topBlue] = pixel(100, 10)
+  const [bottomRed, bottomBlue] = pixel(100, 190)
+  expect(topRed).toBeGreaterThan(200)
+  expect(topBlue).toBeLessThan(50)
+  expect(bottomRed).toBeLessThan(50)
+  expect(bottomBlue).toBeGreaterThan(200)
+})

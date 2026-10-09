@@ -69,21 +69,13 @@ export async function generateThumbnail(
 
   console.log(`Original dimensions: ${width}x${height} (orientation: ${orientation})`)
 
-  // Calculate square crop dimensions
-  const size = Math.min(width, height)
-  const left = Math.round((width - size) / 2)
-  const top = Math.round((height - size) / 2)
-
-  console.log(`Crop area: left=${left}, top=${top}, size=${size}`)
-
-  // Apply base transformations
-  const processedImage = image
-    .rotate() // Add automatic rotation based on EXIF orientation
-    .extract({ left, top, width: size, height: size })
-    .resize(THUMBNAIL_SIZE, THUMBNAIL_SIZE, {
-      fit: 'fill',
-      kernel: 'lanczos3',
-    })
+  // Turn the picture upright by its EXIF orientation, then cut the centred square out of
+  // the upright picture, so that a phone photo taken upright is cropped along its height.
+  const processedImage = image.rotate().resize(THUMBNAIL_SIZE, THUMBNAIL_SIZE, {
+    fit: 'cover',
+    position: 'centre',
+    kernel: 'lanczos3',
+  })
 
   if (format === 'gif') {
     return { data: await processedImage.toBuffer(), mimeType: 'image/gif' }
