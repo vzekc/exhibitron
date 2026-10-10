@@ -44,7 +44,7 @@ interface NavListProps {
 const NavList = ({ items, className = '' }: NavListProps) => (
   <ul className={`flex ${className}`}>
     {items.map((item, index) => (
-      <li key={index} className="mr-3">
+      <li key={index} className="mr-1.5">
         {item}
       </li>
     ))}
@@ -402,7 +402,7 @@ const NavBar = () => {
                 <NavList items={desktopNavItems} />
               </div>
             </div>
-            <ul className="flex min-w-0 items-center gap-2">
+            <ul className="flex shrink-0 items-center gap-2">
               <div className="hidden md:block">{desktopUserNavItems}</div>
               <li>
                 <Link
