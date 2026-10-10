@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useApolloClient } from '@apollo/client'
 import Icon from './Icon'
 import { Html5Qrcode } from 'html5-qrcode'
+import { SEARCH } from '@pages/Search.tsx'
+
+/*
+ * Das eine Suchfeld der Navigationsleiste. Eine Foto-ID vom Laufzettel, eine
+ * Tischnummer oder der Forums-Nickname eines Mitwirkenden führen direkt auf
+ * deren Seite, jeder andere Text auf die Liste der Treffer. Auf dem Telefon
+ * liest der Knopf davor den QR-Code eines Tischschilds.
+ */
 
 const isMobileDevice = (): boolean => {
   // @ts-expect-error ts2339
@@ -9,10 +18,11 @@ const isMobileDevice = (): boolean => {
   return /android|ipad|iphone|ipod/.test(userAgent.toLowerCase())
 }
 
-const SearchTableNumber = () => {
+const SearchField = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [isScanning, setIsScanning] = useState(false)
   const navigate = useNavigate()
+  const client = useApolloClient()
 
   useEffect(() => {
     let scanner: Html5Qrcode | null = null
@@ -68,20 +78,17 @@ const SearchTableNumber = () => {
     }
   }, [isScanning, navigate])
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    if (/^\d*$/.test(value)) {
-      // Only allow numeric input
-      setSearchQuery(value)
-    }
-  }
-
-  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSearchSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (searchQuery) {
-      setSearchQuery('')
-      navigate(`/table/${searchQuery}`)
-    }
+    const query = searchQuery.trim()
+    if (!query) return
+    setSearchQuery('')
+    const { data } = await client.query({
+      query: SEARCH,
+      variables: { query },
+      fetchPolicy: 'network-only',
+    })
+    navigate(data?.search.target ?? `/suche?q=${encodeURIComponent(query)}`)
   }
 
   const scanQrCode = (e: React.MouseEvent) => {
@@ -97,7 +104,7 @@ const SearchTableNumber = () => {
 
   return (
     <>
-      <form onSubmit={handleSearchSubmit} className="flex min-w-0 shrink-0">
+      <form onSubmit={(e) => void handleSearchSubmit(e)} className="flex min-w-0 shrink-0">
         <div className="flex min-w-0">
           {isMobileDevice() && (
             <button
@@ -109,15 +116,18 @@ const SearchTableNumber = () => {
           <input
             type="text"
             value={searchQuery}
-            onChange={handleSearchChange}
-            placeholder="Tisch Nr"
-            maxLength={3}
-            className="w-20 min-w-0 shrink border border-gray-300 bg-white px-2 py-1 text-gray-900 placeholder-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Suche"
+            title="Foto-ID, Tischnummer, Nickname oder Text"
+            aria-label="Suche nach Foto-ID, Tischnummer, Nickname oder Text"
+            autoComplete="off"
+            spellCheck={false}
+            className="w-28 min-w-0 shrink border border-gray-300 bg-white px-2 py-1 text-gray-900 placeholder-gray-500 sm:w-44 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
           />
           <button
             type="submit"
             className="shrink-0 border border-gray-300 bg-gray-100 px-2 py-1 hover:bg-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600">
-            <Icon name="search-table" alt="Search Table" />
+            <Icon name="search-table" alt="Suchen" />
           </button>
         </div>
       </form>
@@ -137,4 +147,4 @@ const SearchTableNumber = () => {
   )
 }
 
-export default SearchTableNumber
+export default SearchField

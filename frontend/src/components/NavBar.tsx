@@ -5,8 +5,7 @@ import { useQuery } from '@apollo/client'
 import { graphql } from 'gql.tada'
 import { useExhibition } from '@contexts/ExhibitionContext.ts'
 import DropdownMenu from './DropdownMenu.tsx'
-import SearchTableNumber from './SearchTableNumber.tsx'
-import SearchPhotoId from './SearchPhotoId.tsx'
+import SearchField from './SearchField.tsx'
 import { getBookmarks } from '@utils/bookmarks.ts'
 import Breadcrumbs from './Breadcrumbs.tsx'
 import { gql, useMutation } from '@apollo/client'
@@ -412,11 +411,8 @@ const NavBar = () => {
                   <Icon name={hasBookmarks ? 'bookmarked' : 'bookmark'} alt="Bookmarks" />
                 </Link>
               </li>
-              <li className="hidden shrink-0 sm:block">
-                <SearchPhotoId />
-              </li>
               <li className="shrink-0">
-                <SearchTableNumber />
+                <SearchField />
               </li>
             </ul>
           </div>

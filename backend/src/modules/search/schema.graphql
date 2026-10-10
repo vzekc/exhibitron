@@ -1,0 +1,15 @@
+"""
+What the search field in the navigation bar finds. `target` is the page to go
+to when the query names one thing outright; the lists are the content matches
+otherwise.
+"""
+type SearchResult {
+  target: String
+  exhibits: [Exhibit!]!
+  exhibitors: [Exhibitor!]!
+  conferenceSessions: [ConferenceSession!]!
+}
+
+extend type Query {
+  search(query: String!): SearchResult!
+}

@@ -53,6 +53,7 @@ import SurveyResults from './pages/user/SurveyResults.tsx'
 import SurveyQuestions from '@pages/admin/SurveyQuestions.tsx'
 import ExhibitAttributes from '@pages/admin/ExhibitAttributes.tsx'
 import SurveyQuestionEditor from '@pages/admin/SurveyQuestionEditor.tsx'
+import Search from './pages/Search.tsx'
 
 const routes: RouteObject[] = [
   { path: '/register', element: <Register /> },
@@ -81,6 +82,7 @@ const routes: RouteObject[] = [
       { path: '/bookmarks', element: <Bookmarks /> },
       { path: '/table/:number', element: <Table /> },
       { path: '/tables', element: <Tables /> },
+      { path: '/suche', element: <Search /> },
       { path: '/lan', element: <LAN /> },
       { path: '/mitmachen', element: <Mitmachen /> },
       { path: '/mitmachen/registrieren', element: <RegisterHelper /> },
