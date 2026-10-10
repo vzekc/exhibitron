@@ -6,6 +6,7 @@ import { graphql } from 'gql.tada'
 import { useExhibition } from '@contexts/ExhibitionContext.ts'
 import DropdownMenu from './DropdownMenu.tsx'
 import SearchField from './SearchField.tsx'
+import PriorityNav, { PriorityNavEntry } from './PriorityNav.tsx'
 import { getBookmarks } from '@utils/bookmarks.ts'
 import Breadcrumbs from './Breadcrumbs.tsx'
 import { gql, useMutation } from '@apollo/client'
@@ -35,21 +36,6 @@ interface MenuEntry {
      under public/ as a file. */
   reloadDocument?: boolean
 }
-
-interface NavListProps {
-  items: React.ReactNode[]
-  className?: string
-}
-
-const NavList = ({ items, className = '' }: NavListProps) => (
-  <ul className={`flex ${className}`}>
-    {items.map((item, index) => (
-      <li key={index} className="mr-1.5">
-        {item}
-      </li>
-    ))}
-  </ul>
-)
 
 const MenuItem = ({
   to,
@@ -280,36 +266,58 @@ const NavBar = () => {
     )
   }
 
-  // Desktop navigation items
-  const desktopNavItems = [
-    ...commonNavItems.map((item) => (
-      <MenuItem
-        key={item.to}
-        to={item.to}
-        isActive={isActivePath(item.to)}
-        onClick={() => setIsMobileMenuOpen(false)}>
-        {item.label}
-      </MenuItem>
-    )),
+  /* The entries of the menu bar, and what stands for each in "Mehr" when the
+     window is too narrow for all of them. */
+  const desktopNavEntries: PriorityNavEntry[] = [
+    ...commonNavItems.map((item) => ({
+      key: item.to,
+      active: isActivePath(item.to),
+      bar: (
+        <MenuItem to={item.to} isActive={isActivePath(item.to)}>
+          {item.label}
+        </MenuItem>
+      ),
+      more: renderMenuEntry(item, item.to),
+    })),
     ...(exhibitor
       ? [
-          <DropdownMenu key="fotofix" label={<MenuItem hasDropdown>fotofix</MenuItem>}>
-            {commonFotofixMenuItems.map((item, index) => renderMenuEntry(item, index))}
-          </DropdownMenu>,
+          {
+            key: 'fotofix',
+            bar: (
+              <DropdownMenu label={<MenuItem hasDropdown>fotofix</MenuItem>}>
+                {commonFotofixMenuItems.map((item, index) => renderMenuEntry(item, index))}
+              </DropdownMenu>
+            ),
+            more: [
+              { type: 'divider' as const },
+              { type: 'heading' as const, label: 'fotofix' },
+              ...commonFotofixMenuItems,
+            ].map((item, index) => renderMenuEntry(item, index)),
+          },
         ]
       : []),
     ...(exhibitor?.user.isAdministrator
       ? [
-          <DropdownMenu key="admin" label={<MenuItem hasDropdown>Administration</MenuItem>}>
-            {commonAdminMenuItems.map((item) => (
-              <MenuItem key={item.to} to={item.to}>
-                {item.label}
-              </MenuItem>
-            ))}
-          </DropdownMenu>,
+          {
+            key: 'admin',
+            bar: (
+              <DropdownMenu label={<MenuItem hasDropdown>Administration</MenuItem>}>
+                {commonAdminMenuItems.map((item) => renderMenuEntry(item, item.to))}
+              </DropdownMenu>
+            ),
+            more: [
+              { type: 'divider' as const },
+              { type: 'heading' as const, label: 'Administration' },
+              ...commonAdminMenuItems,
+            ].map((item, index) => renderMenuEntry(item, index)),
+          },
         ]
       : []),
   ]
+
+  /* On a phone the entries are behind the hamburger; beside it stands the
+     section being shown, or Start, so the bar is never empty. */
+  const currentSection = commonNavItems.find((item) => isActivePath(item.to)) ?? commonNavItems[0]
 
   // User navigation items for desktop
   const desktopUserNavItems = exhibitor
@@ -394,13 +402,14 @@ const NavBar = () => {
       <nav className="fixed left-0 right-0 top-0 z-50 w-screen bg-white shadow-md dark:bg-gray-800">
         <div className="mx-auto w-full max-w-[100vw] overflow-x-hidden px-4">
           <div className="flex justify-between py-2">
-            <div className="flex min-w-0 items-center">
+            <div className="flex min-w-0 flex-1 items-center">
               <MobileMenuButton />
-              {/* The list scrolls when the window is too narrow for every
-                  entry, rather than sliding under the buttons on the right. */}
-              <div className="hidden min-w-0 items-center overflow-x-auto md:flex">
-                <NavList items={desktopNavItems} />
-              </div>
+              <Link
+                to={currentSection.to}
+                className="ml-1 min-w-0 truncate rounded px-1 py-2 text-lg font-bold text-blue-600 md:hidden dark:text-blue-400">
+                {currentSection.label}
+              </Link>
+              <PriorityNav entries={desktopNavEntries} className="mr-2 hidden md:block" />
             </div>
             <ul className="flex shrink-0 items-center gap-2">
               <div className="hidden md:block">{desktopUserNavItems}</div>
