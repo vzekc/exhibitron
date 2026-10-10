@@ -31,6 +31,10 @@ const DropdownMenu = ({
 
     // Close dropdown when clicking outside
     const handleClickOutside = (event: MouseEvent) => {
+      /* A click inside the open menu that is not on a link, such as one that
+         unfolds a group, leaves the menu open. */
+      const target = event.target as Element
+      if (dropdownRef.current?.contains(target) && !target.closest('a')) return
       if (details && !details.contains(event.target as Node) && details.hasAttribute('open')) {
         closeDropdown()
       }
@@ -84,6 +88,8 @@ const DropdownMenu = ({
               top: `${dropdownPosition.top}px`,
               left: `${dropdownPosition.left}px`,
               width: `${dropdownPosition.width}px`,
+              maxHeight: `calc(100vh - ${dropdownPosition.top}px - 8px)`,
+              overflowY: 'auto',
             }}>
             {children}
           </ul>,

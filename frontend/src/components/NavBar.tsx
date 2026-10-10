@@ -6,7 +6,7 @@ import { graphql } from 'gql.tada'
 import { useExhibition } from '@contexts/ExhibitionContext.ts'
 import DropdownMenu from './DropdownMenu.tsx'
 import SearchField from './SearchField.tsx'
-import PriorityNav, { PriorityNavEntry } from './PriorityNav.tsx'
+import PriorityNav, { MoreGroup, PriorityNavEntry } from './PriorityNav.tsx'
 import { getBookmarks } from '@utils/bookmarks.ts'
 import Breadcrumbs from './Breadcrumbs.tsx'
 import { gql, useMutation } from '@apollo/client'
@@ -288,11 +288,11 @@ const NavBar = () => {
                 {commonFotofixMenuItems.map((item, index) => renderMenuEntry(item, index))}
               </DropdownMenu>
             ),
-            more: [
-              { type: 'divider' as const },
-              { type: 'heading' as const, label: 'fotofix' },
-              ...commonFotofixMenuItems,
-            ].map((item, index) => renderMenuEntry(item, index)),
+            more: (
+              <MoreGroup label="fotofix">
+                {commonFotofixMenuItems.map((item, index) => renderMenuEntry(item, index))}
+              </MoreGroup>
+            ),
           },
         ]
       : []),
@@ -305,11 +305,11 @@ const NavBar = () => {
                 {commonAdminMenuItems.map((item) => renderMenuEntry(item, item.to))}
               </DropdownMenu>
             ),
-            more: [
-              { type: 'divider' as const },
-              { type: 'heading' as const, label: 'Administration' },
-              ...commonAdminMenuItems,
-            ].map((item, index) => renderMenuEntry(item, index)),
+            more: (
+              <MoreGroup label="Administration">
+                {commonAdminMenuItems.map((item) => renderMenuEntry(item, item.to))}
+              </MoreGroup>
+            ),
           },
         ]
       : []),
