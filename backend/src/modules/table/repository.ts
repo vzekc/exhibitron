@@ -10,10 +10,15 @@ export class TableRepository extends EntityRepository<Table> {
    * Every hand a table passes through is written down as it happens, because
    * the assignment itself is a single column that the next change overwrites.
    * A table set to the exhibitor it already has leaves nothing behind.
+   *
+   * Whether the table shows visitor photos is its holder's statement about
+   * their own machine, so it goes with them and a new holder starts without it.
    */
-  private record(table: Table, next: Exhibitor | undefined, actor: User) {
+  private handOver(table: Table, next: Exhibitor | undefined, actor: User) {
     const previous = table.exhibitor
+    table.exhibitor = next
     if (previous?.id === next?.id) return
+    table.showsVisitorPhotos = false
     this.getEntityManager().persist(
       this.getEntityManager().create(TableAssignmentChange, {
         exhibition: table.exhibition,
@@ -30,8 +35,7 @@ export class TableRepository extends EntityRepository<Table> {
     if (table.exhibitor && table.exhibitor !== exhibitor) {
       throw new PermissionDeniedError('The requested table is assigned to another exhibitor')
     }
-    this.record(table, exhibitor, actor)
-    table.exhibitor = exhibitor
+    this.handOver(table, exhibitor, actor)
     return table
   }
 
@@ -45,8 +49,7 @@ export class TableRepository extends EntityRepository<Table> {
     if (exhibitor && table.exhibitor !== exhibitor) {
       throw new PermissionDeniedError('Cannot release table claimed by another exhibitor')
     }
-    this.record(table, undefined, actor)
-    table.exhibitor = undefined
+    this.handOver(table, undefined, actor)
     return table
   }
 
@@ -54,8 +57,7 @@ export class TableRepository extends EntityRepository<Table> {
      whoever held it before. */
   async assignTo(exhibition: Exhibition, tableNumber: number, exhibitor: Exhibitor, actor: User) {
     const table = await this.findOneOrFail({ exhibition, number: tableNumber })
-    this.record(table, exhibitor, actor)
-    table.exhibitor = exhibitor
+    this.handOver(table, exhibitor, actor)
     return table
   }
 

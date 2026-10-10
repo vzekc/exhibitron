@@ -109,3 +109,49 @@ graphqlTest('should unassign exhibits when table is released', async (executeOpe
   const exhibit = response.data!.getExhibit!
   expect(exhibit.table).toBeNull()
 })
+
+graphqlTest('a table changing hands no longer shows visitor photos', async (executeOperation) => {
+  const daffy = await login('daffy@example.com')
+  const admin = await login('admin@example.com')
+
+  const claim = await executeOperation(
+    graphql(`
+      mutation ClaimTable($number: Int!) {
+        claimTable(number: $number) {
+          id
+        }
+      }
+    `),
+    { number: 1 },
+    daffy,
+  )
+  expect(claim.errors).toBeUndefined()
+
+  const update = await executeOperation(
+    graphql(`
+      mutation UpdateTable($number: Int!, $showsVisitorPhotos: Boolean) {
+        updateTable(number: $number, showsVisitorPhotos: $showsVisitorPhotos) {
+          showsVisitorPhotos
+        }
+      }
+    `),
+    { number: 1, showsVisitorPhotos: true },
+    daffy,
+  )
+  expect(update.errors).toBeUndefined()
+  expect(update.data?.updateTable?.showsVisitorPhotos).toBe(true)
+
+  const release = await executeOperation(
+    graphql(`
+      mutation ReleaseTable($number: Int!) {
+        releaseTable(number: $number) {
+          showsVisitorPhotos
+        }
+      }
+    `),
+    { number: 1 },
+    admin,
+  )
+  expect(release.errors).toBeUndefined()
+  expect(release.data?.releaseTable?.showsVisitorPhotos).toBe(false)
+})
