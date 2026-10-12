@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>FotoFix auf der CC2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&family=VT323&display=swap">
+<style>
+/* Layout: one reading column, a ticket-strip of headline numbers, then charts and the machine list; phosphor-green accent from the hall's terminals */
+:root {
+  --bg: #f6f7f4;
+  --surface: #ffffff;
+  --fg: #16201a;
+  --fg-2: #4a564e;
+  --muted: #7b867f;
+  --rule: #d9dfd9;
+  --accent: #1f7a4a;
+  --bar: #2f8f5b;
+  --bar-hover: #1f6e44;
+  --bar-zero: #b9c2bc;
+  --chip-sure: #1f7a4a;
+  --chip-likely: #2b6aa8;
+  --chip-guess: #9a6a00;
+  --chip-open: #b4413a;
+  --display: "VT323", "IBM Plex Mono", ui-monospace, monospace;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1411; --surface: #161d18; --fg: #e3ebe5; --fg-2: #b0bdb4; --muted: #84928a; --rule: #2a352e;
+    --accent: #5fd08e; --bar: #3fae70; --bar-hover: #6fd49a; --bar-zero: #4a564e;
+    --chip-sure: #5fd08e; --chip-likely: #7fb2ea; --chip-guess: #e0b04a; --chip-open: #f08a80;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1411; --surface: #161d18; --fg: #e3ebe5; --fg-2: #b0bdb4; --muted: #84928a; --rule: #2a352e;
+  --accent: #5fd08e; --bar: #3fae70; --bar-hover: #6fd49a; --bar-zero: #4a564e;
+  --chip-sure: #5fd08e; --chip-likely: #7fb2ea; --chip-guess: #e0b04a; --chip-open: #f08a80;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.55 var(--body); padding: 0 16px; }
+main { max-width: 920px; margin: 0 auto; padding-block: 40px 64px; display: flex; flex-direction: column; gap: 48px; }
+h1, h2 { font-family: var(--display); font-weight: 400; text-wrap: balance; margin: 0; line-height: 1.05; }
+h1 { font-size: clamp(44px, 8vw, 72px); color: var(--accent); }
+h2 { font-size: 34px; }
+h3 { font-size: 15px; font-weight: 600; margin: 0; }
+p { margin: 0; max-width: 68ch; }
+.lede { font-size: 17px; color: var(--fg-2); }
+.eyebrow { font: 600 12px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+header { display: flex; flex-direction: column; gap: 14px; }
+section { display: flex; flex-direction: column; gap: 18px; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* headline strip */
+.strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-block: 2px solid var(--fg); }
+.strip > div { padding: 16px 14px; display: flex; flex-direction: column; gap: 4px; border-left: 1px dashed var(--rule); min-width: 0; }
+.strip > div:first-child { border-left: 0; }
+.strip .big { font: 400 52px/1 var(--display); color: var(--fg); }
+.strip .lbl { font-size: 13px; color: var(--fg-2); }
+@media (max-width: 640px) { .strip { grid-template-columns: repeat(2, minmax(0, 1fr)); } .strip > div:nth-child(3) { border-left: 0; } .strip > div:nth-child(n+3) { border-top: 1px dashed var(--rule); } }
+
+/* tables */
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font: 600 12px/1.3 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+td.r, th.r { text-align: right; }
+tbody tr:last-child td { border-bottom: 0; }
+tfoot td { border-top: 2px solid var(--fg); border-bottom: 0; font-weight: 600; }
+
+/* charts */
+.chart-wrap { position: relative; }
+.multiples { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+@media (max-width: 640px) { .multiples { grid-template-columns: minmax(0, 1fr); } }
+.multiples figure { margin: 0; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+figcaption { font: 600 13px/1.3 var(--mono); color: var(--fg-2); }
+svg { display: block; width: 100%; height: auto; overflow: visible; }
+svg text { fill: var(--muted); font: 11px var(--mono); }
+svg .val { fill: var(--fg-2); font-weight: 600; }
+svg .grid { stroke: var(--rule); stroke-width: 1; }
+svg .bar { fill: var(--bar); }
+svg .bar.zero { fill: var(--bar-zero); }
+svg .hit { fill: transparent; cursor: default; }
+svg .hit:hover + .bar, svg .hit:focus + .bar { fill: var(--bar-hover); }
+svg .hit:focus { outline: none; }
+.tip { position: absolute; pointer-events: none; background: var(--surface); color: var(--fg); border: 1px solid var(--rule); border-radius: 4px; padding: 6px 9px; font: 12px/1.35 var(--body); box-shadow: 0 2px 8px rgb(0 0 0 / .12); white-space: nowrap; z-index: 2; }
+.tip b { font: 600 15px var(--mono); display: block; }
+.note { font-size: 13px; color: var(--muted); }
+
+/* machine list */
+.machines td.bar-cell { width: 34%; min-width: 120px; }
+.mbar { display: flex; align-items: center; gap: 8px; }
+.mbar span.track { flex: 1; height: 10px; position: relative; }
+.mbar span.fill { position: absolute; inset: 0 auto 0 0; background: var(--bar); border-radius: 0 3px 3px 0; }
+.mbar b { font: 600 13px var(--mono); min-width: 2ch; text-align: right; }
+.who { font-family: var(--mono); font-size: 13px; color: var(--accent); }
+.sub { color: var(--muted); font-size: 12.5px; }
+.chip { display: inline-flex; align-items: center; gap: 5px; font: 600 11px/1 var(--mono); letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
+.chip::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.chip.sure { color: var(--chip-sure); }
+.chip.likely { color: var(--chip-likely); }
+.chip.guess { color: var(--chip-guess); }
+.chip.open { color: var(--chip-open); }
+.chip.sure::before { border-radius: 2px; }
+.chip.open::before { border-radius: 0; transform: rotate(45deg); width: 7px; height: 7px; }
+
+/* nick index */
+.nicks { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px 24px; margin: 0; padding: 0; list-style: none; }
+.nicks li { display: flex; gap: 10px; align-items: baseline; border-bottom: 1px dashed var(--rule); padding-block: 5px; min-width: 0; }
+.nicks .t { font: 600 12px var(--mono); color: var(--muted); min-width: 5ch; }
+.nicks .n { font: 600 14px var(--mono); color: var(--accent); }
+.nicks .s { font-size: 12.5px; color: var(--fg-2); margin-left: auto; text-align: right; }
+
+/* questions */
+.questions { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; border-top: 2px solid var(--fg); }
+.questions li { padding: 16px 0; border-bottom: 1px dashed var(--rule); display: grid; grid-template-columns: 3ch minmax(0, 1fr); gap: 0 12px; }
+.questions .q-n { font: 400 28px/1 var(--display); color: var(--accent); }
+.questions h3 { margin-bottom: 4px; }
+.questions p { color: var(--fg-2); }
+code { font: 13px var(--mono); background: color-mix(in srgb, var(--rule) 55%, transparent); padding: 1px 4px; border-radius: 3px; }
+footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 16px; display: flex; flex-direction: column; gap: 6px; }
+@media (prefers-reduced-motion: no-preference) { svg .bar, .mbar span.fill { transition: fill .12s; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <span class="eyebrow">Classic Computing 2026 · 9.–11. Oktober</span>
+    <h1>FotoFix auf der CC2026</h1>
+    <p class="lede">Wie oft die Fotobox fotografiert hat und welche Rechner in der Halle die Fotos abgeholt und gezeigt haben. Gezählt sind Freitag bis Sonntag. Unten stehen ein paar offene Fragen an euch Aussteller.</p>
+  </header>
+
+  <div class="strip" aria-label="Kennzahlen">
+    <div><span class="big num">170</span><span class="lbl">Fotos an der Fotobox</span></div>
+    <div><span class="big num">111</span><span class="lbl">davon auf mindestens einem Rechner gezeigt (65&nbsp;%)</span></div>
+    <div><span class="big num">25</span><span class="lbl">Rechner haben Fotos abgerufen</span></div>
+    <div><span class="big num">2,95</span><span class="lbl">Rechner pro Foto im Mittel</span></div>
+  </div>
+
+  <section>
+    <span class="eyebrow">Fotos</span>
+    <h2>Drei Tage an der Fotobox</h2>
+    <div class="scroll">
+      <table>
+        <thead><tr><th></th><th class="r">Freitag</th><th class="r">Samstag</th><th class="r">Sonntag</th><th class="r">Gesamt</th></tr></thead>
+        <tbody>
+          <tr><td>Fotos an der Fotobox</td><td class="r">41</td><td class="r">75</td><td class="r">54</td><td class="r"><b>170</b></td></tr>
+          <tr><td>Countdowns gestartet</td><td class="r">44</td><td class="r">107</td><td class="r">56</td><td class="r">207</td></tr>
+          <tr><td>Bons gedruckt</td><td class="r">30</td><td class="r">75</td><td class="r">52</td><td class="r">157</td></tr>
+          <tr><td>auf Wunsch gelöscht</td><td class="r">0</td><td class="r">2</td><td class="r">1</td><td class="r">3</td></tr>
+          <tr><td>auf einem Rechner gezeigt</td><td class="r">27 (66&nbsp;%)</td><td class="r">46 (61&nbsp;%)</td><td class="r">38 (70&nbsp;%)</td><td class="r">111 (65&nbsp;%)</td></tr>
+          <tr><td>Rechner pro Foto, Mittel</td><td class="r">3,6</td><td class="r">2,8</td><td class="r">2,6</td><td class="r">2,95</td></tr>
+          <tr><td>Rechner pro Foto, Median</td><td class="r">2</td><td class="r">1</td><td class="r">1</td><td class="r">1</td></tr>
+          <tr><td>meiste Rechner für ein Foto</td><td class="r">16</td><td class="r">15</td><td class="r">14</td><td class="r">16</td></tr>
+          <tr><td>Rechner mit Abrufen</td><td class="r">24</td><td class="r">22</td><td class="r">20</td><td class="r">25</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">Freitag liefen die ersten elf Fotos über die Kamera-Webseite, bis die Indy um 13:37 Uhr lief; deshalb weniger Bons als Fotos. Drei von vier Countdowns endeten in einem gespeicherten Foto. Vier weitere Fotos kamen über die Webseite statt über die Fotobox und sind oben nicht mitgezählt. Die Zahlen pro Tag zählen nur die Fotos dieses Tages; Sonntagsfotos hatten bis Messeschluss weniger Zeit, abgerufen zu werden.</p>
+
+    <h3>Fotos pro Stunde</h3>
+    <div class="chart-wrap" id="hours-wrap">
+      <div class="multiples" id="hours"></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">Verbreitung</span>
+    <h2>Auf wie vielen Rechnern ein Foto zu sehen war</h2>
+    <p>Ein Drittel der Fotos hat kein Rechner abgeholt. Die übrigen verteilen sich weit: 17 Fotos waren auf zehn oder mehr Rechnern zu sehen, eins auf sechzehn. Unter den gezeigten Fotos sind es im Mittel 4,5 Rechner.</p>
+    <div class="chart-wrap" id="hist-wrap"><div id="hist"></div></div>
+    <p class="note">Gezählt ist ein Rechner, wenn er eine Bilddatei des Fotos geholt hat. Verzeichnisse und Übersichtsseiten zählen nicht. Auf der öffentlichen Webseite haben Besucher außerdem 75 der 170 Fotos heruntergeladen, Suchmaschinen nicht mitgerechnet.</p>
+  </section>
+
+  <section>
+    <span class="eyebrow">Rechner</span>
+    <h2>Wer die Fotos gezeigt hat</h2>
+    <p>Rechner mit fester Adresse erkennen wir am Adressplan (10.1.<i>Tisch</i>.x) oder an den angemeldeten Hosts. Viele Rechner holten sich ihre Adresse per DHCP; die ordnen wir nach Programmkennung, abgerufenen Formaten und Ausstellungstext zu. Das Zeichen in der letzten Spalte sagt, wie sicher die Zuordnung ist.</p>
+    <div class="scroll">
+      <table class="machines" id="machines">
+        <thead><tr><th>Tisch</th><th>Rechner</th><th>Aussteller</th><th>Fotos</th><th class="r">Fr / Sa / So</th><th>Zuordnung</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="note"><span class="chip sure">sicher</span> feste Adresse oder eindeutige Leitung · <span class="chip likely">wahrscheinlich</span> Kennung und Ausstellungstext passen · <span class="chip guess">vermutet</span> nur das System passt · <span class="chip open">offen</span> kein Tisch gefunden. „Fr / Sa / So“ zählt die Fotos, die der Rechner an dem Tag abgerufen hat.</p>
+  </section>
+
+  <section>
+    <span class="eyebrow">Aussteller</span>
+    <h2>Nach Spitznamen</h2>
+    <p>Alle Tische, die Besucherfotos zeigen wollten oder gezeigt haben, mit den Rechnern, die wir ihnen zuordnen. Wer hier ohne Rechner steht, hat entweder auf einem Weg abgerufen, den wir nicht erkennen, oder nichts abgerufen. Siehe Frage 7.</p>
+    <ul class="nicks" id="nicks"></ul>
+  </section>
+
+  <section>
+    <span class="eyebrow">Eure Hilfe</span>
+    <h2>Offene Fragen</h2>
+    <p>Wenn ihr eine Antwort wisst, sagt Hans Bescheid. Wir rechnen die Zahlen dann neu.</p>
+    <ol class="questions">
+      <li><span class="q-n">1</span><div><h3>Wer hat RetroTronBattle gezeigt?</h3><p>Ein Programm, das sich als <code>RetroTronBattle/1.0</code> meldet, hat von 10.200.102.38 aus 36 Fotos geholt. Das ist der viertfleißigste Rechner der Halle. Wir finden kein passendes Exponat.</p></div></li>
+      <li><span class="q-n">2</span><div><h3>Tisch 33: welcher Windows-PC?</h3><p>Ein Windows-PC mit Firefox an Adresse 10.1.33.100 hat Samstag und Sonntag sechs Fotos angesehen. Laut Adressplan ist das Tisch 33, für den aber kein Exponat eingetragen ist.</p></div></li>
+      <li><span class="q-n">3</span><div><h3>Windows-PC am Samstagabend</h3><p>10.200.102.37, Chrome unter Windows, Samstag zwischen 17 und 18 Uhr, drei Fotos.</p></div></li>
+      <li><span class="q-n">4</span><div><h3>Apple II am ETS-Terminalserver, Port 1</h3><p>Samstag um 22:12 Uhr hat ein Apple II über LAT-Knoten <code>ETS_661EA6</code>, Port 1 eine Diskette mit einem Foto geholt. Port 2 desselben Knotens war das MSX von <span class="who">Olaf.Friedrich</span>. Gehört Port 1 auch an Tisch 64 oder an einen anderen?</p></div></li>
+      <li><span class="q-n">5</span><div><h3>68k-Mac mit Internet Explorer 3</h3><p>Freitag zwischen 13 und 16 Uhr hat ein Mac mit 68k-Prozessor (MSIE 3.0.1, Mac OS 8) ein Foto angesehen. <span class="who">cybernesto</span> (Colour Classic, Tisch 53), <span class="who">THein</span> (SE/30, Tisch 54) oder <span class="who">Rudi</span> (Quadra 950, Tisch 82)?</p></div></li>
+      <li><span class="q-n">6</span><div><h3>Stimmen unsere Vermutungen?</h3><p>Apple II per FTP (doppelte Hires-Grafik) bei <span class="who">cybernesto</span>, Tisch 53 · Mac OS X mit Safari auf dem iMac G3 von <span class="who">MarkL eisdielenbiker</span>, Tisch 72 · DOS-Programm <code>vga.com</code> auf dem IBM PS/1 von <span class="who">Faltenwespe</span>, Tisch 4 · TRS-80 Model 4P von <span class="who">RetroGuy</span> über den DECserver, Tisch 17 · C64 mit WiC64 bei <span class="who">joergr</span> und C64 mit Meatloaf bei <span class="who">andi6510</span>.</p></div></li>
+      <li><span class="q-n">7</span><div><h3>Tische ohne erkannte Abrufe</h3><p><span class="who">CPU Duke</span> (3), <span class="who">wildbits</span> (24), <span class="who">der_letzte_Amiganer</span> (28), <span class="who">JPSAF</span> (29), <span class="who">THein</span> (54), <span class="who">konnexus</span> (55), Tisch 80, <span class="who">Rudi</span> (82), <span class="who">boulderdash</span> (87) und <span class="who">easywitt</span> (90) wollten Fotos zeigen. Wir sehen von dort keinen sicher zugeordneten Abruf. Habt ihr Fotos gezeigt, und wenn ja, wie wurden sie geholt?</p></div></li>
+    </ol>
+  </section>
+
+  <footer>
+    <span>Quellen: Fotodatenbank von exhibitron, Protokoll der Foto-Abrufe aus der Halle (HTTP, FTP, LAT, serielle Leitungen), Protokoll der Fotobox. Stand 12. Oktober 2026.</span>
+    <span>Hans' eigene Testabrufe sind herausgerechnet.</span>
+  </footer>
+</main>
+
+<script>
+const HOURS = {
+  "Freitag":  {11:8, 12:4, 13:4, 14:2, 15:6, 16:7, 17:10},
+  "Samstag":  {9:2, 10:5, 11:15, 12:14, 13:13, 14:3, 15:6, 16:8, 17:3, 18:5, 19:1},
+  "Sonntag":  {10:7, 11:19, 12:17, 13:7, 14:4}
+};
+const HIST = {0:59,1:32,2:21,3:10,4:7,5:6,6:7,7:3,8:5,9:3,10:4,11:2,12:5,13:1,14:2,15:2,16:1};
+const NICK = {"3":"CPU Duke","4":"Faltenwespe","13":"Sayjionix","16":"joergr","17":"RetroGuy","24":"wildbits","28":"der_letzte_Amiganer","29":"JPSAF","33":"","34":"CBM_Ba","47":"andi6510","53":"cybernesto","54":"THein","55":"konnexus","64":"Olaf.Friedrich","72":"MarkL eisdielenbiker","73":"hans","74":"hans","75":"Toshi","78":"tuti","80":"","82":"Rudi","87":"boulderdash","90":"easywitt","94":"gnupublic","97":"Ekatus","98":"Ekatus"};
+// table, machine, how, confidence, photos, [fri, sat, sun]
+const MACHINES = [
+  ["78","Amiga 3000 Slotmachine","Host a3000slot, 10.2.0.11","sure",45,[9,18,19]],
+  ["4","Minitel 1","über Relay","sure",40,[5,19,16]],
+  ["16","C64 mit WiC64","DHCP, Kennung WiC64","likely",38,[7,20,15]],
+  ["?","RetroTronBattle","DHCP 10.200.102.38","open",36,[4,22,10]],
+  ["78","PowerMac 6100, Puzzle","DHCP, Mac OS 8 PPC und PICT per FTP","likely",36,[6,21,12]],
+  ["47","C64-II mit Meatloaf","DHCP, Kennung MEATLOAF","likely",36,[2,26,10]],
+  ["73","SPARCclassic Plotstation","10.1.74.1, Kennung sunplot","sure",35,[4,22,10]],
+  ["4","TONO Θ-7000 / Θ-777","über Relay","sure",35,[2,20,13]],
+  ["94","Analoges Speicherterminal","Host compo, 10.2.0.8","sure",34,[3,19,12]],
+  ["97","Zeilendrucker am TN3270-Host","10.1.97.2, Host-Druckseite","likely",25,[5,13,9]],
+  ["72","iMac G3","DHCP, Mac OS X PPC, Safari","guess",24,[1,16,7]],
+  ["4","IBM PS/1","DHCP, vga.com unter DOS","guess",20,[5,10,6]],
+  ["34","CBM 8032 mit HSG-Karte","DHCP, holt cbm8032.pbm über einen PC","likely",19,[1,15,3]],
+  ["53","Apple II","DHCP, Apple-II-Formate per FTP","likely",15,[1,1,15]],
+  ["75","DEC VT241 / LA75 Plus","10.1.75.0, Sixel und LA75","sure",15,[0,7,8]],
+  ["64","MSX","LAT ETS_661EA6, Port 2","likely",14,[0,6,8]],
+  ["98","Apple IIc mit ImageWriter","DHCP, gleicher Abrufer wie 10.1.97.2","likely",11,[2,5,6]],
+  ["17","TRS-80 Model 4P","LAT DS200HANS, Port 1","likely",7,[0,0,7]],
+  ["33","Windows-PC","10.1.33.100, Firefox","open",6,[0,3,3]],
+  ["74","DEC GIGI (VK100)","LAT M32, Port 1","sure",6,[0,3,3]],
+  ["13","Sharp X68000","LAT DS200HANS, Port 8, X68000-PIC","likely",3,[0,3,1]],
+  ["?","Windows-PC","DHCP 10.200.102.37, Chrome","open",3,[0,3,0]],
+  ["53/54/82","68k-Mac, MSIE 3","DHCP, nur Freitag","guess",1,[1,0,0]],
+  ["?","Apple II","LAT ETS_661EA6, Port 1","open",1,[0,1,0]],
+  ["98","PowerMac G4 Cube","10.1.98.2, Programm FOTOFIX1.0","sure",1,[0,0,1]]
+];
+const SHOWING = ["3","4","13","16","17","24","28","29","33","34","47","53","54","55","64","72","73","74","75","78","80","82","87","90","94","97","98"];
+const CONF = {sure:"sicher", likely:"wahrscheinlich", guess:"vermutet", open:"offen"};
+const NS = "http://www.w3.org/2000/svg";
+
+function el(tag, attrs, text) {
+  const e = tag === "svg" || ["g","rect","line","text"].includes(tag) ? document.createElementNS(NS, tag) : document.createElement(tag);
+  for (const k in attrs || {}) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  return e;
+}
+
+function tooltip(wrap) {
+  const tip = el("div", {class: "tip", hidden: ""});
+  wrap.appendChild(tip);
+  return {
+    show(target, value, label) {
+      tip.replaceChildren(el("b", {}, value), document.createTextNode(label));
+      tip.hidden = false;
+      const w = wrap.getBoundingClientRect(), r = target.getBoundingClientRect();
+      let x = r.left - w.left + r.width / 2 - tip.offsetWidth / 2;
+      x = Math.max(0, Math.min(x, w.width - tip.offsetWidth));
+      tip.style.left = x + "px";
+      tip.style.top = (r.top - w.top - tip.offsetHeight - 6) + "px";
+    },
+    hide() { tip.hidden = true; }
+  };
+}
+
+function bars(container, data, opts) {
+  const keys = opts.keys, max = opts.max, W = opts.width, H = 150, pl = 26, pr = 4, pt = 16, pb = 22;
+  const svg = el("svg", {viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": opts.label});
+  const iw = W - pl - pr, ih = H - pt - pb, step = iw / keys.length, bw = Math.max(4, step - 2);
+  const y = v => pt + ih - (v / max) * ih;
+  for (const t of opts.ticks) {
+    svg.appendChild(el("line", {class: "grid", x1: pl, x2: W - pr, y1: y(t), y2: y(t)}));
+    svg.appendChild(el("text", {x: pl - 5, y: y(t) + 4, "text-anchor": "end"}, t));
+  }
+  keys.forEach((k, i) => {
+    const v = data[k] || 0, x = pl + i * step + (step - bw) / 2;
+    const h = Math.max(v ? 2 : 0, ih - (y(v) - pt));
+    const hit = el("rect", {class: "hit", x: pl + i * step, y: pt, width: step, height: ih + pb, tabindex: 0, "aria-label": opts.aria(k, v)});
+    const bar = el("rect", {class: "bar" + (opts.zero && k == 0 ? " zero" : ""), x, y: pt + ih - h, width: bw, height: h, rx: Math.min(3, bw / 2)});
+    hit.addEventListener("pointerenter", () => opts.tip.show(bar, String(v), opts.tipLabel(k)));
+    hit.addEventListener("focus", () => opts.tip.show(bar, String(v), opts.tipLabel(k)));
+    hit.addEventListener("pointerleave", () => opts.tip.hide());
+    hit.addEventListener("blur", () => opts.tip.hide());
+    svg.appendChild(hit); svg.appendChild(bar);
+    if (opts.labelEvery(k, i)) svg.appendChild(el("text", {x: x + bw / 2, y: H - 6, "text-anchor": "middle"}, opts.xLabel(k)));
+    if (opts.showVal(k, v)) svg.appendChild(el("text", {class: "val", x: x + bw / 2, y: pt + ih - h - 4, "text-anchor": "middle"}, v));
+  });
+  container.appendChild(svg);
+}
+
+// Fotos pro Stunde: drei kleine Diagramme mit gemeinsamer Skala
+(() => {
+  const wrap = document.getElementById("hours-wrap"), tip = tooltip(wrap), root = document.getElementById("hours");
+  const keys = Array.from({length: 11}, (_, i) => 9 + i);
+  for (const day in HOURS) {
+    const fig = el("figure"), total = Object.values(HOURS[day]).reduce((a, b) => a + b, 0);
+    fig.appendChild(el("figcaption", {}, `${day} · ${total} Fotos`));
+    bars(fig, HOURS[day], {keys, max: 20, width: 260, ticks: [0, 10, 20], tip, label: `${day}: Fotos pro Stunde`,
+      aria: (k, v) => `${day} ${k}–${k + 1} Uhr: ${v} Fotos`, tipLabel: k => `Fotos, ${day} ${k}–${k + 1} Uhr`,
+      labelEvery: (k, i) => i % 2 === 0, xLabel: k => k, showVal: (k, v) => v === Math.max(...Object.values(HOURS[day]))});
+    root.appendChild(fig);
+  }
+})();
+
+// Histogramm
+(() => {
+  const wrap = document.getElementById("hist-wrap"), tip = tooltip(wrap);
+  const keys = Array.from({length: 17}, (_, i) => i);
+  bars(document.getElementById("hist"), HIST, {keys, max: 60, width: 640, ticks: [0, 20, 40, 60], tip, zero: true,
+    label: "Anzahl Fotos nach Zahl der Rechner, die sie abgerufen haben",
+    aria: (k, v) => `${v} Fotos auf ${k} Rechnern`, tipLabel: k => k === 0 ? "Fotos auf keinem Rechner" : `Fotos auf ${k} Rechner${k === 1 ? "" : "n"}`,
+    labelEvery: () => true, xLabel: k => k, showVal: (k, v) => v > 0});
+  const cap = el("p", {class: "note"}, "Waagerecht: Zahl der Rechner, die ein Foto geholt haben. Senkrecht: Zahl der Fotos. Grau: nirgends gezeigt.");
+  document.getElementById("hist").appendChild(cap);
+})();
+
+// Rechnerliste
+(() => {
+  const tbody = document.querySelector("#machines tbody"), max = 45;
+  for (const [table, name, how, conf, photos, days] of MACHINES) {
+    const tr = el("tr");
+    tr.appendChild(el("td", {class: "num"}, table));
+    const m = el("td"); m.appendChild(el("div", {}, name)); m.appendChild(el("div", {class: "sub"}, how)); tr.appendChild(m);
+    const nicks = [...new Set(table.split("/").map(t => NICK[t]).filter(Boolean))];
+    tr.appendChild(el("td", {class: "who"}, nicks.join(" / ") || "–"));
+    const bc = el("td", {class: "bar-cell"}), mb = el("div", {class: "mbar"}), track = el("span", {class: "track"}), fill = el("span", {class: "fill"});
+    fill.style.width = (photos / max * 100) + "%";
+    track.appendChild(fill); mb.appendChild(el("b", {class: "num"}, photos)); mb.appendChild(track); bc.appendChild(mb); tr.appendChild(bc);
+    tr.appendChild(el("td", {class: "r num"}, days.join(" / ")));
+    tr.appendChild(el("td", {}, "")).appendChild(el("span", {class: "chip " + conf}, CONF[conf]));
+    tbody.appendChild(tr);
+  }
+})();
+
+// Spitznamen-Index
+(() => {
+  const ul = document.getElementById("nicks");
+  for (const t of SHOWING) {
+    const ms = MACHINES.filter(m => m[0].split("/").includes(t)).map(m => m[1] + (m[0].includes("/") ? " (?)" : ""));
+    const li = el("li");
+    li.appendChild(el("span", {class: "t"}, "T" + t));
+    li.appendChild(el("span", {class: "n"}, NICK[t] || "–"));
+    li.appendChild(el("span", {class: "s"}, ms.length ? ms.join(", ") : "kein Abruf erkannt"));
+    ul.appendChild(li);
+  }
+})();
+</script>
+</body>
+</html>
