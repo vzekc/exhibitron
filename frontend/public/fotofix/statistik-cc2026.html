@@ -117,7 +117,8 @@ svg .hit:focus { outline: none; }
 .nicks .s { font-size: 12.5px; color: var(--fg-2); margin-left: auto; text-align: right; }
 
 /* questions */
-.questions { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; border-top: 2px solid var(--fg); }
+.learned { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 8px; max-width: 72ch; color: var(--fg-2); }
+\1 list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; border-top: 2px solid var(--fg); }
 .questions li { padding: 16px 0; border-bottom: 1px dashed var(--rule); display: grid; grid-template-columns: 3ch minmax(0, 1fr); gap: 0 12px; }
 .questions .q-n { font: 400 28px/1 var(--display); color: var(--accent); }
 .questions h3 { margin-bottom: 4px; }
@@ -137,9 +138,9 @@ footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule)
 
   <div class="strip" aria-label="Kennzahlen">
     <div><span class="big num">170</span><span class="lbl">Fotos an der Fotobox</span></div>
-    <div><span class="big num">111</span><span class="lbl">davon auf mindestens einem Rechner gezeigt (65&nbsp;%)</span></div>
-    <div><span class="big num">25</span><span class="lbl">Rechner haben Fotos abgerufen</span></div>
-    <div><span class="big num">2,95</span><span class="lbl">Rechner pro Foto im Mittel</span></div>
+    <div><span class="big num">116</span><span class="lbl">davon an mindestens einem Stand gezeigt (68&nbsp;%)</span></div>
+    <div><span class="big num">32</span><span class="lbl">Rechner haben Fotos abgerufen</span></div>
+    <div><span class="big num">3,55</span><span class="lbl">Rechner pro Foto im Mittel</span></div>
   </div>
 
   <section>
@@ -150,14 +151,14 @@ footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule)
         <thead><tr><th></th><th class="r">Freitag</th><th class="r">Samstag</th><th class="r">Sonntag</th><th class="r">Gesamt</th></tr></thead>
         <tbody>
           <tr><td>Fotos an der Fotobox</td><td class="r">41</td><td class="r">75</td><td class="r">54</td><td class="r"><b>170</b></td></tr>
-          <tr><td>Countdowns gestartet</td><td class="r">44</td><td class="r">107</td><td class="r">56</td><td class="r">207</td></tr>
-          <tr><td>Bons gedruckt</td><td class="r">30</td><td class="r">75</td><td class="r">52</td><td class="r">157</td></tr>
-          <tr><td>auf Wunsch gelöscht</td><td class="r">0</td><td class="r">2</td><td class="r">1</td><td class="r">3</td></tr>
-          <tr><td>auf einem Rechner gezeigt</td><td class="r">27 (66&nbsp;%)</td><td class="r">46 (61&nbsp;%)</td><td class="r">38 (70&nbsp;%)</td><td class="r">111 (65&nbsp;%)</td></tr>
-          <tr><td>Rechner pro Foto, Mittel</td><td class="r">3,6</td><td class="r">2,8</td><td class="r">2,6</td><td class="r">2,95</td></tr>
-          <tr><td>Rechner pro Foto, Median</td><td class="r">2</td><td class="r">1</td><td class="r">1</td><td class="r">1</td></tr>
-          <tr><td>meiste Rechner für ein Foto</td><td class="r">16</td><td class="r">15</td><td class="r">14</td><td class="r">16</td></tr>
-          <tr><td>Rechner mit Abrufen</td><td class="r">24</td><td class="r">22</td><td class="r">20</td><td class="r">25</td></tr>
+<tr><td>Countdowns gestartet</td><td class="r">44</td><td class="r">107</td><td class="r">56</td><td class="r">207</td></tr>
+<tr><td>Bons gedruckt</td><td class="r">30</td><td class="r">75</td><td class="r">52</td><td class="r">157</td></tr>
+<tr><td>auf Wunsch gelöscht</td><td class="r">0</td><td class="r">2</td><td class="r">1</td><td class="r">3</td></tr>
+<tr><td>an einem Stand gezeigt</td><td class="r">29 (71&nbsp;%)</td><td class="r">48 (64&nbsp;%)</td><td class="r">39 (72&nbsp;%)</td><td class="r">116 (68&nbsp;%)</td></tr>
+<tr><td>Rechner pro Foto, Mittel</td><td class="r">4,6</td><td class="r">3,5</td><td class="r">2,8</td><td class="r">3,55</td></tr>
+<tr><td>Rechner pro Foto, Median</td><td class="r">2</td><td class="r">2</td><td class="r">1</td><td class="r">1,5</td></tr>
+<tr><td>meiste Rechner für ein Foto</td><td class="r">22</td><td class="r">20</td><td class="r">16</td><td class="r">22</td></tr>
+<tr><td>Rechner mit Abrufen</td><td class="r">31</td><td class="r">28</td><td class="r">22</td><td class="r">32</td></tr>
         </tbody>
       </table>
     </div>
@@ -172,15 +173,15 @@ footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule)
   <section>
     <span class="eyebrow">Verbreitung</span>
     <h2>Auf wie vielen Rechnern ein Foto zu sehen war</h2>
-    <p>Ein Drittel der Fotos hat kein Rechner abgeholt. Die übrigen verteilen sich weit: 17 Fotos waren auf zehn oder mehr Rechnern zu sehen, eins auf sechzehn. Unter den gezeigten Fotos sind es im Mittel 4,5 Rechner.</p>
+    <p>Kein Rechner hat 54 der 170 Fotos abgeholt. Die übrigen verteilen sich weit: 21 Fotos waren auf zehn oder mehr Rechnern zu sehen, eins auf 22. Unter den gezeigten Fotos sind es im Mittel 5,2 Rechner.</p>
     <div class="chart-wrap" id="hist-wrap"><div id="hist"></div></div>
-    <p class="note">Gezählt ist ein Rechner, wenn er eine Bilddatei des Fotos geholt hat. Verzeichnisse und Übersichtsseiten zählen nicht. Auf der öffentlichen Webseite haben Besucher außerdem 75 der 170 Fotos heruntergeladen, Suchmaschinen nicht mitgerechnet.</p>
+    <p class="note">Gezählt ist ein Rechner, wenn er eine Bilddatei des Fotos geholt hat. Verzeichnisse und Übersichtsseiten zählen nicht. Von außerhalb der Halle haben Besucher außerdem 45 der 170 Fotos heruntergeladen, Suchmaschinen nicht mitgerechnet.</p>
   </section>
 
   <section>
     <span class="eyebrow">Rechner</span>
     <h2>Wer die Fotos gezeigt hat</h2>
-    <p>Rechner mit fester Adresse erkennen wir am Adressplan (10.1.<i>Tisch</i>.x) oder an den angemeldeten Hosts. Viele Rechner holten sich ihre Adresse per DHCP; die ordnen wir nach Programmkennung, abgerufenen Formaten und Ausstellungstext zu. Das Zeichen in der letzten Spalte sagt, wie sicher die Zuordnung ist.</p>
+    <p>Rechner mit fester Adresse erkennen wir am Adressplan (10.1.<i>Tisch</i>.x) oder an den angemeldeten Hosts. Viele Rechner holten sich ihre Adresse per DHCP; die ordnen wir nach Programmkennung, abgerufenen Formaten und Ausstellungstext zu. Etliche Stände holten die Fotos nicht vom FotoFix-Rechner in der Halle, sondern über das Internet von fotofix.classic-computing.de; dort erscheint die ganze Halle unter einer Adresse, und nur die Programmkennung unterscheidet die Rechner. Das Zeichen in der letzten Spalte sagt, wie sicher die Zuordnung ist.</p>
     <div class="scroll">
       <table class="machines" id="machines">
         <thead><tr><th>Tisch</th><th>Rechner</th><th>Aussteller</th><th>Fotos</th><th class="r">Fr / Sa / So</th><th>Zuordnung</th></tr></thead>
@@ -193,26 +194,41 @@ footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule)
   <section>
     <span class="eyebrow">Aussteller</span>
     <h2>Nach Spitznamen</h2>
-    <p>Alle Tische, die Besucherfotos zeigen wollten oder gezeigt haben, mit den Rechnern, die wir ihnen zuordnen. Wer hier ohne Rechner steht, hat entweder auf einem Weg abgerufen, den wir nicht erkennen, oder nichts abgerufen. Siehe Frage 6.</p>
+    <p>Alle Tische, die Besucherfotos zeigen wollten oder gezeigt haben, mit den Rechnern, die wir ihnen zuordnen. Wer hier ohne Rechner steht, hat entweder auf einem Weg abgerufen, den wir nicht erkennen, oder nichts abgerufen. Siehe die offenen Fragen.</p>
     <ul class="nicks" id="nicks"></ul>
+  </section>
+
+  <section>
+    <span class="eyebrow">Aus dem Forum</span>
+    <h2>Was wir dazugelernt haben</h2>
+    <ul class="learned">
+      <li><span class="who">CPU Duke</span> hat mit seinem Browserverlauf gezeigt, dass viele Stände die Fotos über das Internet geholt haben. Diese Abrufe sind jetzt mitgezählt, daher mehr Rechner und mehr gezeigte Fotos als in der ersten Fassung.</li>
+      <li>Den Meatloaf hatte <span class="who">joergr</span> dabei, den WiC64 <span class="who">andi6510</span>. RetroTronBattle läuft bei <span class="who">joergr</span>; viele Spieler haben die Foto-ID mit ENTER übersprungen, manche wollten gar kein Foto.</li>
+      <li>Der Apple II am Samstag um 22:12 Uhr war der Apple IIe von <span class="who">THein</span>, über den seriellen Abruf.</li>
+      <li><span class="who">Ekatus</span> hat FOTOFIX für MVS auch selbst gezählt, musste den VSAM-Cluster aber am Samstag leeren. Den Apple-II-Client gibt es bei ihm als .dsk.</li>
+      <li><span class="who">boulderdash</span> hat mit der PDP-1 viele Fotos gedruckt, über eine FritzBox als Bridge.</li>
+    </ul>
   </section>
 
   <section>
     <span class="eyebrow">Eure Hilfe</span>
     <h2>Offene Fragen</h2>
-    <p>Wenn ihr eine Antwort wisst, sagt Hans Bescheid. Wir rechnen die Zahlen dann neu.</p>
+    <p>Wenn ihr eine Antwort wisst, schreibt sie in den Forumsthread oder sagt Hans Bescheid. Wir rechnen die Zahlen dann neu.</p>
     <ol class="questions">
-      <li><span class="q-n">1</span><div><h3>Tisch 33: welcher Windows-PC?</h3><p>Ein Windows-PC mit Firefox an Adresse 10.1.33.100 hat Samstag und Sonntag sechs Fotos angesehen. Laut Adressplan ist das Tisch 33, für den aber kein Exponat eingetragen ist.</p></div></li>
-      <li><span class="q-n">2</span><div><h3>Windows-PC am Samstagabend</h3><p>10.200.102.37, Chrome unter Windows, Samstag zwischen 17 und 18 Uhr, drei Fotos.</p></div></li>
-      <li><span class="q-n">3</span><div><h3>Apple II am ETS-Terminalserver, Port 1</h3><p>Samstag um 22:12 Uhr hat ein Apple II über LAT-Knoten <code>ETS_661EA6</code>, Port 1 eine Diskette mit einem Foto geholt. Port 2 desselben Knotens war das MSX von <span class="who">Olaf.Friedrich</span>. Gehört Port 1 auch an Tisch 64 oder an einen anderen?</p></div></li>
-      <li><span class="q-n">4</span><div><h3>68k-Mac mit Internet Explorer 3</h3><p>Freitag zwischen 13 und 16 Uhr hat ein Mac mit 68k-Prozessor (MSIE 3.0.1, Mac OS 8) ein Foto angesehen. <span class="who">cybernesto</span> (Colour Classic, Tisch 53), <span class="who">THein</span> (SE/30, Tisch 54) oder <span class="who">Rudi</span> (Quadra 950, Tisch 82)?</p></div></li>
-      <li><span class="q-n">5</span><div><h3>Stimmen unsere Vermutungen?</h3><p>Apple II per FTP (doppelte Hires-Grafik) bei <span class="who">cybernesto</span>, Tisch 53 · Mac OS X mit Safari auf dem iMac G3 von <span class="who">MarkL eisdielenbiker</span>, Tisch 72 · DOS-Programm <code>vga.com</code> auf dem IBM PS/1 von <span class="who">Faltenwespe</span>, Tisch 4 · TRS-80 Model 4P von <span class="who">RetroGuy</span> über den DECserver, Tisch 17 · C64 mit WiC64 bei <span class="who">joergr</span> und C64 mit Meatloaf bei <span class="who">andi6510</span>, der über einen ESP32 auch die 80-Spalten-Druckseite holt.</p></div></li>
-      <li><span class="q-n">6</span><div><h3>Tische ohne erkannte Abrufe</h3><p><span class="who">CPU Duke</span> (3), <span class="who">wildbits</span> (24), <span class="who">der_letzte_Amiganer</span> (28), <span class="who">JPSAF</span> (29), <span class="who">THein</span> (54), <span class="who">konnexus</span> (55), Tisch 80, <span class="who">Rudi</span> (82), <span class="who">boulderdash</span> (87) und <span class="who">easywitt</span> (90) wollten Fotos zeigen. Wir sehen von dort keinen sicher zugeordneten Abruf. Habt ihr Fotos gezeigt, und wenn ja, wie wurden sie geholt?</p></div></li>
+      <li><span class="q-n">1</span><div><h3>Wessen ESP32 druckt die 80-Spalten-Seite?</h3><p>Ein Gerät mit der Kennung <code>ESP32HTTPClient</code> hat für 22 Fotos die 80-Spalten-Druckseite <code>ascii-print-80.prn</code> geholt, am Samstag und Sonntag hinter derselben FritzBox wie der Meatloaf von <span class="who">joergr</span>. Ist das die PDP-1 von <span class="who">boulderdash</span>, oder steht es bei joergr?</p></div></li>
+      <li><span class="q-n">2</span><div><h3>Tisch 80: wie hat die RS/6000 abgerufen?</h3><p><span class="who">Cobalt60</span> schreibt, die RS/6000 7006-410 habe am Samstag von 10.2.0.7 per HTTP abgerufen. Von dieser Adresse sehen wir keinen Abruf, und über das Internet meldet sich kein Browser unter AIX. Über welche Adresse oder welchen Proxy, etwa FrogFind, lief das?</p></div></li>
+      <li><span class="q-n">3</span><div><h3>PowerMac mit Internet Explorer 4.5</h3><p>Ein PowerMac mit MSIE 4.5 hat Freitag und Samstag über das Internet 16 Fotos als GIF geholt. An welchem Tisch stand er?</p></div></li>
+      <li><span class="q-n">4</span><div><h3>Wer steckt hinter Hello Retro?</h3><p>helloretro.net baut aus einer Foto-ID eine Heimseite im Stil von 1999. Am Samstag hat ein PowerMac mit Netscape 4.5 in der Halle damit sieben Fotos gezeigt. Wessen Projekt ist das, und an welchem Tisch lief es?</p></div></li>
+      <li><span class="q-n">5</span><div><h3>FTP-Client, der photo.jpg holt</h3><p>Freitag und Samstag hat ein FTP-Client aus der Halle über das Internet 13 Fotos als <code>photo.jpg</code> geholt. Welcher Rechner war das?</p></div></li>
+      <li><span class="q-n">6</span><div><h3>Windows-PCs</h3><p>Ein Windows-PC mit Firefox an 10.1.33.100 (laut Adressplan Tisch 33, ohne eingetragenes Exponat) hat acht Fotos angesehen, ein zweiter mit Chrome an 10.200.102.37 am Samstag zwischen 17 und 18 Uhr drei. Wem gehören sie?</p></div></li>
+      <li><span class="q-n">7</span><div><h3>68k-Mac mit Internet Explorer 3</h3><p>Freitag hat ein Mac mit 68k-Prozessor (MSIE 3.0.1, Mac OS 8) vier Fotos angesehen. <span class="who">cybernesto</span> (Colour Classic, Tisch 53), <span class="who">THein</span> (SE/30, Tisch 54) oder <span class="who">Rudi</span> (Quadra 950, Tisch 82)?</p></div></li>
+      <li><span class="q-n">8</span><div><h3>Stimmen unsere Vermutungen?</h3><p>Apple II per FTP (doppelte Hires-Grafik) bei <span class="who">cybernesto</span>, Tisch 53 · Mac OS X mit Safari auf dem iMac G3 von <span class="who">MarkL eisdielenbiker</span>, Tisch 72 · DOS-Programm <code>vga.com</code> auf dem IBM PS/1 von <span class="who">Faltenwespe</span>, Tisch 4 · TRS-80 Model 4P von <span class="who">RetroGuy</span> über den DECserver, Tisch 17.</p></div></li>
+      <li><span class="q-n">9</span><div><h3>Tische ohne erkannte Abrufe</h3><p><span class="who">wildbits</span> (24), <span class="who">der_letzte_Amiganer</span> (28), <span class="who">JPSAF</span> (29), <span class="who">konnexus</span> (55), <span class="who">Rudi</span> (82) und <span class="who">easywitt</span> (90) wollten Fotos zeigen. Wir sehen von dort keinen sicher zugeordneten Abruf. Habt ihr Fotos gezeigt, und wenn ja, wie wurden sie geholt?</p></div></li>
     </ol>
   </section>
 
   <footer>
-    <span>Quellen: Fotodatenbank von exhibitron, Protokoll der Foto-Abrufe aus der Halle (HTTP, FTP, LAT, serielle Leitungen), Protokoll der Fotobox. Stand 12. Oktober 2026.</span>
+    <span>Quellen: Fotodatenbank von exhibitron, Protokoll der Foto-Abrufe in der Halle (HTTP, FTP, LAT, serielle Leitungen) und auf fotofix.classic-computing.de, Protokoll der Fotobox, Antworten im Forum. Stand 12. Oktober 2026.</span>
     <span>Hans' eigene Testabrufe sind herausgerechnet.</span>
   </footer>
 </main>
@@ -223,37 +239,396 @@ const HOURS = {
   "Samstag":  {9:2, 10:5, 11:15, 12:14, 13:13, 14:3, 15:6, 16:8, 17:3, 18:5, 19:1},
   "Sonntag":  {10:7, 11:19, 12:17, 13:7, 14:4}
 };
-const HIST = {0:59,1:32,2:21,3:10,4:7,5:6,6:7,7:3,8:5,9:3,10:4,11:2,12:5,13:1,14:2,15:2,16:1};
-const NICK = {"3":"CPU Duke","4":"Faltenwespe","13":"Sayjionix","16":"joergr","17":"RetroGuy","24":"wildbits","28":"der_letzte_Amiganer","29":"JPSAF","33":"","34":"CBM_Ba","47":"andi6510","53":"cybernesto","54":"THein","55":"konnexus","64":"Olaf.Friedrich","72":"MarkL eisdielenbiker","73":"hans","74":"hans","75":"Toshi","78":"tuti","80":"","82":"Rudi","87":"boulderdash","90":"easywitt","94":"gnupublic","97":"Ekatus","98":"Ekatus"};
+const HIST = {"0": 54, "1": 31, "2": 22, "3": 10, "4": 6, "5": 8, "6": 3, "7": 7, "8": 5, "9": 3, "10": 4, "11": 3, "13": 4, "14": 2, "16": 2, "17": 2, "18": 1, "20": 1, "21": 1, "22": 1};
+const NICK = {"3": "CPU Duke", "4": "Faltenwespe", "13": "Sayjionix", "16": "joergr", "17": "RetroGuy", "24": "wildbits", "28": "der_letzte_Amiganer", "29": "JPSAF", "33": "", "34": "CBM_Ba", "47": "andi6510", "53": "cybernesto", "54": "THein", "55": "konnexus", "64": "Olaf.Friedrich", "72": "MarkL eisdielenbiker", "73": "hans", "74": "hans", "75": "Toshi", "78": "tuti", "80": "Cobalt60", "82": "Rudi", "87": "boulderdash", "90": "easywitt", "94": "gnupublic", "97": "Ekatus", "98": "Ekatus"};
 // table, machine, how, confidence, photos, [fri, sat, sun]
 const MACHINES = [
-  ["78","Amiga 3000 Slotmachine","Host a3000slot, 10.2.0.11","sure",45,[9,18,19]],
-  ["4","Minitel 1","über Relay","sure",40,[5,19,16]],
-  ["16","C64 mit WiC64","DHCP, Kennung WiC64","likely",38,[7,20,15]],
-  ["16","RetroTronBattle","DHCP 10.200.102.38, Kennung RetroTronBattle","sure",36,[4,22,10]],
-  ["78","PowerMac 6100, Puzzle","DHCP, Mac OS 8 PPC und PICT per FTP","likely",36,[6,21,12]],
-  ["47","C64-II mit Meatloaf","DHCP, Kennung MEATLOAF, druckt über ESP32","likely",36,[2,26,10]],
-  ["73","SPARCclassic Plotstation","10.1.74.1, Kennung sunplot","sure",35,[4,22,10]],
-  ["4","TONO Θ-7000 / Θ-777","über Relay","sure",35,[2,20,13]],
-  ["94","Analoges Speicherterminal","Host compo, 10.2.0.8","sure",34,[3,19,12]],
-  ["97","Zeilendrucker am TN3270-Host","10.1.97.2, Host-Druckseite","likely",25,[5,13,9]],
-  ["72","iMac G3","DHCP, Mac OS X PPC, Safari","guess",24,[1,16,7]],
-  ["4","IBM PS/1","DHCP, vga.com unter DOS","guess",20,[5,10,6]],
-  ["34","CBM 8032 mit HSG-Karte","DHCP, holt cbm8032.pbm über einen PC","likely",19,[1,15,3]],
-  ["53","Apple II","DHCP, Apple-II-Formate per FTP","likely",15,[1,1,15]],
-  ["75","DEC VT241 / LA75 Plus","10.1.75.0, Sixel und LA75","sure",15,[0,7,8]],
-  ["64","MSX","LAT ETS_661EA6, Port 2","likely",14,[0,6,8]],
-  ["98","Apple IIc mit ImageWriter","DHCP, gleicher Abrufer wie 10.1.97.2","likely",11,[2,5,6]],
-  ["17","TRS-80 Model 4P","LAT DS200HANS, Port 1","likely",7,[0,0,7]],
-  ["33","Windows-PC","10.1.33.100, Firefox","open",6,[0,3,3]],
-  ["74","DEC GIGI (VK100)","LAT M32, Port 1","sure",6,[0,3,3]],
-  ["13","Sharp X68000","LAT DS200HANS, Port 8, X68000-PIC","likely",3,[0,3,1]],
-  ["?","Windows-PC","DHCP 10.200.102.37, Chrome","open",3,[0,3,0]],
-  ["53/54/82","68k-Mac, MSIE 3","DHCP, nur Freitag","guess",1,[1,0,0]],
-  ["?","Apple II","LAT ETS_661EA6, Port 1","open",1,[0,1,0]],
-  ["98","PowerMac G4 Cube","10.1.98.2, Programm FOTOFIX1.0","sure",1,[0,0,1]]
+[
+"78",
+"Amiga 3000 Slotmachine",
+"Host a3000slot, 10.2.0.11",
+"sure",
+45,
+[
+9,
+18,
+19
+]
+],
+[
+"4",
+"Minitel 1",
+"über Relay",
+"sure",
+40,
+[
+5,
+19,
+16
+]
+],
+[
+"47",
+"C64 mit WiC64",
+"Kennung WiC64; andi6510 im Forum",
+"sure",
+38,
+[
+8,
+20,
+15
+]
+],
+[
+"3",
+"Windows-10-PC",
+"über das Internet; CPU Duke im Forum",
+"sure",
+37,
+[
+1,
+24,
+13
+]
+],
+[
+"16",
+"RetroTronBattle",
+"Kennung RetroTronBattle; joergr im Forum",
+"sure",
+36,
+[
+4,
+22,
+10
+]
+],
+[
+"78",
+"PowerMac 6100, Puzzle",
+"Mac OS 8 PPC, PICT per FTP",
+"likely",
+36,
+[
+6,
+21,
+12
+]
+],
+[
+"73",
+"SPARCclassic Plotstation",
+"10.1.74.1, Kennung sunplot",
+"sure",
+35,
+[
+4,
+22,
+10
+]
+],
+[
+"4",
+"TONO Θ-7000 / Θ-777",
+"über Relay",
+"sure",
+35,
+[
+2,
+20,
+13
+]
+],
+[
+"94",
+"Analoges Speicherterminal",
+"Host compo, 10.2.0.8",
+"sure",
+34,
+[
+3,
+19,
+12
+]
+],
+[
+"16",
+"C64 mit Meatloaf",
+"hinter FritzBox-NAT, Kennung MEATLOAF; joergr im Forum",
+"sure",
+31,
+[
+2,
+20,
+10
+]
+],
+[
+"97",
+"Zeilendrucker am TN3270-Host",
+"10.1.97.2, Host-Druckseite",
+"likely",
+25,
+[
+5,
+13,
+9
+]
+],
+[
+"72",
+"iMac G3",
+"Mac OS X PPC, Safari",
+"guess",
+24,
+[
+1,
+16,
+7
+]
+],
+[
+"16/87",
+"ESP32, druckt die 80-Spalten-Seite",
+"Kennung ESP32HTTPClient, hinter joergrs FritzBox",
+"open",
+22,
+[
+3,
+16,
+3
+]
+],
+[
+"4",
+"IBM PS/1",
+"vga.com unter DOS",
+"guess",
+22,
+[
+5,
+12,
+6
+]
+],
+[
+"34",
+"CBM 8032 mit HSG-Karte",
+"holt cbm8032.pbm über einen PC",
+"likely",
+19,
+[
+1,
+15,
+3
+]
+],
+[
+"?",
+"PowerMac mit MSIE 4.5",
+"über das Internet, gif.gif",
+"open",
+16,
+[
+3,
+13,
+0
+]
+],
+[
+"53",
+"Apple II",
+"Apple-II-Formate per FTP",
+"likely",
+15,
+[
+1,
+1,
+15
+]
+],
+[
+"75",
+"DEC VT241 / LA75 Plus",
+"10.1.75.0, Sixel und LA75",
+"sure",
+15,
+[
+0,
+7,
+8
+]
+],
+[
+"64",
+"MSX",
+"LAT ETS_661EA6, Port 2",
+"likely",
+14,
+[
+0,
+6,
+8
+]
+],
+[
+"?",
+"FTP-Client, holt photo.jpg",
+"FTP über das Internet",
+"open",
+13,
+[
+2,
+11,
+0
+]
+],
+[
+"98",
+"Apple IIc mit ImageWriter",
+"gleicher Abrufer wie 10.1.97.2",
+"likely",
+11,
+[
+2,
+5,
+6
+]
+],
+[
+"33",
+"Windows-PC",
+"Firefox; Tisch 33 hat kein Exponat",
+"open",
+8,
+[
+1,
+4,
+3
+]
+],
+[
+"?",
+"Hello Retro (helloretro.net)",
+"PowerMac mit Netscape 4.5, über das Internet",
+"open",
+7,
+[
+0,
+7,
+0
+]
+],
+[
+"17",
+"TRS-80 Model 4P",
+"LAT DS200HANS, Port 1",
+"likely",
+7,
+[
+0,
+0,
+7
+]
+],
+[
+"74",
+"DEC GIGI (VK100)",
+"LAT M32, Port 1",
+"sure",
+6,
+[
+0,
+3,
+3
+]
+],
+[
+"54",
+"Linux-PC, holt die Apple-II-Diskette",
+"über das Internet, Samstagabend",
+"likely",
+5,
+[
+0,
+5,
+0
+]
+],
+[
+"53/54/82",
+"68k-Mac, MSIE 3",
+"nur Freitag",
+"guess",
+4,
+[
+4,
+0,
+0
+]
+],
+[
+"13",
+"Sharp X68000",
+"LAT DS200HANS, Port 8, X68000-PIC",
+"likely",
+3,
+[
+0,
+3,
+1
+]
+],
+[
+"?",
+"Windows-PC",
+"DHCP 10.200.102.37, Chrome",
+"open",
+3,
+[
+0,
+3,
+0
+]
+],
+[
+"16",
+"Linux-Laptop",
+"hinter FritzBox-NAT, Firefox",
+"likely",
+1,
+[
+1,
+0,
+0
+]
+],
+[
+"54",
+"Apple IIe",
+"LAT ETS_661EA6, Port 1; THein im Forum",
+"sure",
+1,
+[
+0,
+1,
+0
+]
+],
+[
+"98",
+"PowerMac G4 Cube",
+"10.1.98.2, Programm FOTOFIX1.0",
+"sure",
+1,
+[
+0,
+0,
+1
+]
+]
 ];
-const SHOWING = ["3","4","13","16","17","24","28","29","33","34","47","53","54","55","64","72","73","74","75","78","80","82","87","90","94","97","98"];
+const SHOWING = ["3", "4", "13", "16", "17", "24", "28", "29", "33", "34", "47", "53", "54", "55", "64", "72", "73", "74", "75", "78", "80", "82", "87", "90", "94", "97", "98"];
 const CONF = {sure:"sicher", likely:"wahrscheinlich", guess:"vermutet", open:"offen"};
 const NS = "http://www.w3.org/2000/svg";
 
@@ -323,7 +698,7 @@ function bars(container, data, opts) {
 // Histogramm
 (() => {
   const wrap = document.getElementById("hist-wrap"), tip = tooltip(wrap);
-  const keys = Array.from({length: 17}, (_, i) => i);
+  const keys = Array.from({length: 22 + 1}, (_, i) => i);
   bars(document.getElementById("hist"), HIST, {keys, max: 60, width: 640, ticks: [0, 20, 40, 60], tip, zero: true,
     label: "Anzahl Fotos nach Zahl der Rechner, die sie abgerufen haben",
     aria: (k, v) => `${v} Fotos auf ${k} Rechnern`, tipLabel: k => k === 0 ? "Fotos auf keinem Rechner" : `Fotos auf ${k} Rechner${k === 1 ? "" : "n"}`,
@@ -334,7 +709,7 @@ function bars(container, data, opts) {
 
 // Rechnerliste
 (() => {
-  const tbody = document.querySelector("#machines tbody"), max = 45;
+  const tbody = document.querySelector("#machines tbody"), max = Math.max(...MACHINES.map(m => m[4]));
   for (const [table, name, how, conf, photos, days] of MACHINES) {
     const tr = el("tr");
     tr.appendChild(el("td", {class: "num"}, table));
