@@ -207,6 +207,8 @@ footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule)
       <li>Der Apple II am Samstag um 22:12 Uhr war der Apple IIe von <span class="who">THein</span>, über den seriellen Abruf.</li>
       <li><span class="who">Ekatus</span> hat FOTOFIX für MVS auch selbst gezählt, musste den VSAM-Cluster aber am Samstag leeren. Den Apple-II-Client gibt es bei ihm als .dsk.</li>
       <li>Hinter Hello Retro (helloretro.net) steckt <span class="who">konnexus</span>: eine Heimseite im Stil von 1999 aus der Foto-ID, in der Halle auf einem PowerMac mit Netscape 4.5 gezeigt.</li>
+      <li>Das DOS-Programm <code>vga.com</code> hat der Client von <span class="who">wildbits</span> geholt: die Wildbits/K2 zieht das 320×200-Bild heraus und zeigt es an. Diese Abrufe zählen für Tisch 24.</li>
+      <li>Die RS/6000 von <span class="who">Cobalt60</span> holte die Fotos mit einem ksh-Skript als <code>photo.jpg</code> per FTP, hinter einem eigenen Router an 10.2.0.7.</li>
       <li><span class="who">boulderdash</span> hat mit der PDP-1 viele Fotos gedruckt, über eine FritzBox als Bridge.</li>
     </ul>
   </section>
@@ -217,13 +219,11 @@ footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule)
     <p>Wenn ihr eine Antwort wisst, schreibt sie in den Forumsthread oder sagt Hans Bescheid. Wir rechnen die Zahlen dann neu.</p>
     <ol class="questions">
       <li><span class="q-n">1</span><div><h3>Wessen ESP32 druckt die 80-Spalten-Seite?</h3><p>Ein Gerät mit der Kennung <code>ESP32HTTPClient</code> hat für 22 Fotos die 80-Spalten-Druckseite <code>ascii-print-80.prn</code> geholt, am Samstag und Sonntag hinter derselben FritzBox wie der Meatloaf von <span class="who">joergr</span>. Ist das die PDP-1 von <span class="who">boulderdash</span>, oder steht es bei joergr?</p></div></li>
-      <li><span class="q-n">2</span><div><h3>Tisch 80: wie hat die RS/6000 abgerufen?</h3><p><span class="who">Cobalt60</span> schreibt, die RS/6000 7006-410 habe am Samstag von 10.2.0.7 per HTTP abgerufen. Von dieser Adresse sehen wir keinen Abruf, und über das Internet meldet sich kein Browser unter AIX. Über welche Adresse oder welchen Proxy, etwa FrogFind, lief das?</p></div></li>
-      <li><span class="q-n">3</span><div><h3>PowerMac mit Internet Explorer 4.5</h3><p>Ein PowerMac mit MSIE 4.5 hat Freitag und Samstag über das Internet 16 Fotos als GIF geholt. An welchem Tisch stand er?</p></div></li>
-      <li><span class="q-n">4</span><div><h3>FTP-Client, der photo.jpg holt</h3><p>Freitag und Samstag hat ein FTP-Client aus der Halle über das Internet 13 Fotos als <code>photo.jpg</code> geholt. Welcher Rechner war das?</p></div></li>
-      <li><span class="q-n">5</span><div><h3>Windows-PCs</h3><p>Ein Windows-PC mit Firefox an 10.1.33.100 (laut Adressplan Tisch 33, ohne eingetragenes Exponat) hat acht Fotos angesehen, ein zweiter mit Chrome an 10.200.102.37 am Samstag zwischen 17 und 18 Uhr drei. Wem gehören sie?</p></div></li>
-      <li><span class="q-n">6</span><div><h3>68k-Mac mit Internet Explorer 3</h3><p>Freitag hat ein Mac mit 68k-Prozessor (MSIE 3.0.1, Mac OS 8) vier Fotos angesehen. <span class="who">cybernesto</span> (Colour Classic, Tisch 53), <span class="who">THein</span> (SE/30, Tisch 54) oder <span class="who">Rudi</span> (Quadra 950, Tisch 82)?</p></div></li>
-      <li><span class="q-n">7</span><div><h3>Stimmen unsere Vermutungen?</h3><p>Apple II per FTP (doppelte Hires-Grafik) bei <span class="who">cybernesto</span>, Tisch 53 · Mac OS X mit Safari auf dem iMac G3 von <span class="who">MarkL eisdielenbiker</span>, Tisch 72 · DOS-Programm <code>vga.com</code> auf dem IBM PS/1 von <span class="who">Faltenwespe</span>, Tisch 4 · TRS-80 Model 4P von <span class="who">RetroGuy</span> über den DECserver, Tisch 17.</p></div></li>
-      <li><span class="q-n">8</span><div><h3>Tische ohne erkannte Abrufe</h3><p><span class="who">wildbits</span> (24), <span class="who">der_letzte_Amiganer</span> (28), <span class="who">JPSAF</span> (29), <span class="who">Rudi</span> (82) und <span class="who">easywitt</span> (90) wollten Fotos zeigen. Wir sehen von dort keinen sicher zugeordneten Abruf. Habt ihr Fotos gezeigt, und wenn ja, wie wurden sie geholt?</p></div></li>
+      <li><span class="q-n">2</span><div><h3>PowerMac mit Internet Explorer 4.5</h3><p>Ein PowerMac mit MSIE 4.5 hat Freitag und Samstag über das Internet 16 Fotos als GIF geholt. An welchem Tisch stand er?</p></div></li>
+      <li><span class="q-n">3</span><div><h3>Windows-PCs</h3><p>Ein Windows-PC mit Firefox an 10.1.33.100 (laut Adressplan Tisch 33, ohne eingetragenes Exponat) hat acht Fotos angesehen, ein zweiter mit Chrome an 10.200.102.37 am Samstag zwischen 17 und 18 Uhr drei. Wem gehören sie?</p></div></li>
+      <li><span class="q-n">4</span><div><h3>68k-Mac mit Internet Explorer 3</h3><p>Freitag hat ein Mac mit 68k-Prozessor (MSIE 3.0.1, Mac OS 8) vier Fotos angesehen. <span class="who">cybernesto</span> (Colour Classic, Tisch 53), <span class="who">THein</span> (SE/30, Tisch 54) oder <span class="who">Rudi</span> (Quadra 950, Tisch 82)?</p></div></li>
+      <li><span class="q-n">5</span><div><h3>Stimmen unsere Vermutungen?</h3><p>Apple II per FTP (doppelte Hires-Grafik) bei <span class="who">cybernesto</span>, Tisch 53 · Mac OS X mit Safari auf dem iMac G3 von <span class="who">MarkL eisdielenbiker</span>, Tisch 72 · TRS-80 Model 4P von <span class="who">RetroGuy</span> über den DECserver, Tisch 17.</p></div></li>
+      <li><span class="q-n">6</span><div><h3>Tische ohne erkannte Abrufe</h3><p><span class="who">der_letzte_Amiganer</span> (28), <span class="who">JPSAF</span> (29), <span class="who">Rudi</span> (82) und <span class="who">easywitt</span> (90) wollten Fotos zeigen. Wir sehen von dort keinen sicher zugeordneten Abruf. Habt ihr Fotos gezeigt, und wenn ja, wie wurden sie geholt?</p></div></li>
     </ol>
   </section>
 
@@ -400,10 +400,10 @@ const MACHINES = [
 ]
 ],
 [
-"4",
-"IBM PS/1",
-"vga.com unter DOS",
-"guess",
+"24",
+"Wildbits/K2",
+"holt vga.com und zieht das 320×200-Bild heraus; wildbits im Forum",
+"sure",
 22,
 [
 5,
@@ -472,10 +472,10 @@ const MACHINES = [
 ]
 ],
 [
-"?",
-"FTP-Client, holt photo.jpg",
-"FTP über das Internet",
-"open",
+"80",
+"RS/6000 7006-410",
+"ksh-Skript holt photo.jpg per FTP über das Internet; Cobalt60 im Forum",
+"sure",
 13,
 [
 2,
