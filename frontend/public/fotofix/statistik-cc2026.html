@@ -118,8 +118,8 @@ svg .hit:focus { outline: none; }
 
 /* questions */
 .learned { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 8px; max-width: 72ch; color: var(--fg-2); }
-\1 list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; border-top: 2px solid var(--fg); }
-.questions li { padding: 16px 0; border-bottom: 1px dashed var(--rule); display: grid; grid-template-columns: 3ch minmax(0, 1fr); gap: 0 12px; }
+.questions { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; border-top: 2px solid var(--fg); }
+.questions .q { padding: 16px 0; border-bottom: 1px dashed var(--rule); display: grid; grid-template-columns: 3ch minmax(0, 1fr); gap: 0 12px; }
 .questions .q-n { font: 400 28px/1 var(--display); color: var(--accent); }
 .questions h3 { margin-bottom: 4px; }
 .questions p { color: var(--fg-2); }
@@ -217,14 +217,14 @@ footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule)
     <span class="eyebrow">Eure Hilfe</span>
     <h2>Offene Fragen</h2>
     <p>Wenn ihr eine Antwort wisst, schreibt sie in den Forumsthread oder sagt Hans Bescheid. Wir rechnen die Zahlen dann neu.</p>
-    <ol class="questions">
-      <li><span class="q-n">1</span><div><h3>Wessen ESP32 druckt die 80-Spalten-Seite?</h3><p>Ein Gerät mit der Kennung <code>ESP32HTTPClient</code> hat für 22 Fotos die 80-Spalten-Druckseite <code>ascii-print-80.prn</code> geholt, am Samstag und Sonntag hinter derselben FritzBox wie der Meatloaf von <span class="who">joergr</span>. Ist das die PDP-1 von <span class="who">boulderdash</span>, oder steht es bei joergr?</p></div></li>
-      <li><span class="q-n">2</span><div><h3>PowerMac mit Internet Explorer 4.5</h3><p>Ein PowerMac mit MSIE 4.5 hat Freitag und Samstag über das Internet 16 Fotos als GIF geholt. An welchem Tisch stand er?</p></div></li>
-      <li><span class="q-n">3</span><div><h3>Windows-PCs</h3><p>Ein Windows-PC mit Firefox an 10.1.33.100 (laut Adressplan Tisch 33, ohne eingetragenes Exponat) hat acht Fotos angesehen, ein zweiter mit Chrome an 10.200.102.37 am Samstag zwischen 17 und 18 Uhr drei. Wem gehören sie?</p></div></li>
-      <li><span class="q-n">4</span><div><h3>68k-Mac mit Internet Explorer 3</h3><p>Freitag hat ein Mac mit 68k-Prozessor (MSIE 3.0.1, Mac OS 8) vier Fotos angesehen. <span class="who">cybernesto</span> (Colour Classic, Tisch 53), <span class="who">THein</span> (SE/30, Tisch 54) oder <span class="who">Rudi</span> (Quadra 950, Tisch 82)?</p></div></li>
-      <li><span class="q-n">5</span><div><h3>Stimmen unsere Vermutungen?</h3><p>Apple II per FTP (doppelte Hires-Grafik) bei <span class="who">cybernesto</span>, Tisch 53 · Mac OS X mit Safari auf dem iMac G3 von <span class="who">MarkL eisdielenbiker</span>, Tisch 72 · TRS-80 Model 4P von <span class="who">RetroGuy</span> über den DECserver, Tisch 17.</p></div></li>
-      <li><span class="q-n">6</span><div><h3>Tische ohne erkannte Abrufe</h3><p><span class="who">der_letzte_Amiganer</span> (28), <span class="who">JPSAF</span> (29), <span class="who">Rudi</span> (82) und <span class="who">easywitt</span> (90) wollten Fotos zeigen. Wir sehen von dort keinen sicher zugeordneten Abruf. Habt ihr Fotos gezeigt, und wenn ja, wie wurden sie geholt?</p></div></li>
-    </ol>
+    <div class="questions">
+      <div class="q"><span class="q-n">1</span><div><h3>Wessen ESP32 druckt die 80-Spalten-Seite?</h3><p>Ein Gerät mit der Kennung <code>ESP32HTTPClient</code> hat für 22 Fotos die 80-Spalten-Druckseite <code>ascii-print-80.prn</code> geholt, am Samstag und Sonntag hinter derselben FritzBox wie der Meatloaf von <span class="who">joergr</span>. Ist das die PDP-1 von <span class="who">boulderdash</span>, oder steht es bei joergr?</p></div></div>
+      <div class="q"><span class="q-n">2</span><div><h3>PowerMac mit Internet Explorer 4.5</h3><p>Ein PowerMac mit MSIE 4.5 hat Freitag und Samstag über das Internet 16 Fotos als GIF geholt. An welchem Tisch stand er?</p></div></div>
+      <div class="q"><span class="q-n">3</span><div><h3>Windows-PCs</h3><p>Ein Windows-PC mit Firefox an 10.1.33.100 (laut Adressplan Tisch 33, ohne eingetragenes Exponat) hat acht Fotos angesehen, ein zweiter mit Chrome an 10.200.102.37 am Samstag zwischen 17 und 18 Uhr drei. Wem gehören sie?</p></div></div>
+      <div class="q"><span class="q-n">4</span><div><h3>68k-Mac mit Internet Explorer 3</h3><p>Freitag hat ein Mac mit 68k-Prozessor (MSIE 3.0.1, Mac OS 8) vier Fotos angesehen. <span class="who">cybernesto</span> (Colour Classic, Tisch 53), <span class="who">THein</span> (SE/30, Tisch 54) oder <span class="who">Rudi</span> (Quadra 950, Tisch 82)?</p></div></div>
+      <div class="q"><span class="q-n">5</span><div><h3>Stimmen unsere Vermutungen?</h3><p>Apple II per FTP (doppelte Hires-Grafik) bei <span class="who">cybernesto</span>, Tisch 53 · Mac OS X mit Safari auf dem iMac G3 von <span class="who">MarkL eisdielenbiker</span>, Tisch 72 · TRS-80 Model 4P von <span class="who">RetroGuy</span> über den DECserver, Tisch 17.</p></div></div>
+      <div class="q"><span class="q-n">6</span><div><h3>Tische ohne erkannte Abrufe</h3><p><span class="who">der_letzte_Amiganer</span> (28), <span class="who">JPSAF</span> (29), <span class="who">Rudi</span> (82) und <span class="who">easywitt</span> (90) wollten Fotos zeigen. Wir sehen von dort keinen sicher zugeordneten Abruf. Habt ihr Fotos gezeigt, und wenn ja, wie wurden sie geholt?</p></div></div>
+    </div>
   </section>
 
   <footer>
